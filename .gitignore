@@ -1,5 +1,8 @@
 ./data
+./data/raw
+./data/processed
 *.csv
 *.mp4
 *.gif
 *.npy
+*.pkl
