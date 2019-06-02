@@ -1,7 +1,5 @@
-./data
-./data/raw
-./data/processed
-./idea
+./data/*
+./idea/*
 *.csv
 *.mp4
 *.gif
