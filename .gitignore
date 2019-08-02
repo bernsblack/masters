@@ -1,7 +1,10 @@
 ./data/*
+./data/raw/*
+./data/processed/*/*
 ./idea/*
 *.csv
 *.mp4
 *.gif
 *.npy
 *.pkl
+*.npz
