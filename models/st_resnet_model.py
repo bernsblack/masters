@@ -6,9 +6,9 @@ General notes on module:
 ========================
 ### STRes-Net (add link to paper)
 * **Input Data Format:** (N,C,W,H) where C a.k.a the channels is the previous time steps leading up to t
-* **Input Data Type:** Continuos value (number of crimes per cell)
+* **Input Data Type:** Continuous value (number of crimes per cell)
 * **Output Data Format:** (N,C,W,H) 
-* **Output Data Type:** Continuos value (number of crimes per cell)
+* **Output Data Type:** Continuous value (number of crimes per cell)
 * **Loss Function:** RMSE
 """
 
@@ -22,7 +22,8 @@ class ResUnit(nn.Module):
         self.bn1 = nn.BatchNorm2d(n_channels)
         self.bn2 = nn.BatchNorm2d(n_channels)
 
-    #         self.init_weights() # using pytorch default weight inits (Xavier Init) we should probably use nn.init.kaiming_normal_
+    # using pytorch default weight inits (Xavier Init) we should probably use nn.init.kaiming_normal_
+    #         self.init_weights()
 
     def init_weights(self):
         self.conv1.weight.data.uniform_(-0.5, 0.5)
@@ -47,7 +48,7 @@ class ResNet(nn.Module):
         r"""
         n_layers: number of ResUnits
         in_channels: number of channels at conv1 input 
-        n_channels: number of channels at conv1 output and resunits inputs
+        n_channels: number of channels at conv1 output and res-units inputs
         conv2 take n_channels and outputs 1 channel
         """
         super(ResNet, self).__init__()
@@ -154,8 +155,9 @@ class STResNet(nn.Module):
         Xq = self.resNetq(Sq)
         Xres = self.fuse(Xc, Xp, Xq)
 
-        # sigmoid squeezes values between 0 and 1 thats, thats why the cumsum wasnt working
-        #         Last layer is sigmoid not tanh - our values are all positive no real reason to use tan like the used in deepst
+        # sigmoid squeezes values between 0 and 1 that's, that's why the cum-sum wasn't working
+        #         Last layer is sigmoid not tanh
+        #         our values are all positive no real reason to use tan like the used in deep-st
         if Et is None:
             Xt_hat = torch.sigmoid(Xres)
         else:
