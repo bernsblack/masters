@@ -1,0 +1,299 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from mpl_toolkits.axes_grid1 import make_axes_locatable
+import io
+import base64
+from IPython.display import HTML
+
+
+def plot(x):
+    """
+    simple quick plot
+    """
+    plt.figure()
+    plt.plot(x)
+    plt.show()
+
+
+def imshow(a, ax, title=""):
+    """
+    a: 2D array (Image)
+    ax: subplot axis
+    """
+    im = ax.imshow(a, cmap="viridis")
+    ax.set_title(title)
+    #  ax.set_xticks(np.arange(a.shape[-2]))
+    #  ax.set_yticks(np.arange(a.shape[-1]))
+    plt.grid("off")
+    divider = make_axes_locatable(ax)
+    cax = divider.append_axes("right", size="5%", pad=0.05)
+    plt.colorbar(im, cax=cax, cmap="viridis")
+
+
+def plot_compare(a, b, times, relative=True, a_title="A", b_title="B"):
+    """
+    plot to grids next to each other given a range of matching times
+    """
+    for i in range(len(a)):
+        plt.figure(figsize=(18, 6))
+        plt.suptitle(times[i])
+        plt.subplot(1, 3, 1)
+        plt.title(a_title)
+        if relative:
+            plt.imshow(a[i], cmap="viridis")
+        else:
+            plt.imshow(a[i], cmap="viridis", vmin=0, vmax=1)
+        plt.xticks(np.arange(a.shape[-1]))
+        plt.yticks(np.arange(a.shape[-1]))
+
+        plt.subplot(1, 3, 2)
+        plt.title(b_title)
+        if relative:
+            plt.imshow(b[i], cmap="viridis")
+        else:
+            plt.imshow(b[i], cmap="viridis", vmin=0, vmax=1)
+        plt.xticks(np.arange(b.shape[-1]))
+        plt.yticks(np.arange(b.shape[-1]))
+
+        plt.subplot(1, 3, 3)
+        plt.title("Error")
+        if relative:
+            plt.imshow(a[i] - b[i], cmap="viridis")
+        else:
+            plt.imshow(a[i] - b[i], cmap="viridis", vmin=0, vmax=1)
+        plt.xticks(np.arange(b.shape[-1]))
+        plt.yticks(np.arange(b.shape[-1]))
+
+        plt.show()
+        print(
+            "============================================================================================================================")
+
+
+def play_video(f):
+    video = io.open(f, "r+b").read()
+    encoded = base64.b64encode(video)
+    return HTML(data="""<video alt="test" controls>
+                  <source src="data:video/mp4;base64,{0}" type="video/mp4" />
+               </video>""".format(encoded.decode("ascii")))
+
+
+def get_times(a):
+    """
+    given array with true-false occurrences return indices of all true occurrences
+    """
+    t = []
+    for i in range(len(a)):
+        if a[i]:
+            t.append(i)
+    return t
+
+
+def plot_targ_pred_over_time(trg, prd):
+    """
+    fig setup should be done before calling function
+    function scatters the values of the target and predicted values
+    and plots the intensity curve
+    """
+    indices = get_times(trg)
+    plt.scatter(indices, prd[indices], s=20)
+    plt.scatter(indices, trg[indices], s=20, c="r", marker="x")
+    plt.plot(prd, alpha=0.7)
+
+
+def plot_day(a, times, relative=True):
+    """
+    display array a (24,rows,cols)
+    """
+    plt.figure(figsize=(25, 15))
+    for i in range(24):
+        plt.subplot(4, 6, i + 1)
+        plt.title(times[i])
+        if relative:
+            plt.imshow(a[i], cmap="viridis")
+        else:
+            plt.imshow(a[i], cmap="viridis", vmin=0, vmax=1)
+
+        #     plt.xticks(np.arange(a.shape[-1]))
+        #     plt.yticks(np.arange(a.shape[-1]))
+        plt.grid("off")
+    plt.show()
+
+
+def plot_bar(v, c, title=""):
+    plt.title(title)
+    plt.bar(v, c)
+    plt.ylim(0, 1)
+    plt.yticks(np.linspace(0, 1, 11))
+    plt.xticks(np.arange(0, v[-1], 2))
+
+
+class MySubplots2:
+    def __init__(self, data, title_text="Plots"):  # init with targets
+        """
+        supply target data
+        """
+        self.fig = plt.figure(figsize=(16, 9))
+        self.target_plots = []
+        self.diff_plots = []
+        self.pred_plots = []
+        self.data_len = len(data)
+        for i in range(self.data_len):
+            plt.subplot(3, self.data_len, i + 1)
+            self.target_plots.append(plt.imshow(data[i]))
+            plt.axis("off")
+
+            plt.subplot(3, self.data_len, self.data_len + i + 1)
+            self.pred_plots.append(plt.imshow(data[i]))
+            plt.axis("off")
+
+            plt.subplot(3, self.data_len, 2 * self.data_len + i + 1)
+            self.diff_plots.append(plt.imshow(data[i]))
+            plt.axis("off")
+            self.diff_plots[-1].set_cmap("Reds")
+
+        self.title = plt.suptitle(title_text, fontsize=20)
+        # plt.tight_layout()
+
+    def update_subplots(self, data, title_text=None):  # update shows the difference and the
+        """
+        supply pred_data
+        """
+        for i in range(self.data_len):
+            self.pred_plots[i].set_data(data[i])
+            self.diff_plots[i].set_data(data[i] - self.target_plots[i].get_array().data)
+
+        if title_text:
+            self.title.set_text(title_text)
+
+
+class MySubplots:
+    def __init__(self, data, title_text="Plots"):
+        """
+        setup subplots 24: 3 by 8 for now
+        """
+        self.fig, self.axs = plt.subplots(nrows=3, ncols=8, figsize=(9.3, 6),
+                                          subplot_kw={"xticks": [], "yticks": []})
+
+        self.fig.subplots_adjust(left=0.03, right=0.97, hspace=0.1, wspace=0.075)
+
+        self.plots = []
+        for i, (ax, grid) in enumerate(zip(self.axs.flat, data)):
+            self.plots.append(ax.imshow(grid, vmin=0, vmax=2.))
+            ax.set_title(str(i))
+
+    def update_subplots(self, data, title_text=None):
+        for i, plot in enumerate(self.plots):
+            plot.set_data(data[i])
+
+        if title_text:
+            self.title.set_text(title_text)
+
+
+def setup_subplots(a):
+    n, m = getNearFactors(len(a))
+
+    k = 0
+    fig = plt.figure(figsize=(m, n))
+    plots = []
+    for i in range(n):
+        for j in range(m):
+            plt.subplot(n, m, k + 1, xticks=[], yticks=[])
+            #             plt.title(str(k))
+            plots.append(plt.imshow(a[k]))
+            k += 1
+
+    plt.tight_layout()
+    return fig, plots
+
+
+def update_subplots(a, plots):
+    for i, plot in enumerate(plots):
+        plot.set_data(a[i])
+
+
+def im(a):
+    plt.imshow(a)
+    plt.colorbar()
+    plt.show()
+
+
+def getNearFactors(C):
+    """
+    used in plot_convs to get ratio for the plot
+    """
+    c1 = int(C / np.sqrt(C) // 1)
+    while C % c1 != 0:
+        c1 -= 1
+    c1 = int(c1)
+    c2 = int(C / c1)
+    return c1, c2
+
+
+def plot_convs(a):
+    """
+    plots all the filter outputs of convs
+    """
+    if len(a.shape) < 4:
+        plt.figure()
+        plt.imshow(a[0].data)
+        plt.show()
+    else:
+        N, C, H, W = a.shape
+        c1, c2 = getNearFactors(C)
+        plt.figure()
+        for i in range(1, C + 1):
+            plt.subplot(c1, c2, i)
+            plt.axis("off")
+            plt.imshow(a[0][i - 1].data, )
+        plt.show()
+
+
+def plot_dist(a):
+    val, cnt = np.unique(a, return_counts=True)
+    dst = cnt / np.sum(cnt) * 100
+    plt.figure()
+    plt.title("Distribution")
+    if type(val[0]) == str:
+        plt.xlabel("Percentage")
+        plt.grid()
+        plt.ylabel("Class")
+        plt.barh(val, dst)
+    else:
+        plt.xlabel("Count")
+        plt.grid()
+        plt.ylabel("Percentage")
+        plt.bar(val, dst)
+    plt.show()
+
+
+def plot3d(a):
+    fig = plt.figure(figsize=(10, 8))
+    ax1 = fig.add_subplot(111, projection="3d")
+
+    w, h = np.shape(a)
+    xpos = []
+    ypos = []
+
+    for i in range(w):
+        for j in range(h):
+            xpos.append(i)
+            ypos.append(j)
+
+    zpos = w * h * [0]
+    dx = np.ones(w * h)
+    dy = np.ones(w * h)
+    dz = a.flatten()
+    # colors = np.arange(w * h)
+    colors = []
+    for i in dz:
+        if i / dz.max() > 0.5:
+            c = (1., 1 - 2. * (i / dz.max() - 0.5), 0., 1.)
+        else:
+            c = (2. * i / dz.max(), 1., 0., 1.)
+        colors.append(c)
+
+    ax1.bar3d(xpos, ypos, zpos, dx, dy, dz, color=colors)
+    ax1.set_xlabel("x pos")
+    ax1.set_ylabel("y pos")
+    ax1.set_zlabel("prob")
+    plt.show()

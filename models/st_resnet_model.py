@@ -45,7 +45,7 @@ class ResUnit(nn.Module):
 
 class ResNet(nn.Module):
     def __init__(self, n_layers=1, in_channels=1, n_channels=1):
-        r"""
+        """
         n_layers: number of ResUnits
         in_channels: number of channels at conv1 input 
         n_channels: number of channels at conv1 output and res-units inputs
@@ -120,7 +120,7 @@ class Fuse(nn.Module):  # fuse the 3 matrices with parametric matrices
 
 class STResNet(nn.Module):
     def __init__(self, n_layers, y_size, x_size, lc=1, lp=1, lq=1, n_channels=1, n_ext_features=10):
-        r"""
+        """
         n_layers: number of layers
         y_size: grids.shape[-2]
         x_size: grids.shape[-1]
@@ -139,7 +139,7 @@ class STResNet(nn.Module):
         self.fuse = Fuse(y_size=y_size, x_size=x_size)
 
     def forward(self, Sc, Sp, Sq, Et=None):
-        r"""
+        """
         Inputs:
         =======
         Sc, Sp, Sq: Sequence of grids - each grid as a channel
