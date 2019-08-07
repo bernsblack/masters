@@ -2,28 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/datasets/simple_dataset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/example_mnist.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/gru_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/kangkang_fnn_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/self_exciting_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/stecklabjan_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/vanilla_mlp_models.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/visualize_generated_data.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/loaders/st_resnet_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/__inti__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/logger/__init__.py" beforeDir="false" afterPath="$PROJECT_DIR$/logger/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/main.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/kangkang_fnn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/loaders/__init__.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/st_resnet_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/st_resnet_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/stecklabjan_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/loaders/st_resnet_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/testers/testers.py" beforeDir="false" afterPath="$PROJECT_DIR$/testers/testers.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -46,18 +26,6 @@
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/utils/data_processing.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="368">
-              <caret line="176" column="7" lean-forward="true" selection-start-line="176" selection-start-column="7" selection-end-line="176" selection-end-column="7" />
-              <folding>
-                <element signature="e#0#18#0" expanded="true" />
-              </folding>
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/datasets/simple_dataset.py">
           <provider selected="true" editor-type-id="text-editor">
             <state relative-caret-position="672">
@@ -69,14 +37,23 @@
           </provider>
         </entry>
       </file>
-      <file pinned="false" current-in-tab="true">
+      <file pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/examples/example_mnist.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="413">
-              <caret line="110" lean-forward="true" selection-start-line="110" selection-end-line="110" />
+            <state relative-caret-position="347">
+              <caret line="104" column="43" selection-start-line="104" selection-start-column="37" selection-end-line="104" selection-end-column="43" />
               <folding>
                 <element signature="e#128#143#0" expanded="true" />
               </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="231">
+              <caret line="11" column="5" lean-forward="true" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
             </state>
           </provider>
         </entry>
@@ -160,8 +137,8 @@
       <find>livin</find>
       <find>project</find>
       <find>epoc</find>
-      <find>resume</find>
       <find>====== TRAINING LOOP STOP =======</find>
+      <find>resume</find>
     </findStrings>
     <replaceStrings>
       <replace>&quot;&quot;&quot;</replace>
@@ -176,7 +153,6 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/.gitignore" />
         <option value="$PROJECT_DIR$/data/generatedata.py" />
         <option value="$PROJECT_DIR$/configs/run.py" />
         <option value="$PROJECT_DIR$/configs/config.json" />
@@ -219,6 +195,7 @@
         <option value="$PROJECT_DIR$/datasets/simple_dataset.py" />
         <option value="$PROJECT_DIR$/example_main.py" />
         <option value="$PROJECT_DIR$/examples/example_mnist.py" />
+        <option value="$PROJECT_DIR$/.gitignore" />
       </list>
     </option>
   </component>
@@ -244,37 +221,7 @@
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
               <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="data" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="examples" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="loaders" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="logger" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="models" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="utils" type="462c0819:PsiDirectoryNode" />
+              <item name="saved" type="462c0819:PsiDirectoryNode" />
             </path>
           </expand>
           <select />
@@ -342,18 +289,18 @@
       <workItem from="1564987390379" duration="2870000" />
       <workItem from="1565097251343" duration="2137000" />
       <workItem from="1565170772086" duration="749000" />
-      <workItem from="1565180474574" duration="15622000" />
+      <workItem from="1565180474574" duration="15777000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="37278000" />
+    <option name="totallyTimeSpent" value="37433000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-587" y="-1417" width="2560" height="1417" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info content_ui="combo" id="Project" order="0" sideWeight="0.49734244" visible="true" weight="0.08101668" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49734244" visible="true" weight="0.08101668" />
       <window_info id="Structure" order="1" sideWeight="0.50265753" side_tool="true" weight="0.16084194" />
       <window_info id="Favorites" order="2" sideWeight="0.50265753" side_tool="true" weight="0.16084194" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -367,7 +314,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info active="true" anchor="bottom" id="Terminal" order="11" visible="true" weight="0.28473803" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.28473803" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -403,13 +350,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file:///anaconda3/lib/python3.7/json/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-106">
-          <caret line="273" column="4" selection-start-line="273" selection-start-column="4" selection-end-line="273" selection-end-column="4" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/configs/run.py" />
     <entry file="file://$PROJECT_DIR$/data/processed/T24H-X850-Y880/demographics_max.png" />
     <entry file="file://$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/scatter_map.png">
@@ -709,11 +649,18 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/examples/example_mnist.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="413">
-          <caret line="110" lean-forward="true" selection-start-line="110" selection-end-line="110" />
+        <state relative-caret-position="347">
+          <caret line="104" column="43" selection-start-line="104" selection-start-column="37" selection-end-line="104" selection-end-column="43" />
           <folding>
             <element signature="e#128#143#0" expanded="true" />
           </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/.gitignore">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="231">
+          <caret line="11" column="5" lean-forward="true" selection-start-line="11" selection-start-column="5" selection-end-line="11" selection-end-column="5" />
         </state>
       </provider>
     </entry>

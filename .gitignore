@@ -2,9 +2,11 @@
 ./data/raw/*
 ./data/processed/*/*
 ./idea/*
+./saved/*
 *.csv
 *.mp4
 *.gif
 *.npy
 *.pkl
 *.npz
+*.pth
