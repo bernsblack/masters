@@ -2,9 +2,11 @@
   <dictionary name="bernardswart">
     <words>
       <w>conv</w>
+      <w>demog</w>
       <w>kaiming</w>
       <w>pytorch</w>
       <w>relu</w>
+      <w>viridis</w>
     </words>
   </dictionary>
 </component>
