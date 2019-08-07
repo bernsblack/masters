@@ -5,6 +5,24 @@ import io
 import base64
 from IPython.display import HTML
 
+from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.pyplot as plt
+import numpy as np
+import matplotlib.cm as cm
+
+
+def visualize_weights(model):
+    plt.figure(figsize=(15, 5))
+    state_dict = model.state_dict()
+    keys = []
+    for i, k in enumerate(state_dict):
+        values = state_dict[k].flatten().data.numpy()
+        plt.scatter(i * np.ones_like(values), values, alpha=0.5)
+        keys.append(k)
+
+    plt.xticks(np.arange(len(keys)), keys, rotation=45, fontsize=30)
+    plt.show()
+
 
 def plot(x):
     """
@@ -266,9 +284,15 @@ def plot_dist(a):
     plt.show()
 
 
+def plot_grid_sum_over_time(a):
+    plt.figure()
+    plt.plot(a.sum(1).sum(1))
+    plt.show()
+
+
 def plot3d(a):
     fig = plt.figure(figsize=(10, 8))
-    ax1 = fig.add_subplot(111, projection="3d")
+    ax1 = fig.add_subplot(111, projection='3d')
 
     w, h = np.shape(a)
     xpos = []
@@ -296,4 +320,35 @@ def plot3d(a):
     ax1.set_xlabel("x pos")
     ax1.set_ylabel("y pos")
     ax1.set_zlabel("prob")
+    plt.show()
+
+
+def plot3D(a):
+    fig = plt.figure()
+    ax = fig.add_subplot(111, projection='3d')
+
+    h, w = np.shape(a)
+    _x = [i for i in range(w)]
+    _y = [i for i in range(h)]
+    _xx, _yy = np.meshgrid(_x, _y)
+    x, y = _xx.ravel(), _yy.ravel()
+    _z = a.ravel()
+
+    # There may be an easier way to do this, but I am not aware of it
+    z = np.zeros(len(x))
+    for i in range(1, len(x)):
+        j = int((i * len(_z)) / len(x))
+        z[i] = _z[j]
+
+    bottom = np.zeros_like(z)
+    width = depth = 1
+
+    cmap = cm.get_cmap('viridis')  # Get desired colormap - you can change this!
+    max_height = np.max(_z)  # get range of colorbars so we can normalize
+    min_height = np.min(_z)
+    # scale each z to [0,1], and get their rgb values
+    rgba = [cmap((k - min_height) / max_height) for k in _z]
+
+    ax.bar3d(x, y, bottom, width, depth, z, shade=True, color=rgba)
+
     plt.show()

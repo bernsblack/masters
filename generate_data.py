@@ -1,7 +1,8 @@
 import os
-from datetime import datetime
-from utils.utils import *
 from matplotlib import rcParams
+import matplotlib.pyplot as plt
+from utils.utils import *
+from utils.data_processing import *
 
 if __name__ == "__main__":
     # set the plotting format
@@ -39,7 +40,7 @@ if __name__ == "__main__":
     tract2km2 = pd.read_pickle(load_folder_raw + "tract2km2.pkl")
 
     # link between points and demographic data
-    point2spatial_info = pd.read_pickle(load_folder_raw + "point2spatial_info.pkl") # todo is this normalised?
+    point2spatial_info = pd.read_pickle(load_folder_raw + "point2spatial_info.pkl")  # todo is this normalised?
 
     ######################################################
     #                PREPROCESS DATA                     #
@@ -163,6 +164,17 @@ if __name__ == "__main__":
     print(f"t_range[-1] -> {t_range[-1]}")
     print(f"t_range[0] -> {t_range[0]}")
 
+    info["t_size"] = t_size
+    info["x_size"] = x_size
+    info["y_size"] = y_size
+
+    info["crimes.t.max()"] = int(crimes.t.max())
+    info["crimes.t.min()"] = int(crimes.t.min())
+    info["crimes.x.max()"] = int(crimes.x.max())
+    info["crimes.x.min()"] = int(crimes.x.min())
+    info["crimes.y.max()"] = int(crimes.y.max())
+    info["crimes.y.min()"] = int(crimes.y.min())
+
     grids = make_grid(A, t_size, x_size, y_size)
 
     ######################################################
@@ -245,6 +257,7 @@ if __name__ == "__main__":
            "MOTOR VEHICLE THEFT": 6,
            "ROBBERY": 7}  # can also change the values to group certain crimes into a class
 
+
     #                       - like battery and assault into a type and theft and robbery and
     #                       motor vehicle theft into a type and narcotics into another type.
 
@@ -262,7 +275,6 @@ if __name__ == "__main__":
     # c2i = {"THEFT":0,
     # "BATTERY":1,
     # "NARCOTICS":2}
-
 
     def type2index(crime_type):
         try:
@@ -330,17 +342,18 @@ if __name__ == "__main__":
     plt.savefig(save_folder + "plots/" + "street_grid_max.png")
 
     # save generated data
-    np.savez(save_folder + "crime_types_grids.npz", B)
-    np.savez(save_folder + "crime_grids.npz", grids)
-    np.savez(save_folder + "demog_grid.npz", demog_grid)
-    np.savez(save_folder + "street_grid.npz", street_grid)
-    np.savez(save_folder + "time_vectors.npz", encode_time_vectors(t_range))
+    np.savez_compressed(save_folder + "generated_data.npz",
+                        crime_types_grids=B,
+                        crime_grids=grids,
+                        demog_grid=demog_grid,
+                        street_grid=street_grid,
+                        time_vectors=encode_time_vectors(t_range),
+                        x_range=x_range,
+                        y_range=y_range)
+    pd.to_pickle(t_range, save_folder + "t_range.pkl")
     # way weather dates are too short time_vectors should be more years
     # - open weather data has more data but has quite a few gaps
-    # np.savez(folder+"weather_vectors.npz", weather_vectors)
-    np.savez(save_folder + "x_range.npz", x_range)
-    np.savez(save_folder + "y_range.npz", y_range)
-    pd.to_pickle(t_range, save_folder + "t_range.pkl")
+    # np.save(folder+"weather_vectors.npy", weather_vectors)
 
     write_json(info, save_folder + "info.json")
 
