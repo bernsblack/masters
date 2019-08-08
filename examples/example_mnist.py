@@ -8,6 +8,11 @@ from torch.nn import functional as F
 from torch.utils.data import DataLoader
 from torchvision import datasets, transforms
 
+# change current directory to the file being run - helps with relative file naming
+abspath = os.path.abspath(__file__)
+dir_name = os.path.dirname(abspath)
+os.chdir(dir_name)
+
 if __name__ == "__main__":
     # =============== PARSE ARGUMENTS ===============
     parser = argparse.ArgumentParser(description='PyTorch MNIST Example')
@@ -87,30 +92,31 @@ if __name__ == "__main__":
     model.train()
     train_losses = []
 
-    print("=============== TRAINING LOOP START ===============")
-    for i, (data, target) in enumerate(train_loader):
-        data = data.to(device=device, non_blocking=True)
-        target = target.to(device=device, non_blocking=True)
-        optimiser.zero_grad()
-        output = model(data)
-        loss = F.nll_loss(output, target)
-        loss.backward()
-        train_losses.append(loss.item())
-        optimiser.step()
+    for epoch in range(args.epochs):
+        print(f"=============== EPOCH {epoch} ===============")
+        for i, (data, target) in enumerate(train_loader):
+            data = data.to(device=device, non_blocking=True)
+            target = target.to(device=device, non_blocking=True)
+            optimiser.zero_grad()
+            output = model(data)
+            loss = F.nll_loss(output, target)
+            loss.backward()
+            train_losses.append(loss.item())
+            optimiser.step()
 
-        if i % 10 == 0:
-            print(f"batch:{i}, loss:{loss.item()}")
-            torch.save(model.state_dict(), folder + 'model.pth')
-            torch.save(optimiser.state_dict(), folder + 'optimiser.pth')
-            torch.save(train_losses, folder + 'train_losses.pth')
-    print("=============== TRAINING LOOP STOP ===============")
+            if i % 10 == 0:
+                print(f"batch:{i}, loss:{loss.item()}")
+                torch.save(model.state_dict(), folder + 'model.pth')
+                torch.save(optimiser.state_dict(), folder + 'optimiser.pth')
+                torch.save(train_losses, folder + 'train_losses.pth')
+    print("=============== TRAINING LOOPS STOP ===============")
 
     # =============== TESTING LOOP ===============
     model.eval()
     test_loss, correct = 0, 0
 
     print("=============== TESTING LOOP START ===============")
-    with torch.no_grad():
+    with torch.no_grad():  # context handler for evaluation loop
         for data, target in test_loader:
             data = data.to(device=device, non_blocking=True)
             target = target.to(device=device, non_blocking=True)

@@ -170,6 +170,17 @@ def cluster2coord(a, centers):
     return poi, i
 
 
+def get_times(a):
+    """
+    given array with true-false occurrences return indices of all true occurrences
+    """
+    t = []
+    for i in range(len(a)):
+        if a[i]:
+            t.append(i)
+    return t
+
+
 def get_dead_cells(a):  # finding all the living cells
     """
     given matrix a (N,d,d)

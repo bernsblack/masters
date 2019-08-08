@@ -165,3 +165,54 @@ class STResNet(nn.Module):
             Xt_hat = torch.sigmoid(Xres + Xext)
 
         return Xt_hat
+
+
+class STResNet_Census(nn.Module):
+    def __init__(self, n_layers, y_size, x_size, lc=1, lp=1, lq=1, n_channels=1, n_ext_features=10,
+                 n_census_features=37, n_census_channels=10, n_census_layers=4):
+        """
+        n_layers: number of layers
+        y_size: grids.shape[-2]
+        x_size: grids.shape[-1]
+        ext_features: number of external features, dimensions of E
+        """
+
+        # TODO: check if pytorch has parallel modules like sequential
+        # TODO: See if we can set parallel networks by a param: not just lc,lp,lq, but even more
+        # TODO: Add option with no external data
+
+        super(STResNet_Census, self).__init__()
+        self.resNetc = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
+        self.resNetp = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
+        self.resNetq = ResNet(n_layers, in_channels=lq, n_channels=n_channels)
+        self.resNetCensus = ResNet(n_census_layers, in_channels=n_census_features, n_channels=n_census_channels)
+        self.extNet = ExternalNet(in_features=n_ext_features, y_size=y_size, x_size=x_size)
+        self.fuse = Fuse(y_size=y_size, x_size=x_size)
+
+    def forward(self, Sc, Sp, Sq, Et=None, Census=None):
+        """
+        Inputs:
+        =======
+        Sc, Sp, Sq: Sequence of grids - each grid as a channel
+        Et: External features at time t
+
+        Outputs:
+        ========
+        Xt_hat: Estimated crime grid at time t
+        """
+        # l indicates the output of the lth ResUnit
+        Xc = self.resNetc(Sc)
+        Xp = self.resNetp(Sp)
+        Xq = self.resNetq(Sq)
+        Xcensus = self.resNetCensus(Census)
+        Xres = self.fuse(Xc, Xp, Xq)
+
+        # tanh squeezes values between -1 and 1 that's, that's why the cumsum wasn't working
+        # Last layer is tanh
+        if Et is None:
+            Xt_hat = torch.tanh(Xres)
+        else:
+            Xext = self.extNet(Et)
+            Xt_hat = torch.tanh(Xres + Xext)
+
+        return Xt_hat

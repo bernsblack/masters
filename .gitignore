@@ -9,4 +9,5 @@
 *.npy
 *.pkl
 *.npz
+*.npy
 *.pth

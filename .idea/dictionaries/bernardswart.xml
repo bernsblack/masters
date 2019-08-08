@@ -5,15 +5,19 @@
       <w>conv</w>
       <w>convs</w>
       <w>demog</w>
+      <w>hama</w>
       <w>imshow</w>
+      <w>jaccard</w>
       <w>kaiming</w>
       <w>kang</w>
       <w>lstm</w>
+      <w>probas</w>
       <w>pytorch</w>
       <w>relu</w>
       <w>softmax</w>
       <w>targ</w>
       <w>tbptt</w>
+      <w>vals</w>
       <w>viridis</w>
       <w>xticks</w>
       <w>yticks</w>

@@ -1,126 +1,180 @@
 import numpy as np
 import torch
 
+"""
+Not many of these metrics can be imported straight from sklearn.metrics, e.g.:
+- roc_curve
+- auc 
+- confusion_matrix 
+- mutual_info_score
+- f1_score 
+- jaccard_score (Defined: size of the intersection divided by the size of the union of two label sets)
+- roc_auc_score 
+- accuracy_score 
+- precision_recall_curve
+- mean_absolute_error 
+- precision_score 
+- recall_score
+- average_precision_score
+"""
 
-def accuracy_top_k(p, q, k):
-    """
-    Inputs
-    ======
-    p:    Predicted grid
-    q:    Exact grid
-    k:    Top k values
-    """
-    p_vals, p_args = torch.topk(p, k)
-    q_vals, q_args = torch.topk(q, k)
+from utils.data_processing import get_times
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve,\
+    mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
-    r = len(set(p_args) & set(q_args)) / len(set(q_args))
+
+def mean_absolute_scaled_error(y_true, y_pred):
+    y_true_lag = y_true[:-1].copy()
+    y_true = y_true[1:]
+    y_pred = y_pred[1:]
+
+    mae_lag = mean_absolute_error(y_true, y_true_lag)
+    mae_pred = mean_absolute_error(y_true, y_pred)
+
+    mase = mae_pred / mae_lag  # anything less than one is good
+
+    return mase
+
+
+def get_metrics(y_true, y_pred):  # for a single time cell (N,1)
+    """
+    grids_true: true crime grid (N,d,d)
+    grids_pred: predicted crime grid (N,d,d)
+    returns accuracy, precision, recall f1score and mase
+    """
+    y_true = y_true.ravel()
+    y_pred = y_pred.ravel()
+
+    accuracy = accuracy_score(y_true, y_pred)
+    precision = precision_score(y_true, y_pred)
+    recall = recall_score(y_true, y_pred)
+    f1score = f1_score(y_true, y_pred)
+    mase = mean_absolute_scaled_error(y_true, y_pred)
+
+    r = {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1score': f1score, 'mase': mase}
 
     return r
+    # mase as well mse our prediction / mse lagged by one prediction
+    # from sklearn.metrics import mean_squared_error
+
+# ============= PLOTS =============
 
 
-# top k accuracies for series of k and whole batch/set of data
-def acc(pred, targ, k=1):
+def plot_cell_results(y_true, y_pred):
     """
-    targ: target maps (N,d,d)
-    pred: predicted maps (N,d,d)
-    k: top k spots to be similar
+    function usually called in a loop to showcase a group of cells results
     """
-    accuracies = []
-    for i in range(len(targ)):
-        p = pred[i].view(-1)
-        q = targ[i].view(-1)
-        accuracies.append(accuracy_top_k(p, q, k))
+    indices = get_times(y_true)
 
-    return accuracies
+    plt.figure(figsize=(20, 3))
+    plt.scatter(indices, y_pred[indices], s=20, marker='1')
+    plt.scatter(indices, y_true[indices], s=20, c='r', marker='2')
+    plt.plot(y_pred, alpha=0.7)
+
+    plt.show()
 
 
-def get_recall(y_true, y_pred):
+def plot_conf(y_true, y_pred):
+    conf = confusion_matrix(y_true, y_pred)  # can't do confusion because the model never predicts higher
+
+    plt.figure(figsize=(5, 5))
+    plt.title("Confusion Matrix")
+    plt.ylabel("True Value")
+    plt.xlabel("Predicted Value")
+    plt.imshow(conf, cmap='viridis')
+    plt.xticks(np.arange(10))
+    plt.yticks(np.arange(10))
+    plt.grid(False)
+    plt.colorbar()
+    plt.show()
+
+
+# important to show this plot - maybe get the AUC and plot that over time,
+# we can see the model gets worse over time and needs to be re-trained
+def plot_pr_curve(ground_truth, predictions_list):
     """
-    args: y_true, y_pred
+    Example:
+    predictions_list = [grids_ha, grids_ma, grids_hama, grids_lag, grids]
     """
-    all_real_pos = np.sum(y_true)
-    correct_pos = np.sum(y_true & y_pred)
-    return correct_pos / all_real_pos
+    plt.figure(figsize=(5, 5))
+    y_true = ground_truth.ravel().copy()  # ground truth
+    y_true[y_true > 1] = 1
+
+    # results = [ha,ma,hama,lag,g]
+    predictions_list_names = ['grids_ha', 'grids_ma', 'grids_hama', 'grids_lag', 'grids']
+    for i, probas_pred in enumerate(predictions_list):
+        probas_pred = probas_pred.ravel()
+        precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
+        ap = average_precision_score(y_true, probas_pred)
+        plt.plot(recall, precision, label=predictions_list_names[i] + ' (AP=%.3f)' % ap)
+
+    plt.xlabel('Recall')
+    plt.ylabel('Precision')
+
+    plt.xlim(-0.01, 1.1)
+    plt.ylim(0, 1.1)
+
+    f_scores = [.4, 0.5, .6, .8, .9]
+    for f_score in f_scores:
+        x = np.linspace(0.01, 1.1)
+        y = f_score * x / (2 * x - f_score)
+        l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
+        plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
+
+    plt.legend(loc=3)
+    plt.show()
 
 
-def get_precision(y_true, y_pred):
-    """
-    args: y_true, y_pred
-    """
-    all_class_pos = np.sum(y_pred)
-    correct_pos = np.sum(y_true & y_pred)
-    return correct_pos / all_class_pos
+def plot_roc_and_pr_curve(ground_truth, predictions_list):
+    # ROC and PR Are binary so the class should be specified, one-vs-many
+    # selecting and setting the class
+    fig, axs = plt.subplots(1, 2)
+    fig.set_figwidth(15)
 
+    axs[0].set_title("Receiver Operating Characteristic (ROC) Curve")  # (AUC = %.4f)"%auc)
+    axs[0].set_xlabel("False Positive Rate")
+    axs[0].set_ylabel("True Positive Raate")
+    axs[0].set_aspect(1)
+    axs[1].set_title("Precision-Recall Curve")  # (AUC = %.4f)"%auc)
+    axs[1].set_ylabel("Precision")
+    axs[1].set_xlabel("Recall")
+    axs[1].set_aspect(1.)
 
-def f1_score(y_true, y_pred):
-    """
-    args: y_true, y_pred
-    returns number of true positive predictions
-    """
-    p = get_precision(y_true, y_pred)
-    r = get_recall(y_true, y_pred)
-    return 2 * p * r / (p + r)
+    y_true = ground_truth.ravel()  # ground truth
+    y_true[y_true > 1] = 1
 
+    predictions_list_names = ['HA', 'MA', 'HAMA', 'KNN', 'GT']  # change the input to a dictionary instead
 
-def get_true_positive(y_true, y_pred):
-    """
-    returns number of true positive predictions
-    """
-    return np.sum(y_true & y_pred)
+    for i, y_score in enumerate(predictions_list):
+        y_score = y_score.ravel()
 
+        # ROC Curve
+        fpr, tpr, thresholds = roc_curve(y_true, y_score, drop_intermediate=False)
+        thresholds = thresholds / np.max(thresholds)
+        auc = roc_auc_score(y_true, y_score)
+        axs[0].plot(fpr, tpr, label=predictions_list_names[i] + " (AUC: %.3f)" % auc, alpha=0.5)
+        axs[0].scatter(fpr, tpr, alpha=0.5, s=50 * thresholds, marker='D')
 
-def get_false_positive(y_true, y_pred):
-    """
-    returns number of false positive predictions
-    """
-    xor = y_true != y_pred
-    return np.sum(xor & y_pred)
+        # Precision Recall Curve
+        precision, recall, thresholds = precision_recall_curve(y_true, y_score)
+        thresholds = thresholds / np.max(thresholds)
+        ap = average_precision_score(y_true, y_score)
+        axs[1].plot(recall, precision, label=predictions_list_names[i] + " (AP: %.3f)" % ap, alpha=0.5)
+        axs[1].scatter(recall, precision, alpha=0.5, s=50 * thresholds, marker='D')
 
+    # f_scores = [.4,0.5,.6,.8,.9]
+    # for f_score in f_scores:
+    #     x = np.linspace(0.01, 1.1)
+    #     y = f_score * x / (2 * x - f_score)
+    #     l, = axs[1].plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
+    #     plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
 
-def get_true_negative(y_true, y_pred):
-    """
-    args: y_true, y_pred
-    returns number of true negative predictions
-    """
-    return np.sum((1 != y_true) & (1 != y_pred))
+    axs[0].legend()
+    axs[0].plot([0, 1], [0, 1], c='k', alpha=0.2)
 
+    axs[1].legend()
 
-def get_false_negative(y_true, y_pred):
-    """args: y_true, y_pred
-    returns number of false negative predictions
-    """
-    xor = y_true != y_pred
-    return np.sum(xor & (1 != y_pred))
-
-
-def get_accuracy(y_true, y_pred):
-    """
-    args: y_true, y_pred
-    returns accuracy between 0. and 1.
-
-    """
-    return np.sum(y_true == y_pred) / len(y_true)
-
-
-def confusion(y_true, y_pred):
-    """
-    return confusion with true values on y axis and predicted values on x axis
-
-           pred
-          _ _ _ _
-     t   |_|_|_|_|
-     r   |_|_|_|_|
-     u   |_|_|_|_|
-     e   |_|_|_|_|
-
-
-    """
-    size = len(set(list(y_true) + list(y_true)))
-    r = np.zeros((size, size))
-
-    for i in range(len(y_true)):
-        j = int(y_true[i])
-        k = int(y_pred[i])
-        r[j, k] += 1
-
-    return r
+    plt.tight_layout()
+    plt.show()

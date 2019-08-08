@@ -10,7 +10,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.cm as cm
 
-
+"""
+    THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
+    CAN BE FOUND IN THE utils.metrics MODULE 
+"""
 def visualize_weights(model):
     plt.figure(figsize=(15, 5))
     state_dict = model.state_dict()
