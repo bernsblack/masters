@@ -153,25 +153,65 @@ class BaseMetricPlotter:
     Class is used to setup and add plots to a figure and then save or show this figure
     """
 
-    def __init__(self):  # setup maybe add the size of the figure
+    def __init__(self, title, legend_loc="best"):  # setup maybe add the size of the figure
         rcParams["mathtext.fontset"] = "stix"
         rcParams["font.family"] = "STIXGeneral"
         rcParams["font.size"] = "18"
+        self.title = title
+        self.legend_loc = legend_loc
+        self.grid_alpha = 0.2
         self.setup()
 
     @staticmethod
     def setup():
         raise NotImplemented
 
-    @staticmethod
-    def show():
-        plt.legend(loc="upper left")
+    def finalise(self):
+        plt.title(self.title)
+        plt.legend(loc=self.legend_loc)
+        plt.grid(alpha=self.grid_alpha)
+
+    def show(self):
+        self.finalise()
         plt.show()
 
-    @staticmethod
-    def savefig(file_location):
-        plt.legend(loc="upper left")
+    def savefig(self, file_location):
+        self.finalise()
         plt.savefig(file_location)
+
+
+class LossPlotter(BaseMetricPlotter):
+    """
+    Class is used to plot the validation and training loss of a model
+    """
+
+    def __init__(self, title, legend_loc="best"):  # setup maybe add the size of the figure
+        super(LossPlotter, self).__init__(title, legend_loc)
+
+    @staticmethod
+    def setup():
+        plt.figure(figsize=(20, 10))
+        plt.ylabel("Loss")
+        plt.xlabel("Epoch")
+
+    @staticmethod
+    def plot_losses(trn_loss, all_trn_loss, val_loss, all_val_loss):
+        kwargs = {
+            "marker": "s",
+            "markersize": 6,
+            "alpha": 0.7,
+        }
+
+        # plt.xticks(list(range(len(trn_loss)))) # plot the x ticks of grid on the epochs
+
+        plt.plot(trn_loss, label="Training Loss (Epoch)", c='g', **kwargs)
+        all_trn_loss_x = np.linspace(start=0, stop=len(trn_loss) - 1, num=len(all_trn_loss))
+        plt.plot(all_trn_loss_x, all_trn_loss, alpha=.2, c='g', label="Training Loss (Batch)")
+
+        plt.plot(val_loss, label="Validation Loss (Epoch)", c='r', **kwargs)
+        all_val_loss_x = np.linspace(start=0, stop=len(trn_loss) - 1, num=len(all_val_loss))
+        plt.plot(all_val_loss_x, all_val_loss, alpha=.2, c='r', label="Validation Loss (Batch)")
+        plt.grid()
 
 
 class PRCurvePlotter(BaseMetricPlotter):
@@ -179,14 +219,13 @@ class PRCurvePlotter(BaseMetricPlotter):
     Class is used to setup and add plots to a figure and then save or show this figure
     """
 
-    def __init__(self):  # setup maybe add the size of the figure
-        super(PRCurvePlotter, self).__init__()
+    def __init__(self, title="Precision-Recall Curve", legend_loc="best"):
+        super(PRCurvePlotter, self).__init__(title, legend_loc)
 
     @staticmethod
     def setup():
         plt.figure(figsize=(10, 10))
 
-        plt.title("Precision-Recall Curve")
         plt.xlabel("Recall")
         plt.ylabel("Precision")
 
@@ -212,7 +251,7 @@ class PRCurvePlotter(BaseMetricPlotter):
         kwargs = {
             "label": label_name + f" (AP={ap:.3f})",
             "marker": 's',
-            "markersize": 4,
+            "markersize": 2,
             "alpha": 0.7,
         }
 
@@ -224,14 +263,14 @@ class ROCCurvePlotter(BaseMetricPlotter):
     Class is used to setup and add plots to a figure and then save or show this figure
     """
 
-    def __init__(self):  # setup maybe add the size of the figure
-        super(ROCCurvePlotter, self).__init__()
+    # setup maybe add the size of the figure
+    def __init__(self, title="Receiver Operating Characteristic (ROC) Curve", legend_loc="best"):
+        super(ROCCurvePlotter, self).__init__(title, legend_loc)
 
     @staticmethod
     def setup():
         plt.figure(figsize=(10, 10))
 
-        plt.title("Receiver Operating Characteristic (ROC) Curve")
         plt.xlabel("False Positive Rate")
         plt.ylabel("True Positive Rate")
 
@@ -259,9 +298,8 @@ class ROCCurvePlotter(BaseMetricPlotter):
         kwargs = {
             "label": label_name + f" (AUC={auc:.3f})",
             "marker": 's',
-            "markersize": 4,
+            "markersize": 2,
             "alpha": 0.7,
         }
 
         plt.plot(fpr, tpr, **kwargs)
-

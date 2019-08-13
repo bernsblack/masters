@@ -2,30 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/datasets/kang_kang_fnn_dataset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/datasets/st_resnet_dataset.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/examples/weighted_class_sampling.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/loaders/generic_loader.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/constants.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/info.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/plots/crimes_max.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/plots/demographics_max.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/plots/scatter_map.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/plots/street_grid_max.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/info.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/plots/crimes_max.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/plots/demographics_max.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/plots/scatter_map.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/plots/street_grid_max.png" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/simple_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/simple_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/trainers/trainers.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/generic_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger/test_logger_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/logger/test_logger_config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/logger/train_logger_config.json" beforeDir="false" afterPath="$PROJECT_DIR$/logger/train_logger_config.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -41,45 +23,56 @@
     <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
       <file pinned="false" current-in-tab="false">
         <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" selection-start-line="1" selection-end-line="1" />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/trainers/generic_trainer.py">
-          <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="577">
-              <caret line="34" column="18" lean-forward="true" selection-start-line="34" selection-start-column="18" selection-end-line="34" selection-end-column="18" />
-            </state>
-          </provider>
+          <provider selected="true" editor-type-id="text-editor" />
         </entry>
       </file>
       <file pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/utils/metrics.py">
+        <entry file="file://$PROJECT_DIR$/run.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="142">
-              <caret line="95" selection-start-line="95" selection-end-line="95" />
+            <state relative-caret-position="835">
+              <caret line="291" column="31" lean-forward="true" selection-start-line="291" selection-start-column="31" selection-end-line="291" selection-end-column="31" />
+              <folding>
+                <element signature="e#0#18#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file:///anaconda3/lib/python3.7/site-packages/sklearn/metrics/ranking.py">
+        <entry file="file://$PROJECT_DIR$/.gitignore">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="350">
-              <caret line="242" column="4" selection-start-line="242" selection-start-column="4" selection-end-line="242" selection-end-column="4" />
+            <state relative-caret-position="252">
+              <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
             </state>
           </provider>
         </entry>
       </file>
       <file pinned="false" current-in-tab="false">
-        <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.sh">
+        <entry file="file:///anaconda3/lib/python3.7/site-packages/torch/nn/modules/linear.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="21">
-              <caret line="1" selection-start-line="1" selection-end-line="1" />
+            <state relative-caret-position="358">
+              <caret line="71" column="23" lean-forward="true" selection-start-line="71" selection-start-column="23" selection-end-line="71" selection-end-column="48" />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/generate_data.py">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="585">
+              <caret line="385" selection-start-line="385" selection-end-line="385" />
+              <folding>
+                <element signature="e#0#9#0" expanded="true" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/info.json">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="378">
+              <caret line="18" column="1" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
             </state>
           </provider>
         </entry>
@@ -96,19 +89,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>project</find>
-      <find>epoc</find>
-      <find>====== TRAINING LOOP STOP =======</find>
-      <find>resume</find>
-      <find>folder_name</find>
-      <find>get_times</find>
-      <find>get</find>
-      <find>to</find>
-      <find>trn_val_splt</find>
-      <find>save</find>
-      <find>&lt;</find>
-      <find>weather</find>
-      <find>load_folder_raw</find>
       <find>load_folder_raw =</find>
       <find>start</find>
       <find>DATETIME</find>
@@ -124,16 +104,30 @@
       <find>rcparam</find>
       <find>optim</find>
       <find>class</find>
+      <find>auc</find>
+      <find>%Y</find>
+      <find>&quot;%Y-%m-%d %H:%M:%S&quot;</find>
+      <find>maked</find>
+      <find>zip</find>
+      <find>makedi</find>
+      <find>if args.resume:</find>
+      <find>loss</find>
+      <find>lossplot</find>
       <find>loc</find>
       <find>loc=</find>
+      <find>plt.legend</find>
+      <find>PRCurvePlotter</find>
+      <find>'</find>
+      <find>losspl</find>
     </findStrings>
     <replaceStrings>
       <replace>&quot;&quot;&quot;</replace>
-      <replace>&quot;</replace>
       <replace>Continuous</replace>
       <replace>savez_compressed</replace>
       <replace>WEEK_IN_HOURS</replace>
       <replace>.Date</replace>
+      <replace>&quot;%Y-%m-%dT%H:%M:%S&quot;</replace>
+      <replace>&quot;</replace>
     </replaceStrings>
   </component>
   <component name="Git.Settings">
@@ -142,14 +136,12 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
-        <option value="$PROJECT_DIR$/loaders/st_resnet_model.py" />
         <option value="$PROJECT_DIR$/base/data_loader_base.py" />
         <option value="$PROJECT_DIR$/utils/__init__.py" />
         <option value="$PROJECT_DIR$/trainers/__init__.py" />
         <option value="$PROJECT_DIR$/testers/__init__.py" />
         <option value="$PROJECT_DIR$/logger/logger_config.json" />
         <option value="$PROJECT_DIR$/logger/test_logger_config.json" />
-        <option value="$PROJECT_DIR$/logger/train_logger_config.json" />
         <option value="$PROJECT_DIR$/logger/logger.py" />
         <option value="$PROJECT_DIR$/main.py" />
         <option value="$PROJECT_DIR$/generatedata.py" />
@@ -162,7 +154,6 @@
         <option value="$PROJECT_DIR$/models/kangkang_fnn_model.py" />
         <option value="$PROJECT_DIR$/models/stecklabjan_model.py" />
         <option value="$PROJECT_DIR$/models/vanilla_mlp_model.py" />
-        <option value="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/info.json" />
         <option value="$PROJECT_DIR$/models/gru_models.py" />
         <option value="$PROJECT_DIR$/config/generate_data.json" />
         <option value="$PROJECT_DIR$/loaders/base_loader.py" />
@@ -184,22 +175,26 @@
         <option value="$PROJECT_DIR$/utils/constants.py" />
         <option value="$PROJECT_DIR$/datasets/st_resnet_dataset.py" />
         <option value="$PROJECT_DIR$/developing_datasets.ipynb" />
-        <option value="$PROJECT_DIR$/generate_data.py" />
         <option value="$PROJECT_DIR$/datasets/kang_kang_fnn_dataset.py" />
         <option value="$PROJECT_DIR$/datasets/generic_dataset.py" />
         <option value="$PROJECT_DIR$/trainers/generic_trainer.py" />
         <option value="$PROJECT_DIR$/examples/weighted_class_sampling.py" />
         <option value="$PROJECT_DIR$/utils/data_processing.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.sh" />
+        <option value="$PROJECT_DIR$/logger/train_logger_config.json" />
+        <option value="$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/info.json" />
+        <option value="$PROJECT_DIR$/generate_data.py" />
         <option value="$APPLICATION_CONFIG_DIR$/scratches/scratch.py" />
         <option value="$PROJECT_DIR$/utils/metrics.py" />
+        <option value="$PROJECT_DIR$/run.py" />
       </list>
     </option>
   </component>
-  <component name="ProjectFrameBounds" extendedState="6">
-    <option name="y" value="23" />
-    <option name="width" value="1440" />
-    <option name="height" value="804" />
+  <component name="ProjectFrameBounds">
+    <option name="x" value="699" />
+    <option name="y" value="-1417" />
+    <option name="width" value="1274" />
+    <option name="height" value="1333" />
   </component>
   <component name="ProjectView">
     <navigator proportions="" version="1">
@@ -217,37 +212,37 @@
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
               <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="config" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
               <item name="data" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
               <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="datasets" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+              <item name="processed" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
               <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="examples" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+              <item name="processed" type="462c0819:PsiDirectoryNode" />
+              <item name="MOCK-DATA" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
               <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="loaders" type="462c0819:PsiDirectoryNode" />
-            </path>
-            <path>
-              <item name="masters" type="b2602c69:ProjectViewProjectNode" />
-              <item name="masters" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+              <item name="processed" type="462c0819:PsiDirectoryNode" />
+              <item name="MOCK-DATA" type="462c0819:PsiDirectoryNode" />
               <item name="models" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
               <item name="masters" type="462c0819:PsiDirectoryNode" />
-              <item name="trainers" type="462c0819:PsiDirectoryNode" />
+              <item name="data" type="462c0819:PsiDirectoryNode" />
+              <item name="processed" type="462c0819:PsiDirectoryNode" />
+              <item name="MOCK-DATA" type="462c0819:PsiDirectoryNode" />
+              <item name="models" type="462c0819:PsiDirectoryNode" />
+              <item name="LINEAR-MOCK-MODEL" type="462c0819:PsiDirectoryNode" />
             </path>
             <path>
               <item name="masters" type="b2602c69:ProjectViewProjectNode" />
@@ -330,18 +325,19 @@
       <workItem from="1565097251343" duration="2137000" />
       <workItem from="1565170772086" duration="749000" />
       <workItem from="1565180474574" duration="20718000" />
-      <workItem from="1565257177150" duration="28122000" />
+      <workItem from="1565257177150" duration="28718000" />
+      <workItem from="1565687401462" duration="8714000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="70496000" />
+    <option name="totallyTimeSpent" value="79806000" />
   </component>
   <component name="ToolWindowManager">
-    <frame x="0" y="23" width="1440" height="804" extended-state="6" />
+    <frame x="699" y="-1417" width="1274" height="1333" extended-state="0" />
     <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49734244" visible="true" weight="0.19670959" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.49734244" visible="true" weight="0.22646104" />
       <window_info id="Structure" order="1" sideWeight="0.50265753" side_tool="true" weight="0.16084194" />
       <window_info id="Favorites" order="2" sideWeight="0.50265753" side_tool="true" weight="0.16084194" />
       <window_info anchor="bottom" id="Message" order="0" />
@@ -355,7 +351,7 @@
       <window_info anchor="bottom" id="Version Control" order="8" />
       <window_info anchor="bottom" id="Database Changes" order="9" />
       <window_info anchor="bottom" id="Event Log" order="10" side_tool="true" />
-      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.171875" />
+      <window_info anchor="bottom" id="Terminal" order="11" visible="true" weight="0.09813463" />
       <window_info anchor="bottom" id="Python Console" order="12" />
       <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
@@ -391,71 +387,6 @@
     <option name="version" value="1" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/trainers/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="6" selection-start-column="6" selection-end-column="6" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file:///anaconda3/lib/python3.7/site-packages/torch/nn/modules/module.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret line="760" column="46" selection-start-line="760" selection-start-column="46" selection-end-line="760" selection-end-column="46" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/testers/__init__.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="22" selection-start-column="22" selection-end-column="22" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/utils_original.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="525">
-          <caret line="41" column="24" selection-start-line="41" selection-start-column="24" selection-end-line="41" selection-end-column="24" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/hyper_opt.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="357">
-          <caret line="18" lean-forward="true" selection-start-line="18" selection-end-line="18" />
-          <folding>
-            <element signature="e#0#61#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/utils/models.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="291">
-          <caret line="14" column="27" lean-forward="true" selection-start-line="14" selection-start-column="27" selection-end-line="14" selection-end-column="27" />
-          <folding>
-            <element signature="e#0#18#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/testers/testers.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state>
-          <caret column="27" selection-start-column="27" selection-end-column="27" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/info.json">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="378">
-          <caret line="18" column="1" lean-forward="true" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/models/__init__.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
     <entry file="file://$PROJECT_DIR$/logger/__init__.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21">
@@ -477,16 +408,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/plots/crimes_max.png">
-      <provider selected="true" editor-type-id="images" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/.gitignore">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="252">
-          <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
-        </state>
-      </provider>
-    </entry>
+    <entry file="file://$PROJECT_DIR$/data/processed/T4H-X850M-Y880M/plots/crimes_max.png" />
     <entry file="file://$PROJECT_DIR$/datasets/__inti__.py">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -497,9 +419,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/examples/pr_curve_plot.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/pr_curve_plot.py" />
     <entry file="file:///anaconda3/lib/python3.7/site-packages/torchvision/transforms/transforms.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="921">
@@ -531,16 +451,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/datasets/st_resnet_dataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="105">
-          <caret line="5" selection-start-line="5" selection-end-line="5" />
-          <folding>
-            <element signature="e#0#19#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/notebook.ipynb">
       <provider selected="true" editor-type-id="jupyter-editor" />
     </entry>
@@ -550,9 +460,6 @@
           <caret line="1" column="16" selection-start-line="1" selection-start-column="16" selection-end-line="1" selection-end-column="16" />
         </state>
       </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/visualize_generated_data.ipynb">
-      <provider selected="true" editor-type-id="jupyter-editor" />
     </entry>
     <entry file="file:///anaconda3/lib/python3.7/site-packages/torch/utils/data/dataset.py">
       <provider selected="true" editor-type-id="text-editor">
@@ -575,13 +482,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/datasets/kang_kang_fnn_dataset.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="84">
-          <caret line="4" column="74" selection-start-line="4" selection-start-column="74" selection-end-line="4" selection-end-column="74" />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/datasets/generic_dataset.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="483">
@@ -592,9 +492,7 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/trainers/trainers.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
+    <entry file="file://$PROJECT_DIR$/trainers/trainers.py" />
     <entry file="file://$PROJECT_DIR$/models/vanilla_mlp_models.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="252">
@@ -629,19 +527,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/loaders/generic_loader.py">
-      <provider selected="true" editor-type-id="text-editor" />
-    </entry>
-    <entry file="file://$PROJECT_DIR$/examples/weighted_class_sampling.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="9" selection-start-line="9" selection-end-line="9" />
-          <folding>
-            <element signature="e#0#12#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file:///anaconda3/lib/python3.7/site-packages/pandas/core/reshape/reshape.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="358">
@@ -673,16 +558,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/generate_data.py">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="189">
-          <caret line="9" column="43" lean-forward="true" selection-start-line="8" selection-start-column="4" selection-end-line="9" selection-end-column="43" />
-          <folding>
-            <element signature="e#0#9#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$USER_HOME$/Library/Caches/PyCharm2019.1/python_stubs/1995955354/builtins.py">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="358">
@@ -700,6 +575,50 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/trainers/generic_trainer.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="630">
+          <caret line="34" column="18" selection-start-line="34" selection-start-column="18" selection-end-line="34" selection-end-column="18" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/datasets/kang_kang_fnn_dataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="84">
+          <caret line="4" column="74" selection-start-line="4" selection-start-column="74" selection-end-line="4" selection-end-column="74" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/datasets/st_resnet_dataset.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="42">
+          <caret line="5" selection-start-line="5" selection-end-line="5" />
+          <folding>
+            <element signature="e#0#19#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/examples/weighted_class_sampling.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="168">
+          <caret line="9" selection-start-line="9" selection-end-line="9" />
+          <folding>
+            <element signature="e#0#12#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/loaders/generic_loader.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///anaconda3/lib/python3.7/site-packages/sklearn/metrics/ranking.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="4746">
+          <caret line="242" column="4" selection-start-line="242" selection-start-column="4" selection-end-line="242" selection-end-column="4" />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.sh">
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="21">
@@ -707,38 +626,94 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/logger/train_logger_config.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="189">
+          <caret line="9" column="42" selection-start-line="9" selection-start-column="23" selection-end-line="9" selection-end-column="42" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/processed/T24H-X850M-Y880M/info.json">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="378">
+          <caret line="18" column="1" selection-start-line="18" selection-start-column="1" selection-end-line="18" selection-end-column="1" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/visualize_generated_data.ipynb">
+      <provider selected="true" editor-type-id="jupyter-editor" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/generate_data.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="585">
+          <caret line="385" selection-start-line="385" selection-end-line="385" />
+          <folding>
+            <element signature="e#0#9#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$APPLICATION_CONFIG_DIR$/scratches/scratch.py">
+      <provider selected="true" editor-type-id="text-editor" />
+    </entry>
+    <entry file="file:///anaconda3/lib/python3.7/site-packages/torch/nn/modules/linear.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="21">
-          <caret line="1" selection-start-line="1" selection-end-line="1" />
+        <state relative-caret-position="358">
+          <caret line="71" column="23" lean-forward="true" selection-start-line="71" selection-start-column="23" selection-end-line="71" selection-end-column="48" />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/trainers/generic_trainer.py">
+    <entry file="file://$PROJECT_DIR$/.gitignore">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="577">
-          <caret line="34" column="18" lean-forward="true" selection-start-line="34" selection-start-column="18" selection-end-line="34" selection-end-column="18" />
+        <state relative-caret-position="252">
+          <caret line="12" column="5" selection-start-line="12" selection-start-column="5" selection-end-line="12" selection-end-column="5" />
         </state>
       </provider>
     </entry>
-    <entry file="file:///anaconda3/lib/python3.7/site-packages/sklearn/metrics/ranking.py">
+    <entry file="file:///anaconda3/lib/python3.7/site-packages/torch/_jit_internal.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="350">
-          <caret line="242" column="4" selection-start-line="242" selection-start-column="4" selection-end-line="242" selection-end-column="4" />
+        <state relative-caret-position="1596">
+          <caret line="78" column="23" lean-forward="true" selection-start-line="78" selection-start-column="23" selection-end-line="78" selection-end-column="23" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file:///anaconda3/lib/python3.7/site-packages/torch/nn/modules/loss.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1243">
+          <caret line="938" column="14" lean-forward="true" selection-start-line="938" selection-start-column="14" selection-end-line="938" selection-end-column="14" />
         </state>
       </provider>
     </entry>
     <entry file="file:///anaconda3/lib/python3.7/site-packages/matplotlib/pyplot.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="278">
-          <caret line="3052" lean-forward="true" selection-start-line="3052" selection-end-line="3052" />
+        <state relative-caret-position="694">
+          <caret line="2721" column="21" lean-forward="true" selection-start-line="2721" selection-start-column="21" selection-end-line="2721" selection-end-column="21" />
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/data/processed/MOCK-DATA/models/LINEAR-MOCK-MODEL/plot_train_val_loss.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/processed/MOCK-DATA/models/LINEAR-MOCK-MODEL/plot_roc_cruve.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
+    <entry file="file://$PROJECT_DIR$/data/processed/MOCK-DATA/models/LINEAR-MOCK-MODEL/plot_pr_curve.png">
+      <provider selected="true" editor-type-id="images" />
+    </entry>
     <entry file="file://$PROJECT_DIR$/utils/metrics.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="142">
-          <caret line="95" selection-start-line="95" selection-end-line="95" />
+        <state relative-caret-position="682">
+          <caret line="165" column="16" lean-forward="true" selection-start-line="165" selection-start-column="16" selection-end-line="165" selection-end-column="16" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/run.py">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="835">
+          <caret line="291" column="31" lean-forward="true" selection-start-line="291" selection-start-column="31" selection-end-line="291" selection-end-column="31" />
+          <folding>
+            <element signature="e#0#18#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>

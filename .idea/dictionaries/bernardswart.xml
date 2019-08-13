@@ -4,6 +4,7 @@
       <w>arange</w>
       <w>conv</w>
       <w>convs</w>
+      <w>cuda</w>
       <w>demog</w>
       <w>fontset</w>
       <w>hama</w>
@@ -16,6 +17,7 @@
       <w>mathtext</w>
       <w>probas</w>
       <w>pytorch</w>
+      <w>regressor</w>
       <w>relu</w>
       <w>savefig</w>
       <w>softmax</w>
