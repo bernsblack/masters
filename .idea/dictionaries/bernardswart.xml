@@ -2,6 +2,8 @@
   <dictionary name="bernardswart">
     <words>
       <w>arange</w>
+      <w>argparsers</w>
+      <w>confs</w>
       <w>conv</w>
       <w>convs</w>
       <w>cuda</w>
@@ -15,6 +17,7 @@
       <w>lstm</w>
       <w>markersize</w>
       <w>mathtext</w>
+      <w>proba</w>
       <w>probas</w>
       <w>pytorch</w>
       <w>regressor</w>

@@ -1,10 +1,22 @@
 import numpy as np
 import pandas as pd
+from torch import nn
+
+
+class LinearRegressor(nn.Module):
+    def __init__(self, in_features=10, out_features=2):
+        super(LinearRegressor, self).__init__()
+
+        self.linear = nn.Linear(in_features, out_features)
+        self.activation = nn.ReLU()
+
+    def forward(self, x):
+        out = self.activation(self.linear(x))
+
+        return out
 
 
 # TODO CONVERT FUNCTIONS INTO A CLASS
-
-
 # still needs to do it only on training data average no the total
 def get_historic_average(a, step=24):
     """

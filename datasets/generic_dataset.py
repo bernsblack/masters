@@ -4,8 +4,30 @@ from torch.utils.data import Dataset, DataLoader
 from ..utils.data_processing import Shaper # used to compress the spatial domain
 
 
+class GenericDataset(Dataset):
+    """
+    Characterizes a dataset for PyTorch
+    """
+
+    def __init__(self, features, labels):
+        """Initialization"""
+        self.labels = labels
+        self.feats = features
+
+    def __len__(self):
+        """Denotes the total number of samples"""
+        return len(self.feats)
+
+    def __getitem__(self, index):
+        """Generates one sample of data"""
+        X = self.feats[index]
+        y = self.labels[index]
+
+        return X, y
+
+
 # todo add set of valid / living sells / to be able to sample the right ones
-class GenericDataSet(Dataset):
+class GenericCrimeDataSet(Dataset):
     """
     Generic data set that contains all data we need for our model
     Provide only with the folder where the data is stored
