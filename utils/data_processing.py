@@ -8,6 +8,27 @@ from torch.autograd import Variable
 from scipy.ndimage import gaussian_filter
 
 
+def inv_weights(labels):
+    """
+    given 1D array of labels gives the inverse weights of the class labels
+    :param labels:
+    :return:
+    """
+    counts, _ = np.histogram(labels, bins=2)
+    dist = 1 / counts
+    dist = dist / np.sum(dist)
+    return dist
+
+
+def map_to_weights(labels):
+    counts, _ = np.histogram(labels, bins=2)
+    dist = 1 / counts
+    dist = dist / np.sum(dist)
+    hot_encoded = pd.get_dummies(pd.DataFrame(labels).loc[:, 0]).values
+    weights = np.matmul(hot_encoded, dist)
+    return weights
+
+
 def encode_time_vectors(t_range):
     """
     given t_range (datetime series)
@@ -136,8 +157,8 @@ def get_trans_mat_d2s(a, threshold=0):
     a array shapped (N,d,d)
     sum over all time should be above this threshold
     """
-    N, d, d = a.shape
-    a = np.reshape(a, (N, d * d))
+    N, W, H = a.shape
+    a = np.reshape(a, (N, W * H))
     dd = np.sum(a, 0)
     dd[dd > threshold] = 1
     dd = np.reshape(dd, (len(dd), 1))
@@ -149,6 +170,33 @@ def get_trans_mat_d2s(a, threshold=0):
             T.append(f)
     T = np.array(T).T
     return T
+
+
+def f2s(f):
+    """
+    ":param f: float
+    :return s: string rounded to 2 decimals
+    """
+    return f"{f:.2f}"
+
+
+class Shaper:
+    def __init__(self, data):
+        shape = list(np.shape(data))
+        self.old_shape = shape
+        self.new_shape = shape[:-2]
+        self.new_shape.append(int(np.product(shape[-2:])))
+        self.trans_mat_d2s = get_trans_mat_d2s(data)
+
+    def flatten(self, sparse_data):
+        reshaped_data = np.reshape(sparse_data, self.new_shape)
+        dense_data = np.matmul(reshaped_data, self.trans_mat_d2s)
+        return dense_data
+
+    def unflatten(self, dense_data):
+        sparse_data = np.matmul(dense_data, self.trans_mat_d2s.T)
+        reshaped_data = np.reshape(sparse_data, self.old_shape)
+        return reshaped_data
 
 
 def cluster2coord(a, centers):

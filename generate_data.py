@@ -70,18 +70,16 @@ if __name__ == "__main__":
     info["start_date"] = start_date
     info["end_date"] = end_date
 
-    crimes["DateTime"] = crimes.Date
-
     t_range = pd.date_range(start_date, end_date, freq=dT)
-    crimes = crimes[crimes.DateTime <= t_range[-1]]  # choose only crimes which lie in the valid time range
-    crimes = crimes[crimes.DateTime >= t_range[0]]  # choose only crimes which lie in the valid time range
-    # crimes.DateTime = crimes.DateTime.dt.floor(dT) # DON"T ROUND,
+    crimes = crimes[crimes.Date < t_range[-1]]  # choose only crimes which lie in the valid time range
+    crimes = crimes[crimes.Date >= t_range[0]]  # choose only crimes which lie in the valid time range
+    # crimes.Date = crimes.Date.dt.floor(dT) # DON"T ROUND,
     # ONLY FLOOR, OTHERWISE THE WEATHER DATA DOESNT LINE UP PROPERLY.
 
-    t_min = pd.Series(crimes.DateTime.min()).astype(np.int64)[0]
+    t_min = pd.Series(crimes.Date.min()).astype(np.int64)[0]
     dt = pd.Series(t_range[1] - t_range[0]).astype(np.int64)[0]
 
-    t = crimes.DateTime.astype(np.int64)
+    t = crimes.Date.astype(np.int64)
     t = t - t_min
     t = t // dt
     crimes["t"] = t
@@ -101,7 +99,7 @@ if __name__ == "__main__":
     crimes.Y = np.round(crimes.Y / dy) * dy
 
     crimes.X = np.round(crimes.X, decimals=3)  # used to make sure we can still hash coords
-    crimes.Y = np.round(crimes.Y, decimals=3)
+    crimes.Y = np.round(crimes.Y, decimals=3) # rounding ensures floating point issues are dealt with
 
     print("Number of total crimes: ", len(crimes))
     crimes = crimes[
@@ -178,6 +176,38 @@ if __name__ == "__main__":
     grids = make_grid(A, t_size, x_size, y_size)
 
     ######################################################
+    #          TRACTS GRIDS DATA GENERATION               #
+    ######################################################
+    # Creates Grid where the cell value is the total crime in that tract for that time step
+    tract2index = {}
+    for i, tr in enumerate(valid_tracts):
+        tract2index[tr] = i
+
+    trindex = []
+    for tr in crimes.tract.values:
+        trindex.append(tract2index[tr])
+
+    crimes['trindex'] = trindex
+    tracts = np.zeros((t_size, len(valid_tracts)))  # crime count in tracts over time - can be used for lstm
+
+    tract_info = crimes[['t', 'trindex']].values
+
+    for t, tr in tract_info:
+        tracts[t, tr] += 1
+
+    # make grid by the number of crimes in that tract
+    tract_count_grids = np.zeros_like(grids)
+
+    # for x, y in valid_crime_spots:  # leads to some missing data
+    for x, y in valid_points:
+        tr = point2tract[x, y]
+        if x in x_range and y in y_range:
+            x = np.argwhere(x_range == x)[0, 0]
+            y = np.argwhere(y_range == y)[0, 0]
+            info = tracts[:, tract2index[tr]]
+            tract_count_grids[:, y_size - y - 1, x] = np.array(info)
+
+    ######################################################
     #          DEMOGRAPHIC DATA GENERATION               #
     ######################################################
     # todo implement interpolation for this as well.
@@ -247,6 +277,18 @@ if __name__ == "__main__":
     #                           CRIME TYPES GRID                            #
     #########################################################################
     # CHOOSE CRIME TYPES
+    valid_crime_types = [
+        "THEFT",
+        "BATTERY",
+        "CRIMINAL DAMAGE",
+        "NARCOTICS",
+        "ASSAULT",
+        "BURGLARY",
+        "MOTOR VEHICLE THEFT",
+        "ROBBERY",
+    ]
+    # filter useless crime types
+    crimes = crimes[crimes["Primary Type"].isin(valid_crime_types)]
 
     c2i = {"THEFT": 0,
            "BATTERY": 1,
@@ -256,7 +298,6 @@ if __name__ == "__main__":
            "BURGLARY": 5,
            "MOTOR VEHICLE THEFT": 6,
            "ROBBERY": 7}  # can also change the values to group certain crimes into a class
-
 
     #                       - like battery and assault into a type and theft and robbery and
     #                       motor vehicle theft into a type and narcotics into another type.
@@ -303,6 +344,8 @@ if __name__ == "__main__":
     # INCLUDE ARRESTS
     crimes["Arrest"] = crimes["Arrest"] * 1
 
+    crime_feature_indices = ["TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
+                             "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]
     A = crimes[["t", "x", "y", "TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
                 "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]].values
     # A = crimes[["t","b","TOTAL","THEFT", "BATTERY", "NARCOTICS","Arrest"]].values # is used when x and y are flattened
@@ -343,8 +386,10 @@ if __name__ == "__main__":
 
     # save generated data
     np.savez_compressed(save_folder + "generated_data.npz",
+                        crime_feature_indices=crime_feature_indices,
                         crime_types_grids=B,
                         crime_grids=grids,
+                        tract_count_grids=tract_count_grids,
                         demog_grid=demog_grid,
                         street_grid=street_grid,
                         time_vectors=encode_time_vectors(t_range),

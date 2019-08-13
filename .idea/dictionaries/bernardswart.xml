@@ -5,18 +5,24 @@
       <w>conv</w>
       <w>convs</w>
       <w>demog</w>
+      <w>fontset</w>
       <w>hama</w>
       <w>imshow</w>
       <w>jaccard</w>
       <w>kaiming</w>
       <w>kang</w>
       <w>lstm</w>
+      <w>markersize</w>
+      <w>mathtext</w>
       <w>probas</w>
       <w>pytorch</w>
       <w>relu</w>
+      <w>savefig</w>
       <w>softmax</w>
+      <w>stix</w>
       <w>targ</w>
       <w>tbptt</w>
+      <w>thresholded</w>
       <w>vals</w>
       <w>viridis</w>
       <w>xticks</w>

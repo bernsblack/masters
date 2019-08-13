@@ -1,3 +1,4 @@
+#!python3
 import numpy as np
 import torch
 
@@ -21,7 +22,8 @@ Not many of these metrics can be imported straight from sklearn.metrics, e.g.:
 from utils.data_processing import get_times
 import numpy as np
 import matplotlib.pyplot as plt
-from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve,\
+from matplotlib import rcParams
+from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve, \
     mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 
@@ -59,6 +61,7 @@ def get_metrics(y_true, y_pred):  # for a single time cell (N,1)
     # mase as well mse our prediction / mse lagged by one prediction
     # from sklearn.metrics import mean_squared_error
 
+
 # ============= PLOTS =============
 
 
@@ -91,42 +94,6 @@ def plot_conf(y_true, y_pred):
     plt.show()
 
 
-# important to show this plot - maybe get the AUC and plot that over time,
-# we can see the model gets worse over time and needs to be re-trained
-def plot_pr_curve(ground_truth, predictions_list):
-    """
-    Example:
-    predictions_list = [grids_ha, grids_ma, grids_hama, grids_lag, grids]
-    """
-    plt.figure(figsize=(5, 5))
-    y_true = ground_truth.ravel().copy()  # ground truth
-    y_true[y_true > 1] = 1
-
-    # results = [ha,ma,hama,lag,g]
-    predictions_list_names = ['grids_ha', 'grids_ma', 'grids_hama', 'grids_lag', 'grids']
-    for i, probas_pred in enumerate(predictions_list):
-        probas_pred = probas_pred.ravel()
-        precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
-        ap = average_precision_score(y_true, probas_pred)
-        plt.plot(recall, precision, label=predictions_list_names[i] + ' (AP=%.3f)' % ap)
-
-    plt.xlabel('Recall')
-    plt.ylabel('Precision')
-
-    plt.xlim(-0.01, 1.1)
-    plt.ylim(0, 1.1)
-
-    f_scores = [.4, 0.5, .6, .8, .9]
-    for f_score in f_scores:
-        x = np.linspace(0.01, 1.1)
-        y = f_score * x / (2 * x - f_score)
-        l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
-        plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
-
-    plt.legend(loc=3)
-    plt.show()
-
-
 def plot_roc_and_pr_curve(ground_truth, predictions_list):
     # ROC and PR Are binary so the class should be specified, one-vs-many
     # selecting and setting the class
@@ -135,7 +102,7 @@ def plot_roc_and_pr_curve(ground_truth, predictions_list):
 
     axs[0].set_title("Receiver Operating Characteristic (ROC) Curve")  # (AUC = %.4f)"%auc)
     axs[0].set_xlabel("False Positive Rate")
-    axs[0].set_ylabel("True Positive Raate")
+    axs[0].set_ylabel("True Positive Rate")
     axs[0].set_aspect(1)
     axs[1].set_title("Precision-Recall Curve")  # (AUC = %.4f)"%auc)
     axs[1].set_ylabel("Precision")
@@ -178,3 +145,123 @@ def plot_roc_and_pr_curve(ground_truth, predictions_list):
 
     plt.tight_layout()
     plt.show()
+
+
+# Metric Plots
+class BaseMetricPlotter:
+    """
+    Class is used to setup and add plots to a figure and then save or show this figure
+    """
+
+    def __init__(self):  # setup maybe add the size of the figure
+        rcParams["mathtext.fontset"] = "stix"
+        rcParams["font.family"] = "STIXGeneral"
+        rcParams["font.size"] = "18"
+        self.setup()
+
+    @staticmethod
+    def setup():
+        raise NotImplemented
+
+    @staticmethod
+    def show():
+        plt.legend(loc="upper left")
+        plt.show()
+
+    @staticmethod
+    def savefig(file_location):
+        plt.legend(loc="upper left")
+        plt.savefig(file_location)
+
+
+class PRCurvePlotter(BaseMetricPlotter):
+    """
+    Class is used to setup and add plots to a figure and then save or show this figure
+    """
+
+    def __init__(self):  # setup maybe add the size of the figure
+        super(PRCurvePlotter, self).__init__()
+
+    @staticmethod
+    def setup():
+        plt.figure(figsize=(10, 10))
+
+        plt.title("Precision-Recall Curve")
+        plt.xlabel("Recall")
+        plt.ylabel("Precision")
+
+        plt.xlim(-0.01, 1.1)
+        plt.ylim(0, 1.1)
+
+        # plot f score contours`
+        f_scores = [.4, 0.5, .6, 0.7, .8, .9]
+        for i, f_score in enumerate(f_scores):
+            x = np.linspace(0.01, 1.1)
+            y = f_score * x / (2 * x - f_score)
+            if i == 0:  # used to add the f_score label
+                l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2, label='F1 score')
+            else:
+                l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
+            plt.annotate('F1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
+
+    @staticmethod
+    def add_curve(y_true, probas_pred, label_name):
+        precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
+        ap = average_precision_score(y_true, probas_pred)
+
+        kwargs = {
+            "label": label_name + f" (AP={ap:.3f})",
+            "marker": 's',
+            "markersize": 4,
+            "alpha": 0.7,
+        }
+
+        plt.plot(recall, precision, **kwargs)
+
+
+class ROCCurvePlotter(BaseMetricPlotter):
+    """
+    Class is used to setup and add plots to a figure and then save or show this figure
+    """
+
+    def __init__(self):  # setup maybe add the size of the figure
+        super(ROCCurvePlotter, self).__init__()
+
+    @staticmethod
+    def setup():
+        plt.figure(figsize=(10, 10))
+
+        plt.title("Receiver Operating Characteristic (ROC) Curve")
+        plt.xlabel("False Positive Rate")
+        plt.ylabel("True Positive Rate")
+
+        plt.xlim(-0.01, 1.1)
+        plt.ylim(0, 1.1)
+
+    @staticmethod
+    def add_curve(y_true, probas_pred, label_name):
+        """
+        :param y_true: array, shape = [n_samples] or [n_samples, n_classes]
+        True binary labels or binary label indicators.
+        :param probas_pred: array, shape = [n_samples] or [n_samples, n_classes]
+        Target scores, can either be probability estimates of the positive
+        class, confidence values, or non-thresholded measure of decisions
+        (as returned by "decision_function" on some classifiers). For binary
+        y_true, y_score is supposed to be the score of the class with greater
+        label.
+        :param label_name: name of the line shown on the legend
+        :return: none
+        """
+
+        fpr, tpr, thresholds = roc_curve(y_true, probas_pred, drop_intermediate=False)
+        auc = roc_auc_score(y_true, probas_pred)
+
+        kwargs = {
+            "label": label_name + f" (AUC={auc:.3f})",
+            "marker": 's',
+            "markersize": 4,
+            "alpha": 0.7,
+        }
+
+        plt.plot(fpr, tpr, **kwargs)
+
