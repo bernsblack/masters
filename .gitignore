@@ -11,3 +11,5 @@
 *.npz
 *.npy
 *.pth
+*.txt
+*.log

@@ -52,56 +52,56 @@ def rolling_avg(fun, a, weights):  # this rolling average includes the current t
 
     return r
 
+if __name__ == "__main__":
+    a = np.random.randn(100)
 
-a = np.random.randn(100)
+    folder = "./data/processed/"
 
-folder = "./data/processed/"
+    zip_file = np.load(folder + "generated_data.npz")
 
-zip_file = np.load(folder + "generated_data.npz")
+    grids = zip_file["crime_grids"]
+    t_range = pd.read_pickle(folder + "t_range.pkl")
 
-grids = zip_file["crime_grids"]
-t_range = pd.read_pickle(folder + "t_range.pkl")
-
-grids = np.load(folder + 'crimes_grids.npy')
-f = lambda x: x.mean(0)
-avg = lambda x, weights: np.average(x, axis=0, weights=weights)  # x and weights should have same length
-# np.average()
+    grids = np.load(folder + 'crimes_grids.npy')
+    f = lambda x: x.mean(0)
+    avg = lambda x, weights: np.average(x, axis=0, weights=weights)  # x and weights should have same length
+    # np.average()
 
 
-window = 4
-weights = np.exp(-10 / np.arange(window))
+    window = 4
+    weights = np.exp(-10 / np.arange(window))
 
-lag = 1
-dT = '1D'
-if dT == '1D':
-    folder = "./data/processed/T24H-X850M-Y880M/"
-    historic_jump = 7
-elif dT == '4H':
-    folder = "./data/processed/T4H-X850M-Y880M/"
-    historic_jump = 24
-else:
-    folder = "./data/processed/T24H-X850M-Y880M/"
-    historic_jump = 1
+    lag = 1
+    dT = '1D'
+    if dT == '1D':
+        folder = "./data/processed/T24H-X850M-Y880M/"
+        historic_jump = 7
+    elif dT == '4H':
+        folder = "./data/processed/T4H-X850M-Y880M/"
+        historic_jump = 24
+    else:
+        folder = "./data/processed/T24H-X850M-Y880M/"
+        historic_jump = 1
 
-grids_lag = grids[:-1]
-grids = grids[1:]
+    grids_lag = grids[:-1]
+    grids = grids[1:]
 
-grids_ma = rolling_apply(f, grids_lag, window)  # use lag because we cannot include today's rate in the MA
+    grids_ma = rolling_apply(f, grids_lag, window)  # use lag because we cannot include today's rate in the MA
 
-grids_avg = rolling_avg(avg, grids, weights)
+    grids_avg = rolling_avg(avg, grids, weights)
 
-grids_ha = get_historic_average(grids[:len(grids)], historic_jump)  # use grids as we get average for that time
-grids_hama = grids_ha * grids_ma
+    grids_ha = get_historic_average(grids[:len(grids)], historic_jump)  # use grids as we get average for that time
+    grids_hama = grids_ha * grids_ma
 
-grids_ha = np.nan_to_num(grids_ha)
-grids_ma = np.nan_to_num(grids_ma)
-grids_hama = np.nan_to_num(grids_hama)
+    grids_ha = np.nan_to_num(grids_ha)
+    grids_ma = np.nan_to_num(grids_ma)
+    grids_hama = np.nan_to_num(grids_hama)
 
-# skip 10 for window size
-grids = grids[window - 1:]
-grids_lag = grids_lag[window - 1:]  # can cap too if we're only looking into binary classification
+    # skip 10 for window size
+    grids = grids[window - 1:]
+    grids_lag = grids_lag[window - 1:]  # can cap too if we're only looking into binary classification
 
-grids_ma = grids_ma[window - 1:]
-grids_ha = grids_ha[window - 1:]
-grids_hama = grids_hama[window - 1:]
-grids_avg = grids_avg[window - 2:]
+    grids_ma = grids_ma[window - 1:]
+    grids_ha = grids_ha[window - 1:]
+    grids_hama = grids_hama[window - 1:]
+    grids_avg = grids_avg[window - 2:]

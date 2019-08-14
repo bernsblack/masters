@@ -1,7 +1,6 @@
 import pandas as pd
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
-from ..utils.data_processing import Shaper # used to compress the spatial domain
+from torch.utils.data import Dataset
 
 
 class GenericDataset(Dataset):
