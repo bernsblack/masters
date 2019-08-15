@@ -22,12 +22,15 @@
       <w>pytorch</w>
       <w>regressor</w>
       <w>relu</w>
+      <w>rmse</w>
       <w>savefig</w>
+      <w>scaler</w>
       <w>softmax</w>
       <w>stix</w>
       <w>targ</w>
       <w>tbptt</w>
       <w>thresholded</w>
+      <w>unsqueeze</w>
       <w>vals</w>
       <w>viridis</w>
       <w>xticks</w>

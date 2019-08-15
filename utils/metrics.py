@@ -196,6 +196,10 @@ class LossPlotter(BaseMetricPlotter):
 
     @staticmethod
     def plot_losses(trn_loss, all_trn_loss, val_loss, all_val_loss):
+        """
+        Note: the epoch plot takes the first batch loss as its first value, all subsequent values are the averages of
+        that epoch.
+        """
         kwargs = {
             "marker": "s",
             "markersize": 6,
@@ -204,12 +208,16 @@ class LossPlotter(BaseMetricPlotter):
 
         # plt.xticks(list(range(len(trn_loss)))) # plot the x ticks of grid on the epochs
 
-        plt.plot(trn_loss, label="Training Loss (Epoch)", c='g', **kwargs)
-        all_trn_loss_x = np.linspace(start=0, stop=len(trn_loss) - 1, num=len(all_trn_loss))
+        trn_loss.insert(0, all_trn_loss[0])  # inset the first loss to ilustrate the curve better
+        trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(trn_loss))
+        plt.plot(trn_loss_x, trn_loss, label="Training Loss (Epoch)", c='g', **kwargs)
+        all_trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(all_trn_loss))
         plt.plot(all_trn_loss_x, all_trn_loss, alpha=.2, c='g', label="Training Loss (Batch)")
 
-        plt.plot(val_loss, label="Validation Loss (Epoch)", c='r', **kwargs)
-        all_val_loss_x = np.linspace(start=0, stop=len(trn_loss) - 1, num=len(all_val_loss))
+        val_loss.insert(0, all_val_loss[0])
+        val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(val_loss))
+        plt.plot(val_loss_x, val_loss, label="Validation Loss (Epoch)", c='r', **kwargs)
+        all_val_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(all_val_loss))
         plt.plot(all_val_loss_x, all_val_loss, alpha=.2, c='r', label="Validation Loss (Batch)")
         plt.grid()
 

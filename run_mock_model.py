@@ -26,7 +26,7 @@ if __name__ == "__main__":
     # logging config is set globally thus we only need to call this in this file
     # imported function logs will follow the configuration
     setup_logging(save_dir=model_path, log_config='./logger/standard_logger_config.json', default_level=log.INFO)
-    log.info("=======================================BEGIN=======================================")
+    log.info("=====================================BEGIN=====================================")
 
     timer = Timer()
     conf = BaseConf()
@@ -36,10 +36,12 @@ if __name__ == "__main__":
 
     # DATA LOADER SETUP
     use_cuda = torch.cuda.is_available()
+
     device = torch.device("cuda:0" if use_cuda else "cpu")
+    log.info(f"Device: {device}")
 
     # GET DATA
-    loaders = GenericDataLoaders()  # torch seed is set in the data loaders
+    loaders = GenericDataLoaders(conf=conf)  # torch seed is set in the data loaders
 
     # TRAIN MODEL
     model = LinearRegressor(in_features=loaders.in_size, out_features=loaders.out_size)
@@ -54,7 +56,7 @@ if __name__ == "__main__":
     all_trn_loss = []
     all_val_loss = []
 
-    optimiser = optim.Adam(params=model.parameters(), lr=0.1, weight_decay=0.001)
+    optimiser = optim.Adam(params=model.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
     if conf.resume:
         # load model and optimiser states
         model.load_state_dict(torch.load(model_path + "model.pth"))
@@ -177,4 +179,4 @@ if __name__ == "__main__":
     info["stop_time"] = strftime("%Y-%m-%dT%H:%M:%S")
     write_json(info, model_path + "info.json")
 
-    log.info("=======================================END=======================================")
+    log.info("=====================================END=====================================")

@@ -19,7 +19,7 @@ def visualize_weights(model):
     state_dict = model.state_dict()
     keys = []
     for i, k in enumerate(state_dict):
-        values = state_dict[k].flatten().data.numpy()
+        values = state_dict[k].squeeze().data.numpy()
         plt.scatter(i * np.ones_like(values), values, alpha=0.5)
         keys.append(k)
 
@@ -272,7 +272,6 @@ def plot_convs(a):
 def plot_dist(a):
     val, cnt = np.unique(a, return_counts=True)
     dst = cnt / np.sum(cnt) * 100
-    plt.figure()
     plt.title("Distribution")
     if type(val[0]) == str:
         plt.xlabel("Percentage")
@@ -284,13 +283,10 @@ def plot_dist(a):
         plt.grid()
         plt.ylabel("Percentage")
         plt.bar(val, dst)
-    plt.show()
 
 
 def plot_grid_sum_over_time(a):
-    plt.figure()
     plt.plot(a.sum(1).sum(1))
-    plt.show()
 
 
 def plot3d(a):
@@ -309,7 +305,7 @@ def plot3d(a):
     zpos = w * h * [0]
     dx = np.ones(w * h)
     dy = np.ones(w * h)
-    dz = a.flatten()
+    dz = a.squeeze()
     # colors = np.arange(w * h)
     colors = []
     for i in dz:

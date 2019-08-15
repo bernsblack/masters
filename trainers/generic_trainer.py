@@ -9,6 +9,7 @@ from torch.utils import data
 from ..datasets.generic_dataset import GenericDataSet
 
 
+# todo sour e training loops for the st_resnet
 
 # CUDA for PyTorch
 use_cuda = torch.cuda.is_available()

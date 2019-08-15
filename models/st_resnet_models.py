@@ -5,9 +5,9 @@ import torch.nn as nn
 General notes on module:
 ========================
 ### STRes-Net (add link to paper)
-* **Input Data Format:** (N,C,W,H) where C a.k.a the channels is the previous time steps leading up to t
+* **Input Data Format:** (N,C,H,W) where C a.k.a the channels is the previous time steps leading up to t
 * **Input Data Type:** Continuous value (number of crimes per cell)
-* **Output Data Format:** (N,C,W,H) 
+* **Output Data Format:** (N,C,H,W) 
 * **Output Data Type:** Continuous value (number of crimes per cell)
 * **Loss Function:** RMSE
 """

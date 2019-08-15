@@ -154,7 +154,7 @@ def get_rev_S(S, do_superres, do_cumsum):
 
 def get_trans_mat_d2s(a, threshold=0):
     """
-    a array shapped (N,d,d)
+    a array shapped (N, W, H)
     sum over all time should be above this threshold
     """
     N, W, H = a.shape
@@ -172,21 +172,17 @@ def get_trans_mat_d2s(a, threshold=0):
     return T
 
 
-def f2s(f):
-    """
-    ":param f: float
-    :return s: string rounded to 2 decimals
-    """
-    return f"{f:.2f}"
-
-
 class Shaper:
     def __init__(self, data):
         shape = list(np.shape(data))
         self.old_shape = shape
         self.new_shape = shape[:-2]
         self.new_shape.append(int(np.product(shape[-2:])))
-        self.trans_mat_d2s = get_trans_mat_d2s(data)
+
+        if len(np.shape(data)) > 3:
+            self.trans_mat_d2s = get_trans_mat_d2s(data[:, 0])
+        else:
+            self.trans_mat_d2s = get_trans_mat_d2s(data)
 
     def flatten(self, sparse_data):
         reshaped_data = np.reshape(sparse_data, self.new_shape)

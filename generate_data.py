@@ -99,7 +99,7 @@ if __name__ == "__main__":
     crimes.Y = np.round(crimes.Y / dy) * dy
 
     crimes.X = np.round(crimes.X, decimals=3)  # used to make sure we can still hash coords
-    crimes.Y = np.round(crimes.Y, decimals=3) # rounding ensures floating point issues are dealt with
+    crimes.Y = np.round(crimes.Y, decimals=3)  # rounding ensures floating point issues are dealt with
 
     print("Number of total crimes: ", len(crimes))
     crimes = crimes[
@@ -204,8 +204,8 @@ if __name__ == "__main__":
         if x in x_range and y in y_range:
             x = np.argwhere(x_range == x)[0, 0]
             y = np.argwhere(y_range == y)[0, 0]
-            info = tracts[:, tract2index[tr]]
-            tract_count_grids[:, y_size - y - 1, x] = np.array(info)
+            info_ = tracts[:, tract2index[tr]]
+            tract_count_grids[:, y_size - y - 1, x] = np.array(info_)
 
     ######################################################
     #          DEMOGRAPHIC DATA GENERATION               #
@@ -299,6 +299,7 @@ if __name__ == "__main__":
            "MOTOR VEHICLE THEFT": 6,
            "ROBBERY": 7}  # can also change the values to group certain crimes into a class
 
+
     #                       - like battery and assault into a type and theft and robbery and
     #                       motor vehicle theft into a type and narcotics into another type.
 
@@ -344,8 +345,22 @@ if __name__ == "__main__":
     # INCLUDE ARRESTS
     crimes["Arrest"] = crimes["Arrest"] * 1
 
+    # crime_feature_indices = {
+    #     0: "TOTAL",
+    #     1: "THEFT",
+    #     2: "BATTERY",
+    #     3: "CRIMINAL DAMAGE",
+    #     4: "NARCOTICS",
+    #     5: "ASSAULT",
+    #     6: "BURGLARY",
+    #     7: "MOTOR VEHICLE THEFT",
+    #     8: "ROBBERY",
+    #     9: "Arrest"
+    # }
+
     crime_feature_indices = ["TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
                              "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]
+
     A = crimes[["t", "x", "y", "TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
                 "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]].values
     # A = crimes[["t","b","TOTAL","THEFT", "BATTERY", "NARCOTICS","Arrest"]].values # is used when x and y are flattened
