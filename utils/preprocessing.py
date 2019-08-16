@@ -8,14 +8,16 @@ def get_trans_mat(data, threshold=0):
     :param threshold: sum over all time should be above this threshold
     :return trans_mat: transition matrix used to filter out cells where nothing occurs over time
     """
-    if len(np.shape(data)) != 4:
-        raise ValueError("data shape must be length 4: (N,C,H,W)")
+    shape_old = np.shape(data)
+    num_axis = len(shape_old)
+    if num_axis != 4:
+        raise ValueError(f"data has {num_axis} axis and shape {shape_old} should be 4: (N,C,H,W)")
 
     data = data[:, 0]  # select only the TOTAL chanel
     n, h, w = np.shape(data)
-    new_shape = (n, h * w)
+    shape_new = (n, h * w)
 
-    data = np.reshape(data, new_shape)
+    data = np.reshape(data, shape_new)
     data_sum = np.sum(data, 0)
     data_sum[data_sum > threshold] = 1
     data_sum = np.reshape(data_sum, (len(data_sum), 1))
@@ -29,27 +31,59 @@ def get_trans_mat(data, threshold=0):
     return trans_mat
 
 
-class Shaper:
+class Shaper:  # TODO MAKE CHANNEL SIZE INDEPENDENT
     def __init__(self, data):
         shape = list(np.shape(data))
-        self.old_shape = shape
-        self.new_shape = shape[:-2]
-        self.new_shape.append(int(np.product(shape[-2:])))
 
-        if len(np.shape(data)) > 3:
-            self.trans_mat_d2s = get_trans_mat(data[:, 0])
-        else:
-            self.trans_mat_d2s = get_trans_mat(data)
+        self.h, self.w = shape[-2:]
+        self.l = self.h * self.w
+
+        self.trans_mat = get_trans_mat(data)
 
     def squeeze(self, sparse_data):
-        reshaped_data = np.reshape(sparse_data, self.new_shape)
-        dense_data = np.matmul(reshaped_data, self.trans_mat_d2s)
+        shape = list(np.shape(sparse_data))
+
+        shape_new = shape[:-2]
+        shape_new.append(int(np.product(shape[-2:])))
+
+        reshaped_data = np.reshape(sparse_data, shape_new)
+        dense_data = np.matmul(reshaped_data, self.trans_mat)
         return dense_data
 
     def unsqueeze(self, dense_data):
-        sparse_data = np.matmul(dense_data, self.trans_mat_d2s.T)
-        reshaped_data = np.reshape(sparse_data, self.old_shape)
+        shape = list(np.shape(dense_data))
+
+        shape_old = shape[:-2]
+        shape_old.extend([self.h, self.w])
+
+        sparse_data = np.matmul(dense_data, self.trans_mat.T)
+        reshaped_data = np.reshape(sparse_data, shape_old)
         return reshaped_data
+
+
+def minmax_scale(data, feature_range=(-1, 1), axis=0):
+    """
+    function can be used if we do not care about re-scaling data back into original values
+    when we want to rescale or save min and max of a certain set then use MinMaxScaler class
+
+    :param data: numpy array to be scaled 
+    :param feature_range: tuple of min and max values
+    :param axis: axis in which the scaling will happen
+    :return: scales numpy array in the axis provided
+    """
+
+    shape = np.shape(data)
+    sum_axis = tuple(set(range(len(shape))) - {axis})
+
+    min_old = np.min(data, axis=sum_axis, keepdims=True)
+    max_old = np.max(data, axis=sum_axis, keepdims=True)
+    scale_old = max_old - min_old
+
+    min_new = np.ones_like(min_old) * feature_range[0]
+    max_new = np.ones_like(max_old) * feature_range[1]
+    scale_new = max_new - min_new
+
+    return scale_new * (data - min_old) / scale_old + min_new
 
 
 class MinMaxScaler:
@@ -57,7 +91,7 @@ class MinMaxScaler:
     Used to scale and inverse scale features of data
     """
 
-    def __init__(self, feature_range=(0, 1)):
+    def __init__(self, feature_range=(-1, 1)):
         self.feature_range = feature_range
 
         self.min_new = None

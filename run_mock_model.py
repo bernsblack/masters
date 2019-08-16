@@ -9,7 +9,7 @@ from logger.logger import setup_logging
 from utils.configs import BaseConf
 from utils.utils import write_json, Timer
 from models.baseline_models import LinearRegressor
-from dataloaders.generic_loader import GenericDataLoaders
+from dataloaders.mock_loaders import MockDataLoaders
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 
@@ -41,7 +41,7 @@ if __name__ == "__main__":
     log.info(f"Device: {device}")
 
     # GET DATA
-    loaders = GenericDataLoaders(conf=conf)  # torch seed is set in the data loaders
+    loaders = MockDataLoaders(conf=conf)  # torch seed is set in the data loaders
 
     # TRAIN MODEL
     model = LinearRegressor(in_features=loaders.in_size, out_features=loaders.out_size)

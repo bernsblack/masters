@@ -3,13 +3,15 @@ from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from utils.utils import *
 from utils.data_processing import *
+import logging as log
+from logger.logger import setup_logging
 
 if __name__ == "__main__":
+    setup_logging(save_dir="./logs/", file_name="generate_data.log")
+    log.info("=====================================BEGIN=====================================")
     # set the plotting format
     rcParams['mathtext.fontset'] = 'stix'
     rcParams['font.family'] = 'STIXGeneral'
-
-    print("GENERATING DATA...")
 
     # set all values from the config
     config = read_json("./config/generate_data.json")
@@ -26,7 +28,8 @@ if __name__ == "__main__":
     #                     LOAD DATA                      #
     ######################################################
     # external information (demographic and weather)
-    weather = pd.read_pickle(load_folder_raw + "weather_minmax_normed.pkl")
+    weather_minmax_normed = pd.read_pickle(load_folder_raw + "weather_minmax_normed.pkl")
+    weather_vectors = weather_minmax_normed.iloc[:, 1:].values  # not these are only weather values for 2014
     # todo is this needed or do we get all info from point2spatial_info
     # census = pd.read_pickle(load_folder + "census_minmax_normed.pkl")
 
@@ -55,12 +58,23 @@ if __name__ == "__main__":
     info["x in metres"] = 85000 * float(dx)
     info["y in metres"] = 110000 * float(dy)
 
-    print("Cell sizes: %.3f m in x direction and %.3f m in y direction" % (85000 * dx, 110000 * dy))
+    log.info("Cell sizes: %.3f m in x direction and %.3f m in y direction" % (85000 * dx, 110000 * dy))
 
     crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018.pkl")
-    # crimes = pd.read_pickle(load_folder_raw + "crimes.pkl")
-    # add tracts columns - select only valid tracts, but the valid points should be filtered in any case
-    # case to date time type the string?
+
+    # CHOOSE CRIME TYPES
+    valid_crime_types = [
+        "THEFT",
+        "BATTERY",
+        "CRIMINAL DAMAGE",
+        "NARCOTICS",
+        "ASSAULT",
+        "BURGLARY",
+        "MOTOR VEHICLE THEFT",
+        "ROBBERY",
+    ]
+    # filter useless crime types
+    crimes = crimes[crimes["Primary Type"].isin(valid_crime_types)]
 
     # take out western most tract to simplify things for the cnn
     crimes = crimes[crimes.tract != 7706.02]
@@ -101,10 +115,10 @@ if __name__ == "__main__":
     crimes.X = np.round(crimes.X, decimals=3)  # used to make sure we can still hash coords
     crimes.Y = np.round(crimes.Y, decimals=3)  # rounding ensures floating point issues are dealt with
 
-    print("Number of total crimes: ", len(crimes))
+    log.info(f"Number of total crimes: {len(crimes)}")
     crimes = crimes[
         (crimes.X <= x_max_valid) & (crimes.X >= x_min_valid) & (crimes.Y >= y_min_valid) & (crimes.Y <= y_max_valid)]
-    print("Number of crimes in valid spatial range:", len(crimes))
+    log.info(f"Number of crimes in valid spatial range: {len(crimes)}")
 
     # x_range = np.arange(crimes.X.min(),crimes.X.max()+dx,dx)
     # .001 because that is our smallest element dx can be bigger
@@ -112,8 +126,8 @@ if __name__ == "__main__":
     x_min, x_max = crimes.X.min(), crimes.X.max()
     y_min, y_max = crimes.Y.min(), crimes.Y.max()
 
-    x_range = np.arange(crimes.X.min(), np.round(crimes.X.max() + dx, decimals=3),
-                        dx)  # .001 because that is our smallest element dx can be bigger
+    # .001 because that is our smallest element dx can be bigger
+    x_range = np.arange(crimes.X.min(), np.round(crimes.X.max() + dx, decimals=3), dx)
     y_range = np.arange(crimes.Y.min(), np.round(crimes.Y.max() + dy, decimals=3), dy)
 
     x_range = x_range.round(decimals=3)  # used to make sure we can still hash coords
@@ -139,28 +153,27 @@ if __name__ == "__main__":
     indices_to_drop = []
 
     for i in range(len(drop_crime_spots)):
-        print(f"dropped {i}")
+        log.info(f"dropped {i}")
         indices = crimes[crimes.xy == drop_crime_spots[i]].index
         crimes.drop(index=indices, inplace=True)
 
-    print("Number of crimes valid spatial range and on nodes with demographic info:", len(crimes))
+    log.info(f"Number of crimes valid spatial range and on nodes with demographic info: {len(crimes)}")
 
     X, Y = np.meshgrid(x_range, y_range)
     # crimes["Primary Type"].value_counts()
-    t_size = len(t_range)
-    x_size = len(x_range)
-    y_size = len(y_range)
+    t_size = len(t_range) - 1  # dates are an extra one - the range indicates start and end walls of each cell
+    x_size = len(x_range)  # x_range are the means of each cell
+    y_size = len(y_range)  # y_range are the means of each cell
 
-    print(f"t_size:\t{t_size}\nx_size:\t{x_size}\ny_size:\t{y_size}")
+    log.info(f"t_size:\t{t_size}\nx_size:\t{x_size}\ny_size:\t{y_size}")
 
-    # A = crimes[crimes["Primary Type"] == "BURGLARY"][["t","x","y",]].values[:] # crime specific
-    A = crimes[["t", "x", "y", ]].values[:]
+    A = crimes[["t", "x", "y"]].values[:]
 
-    print(f"A.shape -> {A.shape}")
-    print(f"t_size, x_size, y_size -> {t_size}, {x_size}, {y_size}")
-    print(f"crimes.t.max(), crimes.x.max(), crimes.y.max() -> {crimes.t.max()}, {crimes.x.max()},{crimes.y.max()}")
-    print(f"t_range[-1] -> {t_range[-1]}")
-    print(f"t_range[0] -> {t_range[0]}")
+    log.info(f"A.shape -> {A.shape}")
+    log.info(f"t_size, x_size, y_size -> {t_size}, {x_size}, {y_size}")
+    log.info(f"crimes.t.max(), crimes.x.max(), crimes.y.max() -> {crimes.t.max()}, {crimes.x.max()},{crimes.y.max()}")
+    log.info(f"t_range[-1] -> {t_range[-1]}")
+    log.info(f"t_range[0] -> {t_range[0]}")
 
     info["t_size"] = t_size
     info["x_size"] = x_size
@@ -173,7 +186,7 @@ if __name__ == "__main__":
     info["crimes.y.max()"] = int(crimes.y.max())
     info["crimes.y.min()"] = int(crimes.y.min())
 
-    grids = make_grid(A, t_size, x_size, y_size)
+    crime_grids = make_grid(A, t_size, x_size, y_size)
 
     ######################################################
     #          TRACTS GRIDS DATA GENERATION               #
@@ -196,7 +209,7 @@ if __name__ == "__main__":
         tracts[t, tr] += 1
 
     # make grid by the number of crimes in that tract
-    tract_count_grids = np.zeros_like(grids)
+    tract_count_grids = np.zeros_like(crime_grids)
 
     # for x, y in valid_crime_spots:  # leads to some missing data
     for x, y in valid_points:
@@ -218,17 +231,17 @@ if __name__ == "__main__":
     err = []
     for x in range(x_size):
         for y in range(y_size):
-            X = x_range[x]
-            Y = y_range[y]
+            X_ = x_range[x]
+            Y_ = y_range[y]
             try:
                 demog_grid[:, y_size - y - 1, x] = np.array(
-                    point2spatial_info[X, Y])  # should be redone with filtered census data
+                    point2spatial_info[X_, Y_])  # should be redone with filtered census data
             except KeyError:
-                err.append((X, Y))
+                err.append((X_, Y_))
 
-    print("sum(demog_grid):\t", demog_grid.sum())
-    print("x_size*y_size:\t\t", x_size * y_size)
-    print("len(err):\t\t", len(err))
+    log.info(f"sum(demog_grid):\t {demog_grid.sum()}")
+    log.info(f"x_size*y_size:\t\t {x_size * y_size}")
+    log.info(f"len(err):\t\t {len(err)}")
 
     # street view vectors
     # some cells do not have coordinates
@@ -261,34 +274,21 @@ if __name__ == "__main__":
     err = []
     for x in range(x_size):
         for y in range(y_size):
-            X = x_range[x]
-            Y = y_range[y]
+            X_ = x_range[x]
+            Y_ = y_range[y]
             try:
                 street_grid[:, y_size - y - 1, x] = np.array(
-                    point2feats[X, Y])  # should be redone with filtered census data
+                    point2feats[X_, Y_])  # should be redone with filtered census data
             except KeyError:
-                err.append((X, Y))
+                err.append((X_, Y_))
 
-    print("sum(street_grid):\t", street_grid.sum())
-    print("x_size*y_size:\t\t", x_size * y_size)
-    print("len(err):\t\t", len(err))
+    log.info(f"sum(street_grid):\t {street_grid.sum()}")
+    log.info(f"x_size*y_size:\t\t {x_size * y_size}")
+    log.info(f"len(err):\t\t {len(err)}")
 
     #########################################################################
     #                           CRIME TYPES GRID                            #
     #########################################################################
-    # CHOOSE CRIME TYPES
-    valid_crime_types = [
-        "THEFT",
-        "BATTERY",
-        "CRIMINAL DAMAGE",
-        "NARCOTICS",
-        "ASSAULT",
-        "BURGLARY",
-        "MOTOR VEHICLE THEFT",
-        "ROBBERY",
-    ]
-    # filter useless crime types
-    crimes = crimes[crimes["Primary Type"].isin(valid_crime_types)]
 
     c2i = {"THEFT": 0,
            "BATTERY": 1,
@@ -358,17 +358,37 @@ if __name__ == "__main__":
     #     9: "Arrest"
     # }
 
-    crime_feature_indices = ["TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
-                             "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]
+    crime_feature_indices = [
+        "TOTAL",
+        "THEFT",
+        "BATTERY",
+        "CRIMINAL DAMAGE",
+        "NARCOTICS",
+        "ASSAULT",
+        "BURGLARY",
+        "MOTOR VEHICLE THEFT",
+        "ROBBERY",
+        "Arrest"]
 
     A = crimes[["t", "x", "y", "TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
                 "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]].values
     # A = crimes[["t","b","TOTAL","THEFT", "BATTERY", "NARCOTICS","Arrest"]].values # is used when x and y are flattened
 
-    B = np.zeros((t_size, A.shape[-1] - 3, y_size, x_size))
+    crime_type_grids = np.zeros((t_size, A.shape[-1] - 3, y_size, x_size))
 
     for a in A:
-        B[a[0], :, y_size - 1 - a[2], a[1]] += a[3:]  # todo normalize in channels
+        crime_type_grids[a[0], :, y_size - 1 - a[2], a[1]] += a[3:]  # todo normalize in channels
+
+    # Adding any crime related data to the channels, e.g. tract counts if we want to
+    crime_feature_indices.append("tract total")
+    tract_count_grids = np.expand_dims(tract_count_grids, axis=1)
+
+    try:
+        crime_type_grids = np.concatenate((crime_type_grids, tract_count_grids), axis=1)
+    except ValueError as e:
+        err_msg = f"crime_type_grids: {np.shape(crime_type_grids)}, tract_count_grids: {np.shape(tract_count_grids)}"
+        log.error(err_msg)
+        raise ValueError(f"{e} -> {err_msg}")
 
     #########################################################################
     #                            SAVE DATA                                  #
@@ -379,35 +399,45 @@ if __name__ == "__main__":
     os.makedirs(save_folder + "plots", exist_ok=True)
 
     # save figures
-    plt.figure(figsize=(8, 11))
-    plt.scatter(X, Y, marker="x", label="range")
-    plt.scatter(valid_points[:, 0], valid_points[:, 1], marker="+", label="valid")
-    plt.scatter(crimes.X, crimes.Y, marker="+", label="round")
+    figsize = (8, 11)
+
+    plt.figure(figsize=figsize)
+    plt.scatter(X, Y, marker=".", label="range")
+    plt.scatter(valid_points[:, 0], valid_points[:, 1], marker=".", label="valid", s=1)
+    plt.scatter(crimes.X, crimes.Y, marker=".", label="round")
     plt.legend(loc=3, prop={"size": 20})
     plt.savefig(save_folder + "plots/" + "scatter_map.png")
 
-    plt.figure()
+    plt.figure(figsize=figsize)
     plt.title("Crimes")
-    plt.imshow(grids.max(0), cmap="viridis")
+    plt.imshow(crime_grids.max(0), cmap="viridis")
     plt.savefig(save_folder + "plots/" + "crimes_max.png")
-    plt.figure()
+
+    plt.figure(figsize=figsize)
     plt.title("Demographics")
     plt.imshow(demog_grid.max(0), cmap="viridis")
     plt.savefig(save_folder + "plots/" + "demographics_max.png")
-    plt.figure()
+
+    plt.figure(figsize=figsize)
     plt.title("Street View Info")
     plt.imshow(street_grid.max(0), cmap="viridis")
     plt.savefig(save_folder + "plots/" + "street_grid_max.png")
 
+    #  ENSURE DIMS (N, C, H, W) FORMAT
+    crime_grids = np.expand_dims(crime_grids, axis=1)
+    demog_grid = np.expand_dims(demog_grid, axis=0)
+    street_grid = np.expand_dims(street_grid, axis=0)
+
     # save generated data
+    # TODO ENSURE ALL SPATIAL DATA IS IN FORM N, C, H, W -> EVEN IF C = 1 SHOULD BE N, 1, H, W
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,
-                        crime_types_grids=B,
-                        crime_grids=grids,
-                        tract_count_grids=tract_count_grids,
+                        crime_types_grids=crime_type_grids,
+                        crime_grids=crime_grids,  # todo remove form script - is embedded in crime_types_grids
                         demog_grid=demog_grid,
                         street_grid=street_grid,
                         time_vectors=encode_time_vectors(t_range),
+                        weather_vectors=weather_vectors,
                         x_range=x_range,
                         y_range=y_range)
     pd.to_pickle(t_range, save_folder + "t_range.pkl")
@@ -417,4 +447,4 @@ if __name__ == "__main__":
 
     write_json(info, save_folder + "info.json")
 
-    print("\nDONE!")
+    log.info("=====================================END=====================================")
