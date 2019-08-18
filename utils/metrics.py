@@ -27,6 +27,21 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, roc
     mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 
+def best_threshold(y_true, probas_pred):
+    def safe_f1_score(pr):
+        p, r = pr
+        if p + r == 0:
+            return 0
+        else:
+            return 2 * (p * r) / (p + r)
+
+    precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
+    scores = list(map(safe_f1_score, zip(precision, recall)))
+    index = np.argmax(scores)
+    print(f"f1_score: {scores[index]} at index {index}, new threshold {thresholds[index]}")
+    return thresholds[index]
+
+
 def mean_absolute_scaled_error(y_true, y_pred):
     y_true_lag = y_true[:-1].copy()
     y_true = y_true[1:]

@@ -24,11 +24,11 @@ Key extraction of the data will be done in the dataset / data loader.
 
 
 class KangFeedForwardNetwork(nn.Module):
-    def __init__(self, spc_size=37, tmp_size=15, env_size=512, do_drop=False):
+    def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5):
         super(KangFeedForwardNetwork, self).__init__()
 
-        self.dropout = nn.Dropout(p=0.5)
-        self.do_drop = do_drop
+        self.dropout_p = dropout_p
+        self.dropout = nn.Dropout(p=self.dropout_p)
 
         self.spcNet = nn.Sequential(nn.Linear(spc_size, 256), nn.ReLU(), nn.Linear(256, 256), nn.ReLU(),
                                     nn.Linear(256, 128), nn.ReLU())
@@ -40,7 +40,7 @@ class KangFeedForwardNetwork(nn.Module):
                                       nn.Linear(1024, 2))  # ,nn.Softmax(dim=-1))
 
     def forward(self, spc_vec, tmp_vec, env_vec):
-        if self.do_drop:
+        if self.dropout_p > 0:
             spc_vec = self.dropout(spc_vec)
             tmp_vec = self.dropout(tmp_vec)
             env_vec = self.dropout(env_vec)

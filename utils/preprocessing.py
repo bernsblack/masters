@@ -78,6 +78,8 @@ def minmax_scale(data, feature_range=(-1, 1), axis=0):
     min_old = np.min(data, axis=sum_axis, keepdims=True)
     max_old = np.max(data, axis=sum_axis, keepdims=True)
     scale_old = max_old - min_old
+    if np.any(scale_old == 0):
+        raise ValueError(f"scale_old is {scale_old}. Division by zero is not allowed.")
 
     min_new = np.ones_like(min_old) * feature_range[0]
     max_new = np.ones_like(max_old) * feature_range[1]
@@ -115,9 +117,13 @@ class MinMaxScaler:
         self.scale_new = self.max_new - self.min_new
 
     def transform(self, data):
+        if np.any(self.scale_old == 0):
+            raise ValueError(f"self.scale_old is {self.scale_old}. Cannot device by zero")
         return self.scale_new * (data - self.min_old) / self.scale_old + self.min_new
 
     def inverse_transform(self, data):
+        if np.any(self.scale_new == 0):
+            raise ValueError(f"self.scale_new is {self.scale_new}. Cannot device by zero")
         return self.scale_old * (data - self.min_new) / self.scale_new + self.min_old
 
     def fit_transform(self, data, axis):

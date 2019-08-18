@@ -41,37 +41,37 @@ def encode_time_vectors(t_range):
     is_weekend[is_weekend < 5] = 0
     is_weekend[is_weekend >= 5] = 1
 
+    is_gte_24hours = 'D' in time_frame or time_frame == '24H'
+
     df = pd.DataFrame({'datetime': t_range, 'hour': t_range.hour,
                        'dow': t_range.dayofweek, 'day': t_range.day, 'month': t_range.month, 'is_weekend': is_weekend})
 
-    if time_frame == 'D':  # working on daily time slots
-        A = df[['month', 'day', 'dow', 'is_weekend']].values  # swap hourr for month
-        A[:, 0] = A[:, 0] - 1  # minus one for month OHE expects range [0,n_values)
+    if is_gte_24hours:  # working on daily time slots
+        time_values = df[['month', 'day', 'dow', 'is_weekend']].values  # swap hour for month
+        time_values[:, 0] = time_values[:, 0] - 1  # minus one for month OHE expects range [0,n_values)
     else:  # working on hourly time slots
-        A = df[['hour', 'day', 'dow',
-                'is_weekend']].values  # left out month because our hourly data isn't more than a year
+        # left out month because our hourly data isn't more than a year
+        time_values = df[['hour', 'day', 'dow', 'is_weekend']].values
 
-    A[:, 1] = A[:, 1] - 1  # minus one OHE expects range [0,n_values)
+    time_values[:, 1] = time_values[:, 1] - 1  # minus one OHE expects range [0,n_values)
 
     # OneHotEncoder for categorical data
     ohe = OneHotEncoder(categories='auto', sparse=False)  # It is assumed that input features take on values
     # in the range[0, n_values). Thus days minus 1
-    A_ohe = ohe.fit_transform(A)
+    time_value_ohe = ohe.fit_transform(time_values)
 
-    if time_frame != 'D':  # only if we are working on a hourly time scale
+    if not is_gte_24hours:  # only if we are working on a hourly time scale
         # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
-        sin_hour = np.sin(2 * np.pi * (A[:, 2] % 24) / 24)
+        sin_hour = np.sin(2 * np.pi * (time_values[:, 2] % 24) / 24)
         sin_hour = np.reshape(sin_hour, (len(sin_hour), 1))
-        cos_hour = np.cos(2 * np.pi * (A[:, 2] % 24) / 24)
+        cos_hour = np.cos(2 * np.pi * (time_values[:, 2] % 24) / 24)
         cos_hour = np.reshape(cos_hour, (len(cos_hour), 1))
 
-        E = np.hstack([A_ohe, cos_hour, sin_hour])
-    #     E = Variable(torch.FloatTensor(E))
+        time_vectors = np.hstack([time_value_ohe, cos_hour, sin_hour])
     else:
-        #     E = Variable(torch.FloatTensor(A_ohe))
-        E = A_ohe
+        time_vectors = time_value_ohe
 
-    return E
+    return time_vectors
 
 
 def set2d(x):
@@ -81,7 +81,7 @@ def set2d(x):
 def get_E(t_range):
     """
     given t_range (datetime series)
-    return E: H,D,DoW,isWeekend hotendcoded vector and sin(hour/24) cos(hour/24)
+    return E: H,D,DoW,isWeekend hot encoded vector and sin(hour/24) cos(hour/24)
     as the columns features
     """
     time_frame = t_range.freqstr  # used to choose the external factors

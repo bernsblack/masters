@@ -18,7 +18,7 @@ class BaseConf:  # args from arg-parser to over write values
             self.seed = 3
             self.resume = False
             self.early_stopping = False
-            self.use_weighted_sampler = True
+            self.sub_sample_test_set = True
             self.use_cuda = False
 
             # data related hyper-params

@@ -12,7 +12,6 @@ def setup_logging(save_dir, file_name=None, log_config='./logger/standard_logger
     log_config = Path(log_config)
     if log_config.is_file():
         config = read_json(log_config)
-        pprint(config)
         if default_level:
             config["root"]["level"] = default_level
         # modify logging paths based on run config
@@ -22,7 +21,6 @@ def setup_logging(save_dir, file_name=None, log_config='./logger/standard_logger
                     handler['filename'] = f"{save_dir}/{file_name}"
                 else:
                     handler['filename'] = f"{save_dir}/{handler['filename']}"
-
 
         logging.config.dictConfig(config)
     else:
