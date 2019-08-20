@@ -223,16 +223,16 @@ class LossPlotter(BaseMetricPlotter):
 
         # plt.xticks(list(range(len(trn_loss)))) # plot the x ticks of grid on the epochs
 
-        trn_loss.insert(0, all_trn_loss[0])  # inset the first loss to ilustrate the curve better
-        trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(trn_loss))
-        plt.plot(trn_loss_x, trn_loss, label="Training Loss (Epoch)", c='g', **kwargs)
+        # insert the first loss to ilustrate the curve better
+        trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(trn_loss)+1)
+        plt.plot(trn_loss_x, [all_trn_loss[0], *trn_loss], label="Training Loss (Epoch)", c='g', **kwargs)
         all_trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(all_trn_loss))
         plt.plot(all_trn_loss_x, all_trn_loss, alpha=.2, c='g', label="Training Loss (Batch)")
 
-        val_loss.insert(0, all_val_loss[0])
-        val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(val_loss))
-        plt.plot(val_loss_x, val_loss, label="Validation Loss (Epoch)", c='r', **kwargs)
-        all_val_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(all_val_loss))
+
+        val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(val_loss)+1)
+        plt.plot(val_loss_x, [all_val_loss[0], *val_loss], label="Validation Loss (Epoch)", c='r', **kwargs)
+        all_val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(all_val_loss))
         plt.plot(all_val_loss_x, all_val_loss, alpha=.2, c='r', label="Validation Loss (Batch)")
         plt.grid()
 

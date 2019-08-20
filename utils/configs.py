@@ -18,18 +18,22 @@ class BaseConf:  # args from arg-parser to over write values
             self.seed = 3
             self.resume = False
             self.early_stopping = False
-            self.sub_sample_test_set = True
             self.use_cuda = False
 
             # data related hyper-params
             self.val_ratio = 0.1
             self.tst_ratio = 0.2
+            self.sub_sample_train_set = True
+            self.sub_sample_validation_set = True
+            self.sub_sample_test_set = False
+            self.flatten_grid = True  # if the shaper should be used to squeeze the data
 
             # training parameters
             self.lr = 1e-3
             self.weight_decay = 1e-8
             self.max_epochs = 10
-            self.batch_size = 80
+            self.batch_size = 64
+            self.dropout = 0
             self.shuffle = False
             self.num_workers = 6
 

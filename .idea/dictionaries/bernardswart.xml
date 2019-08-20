@@ -37,6 +37,7 @@
       <w>viridis</w>
       <w>xticks</w>
       <w>yticks</w>
+      <w>zorder</w>
     </words>
   </dictionary>
 </component>

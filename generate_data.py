@@ -382,6 +382,10 @@ if __name__ == "__main__":
     # Adding any crime related data to the channels, e.g. tract counts if we want to
     crime_feature_indices.append("tract total")
     tract_count_grids = np.expand_dims(tract_count_grids, axis=1)
+    """
+    note: tract_count_grids has values where the shaper loses values - that is why
+    when un-squeezing the tract_count_grids using the shaper the grid counts do not match up  
+    """
 
     try:
         crime_type_grids = np.concatenate((crime_type_grids, tract_count_grids), axis=1)

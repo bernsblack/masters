@@ -7,12 +7,14 @@ from utils.configs import BaseConf
 
 
 # todo add set of valid / living sells / to be able to sample the right ones
-class CrimeDataGroup:
+class FlatDataGroup:
     """
-    Collection of datasets (training/validation/test)
+    FlatDataGroup class acts as a collection of datasets (training/validation/test)
+    The data group loads data from disk, splits in separate sets and normalises according to train set.
+    The data group class also handles reshaping of data.
     """
 
-    def __init__(self, data_path, conf):
+    def __init__(self, data_path: str, conf: BaseConf):
         """
         Args:
             data_path (string): Path to the data folder with all spatial and temporal data.
@@ -43,10 +45,9 @@ class CrimeDataGroup:
         self.targets[self.targets > 0] = 1
 
         self.crimes = self.crimes[:-1]
+        self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
 
-        self.total_crimes = self.crimes[:, 0].sum(1)
-
-        self.time_vectors = zip_file["time_vectors"][:-1]  # already normalised
+        self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
         self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
         self.x_range = zip_file["x_range"]
         self.y_range = zip_file["y_range"]
@@ -68,49 +69,53 @@ class CrimeDataGroup:
         tst_size = int(self.total_len * conf.tst_ratio)
 
         trn_index = (0, self.total_len - tst_size - val_size)
-        val_index = (trn_index[1], self.total_len - tst_size)
-        tst_index = (val_index[1], self.total_len)
+        val_index = (trn_index[1] - self.seq_len, self.total_len - tst_size)
+        tst_index = (val_index[1] - self.seq_len, self.total_len)
 
-        trn_times = self.t_range[trn_index[0]:trn_index[1]]
-        val_times = self.t_range[val_index[0]:val_index[1]]
-        tst_times = self.t_range[tst_index[0]:tst_index[1]]
+        trn_t_range = self.t_range[trn_index[0]:trn_index[1]]
+        val_t_range = self.t_range[val_index[0]:val_index[1]]
+        tst_t_range = self.t_range[tst_index[0]:tst_index[1]]
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
         self.crimes = np.log2(1 + self.crimes)
+        self.crime_scaler = MinMaxScaler(feature_range=(-1, 1))
+        # should be axis of the channels - only fit scaler on training data
+        self.crime_scaler.fit(self.crimes[trn_index[0]:trn_index[1]], axis=1)
+        self.crimes = self.crime_scaler.transform(self.crimes)
         trn_crimes = self.crimes[trn_index[0]:trn_index[1]]
         val_crimes = self.crimes[val_index[0]:val_index[1]]
         tst_crimes = self.crimes[tst_index[0]:tst_index[1]]
-        self.crime_scaler = MinMaxScaler(feature_range=(-1, 1))
-        self.crime_scaler.fit(trn_crimes, axis=1)  # should be axis of the channels
-        trn_crimes = self.crime_scaler.transform(trn_crimes)
-        val_crimes = self.crime_scaler.transform(val_crimes)
-        tst_crimes = self.crime_scaler.transform(tst_crimes)
 
         # targets
         trn_targets = self.targets[trn_index[0]:trn_index[1]]
         val_targets = self.targets[val_index[0]:val_index[1]]
         tst_targets = self.targets[tst_index[0]:tst_index[1]]
 
-        # split and normalise the time vector data # todo concat the weather data
+        # total crimes - added separately because all spatial
+        self.total_crimes = np.log2(1 + self.total_crimes)
+        self.total_crimes_scaler = MinMaxScaler(feature_range=(-1, 1))
+        # should be axis of the channels - only fit scaler on training data
+        self.total_crimes_scaler.fit(self.total_crimes[trn_index[0]:trn_index[1]], axis=1)
+        self.total_crimes = self.total_crimes_scaler.transform(self.total_crimes)
+        trn_total_crimes = self.total_crimes[trn_index[0]:trn_index[1]]
+        val_total_crimes = self.total_crimes[val_index[0]:val_index[1]]
+        tst_total_crimes = self.total_crimes[tst_index[0]:tst_index[1]]
+
+        # time_vectors is already scaled between 0 and 1
         trn_time_vectors = self.time_vectors[trn_index[0]:trn_index[1]]
         val_time_vectors = self.time_vectors[val_index[0]:val_index[1]]
         tst_time_vectors = self.time_vectors[tst_index[0]:tst_index[1]]
-        # is already scaled between 0 and 1
-        # self.time_vector_scaler = MinMaxScaler(feature_range=(-1, 1))
-        # self.time_vector_scaler.fit(trn_time_vectors, axis=1)
-        # trn_time_vectors = self.time_vector_scaler.transform(trn_time_vectors)
-        # val_time_vectors = self.time_vector_scaler.transform(val_time_vectors)
-        # tst_time_vectors = self.time_vector_scaler.transform(tst_time_vectors)
 
         # splitting and normalisation of weather data
+        self.weather_vector_scaler = MinMaxScaler(feature_range=(-1, 1))
+        # todo maybe scale weather with all data so it's season independent
+        # self.weather_vector_scaler.fit(self.weather_vectors[trn_index[0]:trn_index[1]], axis=1)  # norm with trn data
+        self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
+        self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
         trn_weather_vectors = self.weather_vectors[trn_index[0]:trn_index[1]]
         val_weather_vectors = self.weather_vectors[val_index[0]:val_index[1]]
         tst_weather_vectors = self.weather_vectors[tst_index[0]:tst_index[1]]
-        self.weather_vector_scaler = MinMaxScaler(feature_range=(-1, 1))
-        self.weather_vector_scaler.fit(trn_weather_vectors, axis=1)
-        trn_weather_vectors = self.weather_vector_scaler.transform(trn_weather_vectors)
-        val_weather_vectors = self.weather_vector_scaler.transform(val_weather_vectors)
 
         # normalise space dependent data - using minmax_scale - no need to save train data norm values
         # todo concat the space dependent values so long
@@ -118,51 +123,64 @@ class CrimeDataGroup:
         self.street_grid = minmax_scale(data=self.street_grid, feature_range=(-1, 1), axis=1)
 
         # todo check if time independent  values aren't copied every time
-        self.training_set = CrimeDataset(
+        self.training_set = FlatDataset(
             crimes=trn_crimes,
             targets=trn_targets,
-            t_range=trn_times,
+            total_crimes=trn_total_crimes,
+            t_range=trn_t_range,
             time_vectors=trn_time_vectors,
             weather_vectors=trn_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
+            shaper=self.shaper,
         )
 
-        self.validation_set = CrimeDataset(
+        self.validation_set = FlatDataset(
             crimes=val_crimes,
             targets=val_targets,
-            t_range=val_times,
+            total_crimes=val_total_crimes,
+            t_range=val_t_range,
             time_vectors=val_time_vectors,
             weather_vectors=val_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
+            shaper=self.shaper,
         )
 
-        self.testing_set = CrimeDataset(
+        self.testing_set = FlatDataset(
             crimes=tst_crimes,
             targets=tst_targets,
-            t_range=tst_times,
+            total_crimes=tst_total_crimes,
+            t_range=tst_t_range,
             time_vectors=tst_time_vectors,
             weather_vectors=tst_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
+            shaper=self.shaper,
         )
 
 
-class CrimeDataset(Dataset):
+class FlatDataset(Dataset):
+    """
+    Flat datasets operate on flattened data where the map/grid of data has been reshaped
+    from (N,C,H,W) -> (N,C,L). These re-shaped values have also been formatted/squeezed to
+    ignore all locations where there never occurs any crimes
+    """
     def __init__(
             self,
             crimes,  # time and space dependent
             targets,  # time and space dependent
+            total_crimes,  # time dependent
             t_range,  # time dependent
             time_vectors,  # time dependent
             weather_vectors,  # time dependent
             demog_grid,  # space dependent
             street_grid,  # space dependent
             seq_len,
+            shaper,
     ):
         # normalize
         self.seq_len = seq_len
@@ -170,6 +188,7 @@ class CrimeDataset(Dataset):
         self.crimes = crimes
         self.targets = targets
         self.t_size, _, self.l_size = np.shape(self.crimes)
+        self.total_crimes = total_crimes
 
         self.demog_grid = demog_grid
         self.street_grid = street_grid
@@ -178,7 +197,7 @@ class CrimeDataset(Dataset):
         self.weather_vectors = weather_vectors
         self.t_range = t_range
 
-        self.total_crimes = self.crimes[:, 0].sum(1)  # or self.crime_types_grids[0].sum(1).sum(1)
+        self.shaper = shaper
 
     # todo add weather -  remember weather should be the info of the next time step
 
@@ -208,7 +227,8 @@ class CrimeDataset(Dataset):
 
         # todo teacher forcing - if we are using this then we need to return sequence of targets
         target = self.targets[t_index, l_index]
-        crime_vec = self.crimes[t_index, :, l_index]  # todo add historical values
+        crime_vec = self.crimes[t_index, :, l_index]
+        crime_vec = np.concatenate((crime_vec, self.total_crimes[t_index]), axis=-1)  # todo add more historical values
 
         time_vec = self.time_vectors[t_index]
         weather_vec = self.weather_vectors[t_index]

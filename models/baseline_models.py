@@ -3,6 +3,63 @@ import pandas as pd
 from torch import nn
 
 
+class HistoricAverage:
+    def __init__(self, step=1):
+        self.step = step
+
+    def __call__(self, a):
+        r = np.empty(a.shape)
+        r.fill(np.nan)
+        for i in range(self.step + 1, len(r)):
+            x = np.mean(a[i - self.step + 1:0:-self.step], axis=0)
+            r[i] = x
+
+        return r
+
+
+class BaseMovingAverage:
+    def __init__(self, window_len, weights):
+        self.window_len = window_len
+        self.weights = weights
+
+        self.f_avg = lambda x, wgt: np.average(x, axis=0, weights=wgt)
+
+    def fn(self, a):
+        return np.average(a, axis=0, weights=self.weights)
+
+    def __call__(self, a):
+        w = self.window_len
+        r = np.empty(a.shape)
+        r.fill(np.nan)
+        for i in range(w - 1, len(r)):
+            x = a[(i - w + 1):i + 1]
+            r[i] = self.fn(x)
+
+        return r
+
+
+class ExponentialMovingAverage(BaseMovingAverage):
+    def __init__(self, alpha, window_len):
+        self.alpha = alpha
+        self.window_len = window_len
+        self.weights = np.exp(-self.alpha / np.arange(1, self.window_len + 1))
+        super(ExponentialMovingAverage, self).__init__(self.window_len, self.weights)
+
+
+class TriangularMovingAverage(BaseMovingAverage):
+    def __init__(self, window_len):
+        self.window_len = window_len
+        self.weights = np.arange(1, self.window_len + 1)
+        super(TriangularMovingAverage, self).__init__(self.window_len, self.weights)
+
+
+class UniformMovingAverage(BaseMovingAverage):
+    def __init__(self, window_len):
+        self.window_len = window_len
+        self.weights = np.ones(self.window_len)
+        super(UniformMovingAverage, self).__init__(self.window_len, self.weights)
+
+
 class LinearRegressor(nn.Module):
     def __init__(self, in_features=10, out_features=2):
         super(LinearRegressor, self).__init__()
@@ -52,6 +109,7 @@ def rolling_avg(fun, a, weights):  # this rolling average includes the current t
 
     return r
 
+
 if __name__ == "__main__":
     a = np.random.randn(100)
 
@@ -66,7 +124,6 @@ if __name__ == "__main__":
     f = lambda x: x.mean(0)
     avg = lambda x, weights: np.average(x, axis=0, weights=weights)  # x and weights should have same length
     # np.average()
-
 
     window = 4
     weights = np.exp(-10 / np.arange(window))

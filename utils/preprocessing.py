@@ -53,7 +53,7 @@ class Shaper:  # TODO MAKE CHANNEL SIZE INDEPENDENT
     def unsqueeze(self, dense_data):
         shape = list(np.shape(dense_data))
 
-        shape_old = shape[:-2]
+        shape_old = shape[:-1]
         shape_old.extend([self.h, self.w])
 
         sparse_data = np.matmul(dense_data, self.trans_mat.T)
@@ -61,7 +61,7 @@ class Shaper:  # TODO MAKE CHANNEL SIZE INDEPENDENT
         return reshaped_data
 
 
-def minmax_scale(data, feature_range=(-1, 1), axis=0):
+def minmax_scale(data, feature_range=(0, 1), axis=0):
     """
     function can be used if we do not care about re-scaling data back into original values
     when we want to rescale or save min and max of a certain set then use MinMaxScaler class
@@ -93,7 +93,7 @@ class MinMaxScaler:
     Used to scale and inverse scale features of data
     """
 
-    def __init__(self, feature_range=(-1, 1)):
+    def __init__(self, feature_range=(0, 1)):
         self.feature_range = feature_range
 
         self.min_new = None

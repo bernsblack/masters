@@ -9,8 +9,7 @@ from logger.logger import setup_logging
 from utils.configs import BaseConf
 from utils.utils import write_json, Timer
 from models.kangkang_fnn_models import KangFeedForwardNetwork
-from dataloaders.generic_loader import CrimeDataLoaders
-from datasets.generic_dataset import CrimeDataGroup
+from dataloaders.flat_loader import FlatDataLoaders
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
 
@@ -33,18 +32,21 @@ if __name__ == "__main__":
     # manually set the config
     conf_dict = {
         "seed": 3,
-        "resume": False,
+        "resume": True,
         "early_stopping": False,
+        "sub_sample_train_set": True,
+        "sub_sample_validation_set": True,
         "sub_sample_test_set": False,
         "use_cuda": False,
         "val_ratio": 0.1,
         "tst_ratio": 0.2,
+        "flatten_grid": True,
         "lr": 1e-3,
         "weight_decay": 1e-8,
-        "max_epochs": 2,
+        "max_epochs": 5,
         "batch_size": 256,
+        "dropout": 0.1,
         "shuffle": False,
-        "num_workers": 6,  # now irrelevant
         "seq_len": 0,
     }
     conf = BaseConf(conf_dict=conf_dict)
@@ -65,7 +67,7 @@ if __name__ == "__main__":
     info["device"] = device.type
 
     # GET DATA
-    loaders = CrimeDataLoaders(data_path=data_path, conf=conf)
+    loaders = FlatDataLoaders(data_path=data_path, conf=conf)
     spc_feats, tmp_feats, env_feats, target = loaders.training_generator.dataset[0]
     spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 

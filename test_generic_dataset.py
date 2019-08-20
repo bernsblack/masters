@@ -1,5 +1,5 @@
 import unittest
-from datasets.generic_dataset import CrimeDataGroup
+from datasets.flat_dataset import FlatDataGroup
 
 
 class TestCrimeDateGroupInit(unittest.TestCase):
@@ -12,7 +12,7 @@ class TestCrimeDateGroupInit(unittest.TestCase):
         data_path = f"./data/processed/{data_dim_str}/"
 
 
-        datagroup = CrimeDataGroup(data_path=data_path)
+        datagroup = FlatDataGroup(data_path=data_path)
 
 
         data = [1, 2, 3]

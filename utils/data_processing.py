@@ -8,6 +8,17 @@ from torch.autograd import Variable
 from scipy.ndimage import gaussian_filter
 
 
+def get_period(a):
+    n = len(a)
+    corr_list = []
+    for i in range(n):
+        corr = np.correlate(a,np.roll(a,i))
+        corr_list.append(corr)
+    r = np.array(corr_list)[:,0]
+    r[r < 0] = 0
+    period = np.argsort(r)[::-1][1]
+    return period
+
 def inv_weights(labels):
     """
     given 1D array of labels gives the inverse weights of the class labels
@@ -170,29 +181,6 @@ def get_trans_mat_d2s(a, threshold=0):
             T.append(f)
     T = np.array(T).T
     return T
-
-
-class Shaper:
-    def __init__(self, data):
-        shape = list(np.shape(data))
-        self.old_shape = shape
-        self.new_shape = shape[:-2]
-        self.new_shape.append(int(np.product(shape[-2:])))
-
-        if len(np.shape(data)) > 3:
-            self.trans_mat_d2s = get_trans_mat_d2s(data[:, 0])
-        else:
-            self.trans_mat_d2s = get_trans_mat_d2s(data)
-
-    def flatten(self, sparse_data):
-        reshaped_data = np.reshape(sparse_data, self.new_shape)
-        dense_data = np.matmul(reshaped_data, self.trans_mat_d2s)
-        return dense_data
-
-    def unflatten(self, dense_data):
-        sparse_data = np.matmul(dense_data, self.trans_mat_d2s.T)
-        reshaped_data = np.reshape(sparse_data, self.old_shape)
-        return reshaped_data
 
 
 def cluster2coord(a, centers):
