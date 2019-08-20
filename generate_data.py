@@ -28,10 +28,19 @@ if __name__ == "__main__":
     #                     LOAD DATA                      #
     ######################################################
     # external information (demographic and weather)
+    # not these are only weather values for 2014
     weather_minmax_normed = pd.read_pickle(load_folder_raw + "weather_minmax_normed.pkl")
-    weather_vectors = weather_minmax_normed.iloc[:, 1:].values  # not these are only weather values for 2014
-    # todo is this needed or do we get all info from point2spatial_info
-    # census = pd.read_pickle(load_folder + "census_minmax_normed.pkl")
+    # re-sample weather data
+    weather_date_range = pd.date_range("2014-01-01", periods=len(weather_minmax_normed), freq="1D")
+    weather_df = pd.DataFrame(weather_minmax_normed, index=weather_date_range)
+
+    is_gte_24hours = 'D' in dT or dT == '24H'
+
+    if is_gte_24hours:
+        weather_df = weather_df.resample(dT).mean()
+    else:
+        weather_df = weather_df.resample(dT).pad()
+    weather_vectors = weather_df.values
 
     # physical coords and their tracts
     valid_points = np.load(load_folder_raw + "valid_points.npy")
@@ -51,7 +60,7 @@ if __name__ == "__main__":
     # Time dimensions
     info["dT"] = dT
     # Spatial dimensions
-    xy_scale = scale * np.array([10, 8])  # must be integer so that we can easily sample demographic data
+    xy_scale = scale * np.array([1, 1])  # must be integer so that we can easily sample demographic data
     dx, dy = xy_scale * np.array([0.001, 0.001])
     info["dx"] = float(dx)
     info["dy"] = float(dy)
