@@ -11,7 +11,7 @@ from utils.utils import write_json, Timer
 from models.kangkang_fnn_models import KangFeedForwardNetwork
 from dataloaders.flat_loader import FlatDataLoaders
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
-from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
+from models.model_result import ModelResult
 
 if __name__ == "__main__":
 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
         "flatten_grid": True,
         "lr": 1e-3,
         "weight_decay": 1e-8,
-        "max_epochs": 5,
+        "max_epochs": 3,
         "batch_size": 256,
         "dropout": 0.1,
         "shuffle": False,
@@ -68,13 +68,15 @@ if __name__ == "__main__":
 
     # GET DATA
     loaders = FlatDataLoaders(data_path=data_path, conf=conf)
+
+    # SET MODEL PARAMS
     spc_feats, tmp_feats, env_feats, target = loaders.training_generator.dataset[0]
     spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 
-    # TRAIN MODEL
-    model = KangFeedForwardNetwork(spc_size=spc_size, tmp_size=tmp_size, env_size=env_size, dropout_p=0)
+    model = KangFeedForwardNetwork(spc_size=spc_size, tmp_size=tmp_size, env_size=env_size, dropout_p=conf.dropout)
     model.to(device)
 
+    # TRAINING SETUP
     loss_function = nn.CrossEntropyLoss()
 
     trn_loss = []
@@ -98,6 +100,7 @@ if __name__ == "__main__":
         val_loss_best = float(losses_zip["val_loss_best"])
         # todo only load loss since last best_checkpoint
 
+    # TRAINING LOOP
     for epoch in range(conf.max_epochs):
         log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
         timer.reset()
@@ -170,8 +173,9 @@ if __name__ == "__main__":
                             val_loss_best=val_loss_best)
 
     # Save training and validation plots
+    skip = 0
     loss_plotter = LossPlotter(title="Cross Entropy Loss of Linear Regression Model")
-    loss_plotter.plot_losses(trn_loss, all_trn_loss, val_loss, all_val_loss)
+    loss_plotter.plot_losses(trn_loss, all_trn_loss[skip:], val_loss, all_val_loss[skip:])
     loss_plotter.savefig(model_path + "plot_train_val_loss.png")
 
     # EVALUATE MODEL
@@ -198,20 +202,15 @@ if __name__ == "__main__":
             out_proba = out[:, 1]  # likelihood of crime is more general form - when comparing to moving averages
             probas_pred.extend(out_proba.tolist())
 
-    acc = accuracy_score(y_true, y_pred)
-    auc = roc_auc_score(y_true, probas_pred)
-    ap = average_precision_score(y_true, probas_pred)
-    log.info(f"Accuracy:\t\t {acc:.4f}")
-    log.info(f"ROC AUC:\t\t {auc:.4f}")
-    log.info(f"Average Precision:\t {ap:.4f}")
+    model_result = ModelResult(model_name="FNN (Kang and Kang)",
+                               y_true=y_true,
+                               y_pred=y_pred,
+                               probas_pred=probas_pred,
+                               shape=None)  # todo add shape
 
-    np.savez_compressed(model_path + "evaluation_results.npz",
-                        acc=acc,
-                        auc=auc,
-                        ap=ap,
-                        y_true=y_true,
-                        y_pred=y_pred,
-                        probas_pred=probas_pred)
+    log.info(model_result)
+
+    np.savez_compressed(model_path + "evaluation_results.npz", model_result)
 
     pr_plotter = PRCurvePlotter()
     pr_plotter.add_curve(y_true, probas_pred, label_name="FNN (Kang and Kang)")

@@ -31,13 +31,13 @@ class BaseConf:  # args from arg-parser to over write values
             # training parameters
             self.lr = 1e-3
             self.weight_decay = 1e-8
-            self.max_epochs = 10
+            self.max_epochs = 1
             self.batch_size = 64
             self.dropout = 0
             self.shuffle = False
             self.num_workers = 6
 
-            self.seq_len = 0
+            self.seq_len = 1
 
     def __str__(self):
         return pformat(self.__dict__)

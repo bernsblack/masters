@@ -9,6 +9,7 @@ class FlatDataLoaders:
     The data group loads data from disk, splits in separate sets and normalises according to train set.
     The data group class also handles reshaping of data.
     """
+
     def __init__(self, data_path, conf: BaseConf):
         # have the train, validation and testing data available im memory
         # (maybe not necessary to have test set in memory tpp)
@@ -21,12 +22,15 @@ class FlatDataLoaders:
         testing_set = data_group.testing_set
         self.training_generator = BatchLoader(dataset=training_set,
                                               batch_size=conf.batch_size,
+                                              seq_len=conf.seq_len,
                                               sub_sample=True)
 
         self.validation_generator = BatchLoader(dataset=validation_set,
                                                 batch_size=conf.batch_size,
+                                                seq_len=conf.seq_len,
                                                 sub_sample=True)
 
         self.testing_generator = BatchLoader(dataset=testing_set,
                                              batch_size=conf.batch_size,
+                                             seq_len=conf.seq_len,
                                              sub_sample=conf.sub_sample_test_set)

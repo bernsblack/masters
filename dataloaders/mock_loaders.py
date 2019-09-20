@@ -7,6 +7,12 @@ from datasets.mock_dataset import MockDataset
 import numpy as np
 import logging as log
 
+"""
+Data loader using the PyTorch default data loaders
+This causes problems seeing that we cannot use our customer samplers
+Thus is will not be used
+"""
+
 
 class MockDataLoaders:
     def __init__(self, conf: BaseConf, file_path=None):

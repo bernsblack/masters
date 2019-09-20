@@ -1,6 +1,7 @@
 #!python3
 import numpy as np
 import torch
+from utils.data_processing import  get_times
 
 """
 Not many of these metrics can be imported straight from sklearn.metrics, e.g.:
@@ -78,8 +79,6 @@ def get_metrics(y_true, y_pred):  # for a single time cell (N,1)
 
 
 # ============= PLOTS =============
-
-
 def plot_cell_results(y_true, y_pred):
     """
     function usually called in a loop to showcase a group of cells results
@@ -326,3 +325,65 @@ class ROCCurvePlotter(BaseMetricPlotter):
         }
 
         plt.plot(fpr, tpr, **kwargs)
+
+
+class CellPlotter(BaseMetricPlotter):
+    """
+    Class is used to plot predictions vs ground truth per cell
+    """
+
+    def __init__(self, title="", legend_loc="best"):  # setup maybe add the size of the figure
+        super(CellPlotter, self).__init__(title, legend_loc)
+
+    @staticmethod
+    def setup():
+        rcParams["mathtext.fontset"] = "stix"
+        rcParams["font.family"] = "STIXGeneral"
+        rcParams["font.size"] = "18"
+
+    @staticmethod
+    def plot_predictions(y_true=None, y_pred=None, probas_pred=None):  # todo maybe just send in model result object?
+        """
+        function usually called in a loop to showcase a group of cells results
+        """
+        fig = plt.figure(figsize=(20, 3))
+        ax = fig.add_subplot(1, 1, 1)
+        plt.ylabel("Likelihood")  # todo overwrite with function
+        plt.xlabel("Time Step")  # todo over write with function
+
+        # indices = get_times(y_true)
+
+        # Major ticks every 20, minor ticks every 5
+        x_minor_ticks = np.arange(0, len(y_true) + 1, 1)
+        x_major_ticks = np.arange(0, len(y_true) + 1, 24)
+
+        y_minor_ticks = np.arange(0, max(y_true) + .1, .1)
+        y_major_ticks = np.arange(0, int(max(y_true)) + 1, 1)
+
+        ax.set_xticks(x_major_ticks)
+        ax.set_xticks(x_minor_ticks, minor=True)
+        ax.set_yticks(y_major_ticks)
+        ax.set_yticks(y_minor_ticks, minor=True)
+
+        plt.xlim(-1, len(y_true))
+        plt.ylim(np.min(y_true) - .1, np.max(y_true) + .1)
+
+        # And a corresponding grid
+        ax.grid(which='both')
+
+        # Or if you want different settings for the grids:
+        ax.grid(which='minor', alpha=0.2)
+        ax.grid(which='major', alpha=0.5)
+
+        if y_true:
+            ax.plot(y_true, label="y_true")
+            mean = np.ones_like(y_true) * np.mean(y_true)
+            ax.plot(mean, label="mean")
+        if probas_pred:
+            ax.plot(probas_pred, label="probas_pred")
+        if y_pred:
+            ax.plot(y_pred, label="y_pred")
+
+    def finalise(self):
+        plt.title(self.title)
+        plt.legend(loc=self.legend_loc)

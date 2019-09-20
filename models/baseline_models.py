@@ -1,11 +1,15 @@
 import numpy as np
 import pandas as pd
 from torch import nn
+from utils.data_processing import get_period
 
 
 class HistoricAverage:
     def __init__(self, step=1):
         self.step = step
+
+    def fit(self, data):
+        self.step = get_period(data)
 
     def __call__(self, a):
         r = np.empty(a.shape)

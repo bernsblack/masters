@@ -11,6 +11,7 @@ class FlatDataGroup:
     """
     FlatDataGroup class acts as a collection of datasets (training/validation/test)
     The data group loads data from disk, splits in separate sets and normalises according to train set.
+    Crime count related data is first scaled using f(x) = log2(1 + x) and then scaled between -1 and 1.
     The data group class also handles reshaping of data.
     """
 
@@ -42,7 +43,7 @@ class FlatDataGroup:
         self.crimes = self.shaper.squeeze(zip_file["crime_types_grids"])  # reshaped into (N, C, L)
 
         self.targets = np.copy(self.crimes)[1:, 0]  # only check for totals > 0
-        self.targets[self.targets > 0] = 1
+        self.targets[self.targets > 0] = 1  # todo (bernard) ensure that the self.crimes are not scaled to -1,1 before
 
         self.crimes = self.crimes[:-1]
         self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
@@ -51,7 +52,7 @@ class FlatDataGroup:
         self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
         self.x_range = zip_file["x_range"]
         self.y_range = zip_file["y_range"]
-        self.t_range = t_range[:-1]
+        self.t_range = t_range[:-1]  # t_range match the time of the target
 
         self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
         self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
@@ -122,12 +123,13 @@ class FlatDataGroup:
         self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(-1, 1), axis=1)
         self.street_grid = minmax_scale(data=self.street_grid, feature_range=(-1, 1), axis=1)
 
-        # todo check if time independent  values aren't copied every time
+        # target index - also the index given to the
+        # todo check if time independent values aren't copied every time
         self.training_set = FlatDataset(
             crimes=trn_crimes,
             targets=trn_targets,
             total_crimes=trn_total_crimes,
-            t_range=trn_t_range,
+            t_range=trn_t_range,  # t_range is matched to the target index
             time_vectors=trn_time_vectors,
             weather_vectors=trn_weather_vectors,
             demog_grid=self.demog_grid,
@@ -140,7 +142,7 @@ class FlatDataGroup:
             crimes=val_crimes,
             targets=val_targets,
             total_crimes=val_total_crimes,
-            t_range=val_t_range,
+            t_range=val_t_range,  # t_range is matched to the target index
             time_vectors=val_time_vectors,
             weather_vectors=val_weather_vectors,
             demog_grid=self.demog_grid,
@@ -153,7 +155,7 @@ class FlatDataGroup:
             crimes=tst_crimes,
             targets=tst_targets,
             total_crimes=tst_total_crimes,
-            t_range=tst_t_range,
+            t_range=tst_t_range,  # t_range is matched to the target index
             time_vectors=tst_time_vectors,
             weather_vectors=tst_weather_vectors,
             demog_grid=self.demog_grid,
@@ -169,6 +171,7 @@ class FlatDataset(Dataset):
     from (N,C,H,W) -> (N,C,L). These re-shaped values have also been formatted/squeezed to
     ignore all locations where there never occurs any crimes
     """
+
     def __init__(
             self,
             crimes,  # time and space dependent
@@ -182,7 +185,6 @@ class FlatDataset(Dataset):
             seq_len,
             shaper,
     ):
-        # normalize
         self.seq_len = seq_len
 
         self.crimes = crimes
@@ -194,12 +196,15 @@ class FlatDataset(Dataset):
         self.street_grid = street_grid
 
         self.time_vectors = time_vectors
-        self.weather_vectors = weather_vectors
+        self.weather_vectors = weather_vectors  # remember weather should be the info of the next time step
         self.t_range = t_range
 
         self.shaper = shaper
 
-    # todo add weather -  remember weather should be the info of the next time step
+        self.max_index = self.t_size * self.l_size
+        self.min_index = self.seq_len * self.l_size
+
+        self.shape = self.t_size, self.l_size  # used when saving the model results
 
     def __len__(self):
         """Denotes the total number of samples"""
@@ -216,26 +221,52 @@ class FlatDataset(Dataset):
         # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
         # [√] number of incidents of crime occurrence by date in 2013 (1-D)
         """Generates one sample of data"""
-        try:
-            t_index, l_index = np.unravel_index(index, (self.t_size, self.l_size))
+
+        # check if index won't cause out of range exception
+        if isinstance(index, slice):
+            start, stop, step = index.start, index.stop, index.step
+        else:
+            start, stop, step = index, index + 1, 1
+
+        if start < self.min_index:  # the batch loader should ensure that this never occurs
+            raise IndexError(f"index should always be more than the minimum index (sequence length times number " +
+                             f"of cells per time frame): index ({start}) > min_index ({self.min_index})")
+        if stop > self.max_index:  # the batch loader should ensure that this never occurs
+            raise IndexError(f"index should always be less than the maximum index (sequence length times number " +
+                             f"of cells per time frame): index ({stop}) < max_index ({self.max_index})")
+
+        # todo review the code below
+        stack_spc_feats = []
+        stack_tmp_feats = []
+        stack_env_feats = []
+        stack_targets = []
+
+        for i in range(start, stop, step):
+            t_index, l_index = np.unravel_index(i, (self.t_size, self.l_size))
+            t_start = t_index - self.seq_len
+            t_stop = t_index
+            print(i)
+
+            # return shape should be (seq_len, batch, input_size)
             # todo teacher forcing - if we are using this then we need to return sequence of targets
-        except TypeError:
-            log.warning(f"Multi index unraveling\ntype(index): {type(index)} | index: {index}")
-            index_slice = slice(index)
-            indices = np.arange(index_slice.start, index_slice.stop, index_slice.step)
-            t_index, l_index = np.unravel_index(indices, (self.t_size, self.l_size))
+            stack_targets = self.targets[t_start:t_stop, l_index]
+            crime_vec = self.crimes[t_start:t_stop, :, l_index]
 
-        # todo teacher forcing - if we are using this then we need to return sequence of targets
-        target = self.targets[t_index, l_index]
-        crime_vec = self.crimes[t_index, :, l_index]
-        crime_vec = np.concatenate((crime_vec, self.total_crimes[t_index]), axis=-1)  # todo add more historical values
+            # todo add more historical values
+            crime_vec = np.concatenate((crime_vec, self.total_crimes[t_start:t_stop]), axis=-1)
 
-        time_vec = self.time_vectors[t_index]
-        weather_vec = self.weather_vectors[t_index]
-        demog_vec = self.demog_grid[0, :, l_index]
-        street_vec = self.street_grid[0, :, l_index]
+            time_vec = self.time_vectors[t_start:t_stop]
+            weather_vec = self.weather_vectors[t_start:t_stop]
+            demog_vec = self.demog_grid[:, :, l_index]
+            street_vec = self.street_grid[:, :, l_index]
 
-        env_feats = street_vec
-        spc_feats = demog_vec
-        tmp_feats = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add historical values
-        return spc_feats, tmp_feats, env_feats, target
+            stack_env_feats = street_vec
+            stack_spc_feats = demog_vec
+            stack_tmp_feats = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add historical values
+
+        spc_feats = np.stack(stack_env_feats)
+        tmp_feats = np.stack(stack_spc_feats)
+        env_feats = np.stack(stack_tmp_feats)
+        targets = np.stack(stack_targets)
+
+        return spc_feats, tmp_feats, env_feats, targets

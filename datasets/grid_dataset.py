@@ -11,6 +11,7 @@ class GridDataGroup:
     """
     GridDataGroup class acts as a collection of datasets (training/validation/test)
     The data group loads data from disk, splits in separate sets and normalises according to train set.
+    Crime count related data is first scaled using f(x) = log2(1 + x) and then scaled between -1 and 1.
     """
 
     def __init__(self, data_path, conf):
@@ -18,8 +19,6 @@ class GridDataGroup:
         Args:
             data_path (string): Path to the data folder with all spatial and temporal data.
         """
-        # todo normalise the data
-        # todo cap the crime grids at a certain level - instead use np.log2(1 + x) to normalise
         # dont use function to get values each time - create join and add table
         # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D)
         # [√] number of incidents of crime occurrence by census tract in 2013 (1-D)
@@ -163,7 +162,7 @@ class GridDataGroup:
 
 class GridDataset(Dataset):
     """
-
+    # todo (bernard): add documentation
     """
 
     def __init__(

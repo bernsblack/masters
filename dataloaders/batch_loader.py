@@ -2,12 +2,23 @@ import numpy as np
 
 
 class BatchLoader:
-    def __init__(self, dataset, batch_size, sub_sample=True):
+    def __init__(self, dataset, batch_size, seq_len, sub_sample=True):
         """
-        sub_sample: used to decide if we limit class imbalance by sub-sampling the classes to be equal
+        BatchLoader is a iterator that produces batches of data that can be fed into a model during a training
+        loop.
+
+        :param dataset: PyTorch dataset
+        :param batch_size: number of records the models see in a training step
+        :param seq_len: length of historic data fed into the model
+        :param sub_sample: used to decide if we limit class imbalance by sub-sampling the classes to be equal
         """
         self.dataset = dataset
-        flat_targets = self.dataset.targets.flatten()
+
+        # values use for checking boundaries for the dataset
+        self.min_index = dataset.min_index
+        self.max_index = dataset.max_index
+
+        flat_targets = self.dataset.targets[seq_len:].flatten()
         class0_args = np.argwhere(flat_targets == 0)
         class1_args = np.argwhere(flat_targets > 0)
 

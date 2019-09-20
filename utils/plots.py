@@ -14,6 +14,8 @@ import matplotlib.cm as cm
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
     CAN BE FOUND IN THE utils.metrics MODULE 
 """
+
+
 def visualize_weights(model):
     plt.figure(figsize=(15, 5))
     state_dict = model.state_dict()
@@ -111,7 +113,7 @@ def get_times(a):
 
 def plot_targ_pred_over_time(trg, prd):
     """
-    fig setup should be done before calling function
+    fig setup  should be done before calling function
     function scatters the values of the target and predicted values
     and plots the intensity curve
     """
@@ -233,6 +235,7 @@ def update_subplots(a, plots):
 
 
 def im(a):
+    plt.figure(figsize=(10, 8))
     plt.imshow(a)
     plt.colorbar()
     plt.show()

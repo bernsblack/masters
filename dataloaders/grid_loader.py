@@ -22,12 +22,15 @@ class GridDataLoaders:
         testing_set = data_group.testing_set
         self.training_generator = BatchLoader(dataset=training_set,
                                               batch_size=conf.batch_size,
+                                              seq_len=conf.seq_len,
                                               sub_sample=True)
 
         self.validation_generator = BatchLoader(dataset=validation_set,
                                                 batch_size=conf.batch_size,
+                                                seq_len=conf.seq_len,
                                                 sub_sample=True)
 
         self.testing_generator = BatchLoader(dataset=testing_set,
                                              batch_size=conf.batch_size,
+                                             seq_len=conf.seq_len,
                                              sub_sample=conf.sub_sample_test_set)
