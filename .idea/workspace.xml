@@ -2,26 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/notes.md" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/batch_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/batch_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/flat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/flat_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/grid_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/grid_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/mock_loaders.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/mock_loaders.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/grid_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/grid_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/mock_dataset.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -173,7 +154,9 @@
       <workItem from="1568654424425" duration="2672000" />
       <workItem from="1568817281545" duration="163000" />
       <workItem from="1568903954912" duration="10000" />
-      <workItem from="1568961017723" duration="1952000" />
+      <workItem from="1568961017723" duration="2006000" />
+      <workItem from="1569060495249" duration="537000" />
+      <workItem from="1569168576363" duration="2579000" />
     </task>
     <servers />
   </component>
