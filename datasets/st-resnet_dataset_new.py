@@ -7,21 +7,18 @@ from utils.configs import BaseConf
 
 
 # todo add set of valid / living sells / to be able to sample the right ones
-class FlatDataGroup:
+class GridDataGroup:
     """
-    FlatDataGroup class acts as a collection of datasets (training/validation/test)
+    GridDataGroup class acts as a collection of datasets (training/validation/test)
     The data group loads data from disk, splits in separate sets and normalises according to train set.
     Crime count related data is first scaled using f(x) = log2(1 + x) and then scaled between -1 and 1.
-    The data group class also handles reshaping of data.
     """
 
-    def __init__(self, data_path: str, conf: BaseConf):
+    def __init__(self, data_path, conf):
         """
         Args:
             data_path (string): Path to the data folder with all spatial and temporal data.
         """
-        # todo normalise the data
-        # todo cap the crime grids at a certain level - instead use np.log2(1 + x) to normalise
         # dont use function to get values each time - create join and add table
         # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D)
         # [√] number of incidents of crime occurrence by census tract in 2013 (1-D)
@@ -37,25 +34,27 @@ class FlatDataGroup:
         t_range = pd.read_pickle(data_path + "t_range.pkl")
         log.info(f"\tt_range shape {np.shape(t_range)}")
 
+        # shaper can bes used to shape the data into teh same format - ignoring cells where nothing ever takes place,
+        # e.g. lakes, air-strips, etc.
         self.shaper = Shaper(data=zip_file["crime_types_grids"])
 
         # squeeze all spatially related data
-        self.crimes = self.shaper.squeeze(zip_file["crime_types_grids"])  # reshaped into (N, C, L)
+        self.crimes = zip_file["crime_types_grids"]
 
-        self.targets = np.copy(self.crimes)[1:, 0:1]  # only check for totals > 0
-        self.targets[self.targets > 0] = 1  # todo (bernard) ensure that the self.crimes are not scaled to -1,1 before
+        self.targets = np.copy(self.crimes)[1:, 0]  # only check for totals > 0
+        self.targets[self.targets > 0] = 1
 
         self.crimes = self.crimes[:-1]
-        self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)  # todo move to where data is generated
+        self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
 
-        self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
+        self.time_vectors = zip_file["time_vectors"][1:]  # already normalised
         self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
         self.x_range = zip_file["x_range"]
         self.y_range = zip_file["y_range"]
-        self.t_range = t_range[1:]  # todo t_range match the time of the target
+        self.t_range = t_range[:-1]
 
-        self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
-        self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
+        self.demog_grid = zip_file["demog_grid"]
+        self.street_grid = zip_file["street_grid"]
 
         self.seq_len = conf.seq_len
         self.total_len = len(self.crimes)  # length of the whole time series
@@ -79,7 +78,7 @@ class FlatDataGroup:
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
-        self.crimes = np.log2(1 + self.crimes)  # todo - change to hot-encoded instead
+        self.crimes = np.log2(1 + self.crimes)
         self.crime_scaler = MinMaxScaler(feature_range=(-1, 1))
         # should be axis of the channels - only fit scaler on training data
         self.crime_scaler.fit(self.crimes[trn_index[0]:trn_index[1]], axis=1)
@@ -123,53 +122,47 @@ class FlatDataGroup:
         self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(-1, 1), axis=1)
         self.street_grid = minmax_scale(data=self.street_grid, feature_range=(-1, 1), axis=1)
 
-        # target index - also the index given to the
-        # todo check if time independent values aren't copied every time
-        self.training_set = FlatDataset(
+        # todo check if time independent  values aren't copied every time
+        self.training_set = GridDataset(
             crimes=trn_crimes,
             targets=trn_targets,
             total_crimes=trn_total_crimes,
-            t_range=trn_t_range,  # t_range is matched to the target index
+            t_range=trn_t_range,
             time_vectors=trn_time_vectors,
             weather_vectors=trn_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
-            shaper=self.shaper,
         )
 
-        self.validation_set = FlatDataset(
+        self.validation_set = GridDataset(
             crimes=val_crimes,
             targets=val_targets,
             total_crimes=val_total_crimes,
-            t_range=val_t_range,  # t_range is matched to the target index
+            t_range=val_t_range,
             time_vectors=val_time_vectors,
             weather_vectors=val_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
-            shaper=self.shaper,
         )
 
-        self.testing_set = FlatDataset(
+        self.testing_set = GridDataset(
             crimes=tst_crimes,
             targets=tst_targets,
             total_crimes=tst_total_crimes,
-            t_range=tst_t_range,  # t_range is matched to the target index
+            t_range=tst_t_range,
             time_vectors=tst_time_vectors,
             weather_vectors=tst_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
-            shaper=self.shaper,
         )
 
 
-class FlatDataset(Dataset):
+class GridDataset(Dataset):
     """
-    Flat datasets operate on flattened data where the map/grid of data has been reshaped
-    from (N,C,H,W) -> (N,C,L). These re-shaped values have also been formatted/squeezed to
-    ignore all locations where there never occurs any crimes
+    # todo (bernard): add documentation
     """
 
     def __init__(
@@ -183,112 +176,44 @@ class FlatDataset(Dataset):
             demog_grid,  # space dependent
             street_grid,  # space dependent
             seq_len,
-            shaper,
     ):
         self.seq_len = seq_len
 
+        #  time and space dependent
         self.crimes = crimes
         self.targets = targets
-        self.t_size, _, self.l_size = np.shape(self.crimes)
-        self.total_crimes = total_crimes
+        self.t_size, _, self.y_size, self.x_size = np.shape(self.crimes)
 
+        #  space dependent
         self.demog_grid = demog_grid
         self.street_grid = street_grid
 
+        # time dependent
+        self.total_crimes = total_crimes
         self.time_vectors = time_vectors
-        self.weather_vectors = weather_vectors  # remember weather should be the info of the next time step
+        self.weather_vectors = weather_vectors
         self.t_range = t_range
-
-        self.shaper = shaper
-
-        #  (min_index, max_index) are limits of flattened targets
-        self.max_index = self.t_size * self.l_size
-        self.min_index = self.seq_len * self.l_size
-        self.len = self.min_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
-
-        self.shape = self.t_size, self.l_size  # used when saving the model results
 
     def __len__(self):
         """Denotes the total number of samples"""
-        return self.len  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
+        return self.t_size - self.seq_len
 
     def __getitem__(self, index):
-        # when using no teacher forcing
-        # target = self.targets[t+self.seq_len, :, l]
-        # todo add all other data - should be done in data-generation?
-        # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D)
-        # [√] number of incidents of crime occurrence by census tract in 2013 (1-D)
-        # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
-        # [√] number of incidents of crime occurrence by date in 2013 (1-D)
-        """Generates one sample of data"""
+        start_index = index
+        stop_index = index + self.seq_len if self.seq_len > 0 else index + 1
 
-        # check if index won't cause out of range exception
-        if isinstance(index, slice):
-            start, stop, step = index.start, index.stop, index.step
-            if step is None:
-                step = 1
-            indices = range(start, stop, step)
+        # todo teacher forcing - if we are using this then we need to return sequence of targets
+        target_grid = self.targets[start_index:stop_index]
+        crime_grid = self.crimes[start_index:stop_index]
+        demog_grid = self.demog_grid
+        street_grid = self.street_grid
 
-            if start < self.min_index:  # the batch loader should ensure that this never occurs
-                raise IndexError(f"index should always be more than the minimum index (sequence length times number " +
-                                 f"of cells per time frame): index ({start}) > min_index ({self.min_index})")
-            if stop > self.max_index:  # the batch loader should ensure that this never occurs
-                raise IndexError(f"index should always be less than the maximum index (sequence length times number " +
-                                 f"of cells per time frame): index ({stop}) < max_index ({self.max_index})")
+        time_vec = self.time_vectors[start_index:stop_index]
+        weather_vec = self.weather_vectors[start_index:stop_index]
 
-        elif isinstance(index, int):
-            indices = [index]
-            if index < self.min_index or index > self.max_index:
-                raise IndexError(f"index should always be less than the maximum index (sequence length times number " +
-                                 f"of cells per time frame): index ({index}) < max_index ({self.max_index})")
-        else:
-            indices = index
-            # todo double check if any of the values in indices is outside of the ranges
+        # stack all grids on channel axis
+        # grids = np.concatenate((crime_grid, demog_grid, street_grid), axis=0)
 
-        # todo review the code below
-        stack_spc_feats = []
-        stack_tmp_feats = []
-        stack_env_feats = []
-        stack_targets = []
-
-        for i in indices:
-            t_index, l_index = np.unravel_index(i, (self.t_size, self.l_size))
-            t_start = t_index - self.seq_len
-            t_stop = t_index
-
-            # return shape should be (seq_len, batch, input_size)
-
-            crime_vec = self.crimes[t_start:t_stop, :, l_index]
-            # todo add more historical values
-            crime_vec = np.concatenate((crime_vec, self.total_crimes[t_start:t_stop]), axis=-1)
-
-            time_vec = self.time_vectors[t_start:t_stop]
-            weather_vec = self.weather_vectors[t_start:t_stop]
-            demog_vec = self.demog_grid[:, :, l_index]
-            street_vec = self.street_grid[:, :, l_index]
-            tmp_vec = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add more historical values
-            # todo teacher forcing - if we are using this then we need to return sequence of targets
-            target_vec = self.targets[t_start:t_stop, :, l_index]
-
-            stack_spc_feats.append(demog_vec)  # todo stacking the same grid might cause memory issues
-            stack_env_feats.append(street_vec)  # todo stacking the same grid might cause memory issues
-
-            stack_tmp_feats.append(tmp_vec)
-            stack_targets.append(target_vec)
-
-        # spc_feats: [demog_vec]
-        # env_feats: [street_vec]
-        # tmp_feats: [time_vec, weather_vec, crime_vec]
-        # targets: [targets]
-        spc_feats = np.stack(stack_spc_feats)
-        tmp_feats = np.stack(stack_tmp_feats)
-        env_feats = np.stack(stack_env_feats)
-        targets = np.stack(stack_targets)
-
-        spc_feats = np.swapaxes(spc_feats, 0, 1)
-        tmp_feats = np.swapaxes(tmp_feats, 0, 1)
-        env_feats = np.swapaxes(env_feats, 0, 1)
-        targets = np.swapaxes(targets, 0, 1)
-
-        # output shapes should be - (seq_len, batch_size,, n_feats)
-        return spc_feats, tmp_feats, env_feats, targets
+        tmp_feats = np.concatenate((time_vec, weather_vec, self.total_crimes[start_index]),
+                                   axis=-1)  # todo add historical values
+        return crime_grid, demog_grid, street_grid, tmp_feats, target_grid

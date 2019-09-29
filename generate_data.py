@@ -447,7 +447,7 @@ if __name__ == "__main__":
     # TODO ENSURE ALL SPATIAL DATA IS IN FORM N, C, H, W -> EVEN IF C = 1 SHOULD BE N, 1, H, W
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,
-                        crime_types_grids=crime_type_grids,
+                        crime_types_grids=crime_type_grids,  # todo add total crimes to a channel
                         crime_grids=crime_grids,  # todo remove form script - is embedded in crime_types_grids
                         demog_grid=demog_grid,
                         street_grid=street_grid,

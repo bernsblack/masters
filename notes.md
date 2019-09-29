@@ -27,6 +27,7 @@ types of datasets - flat_dataset (2dim) and grid_dataset (3dim).
 We can add something to the testing batch loader - where we do not subsample ont sample all of the grids, 
 and take the evaluations per time index.
 
+
 Thus we save each prediction for the model under the data folder - with that models name. Then all results are in one
  place and it is easy to compare the results - should be in a time index format - flattened (N,L) for all predictions.  
 
@@ -43,3 +44,23 @@ Thus we save each prediction for the model under the data folder - with that mod
 	x_range shape (W,)
 	y_range shape (H,)
 	t_range shape (N + 1,)
+	
+## Defining a data pipeline
+Do the data clean, reshaping and normalisation first - because each model can 
+have different training loops they do not always use the same loaders - so might be a waste of time.
+Focus on cleaning and normalising data. We use data-groups to normalise all data using only. 
+
+#### Important note:
+1. all models should be comparing the same target indices
+2. we might need to average the results to avoid getting biased results.  
+ 
+- Raw data
+- Cleaned data
+- Reshaped data
+- Normalised Data
+- Batch Load Data
+- Model Transform Data
+- Evaluated Data 
+
+We should not touch the indices outside of the batch loaders - this can lead to issues,
+if and when the datasets are changes and indices have not changed on different spots

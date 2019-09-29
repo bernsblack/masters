@@ -15,7 +15,7 @@ class STResNetDataLoader:  # add test and train data and validation set
                  overlap_in_out=True, norm='none'):
         """
         Args:
-            S: Total Sequence size -> (N,rows,cols)
+            S: Total Sequence size -> (N,H,W)
             E: External Info -> (N, n_features)
             lc,lp,lq: number of closeness, period and trend frames respectively
             c,p,q: time step of closeness, period and trend frames respectively
@@ -88,7 +88,7 @@ class STResNetDataLoader:  # add test and train data and validation set
         print('Test data: ', len(self.tst_times))
         print()
 
-    def getTrainDataLength(self):
+    def get_train_data_length(self):
         return len(self.trn_times)
 
     def __call__(self, batch_size):
@@ -98,7 +98,7 @@ class STResNetDataLoader:  # add test and train data and validation set
         """
         return self.get_train_batch(batch_size)
 
-    def getData(self, times):
+    def get_data(self, times):
         """
         returns data sequences given a set of Xt times
         return Dbc,Dbp,Dbq,Dbe,Dbt,times
@@ -123,16 +123,16 @@ class STResNetDataLoader:  # add test and train data and validation set
             Et = self.E[t:t + 1]
             Dbe.append(Et)
 
-        Dbc = torch.stack(Dbc)
-        Dbp = torch.stack(Dbp)
-        Dbq = torch.stack(Dbq)
-        Dbe = torch.stack(Dbe)
-        Dbt = torch.stack(Dbt)
+        Dbc = np.stack(Dbc)
+        Dbp = np.stack(Dbp)
+        Dbq = np.stack(Dbq)
+        Dbe = np.stack(Dbe)
+        Dbt = np.stack(Dbt)
 
         return Dbc, Dbp, Dbq, Dbe, Dbt, times
 
         # if self.E != None:
-        #     Dbe = torch.stack(Dbe)
+        #     Dbe = np.stack(Dbe)
         #     return Dbc,Dbp,Dbq,Dbe,Dbt
         # else:
         #     return Dbc,Dbp,Dbq,Dbt
@@ -153,7 +153,7 @@ class STResNetDataLoader:  # add test and train data and validation set
         else:
             self.current_t = self.current_t + batch_size
 
-        return self.getData(times)
+        return self.get_data(times)
 
     def get_test_set(self):
         """
@@ -163,7 +163,7 @@ class STResNetDataLoader:  # add test and train data and validation set
         #         times = np.arange(self.max_t_val,self.max_t)
         times = self.tst_times
 
-        return self.getData(times)
+        return self.get_data(times)
 
     def get_train_set(self):
         """
@@ -173,7 +173,7 @@ class STResNetDataLoader:  # add test and train data and validation set
         #         times = np.arange(self.min_t,self.max_t_trn)
         times = self.trn_times
 
-        return self.getData(times)
+        return self.get_data(times)
 
     # TODO: Implement cross validation
     def get_validation_set(self):
@@ -184,7 +184,7 @@ class STResNetDataLoader:  # add test and train data and validation set
         #         times = np.arange(self.max_t_trn,self.max_t_val)
         times = self.val_times
 
-        return self.getData(times)
+        return self.get_data(times)
 
     def reset_current_t(self):
         self.current_t = 0

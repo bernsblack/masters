@@ -5,7 +5,7 @@ class BatchLoader:
     def __init__(self, dataset, batch_size, seq_len, sub_sample=True):
         """
         BatchLoader is a iterator that produces batches of data that can be fed into a model during a training
-        loop.
+        loop. BatchLoader is used to iterate through and sample the indices for a whole epoch.
 
         :param dataset: PyTorch dataset
         :param batch_size: number of records the models see in a training step
@@ -18,9 +18,12 @@ class BatchLoader:
         self.min_index = dataset.min_index
         self.max_index = dataset.max_index
 
-        flat_targets = self.dataset.targets[seq_len:].flatten()
+        flat_targets = self.dataset.targets.flatten()
         class0_args = np.argwhere(flat_targets == 0)
+        class0_args = class0_args[class0_args > self.min_index]
+
         class1_args = np.argwhere(flat_targets > 0)
+        class1_args = class1_args[class1_args > self.min_index]
 
         if sub_sample:
             np.random.shuffle(class0_args)
