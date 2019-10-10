@@ -1,5 +1,11 @@
 # Notes
 
+Regarding training and testing loops, rather use the indices as it makes access coherent daata easier,
+although this techniques might create and issue when we start adding extra, other date types
+like time/weather/demographic data
+
+When we concat various vectors into one vector - these, vectors should all be 
+
 We might want to have a certain number of coordinates (t,x,y) or (t,l) and
 a list of these that we can use for our.
 

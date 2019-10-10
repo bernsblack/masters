@@ -167,12 +167,11 @@ class BaseMetricPlotter:
     Class is used to setup and add plots to a figure and then save or show this figure
     """
 
-    def __init__(self, title, legend_loc="best"):  # setup maybe add the size of the figure
+    def __init__(self, title):
         rcParams["mathtext.fontset"] = "stix"
         rcParams["font.family"] = "STIXGeneral"
         rcParams["font.size"] = "18"
         self.title = title
-        self.legend_loc = legend_loc
         self.grid_alpha = 0.2
         self.setup()
 
@@ -182,7 +181,7 @@ class BaseMetricPlotter:
 
     def finalise(self):
         plt.title(self.title)
-        plt.legend(loc=self.legend_loc)
+        plt.legend(bbox_to_anchor=(1.04, 0), loc="lower left", borderaxespad=0)
         plt.grid(alpha=self.grid_alpha)
 
     def show(self):
@@ -199,8 +198,8 @@ class LossPlotter(BaseMetricPlotter):
     Class is used to plot the validation and training loss of a model
     """
 
-    def __init__(self, title, legend_loc="best"):  # setup maybe add the size of the figure
-        super(LossPlotter, self).__init__(title, legend_loc)
+    def __init__(self, title):  # setup maybe add the size of the figure
+        super(LossPlotter, self).__init__(title)
 
     @staticmethod
     def setup():
@@ -222,7 +221,7 @@ class LossPlotter(BaseMetricPlotter):
 
         # plt.xticks(list(range(len(trn_loss)))) # plot the x ticks of grid on the epochs
 
-        # insert the first loss to ilustrate the curve better
+        # insert the first loss to illustrate the curve better
         trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(trn_loss)+1)
         plt.plot(trn_loss_x, [all_trn_loss[0], *trn_loss], label="Training Loss (Epoch)", c='g', **kwargs)
         all_trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(all_trn_loss))
@@ -241,8 +240,8 @@ class PRCurvePlotter(BaseMetricPlotter):
     Class is used to setup and add plots to a figure and then save or show this figure
     """
 
-    def __init__(self, title="Precision-Recall Curve", legend_loc="best"):
-        super(PRCurvePlotter, self).__init__(title, legend_loc)
+    def __init__(self, title="Precision-Recall Curve"):
+        super(PRCurvePlotter, self).__init__(title)
 
     @staticmethod
     def setup():
@@ -286,8 +285,8 @@ class ROCCurvePlotter(BaseMetricPlotter):
     """
 
     # setup maybe add the size of the figure
-    def __init__(self, title="Receiver Operating Characteristic (ROC) Curve", legend_loc="best"):
-        super(ROCCurvePlotter, self).__init__(title, legend_loc)
+    def __init__(self, title="Receiver Operating Characteristic (ROC) Curve"):
+        super(ROCCurvePlotter, self).__init__(title)
 
     @staticmethod
     def setup():
@@ -332,8 +331,8 @@ class CellPlotter(BaseMetricPlotter):
     Class is used to plot predictions vs ground truth per cell
     """
 
-    def __init__(self, title="", legend_loc="best"):  # setup maybe add the size of the figure
-        super(CellPlotter, self).__init__(title, legend_loc)
+    def __init__(self, title=""):  # setup maybe add the size of the figure
+        super(CellPlotter, self).__init__(title)
 
     @staticmethod
     def setup():
@@ -386,4 +385,4 @@ class CellPlotter(BaseMetricPlotter):
 
     def finalise(self):
         plt.title(self.title)
-        plt.legend(loc=self.legend_loc)
+        plt.legend(bbox_to_anchor=(1.04, 0), loc="lower left", borderaxespad=0)

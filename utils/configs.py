@@ -39,6 +39,9 @@ class BaseConf:  # args from arg-parser to over write values
 
             self.seq_len = 1
 
+            self.top_k_cells = 20
+            self.use_top_k_cells = False  # indicates if we should select a subsets of the cells
+
     def __str__(self):
         return pformat(self.__dict__)
 

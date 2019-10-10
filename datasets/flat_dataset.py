@@ -20,9 +20,7 @@ class FlatDataGroup:
         Args:
             data_path (string): Path to the data folder with all spatial and temporal data.
         """
-        # todo normalise the data
-        # todo cap the crime grids at a certain level - instead use np.log2(1 + x) to normalise
-        # dont use function to get values each time - create join and add table
+        # todo (note): dont use function to get values each time - create join and add table
         # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D)
         # [√] number of incidents of crime occurrence by census tract in 2013 (1-D)
         # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
@@ -42,8 +40,13 @@ class FlatDataGroup:
         # squeeze all spatially related data
         self.crimes = self.shaper.squeeze(zip_file["crime_types_grids"])  # reshaped into (N, C, L)
 
+        # todo - add most popular indices
+        self.top_k_l_indices = np.argsort(self.crimes[:, 0].mean(0))[::-1][:conf.top_k_cells]
+        if conf.use_top_k_cells:
+            self.crimes = self.crimes[:, :, self.top_k_l_indices]
+
         self.targets = np.copy(self.crimes)[1:, 0:1]  # only check for totals > 0
-        self.targets[self.targets > 0] = 1  # todo (bernard) ensure that the self.crimes are not scaled to -1,1 before
+        self.targets[self.targets > 0] = 1  # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
 
         self.crimes = self.crimes[:-1]
         self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)  # todo move to where data is generated
@@ -52,7 +55,7 @@ class FlatDataGroup:
         self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
         self.x_range = zip_file["x_range"]
         self.y_range = zip_file["y_range"]
-        self.t_range = t_range[1:]  # todo t_range match the time of the target
+        self.t_range = t_range[1:]  # todo: t_range match the time of the target
 
         self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
         self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
@@ -66,62 +69,64 @@ class FlatDataGroup:
                       "len(self.t_range) != len(self.crime_types_grids)")
             raise RuntimeError(f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
 
+        #  split the data into ratios
         val_size = int(self.total_len * conf.val_ratio)
         tst_size = int(self.total_len * conf.tst_ratio)
 
-        trn_index = (0, self.total_len - tst_size - val_size)
-        val_index = (trn_index[1] - self.seq_len, self.total_len - tst_size)
-        tst_index = (val_index[1] - self.seq_len, self.total_len)
+        #  start and stop t_index of each dataset - can be used outside of loader/group
+        self.trn_indices = (0, self.total_len - tst_size - val_size)
+        self.val_indices = (self.trn_indices[1] - self.seq_len, self.total_len - tst_size)
+        self.tst_indices = (self.val_indices[1] - self.seq_len, self.total_len)
 
-        trn_t_range = self.t_range[trn_index[0]:trn_index[1]]
-        val_t_range = self.t_range[val_index[0]:val_index[1]]
-        tst_t_range = self.t_range[tst_index[0]:tst_index[1]]
+        trn_t_range = self.t_range[self.trn_indices[0]:self.trn_indices[1]]
+        val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
+        tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
-        self.crimes = np.log2(1 + self.crimes)  # todo - change to hot-encoded instead
-        self.crime_scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.crimes = np.log2(1 + self.crimes)  # todo: add hot-encoded option
+        self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
-        self.crime_scaler.fit(self.crimes[trn_index[0]:trn_index[1]], axis=1)
+        self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
-        trn_crimes = self.crimes[trn_index[0]:trn_index[1]]
-        val_crimes = self.crimes[val_index[0]:val_index[1]]
-        tst_crimes = self.crimes[tst_index[0]:tst_index[1]]
+        trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
+        val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1]]
+        tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # targets
-        trn_targets = self.targets[trn_index[0]:trn_index[1]]
-        val_targets = self.targets[val_index[0]:val_index[1]]
-        tst_targets = self.targets[tst_index[0]:tst_index[1]]
+        trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
+        val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
+        tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
         self.total_crimes = np.log2(1 + self.total_crimes)
-        self.total_crimes_scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
-        self.total_crimes_scaler.fit(self.total_crimes[trn_index[0]:trn_index[1]], axis=1)
+        self.total_crimes_scaler.fit(self.total_crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.total_crimes = self.total_crimes_scaler.transform(self.total_crimes)
-        trn_total_crimes = self.total_crimes[trn_index[0]:trn_index[1]]
-        val_total_crimes = self.total_crimes[val_index[0]:val_index[1]]
-        tst_total_crimes = self.total_crimes[tst_index[0]:tst_index[1]]
+        trn_total_crimes = self.total_crimes[self.trn_indices[0]:self.trn_indices[1]]
+        val_total_crimes = self.total_crimes[self.val_indices[0]:self.val_indices[1]]
+        tst_total_crimes = self.total_crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # time_vectors is already scaled between 0 and 1
-        trn_time_vectors = self.time_vectors[trn_index[0]:trn_index[1]]
-        val_time_vectors = self.time_vectors[val_index[0]:val_index[1]]
-        tst_time_vectors = self.time_vectors[tst_index[0]:tst_index[1]]
+        trn_time_vectors = self.time_vectors[self.trn_indices[0]:self.trn_indices[1]]
+        val_time_vectors = self.time_vectors[self.val_indices[0]:self.val_indices[1]]
+        tst_time_vectors = self.time_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
         # splitting and normalisation of weather data
-        self.weather_vector_scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
         # todo maybe scale weather with all data so it's season independent
-        # self.weather_vector_scaler.fit(self.weather_vectors[trn_index[0]:trn_index[1]], axis=1)  # norm with trn data
+        # self.weather_vector_scaler.fit(self.weather_vectors[self.trn_index[0]:self.trn_index[1]], axis=1)  # norm with trn data
         self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
         self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
-        trn_weather_vectors = self.weather_vectors[trn_index[0]:trn_index[1]]
-        val_weather_vectors = self.weather_vectors[val_index[0]:val_index[1]]
-        tst_weather_vectors = self.weather_vectors[tst_index[0]:tst_index[1]]
+        trn_weather_vectors = self.weather_vectors[self.trn_indices[0]:self.trn_indices[1]]
+        val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
+        tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
         # normalise space dependent data - using minmax_scale - no need to save train data norm values
         # todo concat the space dependent values so long
-        self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(-1, 1), axis=1)
-        self.street_grid = minmax_scale(data=self.street_grid, feature_range=(-1, 1), axis=1)
+        self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
+        self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
         # target index - also the index given to the
         # todo check if time independent values aren't copied every time
@@ -292,3 +297,5 @@ class FlatDataset(Dataset):
 
         # output shapes should be - (seq_len, batch_size,, n_feats)
         return spc_feats, tmp_feats, env_feats, targets
+
+    ## todo have this as the base class - create new classes where we're just over loading

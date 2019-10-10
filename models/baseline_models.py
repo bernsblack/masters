@@ -5,17 +5,28 @@ from utils.data_processing import get_period
 
 
 class HistoricAverage:
-    def __init__(self, step=1):
+    """
+    Note: the first values of the predictions will be
+    """
+
+    def __init__(self, step=1, max_steps=-1):
         self.step = step
 
-    def fit(self, data):
-        self.step = get_period(data)
+        # max steps when to start ignoring previous values: if -1 means get all values
+        self.max_steps = max_steps
 
-    def __call__(self, a):
-        r = np.empty(a.shape)
+    # def fit(self, data):
+    #     self.step = get_period(data)
+
+    def __call__(self, data):
+        r = np.empty(data.shape)
         r.fill(np.nan)
         for i in range(self.step + 1, len(r)):
-            x = np.mean(a[i - self.step + 1:0:-self.step], axis=0)
+            a_subset = data[i - self.step + 1:0:-self.step]
+            if self.max_steps > 0:
+                a_subset = a_subset[-self.max_steps:]
+
+            x = np.mean(a_subset, axis=0)
             r[i] = x
 
         return r
@@ -28,15 +39,15 @@ class BaseMovingAverage:
 
         self.f_avg = lambda x, wgt: np.average(x, axis=0, weights=wgt)
 
-    def fn(self, a):
-        return np.average(a, axis=0, weights=self.weights)
+    def fn(self, data):
+        return np.average(data, axis=0, weights=self.weights)
 
-    def __call__(self, a):
+    def __call__(self, data):
         w = self.window_len
-        r = np.empty(a.shape)
+        r = np.empty(data.shape)
         r.fill(np.nan)
         for i in range(w - 1, len(r)):
-            x = a[(i - w + 1):i + 1]
+            x = data[(i - w + 1):i + 1]
             r[i] = self.fn(x)
 
         return r
@@ -79,7 +90,7 @@ class LinearRegressor(nn.Module):
 
 # TODO CONVERT FUNCTIONS INTO A CLASS
 # still needs to do it only on training data average no the total
-def get_historic_average(a, step=24):
+def get_historic_average(data, step=24):
     """
     a: array (N,d) or (N,d,d)
     step: the historic step the average is taken over, e.g. 24 for every 24 hours
@@ -87,29 +98,29 @@ def get_historic_average(a, step=24):
     ha = []  # historic averages
 
     for i in range(step):
-        ha.append(a[i::step].mean(0))
+        ha.append(data[i::step].mean(0))
 
-    b = -1 * np.ones_like(a)  # minus one there to check if anything went wrong
+    b = -1 * np.ones_like(data)  # minus one there to check if anything went wrong
     for i in range(len(b)):
         b[i] = ha[i % step]
 
     return b
 
 
-def rolling_apply(fun, a, w):  # this rolling average includes the current time step
-    r = np.empty(a.shape)
+def rolling_apply(fun, data, w):  # this rolling average includes the current time step
+    r = np.empty(data.shape)
     r.fill(np.nan)
-    for i in range(w - 1, a.shape[0]):
-        r[i] = fun(a[(i - w + 1):i + 1])
+    for i in range(w - 1, data.shape[0]):
+        r[i] = fun(data[(i - w + 1):i + 1])
     return r
 
 
-def rolling_avg(fun, a, weights):  # this rolling average includes the current time step
+def rolling_avg(fun, data, weights):  # this rolling average includes the current time step
     w = len(weights)
-    r = np.empty(a.shape)
+    r = np.empty(data.shape)
     r.fill(np.nan)
-    for i in range(w - 1, a.shape[0]):
-        r[i] = fun(a[(i - w + 1):i + 1], weights)
+    for i in range(w - 1, data.shape[0]):
+        r[i] = fun(data[(i - w + 1):i + 1], weights)
 
     return r
 

@@ -79,7 +79,7 @@ class GridDataGroup:
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
         self.crimes = np.log2(1 + self.crimes)
-        self.crime_scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         self.crime_scaler.fit(self.crimes[trn_index[0]:trn_index[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
@@ -94,7 +94,7 @@ class GridDataGroup:
 
         # total crimes - added separately because all spatial
         self.total_crimes = np.log2(1 + self.total_crimes)
-        self.total_crimes_scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         self.total_crimes_scaler.fit(self.total_crimes[trn_index[0]:trn_index[1]], axis=1)
         self.total_crimes = self.total_crimes_scaler.transform(self.total_crimes)
@@ -108,7 +108,7 @@ class GridDataGroup:
         tst_time_vectors = self.time_vectors[tst_index[0]:tst_index[1]]
 
         # splitting and normalisation of weather data
-        self.weather_vector_scaler = MinMaxScaler(feature_range=(-1, 1))
+        self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
         # todo maybe scale weather with all data so it's season independent
         # self.weather_vector_scaler.fit(self.weather_vectors[trn_index[0]:trn_index[1]], axis=1)  # norm with trn data
         self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
@@ -119,8 +119,8 @@ class GridDataGroup:
 
         # normalise space dependent data - using minmax_scale - no need to save train data norm values
         # todo concat the space dependent values so long
-        self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(-1, 1), axis=1)
-        self.street_grid = minmax_scale(data=self.street_grid, feature_range=(-1, 1), axis=1)
+        self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
+        self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
         # todo check if time independent  values aren't copied every time
         self.training_set = GridDataset(
