@@ -16,8 +16,6 @@ class BaseConf:  # args from arg-parser to over write values
             self.__dict__ = deepcopy(conf_dict)
         else:  # default values
             self.seed = 3
-            self.resume = False
-            self.early_stopping = False
             self.use_cuda = False
 
             # data related hyper-params
@@ -28,7 +26,13 @@ class BaseConf:  # args from arg-parser to over write values
             self.sub_sample_test_set = False
             self.flatten_grid = True  # if the shaper should be used to squeeze the data
 
+            self.seq_len = 1
+            self.shaper_top_k = -1  # if less then 0, top_k will not be applied
+            self.shaper_threshold = 0
+
             # training parameters
+            self.resume = False
+            self.early_stopping = False
             self.lr = 1e-3
             self.weight_decay = 1e-8
             self.max_epochs = 1
@@ -37,15 +41,12 @@ class BaseConf:  # args from arg-parser to over write values
             self.shuffle = False
             self.num_workers = 6
 
-            self.seq_len = 1
-
-            self.top_k_cells = 20
-            self.use_top_k_cells = False  # indicates if we should select a subsets of the cells
-
     def __str__(self):
         return pformat(self.__dict__)
 
     def __repr__(self):
         return self.__str__()
+
+
 #  create different confs that can be set and easily used from any where
 #  argparsers should be able to overwrite some of confs values

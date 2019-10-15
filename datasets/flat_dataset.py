@@ -35,17 +35,18 @@ class FlatDataGroup:
         t_range = pd.read_pickle(data_path + "t_range.pkl")
         log.info(f"\tt_range shape {np.shape(t_range)}")
 
-        self.shaper = Shaper(data=zip_file["crime_types_grids"])
+        # should make shaper on only the testing data so that we don't look at testing cells where nothing actually
+        # happens
+        self.shaper = Shaper(data=zip_file["crime_types_grids"],
+                             threshold=conf.shaper_threshold,
+                             top_k=conf.shaper_top_k)
 
         # squeeze all spatially related data
-        self.crimes = self.shaper.squeeze(zip_file["crime_types_grids"])  # reshaped into (N, C, L)
+        self.crimes = self.shaper.squeeze(zip_file["crime_types_grids"])  # reshaped into (N, C, L) from (N, C, H, W)
+        # used for display purposes - and grouping similarly active cells together.
+        self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]
 
-        # todo - add most popular indices
-        self.top_k_l_indices = np.argsort(self.crimes[:, 0].mean(0))[::-1][:conf.top_k_cells]
-        if conf.use_top_k_cells:
-            self.crimes = self.crimes[:, :, self.top_k_l_indices]
-
-        self.targets = np.copy(self.crimes)[1:, 0:1]  # only check for totals > 0
+        self.targets = np.copy(self.crimes)[1:, 0]  # only check for totals > 0
         self.targets[self.targets > 0] = 1  # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
 
         self.crimes = self.crimes[:-1]
@@ -217,7 +218,7 @@ class FlatDataset(Dataset):
         """Denotes the total number of samples"""
         return self.len  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
 
-    def __getitem__(self, index):
+    def __getitem__(self, index):  # tensorflow version of the pasring function
         # when using no teacher forcing
         # target = self.targets[t+self.seq_len, :, l]
         # todo add all other data - should be done in data-generation?

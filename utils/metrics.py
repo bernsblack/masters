@@ -1,7 +1,7 @@
 #!python3
 import numpy as np
 import torch
-from utils.data_processing import  get_times
+from utils.data_processing import get_times
 
 """
 Not many of these metrics can be imported straight from sklearn.metrics, e.g.:
@@ -28,7 +28,7 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, roc
     mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 
-def best_threshold(y_true, probas_pred):
+def best_threshold(y_true, probas_pred, verbose=True):
     def safe_f1_score(pr):
         p, r = pr
         if p + r == 0:
@@ -36,11 +36,26 @@ def best_threshold(y_true, probas_pred):
         else:
             return 2 * (p * r) / (p + r)
 
-    precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
-    scores = list(map(safe_f1_score, zip(precision, recall)))
-    index = np.argmax(scores)
-    print(f"f1_score: {scores[index]} at index {index}, new threshold {thresholds[index]}")
-    return thresholds[index]
+    precision, recall, thresholds = precision_recall_curve(y_true.flatten(), probas_pred.flatten())
+    scores = np.array(list(map(safe_f1_score, zip(precision, recall))))
+    index_array = np.argmax(scores)  # almost always a singular int, and not an array
+    if verbose:
+        print(f"f1_score: {scores[index_array]} at index {index_array}, new threshold {thresholds[index_array]}")
+    return thresholds[index_array]
+
+
+def get_y_pred(thresh, probas_pred):
+    """
+    Note: thresh should be determined using the training data only
+    :param thresh: Used best_threshold to get the optimal threshold for the maximum F1 score
+    :param probas_pred:  [0,inf) and float values
+    :return y_pred: thresholds float values of probas_pred to get hard classifications
+    """
+    y_pred = np.copy(probas_pred)
+    y_pred[y_pred >= thresh] = 1
+    y_pred[y_pred < thresh] = 0
+
+    return y_pred
 
 
 def mean_absolute_scaled_error(y_true, y_pred):
@@ -162,7 +177,7 @@ def plot_roc_and_pr_curve(ground_truth, predictions_list):
 
 
 # Metric Plots
-class BaseMetricPlotter:
+class BaseMetricPlotter:  # todo: replace with the BasePlotter in plots
     """
     Class is used to setup and add plots to a figure and then save or show this figure
     """
@@ -222,13 +237,12 @@ class LossPlotter(BaseMetricPlotter):
         # plt.xticks(list(range(len(trn_loss)))) # plot the x ticks of grid on the epochs
 
         # insert the first loss to illustrate the curve better
-        trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(trn_loss)+1)
+        trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(trn_loss) + 1)
         plt.plot(trn_loss_x, [all_trn_loss[0], *trn_loss], label="Training Loss (Epoch)", c='g', **kwargs)
         all_trn_loss_x = np.linspace(start=0, stop=len(trn_loss), num=len(all_trn_loss))
         plt.plot(all_trn_loss_x, all_trn_loss, alpha=.2, c='g', label="Training Loss (Batch)")
 
-
-        val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(val_loss)+1)
+        val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(val_loss) + 1)
         plt.plot(val_loss_x, [all_val_loss[0], *val_loss], label="Validation Loss (Epoch)", c='r', **kwargs)
         all_val_loss_x = np.linspace(start=0, stop=len(val_loss), num=len(all_val_loss))
         plt.plot(all_val_loss_x, all_val_loss, alpha=.2, c='r', label="Validation Loss (Batch)")

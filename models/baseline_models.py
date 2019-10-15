@@ -22,7 +22,7 @@ class HistoricAverage:
         r = np.empty(data.shape)
         r.fill(np.nan)
         for i in range(self.step + 1, len(r)):
-            a_subset = data[i - self.step + 1:0:-self.step]
+            a_subset = data[i - self.step + 1:0:-self.step]  # +1 to take the historic average of the next time step
             if self.max_steps > 0:
                 a_subset = a_subset[-self.max_steps:]
 

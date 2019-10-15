@@ -1,5 +1,31 @@
 import json
 from datetime import datetime
+from warnings import warn
+from time import time, sleep
+
+
+def timeit(func):
+    """
+    Profiling wrapper to time functions
+    :param func: function that needs to be times
+    :return: return value of the function
+    """
+    def wrapper(*args):
+        start = time()
+        a = func(*args)
+        stop = time()
+        print(f"{func.__name__}: {stop - start}")
+        return a
+
+    return wrapper
+
+
+def deprecated(func):
+    def wrapper():
+        warn(f"{func.__name__} has been deprecated", DeprecationWarning)
+        return func()
+
+    return wrapper
 
 
 class Timer:

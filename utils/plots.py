@@ -9,11 +9,91 @@ from mpl_toolkits.mplot3d import Axes3D
 import matplotlib.pyplot as plt
 import numpy as np
 import matplotlib.cm as cm
+from matplotlib import rcParams
 
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
     CAN BE FOUND IN THE utils.metrics MODULE 
 """
+from matplotlib import rcParams
+
+
+class BasePlotter:
+    """
+    Class is used to setup and add plots to a figure and then save or show this figure
+    Acts az the base-class where we set global style features like the rcParams
+    """
+
+    def __init__(self, title, xlabel, ylabel):
+        rcParams["mathtext.fontset"] = "stix"
+        rcParams["font.family"] = "STIXGeneral"
+        rcParams["font.size"] = "18"
+
+        self.title = title
+        self.figsize = (20, 10)
+        self.xlabel = xlabel
+        self.ylabel = ylabel
+
+        self.grid_alpha = 0.2
+        self.setup()
+
+    @staticmethod
+    def setup():
+        raise NotImplemented
+
+    def finalise(self):
+        plt.title(self.title)
+        plt.legend(bbox_to_anchor=(1.04, 0), loc="lower left", borderaxespad=0)
+        plt.grid(alpha=self.grid_alpha)
+
+    def show(self):
+        self.finalise()
+        plt.show()
+
+    def savefig(self, file_location):
+        self.finalise()
+        plt.savefig(file_location)
+
+
+class DistributionPlotter(BasePlotter):
+    """
+    Class is used to plot violin distributions of data
+
+    Example:
+        ```
+        dist_plot = DistributionPlotter(title="Random Data Test", xlabel="Models",ylabel="Accuracy", is_box_plot=False)
+        dist_plot.add_data(data=data, labels=labels)  # where data is a list [(N, 1),(N, 1), ...]
+        dist_plot.show()
+        ```
+    """
+
+    def __init__(self, title, xlabel="Features", ylabel="Values", is_box_plot=False):  # setup maybe add the size of the figure
+        super(DistributionPlotter, self).__init__(title, xlabel, ylabel)
+        self.data = []
+        self.labels = []
+        self.is_box_plot = is_box_plot
+
+    @staticmethod
+    def setup():
+        return None
+
+    def add_data(self, data, labels):
+        self.data.extend(data)
+        self.labels.extend(labels)
+
+    def finalise(self):
+        plt.figure(figsize=self.figsize)
+        plt.title(self.title)
+        plt.xlabel(self.xlabel)
+        plt.ylabel(self.ylabel)
+
+        if self.is_box_plot:
+            plt.boxplot(x=self.data,labels=self.labels, flierprops={"marker": "_"})
+        else:
+            plt.violinplot(dataset=self.data, showmeans=True, showextrema=True, showmedians=False)
+            plt.xticks(ticks=np.arange(1, len(self.labels) + 1), labels=self.labels)
+
+        plt.grid(alpha=self.grid_alpha)
 
 
 def visualize_weights(model):

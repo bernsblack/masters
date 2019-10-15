@@ -1,11 +1,39 @@
 import numpy as np
+from utils import deprecated
 
+
+def get_trans_mat(data, threshold=0, top_k=-1):
+    """
+    :param data: array shaped (N, C, H, W)
+    :param threshold: sum over all time should be above this threshold
+    :param top_k: if larger than 0 we filter out only the top k most active cells of the data grid
+    :return trans_mat: transition matrix used to filter out cells where nothing occurs over time
+    """
+    old_shape = list(data.shape)
+    new_shape = old_shape[:-2]
+    new_shape.append(old_shape[-1] * old_shape[-2])
+
+    flat_data_sum = data.reshape(new_shape).sum(0)
+
+    indices = np.argwhere(flat_data_sum > threshold)
+
+    if top_k > 0:  # zero where data_sum is not
+        top_indices = np.argsort(flat_data_sum)[:-top_k:-1]  # ensures the
+        indices = np.intersect1d(top_indices, indices) # sort the array for us
+
+    trans_mat = np.zeros((new_shape[-1], len(indices)))
+    for i, j in enumerate(indices):
+        trans_mat[j, i] = 1
+
+    return trans_mat
 
 # utils functions because we're having issues importing utils
-def get_trans_mat(data, threshold=0):
+@deprecated
+def get_trans_mat_old(data, threshold=0, top_k=-1):
     """
-    :param data: array shaped (N, C, W, H)
+    :param data: array shaped (N, C, H, W)
     :param threshold: sum over all time should be above this threshold
+    :param top_k: if larger than 0 we filter out only the top k most active cells of the data grid
     :return trans_mat: transition matrix used to filter out cells where nothing occurs over time
     """
     shape_old = np.shape(data)
@@ -18,9 +46,16 @@ def get_trans_mat(data, threshold=0):
     shape_new = (n, h * w)
 
     data = np.reshape(data, shape_new)
+
     data_sum = np.sum(data, 0)
+
+    if top_k > 0:  # zero where data_sum is not
+        bottom_indices = np.sort(np.argsort(data.mean(0))[:-top_k])  # ensures the
+        data_sum[bottom_indices] = 0
+    data_sum[data_sum <= threshold] = 0
     data_sum[data_sum > threshold] = 1
-    data_sum = np.reshape(data_sum, (len(data_sum), 1))
+
+    data_sum = np.expand_dims(data_sum, 1)
     trans_mat = []
     for i in range(len(data_sum)):
         if data_sum[i] != 0:
@@ -31,14 +66,21 @@ def get_trans_mat(data, threshold=0):
     return trans_mat
 
 
-class Shaper:  # TODO MAKE CHANNEL SIZE INDEPENDENT
-    def __init__(self, data):
+class Shaper:
+    def __init__(self, data, threshold=0, top_k=-1):
+        """
+
+        :param top_k: if larger than 0 we filter out only the top k most active cells of the data grid
+        :param data: array shaped (N, C, H, W)
+        :param threshold: sum over all time should be above this threshold
+        """
         shape = list(np.shape(data))
 
         self.h, self.w = shape[-2:]
-        self.l = self.h * self.w
 
-        self.trans_mat = get_trans_mat(data)
+        self.trans_mat = get_trans_mat(data=data, threshold=threshold, top_k=top_k)
+
+        self.l = self.trans_mat.shape[-1]
 
     def squeeze(self, sparse_data):
         shape = list(np.shape(sparse_data))

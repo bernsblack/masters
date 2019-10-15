@@ -6,18 +6,20 @@ from scipy.interpolate import interp2d  # used for super resolution of grids
 import torch
 from torch.autograd import Variable
 from scipy.ndimage import gaussian_filter
+from utils import deprecated
 
 
 def get_period(a):
     n = len(a)
     corr_list = []
     for i in range(n):
-        corr = np.correlate(a,np.roll(a,i))
+        corr = np.correlate(a, np.roll(a, i))
         corr_list.append(corr)
-    r = np.array(corr_list)[:,0]
+    r = np.array(corr_list)[:, 0]
     r[r < 0] = 0
     period = np.argsort(r)[::-1][1]
     return period
+
 
 def inv_weights(labels):
     """
@@ -163,11 +165,14 @@ def get_rev_S(S, do_superres, do_cumsum):
     return rev
 
 
+@deprecated
 def get_trans_mat_d2s(a, threshold=0):
     """
+    Warning: has been deprecated
     a array shapped (N, W, H)
     sum over all time should be above this threshold
     """
+
     N, W, H = a.shape
     a = np.reshape(a, (N, W * H))
     dd = np.sum(a, 0)
