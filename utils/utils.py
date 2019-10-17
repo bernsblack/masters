@@ -1,7 +1,11 @@
 import json
 from datetime import datetime
+from time import time
 from warnings import warn
-from time import time, sleep
+
+
+def if_none(a, b):  # common null checker
+    return b if a is None else a
 
 
 def timeit(func):
@@ -10,6 +14,7 @@ def timeit(func):
     :param func: function that needs to be times
     :return: return value of the function
     """
+
     def wrapper(*args):
         start = time()
         a = func(*args)

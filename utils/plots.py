@@ -1,15 +1,11 @@
-import numpy as np
-import matplotlib.pyplot as plt
-from mpl_toolkits.axes_grid1 import make_axes_locatable
-import io
 import base64
-from IPython.display import HTML
+import io
 
-from mpl_toolkits.mplot3d import Axes3D
+import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
-import matplotlib.cm as cm
-from matplotlib import rcParams
+from IPython.display import HTML
+from mpl_toolkits.axes_grid1 import make_axes_locatable
 
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
@@ -67,7 +63,8 @@ class DistributionPlotter(BasePlotter):
         ```
     """
 
-    def __init__(self, title, xlabel="Features", ylabel="Values", is_box_plot=False):  # setup maybe add the size of the figure
+    def __init__(self, title, xlabel="Features", ylabel="Values",
+                 is_box_plot=False):  # setup maybe add the size of the figure
         super(DistributionPlotter, self).__init__(title, xlabel, ylabel)
         self.data = []
         self.labels = []
@@ -88,7 +85,7 @@ class DistributionPlotter(BasePlotter):
         plt.ylabel(self.ylabel)
 
         if self.is_box_plot:
-            plt.boxplot(x=self.data,labels=self.labels, flierprops={"marker": "_"})
+            plt.boxplot(x=self.data, labels=self.labels, flierprops={"marker": "_"})
         else:
             plt.violinplot(dataset=self.data, showmeans=True, showextrema=True, showmedians=False)
             plt.xticks(ticks=np.arange(1, len(self.labels) + 1), labels=self.labels)
@@ -127,7 +124,7 @@ def imshow(a, ax, title=""):
     ax.set_title(title)
     #  ax.set_xticks(np.arange(a.shape[-2]))
     #  ax.set_yticks(np.arange(a.shape[-1]))
-    plt.grid("off")
+    plt.grid(False)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
     plt.colorbar(im, cax=cax, cmap="viridis")
@@ -310,14 +307,19 @@ def setup_subplots(a):
 
 
 def update_subplots(a, plots):
-    for i, plot in enumerate(plots):
-        plot.set_data(a[i])
+    for i, plot_ in enumerate(plots):
+        plot_.set_data(a[i])
 
 
-def im(a):
-    plt.figure(figsize=(10, 8))
-    plt.imshow(a)
-    plt.colorbar()
+def im(data, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis'):
+    """
+    quick and easy way to view 2d matrices in notebooks
+    """
+    plt.figure(figsize=figsize)
+    plt.imshow(data, aspect=aspect, cmap=cmap)
+    if colorbar:
+        plt.colorbar()
+
     plt.show()
 
 

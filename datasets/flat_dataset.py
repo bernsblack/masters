@@ -6,6 +6,7 @@ from torch.utils.data import Dataset
 
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
+from utils.utils import if_none
 
 """
 Not really faster as the FlatDataset
@@ -184,7 +185,7 @@ class FlatDataGroup:
             # used for display purposes - and grouping similarly active cells together.
             self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]
 
-            self.targets = np.copy(self.crimes[1:, 0])  # only check for totals > 0
+            self.targets = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
             self.targets[
                 self.targets > 0] = 1  # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
 
@@ -227,6 +228,9 @@ class FlatDataGroup:
         self.crimes = np.log2(1 + self.crimes)  # todo: add hot-encoded option
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
+        print("shape crimes_train -> ", self.crimes[self.trn_indices[0]:self.trn_indices[1]].shape)
+        print("shape crimes -> ", self.crimes.shape)
+
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
         trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
@@ -269,6 +273,7 @@ class FlatDataGroup:
 
         # target index - also the index given to the
         # todo check if time independent values aren't copied every time
+        # todo dependency injection of the different types of datasets
         self.training_set = FlatDataset(
             crimes=trn_crimes,
             targets=trn_targets,
@@ -345,7 +350,7 @@ class FlatDataset(Dataset):
 
         self.shaper = shaper
 
-        #  (min_index, max_index) are limits of flattened targets
+        #  [min_index, max_index) are limits of flattened targets
         self.max_index = self.t_size * self.l_size
         self.min_index = self.seq_len * self.l_size
         self.len = self.min_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
@@ -365,30 +370,12 @@ class FlatDataset(Dataset):
         # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
         # [√] number of incidents of crime occurrence by date in 2013 (1-D)
         """Generates one sample of data"""
-
-        # check if index won't cause out of range exception
         if isinstance(index, slice):
-            start, stop, step = index.start, index.stop, index.step
-            if step is None:
-                step = 1
-            indices = range(start, stop, step)
+            index = range(if_none(index.start, self.min_index),
+                          if_none(index.stop, self.max_index),
+                          if_none(index.step, 1))
 
-            if start < self.min_index:  # the batch loader should ensure that this never occurs
-                raise IndexError(f"index should always be more than the minimum index (sequence length times number " +
-                                 f"of cells per time frame): index ({start}) > min_index ({self.min_index})")
-            if stop > self.max_index:  # the batch loader should ensure that this never occurs
-                raise IndexError(f"index should always be less than the maximum index (sequence length times number " +
-                                 f"of cells per time frame): index ({stop}) < max_index ({self.max_index})")
-
-        elif isinstance(index, int):
-            indices = [index]
-            if index < self.min_index or index > self.max_index:
-                raise IndexError(f"index should always be less than the maximum index (sequence length times number " +
-                                 f"of cells per time frame): index ({index}) < max_index ({self.max_index})")
-        else:
-            indices = index
-            # todo double check if any of the values in indices is outside of the ranges
-
+        indices = np.array([index]).flatten()  # brackets and flatten caters where index is a single number
         # todo review the code below - list are bad find a better way!!
         stack_spc_feats = []
         stack_tmp_feats = []
@@ -398,6 +385,9 @@ class FlatDataset(Dataset):
         result_indices = []
 
         for i in indices:
+            if not (self.min_index <= i < self.max_index):
+                raise IndexError(f"index value {i} is not in range({self.min_index},{self.max_index})")
+
             t_index, l_index = np.unravel_index(i, (self.t_size, self.l_size))
             t_start = t_index - self.seq_len
             t_stop = t_index

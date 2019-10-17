@@ -16,7 +16,7 @@ def get_index_mask(data, threshold=0, top_k=-1):
     # new_shape = old_shape[:-2]
     # new_shape.append(old_shape[-1] * old_shape[-2])
 
-    flat_data_sum = data[:, 0].reshape(new_shape).sum(0)[0]
+    flat_data_sum = data[:, 0].reshape(new_shape).sum(0).flatten()
 
     indices = np.argwhere(flat_data_sum > threshold)
 

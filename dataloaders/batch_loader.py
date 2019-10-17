@@ -57,6 +57,6 @@ class BatchLoader:
             stop_index = self.current_batch * self.batch_size
             if stop_index > len(self.indices):
                 stop_index = self.len
-            batch_indices = self.indices[start_index:stop_index]
+            batch_indices = self.indices[start_index:stop_index]  # array of the indices - thus getitem should cater
 
             return self.dataset[batch_indices]
