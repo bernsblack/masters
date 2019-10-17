@@ -1,6 +1,9 @@
-from pprint import pformat
+from numpy import ndarray
+from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
     , precision_recall_curve, roc_curve
+
+from utils.preprocessing import Shaper
 
 
 class PRCurve:
@@ -40,14 +43,18 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
 
 class ModelResult:
-    def __init__(self, model_name, y_true, y_pred, probas_pred, t_range):
+    def __init__(self, model_name: str, y_true: ndarray, y_pred: ndarray,
+                 probas_pred: ndarray, t_range: DatetimeIndex, shaper: Shaper):
         """
+        ModelResult: save the data in the actual format we need it (N,C,L)
+        Data is saved in a sparse representation - no extra zero values data saved.
+        Shaper allows us to re-shape the data to create a map view of the city
 
         :param model_name: text used to refer to the model on plots
-        :param y_true: ground truth value (i.e. did crime happen 1 or not 0) {0,1}
-        :param y_pred: the model's hard prediction of the model {0,1}
-        :param probas_pred: model floating point values, can be likelihoods [0,1) or count estimates [0,n)
-        :param t_range: range of the times of the test set - also used in plots
+        :param y_true (N,1,L): ground truth value (i.e. did crime happen 1 or not 0) {0,1}
+        :param y_pred (N,1,L): the model's hard prediction of the model {0,1}
+        :param probas_pred (N,1,L): model floating point values, can be likelihoods [0,1) or count estimates [0,n)
+        :param t_range (N,1): range of the times of the test set - also used in plots
         """
 
         self.model_name = model_name
@@ -55,6 +62,7 @@ class ModelResult:
         self.y_pred = y_pred  # remove we're getting y_true from y_pred -> get-best_threshold
         self.probas_pred = probas_pred
         self.t_range = t_range
+        self.shaper = shaper
 
     def accuracy(self):
         return accuracy_score(self.y_true, self.y_pred)

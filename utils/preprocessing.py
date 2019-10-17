@@ -1,7 +1,33 @@
 import numpy as np
+
 from utils import deprecated
 
 
+def get_index_mask(data, threshold=0, top_k=-1):
+    """
+    :param data: array shaped (N, C, H, W)
+    :param threshold: sum over all time should be above this threshold
+    :param top_k: if larger than 0 we filter out only the top k most active cells of the data grid
+    :return trans_mat: transition matrix used to filter out cells where nothing occurs over time
+    """
+    N, C, H, W = data.shape
+    new_shape = N, H * W
+    # old_shape = list(data.shape)
+    # new_shape = old_shape[:-2]
+    # new_shape.append(old_shape[-1] * old_shape[-2])
+
+    flat_data_sum = data[:, 0].reshape(new_shape).sum(0)[0]
+
+    indices = np.argwhere(flat_data_sum > threshold)
+
+    if top_k > 0:  # zero where data_sum is not
+        top_indices = np.argsort(flat_data_sum)[:-top_k - 1:-1]  # ensures the
+        indices = np.intersect1d(top_indices, indices)  # sort the array for us
+
+    return indices.flatten()
+
+
+@deprecated
 def get_trans_mat(data, threshold=0, top_k=-1):
     """
     :param data: array shaped (N, C, H, W)
@@ -13,19 +39,20 @@ def get_trans_mat(data, threshold=0, top_k=-1):
     new_shape = old_shape[:-2]
     new_shape.append(old_shape[-1] * old_shape[-2])
 
-    flat_data_sum = data.reshape(new_shape).sum(0)
+    flat_data_sum = data.reshape(new_shape).sum(0)[0]
 
     indices = np.argwhere(flat_data_sum > threshold)
 
     if top_k > 0:  # zero where data_sum is not
-        top_indices = np.argsort(flat_data_sum)[:-top_k:-1]  # ensures the
-        indices = np.intersect1d(top_indices, indices) # sort the array for us
+        top_indices = np.argsort(flat_data_sum)[:-top_k - 1:-1]  # ensures the
+        indices = np.intersect1d(top_indices, indices)  # sort the array for us
 
     trans_mat = np.zeros((new_shape[-1], len(indices)))
     for i, j in enumerate(indices):
         trans_mat[j, i] = 1
 
     return trans_mat
+
 
 # utils functions because we're having issues importing utils
 @deprecated
@@ -78,11 +105,67 @@ class Shaper:
 
         self.h, self.w = shape[-2:]
 
+        self.index_mask = get_index_mask(data=data, threshold=threshold, top_k=top_k)
+
+        self.l = len(self.index_mask)
+
+    def squeeze(self, sparse_data):
+        """
+
+        :param sparse_data: np.array with shape (N, C, H, W)
+        :return dense_data: np.array with shape (N, C, L)
+        """
+        shape = list(np.shape(sparse_data))
+
+        shape_new = shape[:-2]
+        shape_new.append(int(np.product(shape[-2:])))
+
+        reshaped_data = np.reshape(sparse_data, shape_new)
+        dense_data = reshaped_data[:, :, self.index_mask]
+        return dense_data
+
+    def unsqueeze(self, dense_data):
+        """
+        :param dense_data: np.array with shape (N, C, L)
+        :return sparse_data: np.array with shape (N, C, H, W):
+        """
+        N, C, L = np.shape(dense_data)
+        shape = list(np.shape(dense_data))
+
+        shape_old = shape[:-1]
+        shape_old.extend([self.h, self.w])
+
+        sparse_data = np.zeros((N, C, self.h * self.w))
+        sparse_data[:, :, self.index_mask] = dense_data
+
+        reshaped_data = np.reshape(sparse_data, shape_old)
+        return reshaped_data
+
+
+class ShaperDeprecated:  # was to slow has been replaced
+    @deprecated
+    def __init__(self, data, threshold=0, top_k=-1):
+        """
+
+        :param top_k: if larger than 0 we filter out only the top k most active cells of the data grid
+        :param data: array shaped (N, C, H, W)
+        :param threshold: sum over all time should be above this threshold
+        """
+        shape = list(np.shape(data))
+
+        self.h, self.w = shape[-2:]
+
         self.trans_mat = get_trans_mat(data=data, threshold=threshold, top_k=top_k)
 
         self.l = self.trans_mat.shape[-1]
 
+    @deprecated
     def squeeze(self, sparse_data):
+        """
+
+        :param sparse_data: np.array with shape (N, C, H, W)
+        :return dense_data: np.array with shape (N, C, H * W)
+        """
         shape = list(np.shape(sparse_data))
 
         shape_new = shape[:-2]
@@ -92,7 +175,12 @@ class Shaper:
         dense_data = np.matmul(reshaped_data, self.trans_mat)
         return dense_data
 
+    @deprecated
     def unsqueeze(self, dense_data):
+        """
+        :param dense_data: np.array with shape (N, C, H * W)
+        :return sparse_data: np.array with shape (N, C, H, W):
+        """
         shape = list(np.shape(dense_data))
 
         shape_old = shape[:-1]

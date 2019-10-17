@@ -2,8 +2,8 @@
 File contains a series of classes that can be used as the config/base settings for the models and their
 hyper parameters for training
 """
-from pprint import pformat
 from copy import deepcopy
+from pprint import pformat
 
 
 class BaseConf:  # args from arg-parser to over write values
@@ -17,6 +17,8 @@ class BaseConf:  # args from arg-parser to over write values
         else:  # default values
             self.seed = 3
             self.use_cuda = False
+
+            self.use_crime_types = False
 
             # data related hyper-params
             self.val_ratio = 0.1

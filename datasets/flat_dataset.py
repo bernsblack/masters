@@ -1,9 +1,142 @@
-import pandas as pd
-import numpy as np
-from torch.utils.data import Dataset
 import logging as log
-from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
+
+import numpy as np
+import pandas as pd
+from torch.utils.data import Dataset
+
 from utils.configs import BaseConf
+from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
+
+"""
+Not really faster as the FlatDataset
+"""
+
+
+class BaseDataGroup:  # using the builder pattern
+    """
+    Simple class to build up a data-group
+    Crime set is always necessary - other meta data can be added later on - makes simplifying models easier
+    """
+
+    def __init__(self, data_path: str, conf: BaseConf):
+        # Init optionals
+        self.time_vectors = None
+        self.weather_vectors = None
+        self.demog_grid = None
+        self.street_grid = None
+
+        self.weather_vector_scaler = None
+        self.trn_time_vectors = None
+        self.val_time_vectors = None
+        self.tst_time_vectors = None
+
+        self.trn_weather_vectors = None
+        self.val_weather_vectors = None
+        self.tst_weather_vectors = None
+
+        # with context helper ensures zip_file is closed
+        with np.load(data_path + "generated_data.npz") as zip_file:
+            self.data_path = data_path
+            self.conf = conf
+
+            t_range = pd.read_pickle(data_path + "t_range.pkl")
+            log.info(f"\tt_range shape {np.shape(t_range)}")
+
+            if conf.use_crime_types:
+                self.crimes = zip_file["crime_types_grids"]
+            else:
+                self.crimes = zip_file["crime_grids"]
+
+            self.shaper = Shaper(data=self.crimes,
+                                 threshold=conf.shaper_threshold,
+                                 top_k=conf.shaper_top_k)
+
+            # squeeze all spatially related data
+            # reshaped into (N, C, L) from (N, C, H, W)
+            self.crimes = self.shaper.squeeze(self.crimes)
+            # used for display purposes - and grouping similarly active cells together.
+
+            self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]  # todo move to shaper
+
+            self.targets = np.copy(self.crimes[1:, 0])  # only check for totals > 0
+            # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
+            self.targets[self.targets > 0] = 1
+
+            self.crimes = self.crimes[:-1]
+
+            self.x_range = zip_file["x_range"]
+            self.y_range = zip_file["y_range"]
+            self.t_range = t_range[1:]  # todo: t_range match the time of the target
+
+            self.seq_len = conf.seq_len
+            self.total_len = len(self.crimes)  # length of the whole time series
+
+            #  sanity check if time matches up with our grids
+            if len(self.t_range) - 1 != len(self.crimes):
+                log.error("time series and time range lengths do not match up -> " +
+                          "len(self.t_range) != len(self.crime_types_grids)")
+                raise RuntimeError(
+                    f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
+
+            #  split the data into ratios
+            val_size = int(self.total_len * conf.val_ratio)
+            tst_size = int(self.total_len * conf.tst_ratio)
+
+            #  start and stop t_index of each dataset - can be used outside of loader/group
+            self.trn_indices = (0, self.total_len - tst_size - val_size)
+            self.val_indices = (self.trn_indices[1] - self.seq_len, self.total_len - tst_size)
+            self.tst_indices = (self.val_indices[1] - self.seq_len, self.total_len)
+
+            self.trn_t_range = self.t_range[self.trn_indices[0]:self.trn_indices[1]]
+            self.val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
+            self.tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
+
+            # split and normalise the crime data
+            # log2 scaling to count data to make less disproportionate
+            self.crimes = np.log2(1 + self.crimes)  # todo: add hot-encoded option
+            self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
+            # should be axis of the channels - only fit scaler on training data
+            self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+            self.crimes = self.crime_scaler.transform(self.crimes)
+            self.trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
+            self.val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1]]
+            self.tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
+
+            # targets
+            self.trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
+            self.val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
+            self.tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
+
+    def with_time_vectors(self):
+        with np.load(self.data_path + "generated_data.npz") as zip_file:
+            self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
+            # time_vectors is already scaled between 0 and 1
+            self.trn_time_vectors = self.time_vectors[self.trn_indices[0]:self.trn_indices[1]]
+            self.val_time_vectors = self.time_vectors[self.val_indices[0]:self.val_indices[1]]
+            self.tst_time_vectors = self.time_vectors[self.tst_indices[0]:self.tst_indices[1]]
+
+    def with_weather_vectors(self):
+        with np.load(self.data_path + "generated_data.npz") as zip_file:
+            self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
+            # splitting and normalisation of weather data
+            self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
+
+            # scaling weather with all data so it's season independent, not just the training data
+            self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
+            self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
+            self.trn_weather_vectors = self.weather_vectors[self.trn_indices[0]:self.trn_indices[1]]
+            self.val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
+            self.tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
+
+    def with_demog_grid(self):
+        with np.load(self.data_path + "generated_data.npz") as zip_file:
+            self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
+            self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
+
+    def with_street_grid(self):
+        with np.load(self.data_path + "generated_data.npz") as zip_file:
+            self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
+            self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
 
 # todo add set of valid / living sells / to be able to sample the right ones
@@ -26,40 +159,46 @@ class FlatDataGroup:
         # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
         # [√] number of incidents of crime occurrence by date in 2013 (1-D)
 
-        zip_file = np.load(data_path + "generated_data.npz")
+        with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
+            # print info on the read data
+            log.info("Data shapes of files in generated_data.npz")
+            for k, v in zip_file.items():
+                log.info(f"\t{k} shape {np.shape(v)}")
+            t_range = pd.read_pickle(data_path + "t_range.pkl")
+            log.info(f"\tt_range shape {np.shape(t_range)}")
 
-        # print info on the read data
-        log.info("Data shapes of files in generated_data.npz")
-        for k, v in zip_file.items():
-            log.info(f"\t{k} shape {np.shape(v)}")
-        t_range = pd.read_pickle(data_path + "t_range.pkl")
-        log.info(f"\tt_range shape {np.shape(t_range)}")
+            if conf.use_crime_types:
+                self.crimes = zip_file["crime_types_grids"]
+            else:
+                self.crimes = zip_file["crime_grids"]
 
-        # should make shaper on only the testing data so that we don't look at testing cells where nothing actually
-        # happens
-        self.shaper = Shaper(data=zip_file["crime_types_grids"],
-                             threshold=conf.shaper_threshold,
-                             top_k=conf.shaper_top_k)
+            # should make shaper on only the testing data so that we don't look at testing cells where nothing actually
+            # happens
+            self.shaper = Shaper(data=self.crimes,
+                                 threshold=conf.shaper_threshold,
+                                 top_k=conf.shaper_top_k)
 
-        # squeeze all spatially related data
-        self.crimes = self.shaper.squeeze(zip_file["crime_types_grids"])  # reshaped into (N, C, L) from (N, C, H, W)
-        # used for display purposes - and grouping similarly active cells together.
-        self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]
+            # squeeze all spatially related data
+            # reshaped into (N, C, L) from (N, C, H, W)
+            self.crimes = self.shaper.squeeze(self.crimes)
+            # used for display purposes - and grouping similarly active cells together.
+            self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]
 
-        self.targets = np.copy(self.crimes)[1:, 0]  # only check for totals > 0
-        self.targets[self.targets > 0] = 1  # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
+            self.targets = np.copy(self.crimes[1:, 0])  # only check for totals > 0
+            self.targets[
+                self.targets > 0] = 1  # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
 
-        self.crimes = self.crimes[:-1]
-        self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)  # todo move to where data is generated
+            self.crimes = self.crimes[:-1]
+            self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)  # todo move to where data is generated
 
-        self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
-        self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
-        self.x_range = zip_file["x_range"]
-        self.y_range = zip_file["y_range"]
-        self.t_range = t_range[1:]  # todo: t_range match the time of the target
+            self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
+            self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
+            self.x_range = zip_file["x_range"]
+            self.y_range = zip_file["y_range"]
+            self.t_range = t_range[1:]  # todo: t_range match the time of the target
 
-        self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
-        self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
+            self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
+            self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
 
         self.seq_len = conf.seq_len
         self.total_len = len(self.crimes)  # length of the whole time series
@@ -67,7 +206,7 @@ class FlatDataGroup:
         #  sanity check if time matches up with our grids
         if len(self.t_range) - 1 != len(self.crimes):
             log.error("time series and time range lengths do not match up -> " +
-                      "len(self.t_range) != len(self.crime_types_grids)")
+                      "len(self.t_range) != len(self.crimes)")
             raise RuntimeError(f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
 
         #  split the data into ratios
@@ -125,7 +264,6 @@ class FlatDataGroup:
         tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
         # normalise space dependent data - using minmax_scale - no need to save train data norm values
-        # todo concat the space dependent values so long
         self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
         self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
@@ -251,11 +389,13 @@ class FlatDataset(Dataset):
             indices = index
             # todo double check if any of the values in indices is outside of the ranges
 
-        # todo review the code below
+        # todo review the code below - list are bad find a better way!!
         stack_spc_feats = []
         stack_tmp_feats = []
         stack_env_feats = []
         stack_targets = []
+
+        result_indices = []
 
         for i in indices:
             t_index, l_index = np.unravel_index(i, (self.t_size, self.l_size))
@@ -282,6 +422,8 @@ class FlatDataset(Dataset):
             stack_tmp_feats.append(tmp_vec)
             stack_targets.append(target_vec)
 
+            result_indices.append((t_index, l_index))
+
         # spc_feats: [demog_vec]
         # env_feats: [street_vec]
         # tmp_feats: [time_vec, weather_vec, crime_vec]
@@ -297,6 +439,6 @@ class FlatDataset(Dataset):
         targets = np.swapaxes(targets, 0, 1)
 
         # output shapes should be - (seq_len, batch_size,, n_feats)
-        return spc_feats, tmp_feats, env_feats, targets
+        return result_indices, spc_feats, tmp_feats, env_feats, targets
 
     ## todo have this as the base class - create new classes where we're just over loading

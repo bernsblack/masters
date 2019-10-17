@@ -1,8 +1,9 @@
-from utils.configs import BaseConf
-from datasets.flat_dataset import FlatDataGroup
 from dataloaders.batch_loader import BatchLoader
+from datasets.flat_dataset import FlatDataGroup
+from utils.configs import BaseConf
 
 
+# todo (rename) to Loader
 class FlatDataLoaders:
     """
     Container for the data group and the TRAIN/TEST/VALIDATION batch loaders
