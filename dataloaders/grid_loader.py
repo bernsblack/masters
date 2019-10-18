@@ -1,6 +1,6 @@
-from utils.configs import BaseConf
-from datasets.grid_dataset import GridDataGroup
 from dataloaders.batch_loader import BatchLoader
+from datasets.grid_dataset import GridDataGroup
+from utils.configs import BaseConf
 
 
 class GridDataLoaders:
@@ -20,17 +20,17 @@ class GridDataLoaders:
         training_set = data_group.training_set
         validation_set = data_group.validation_set
         testing_set = data_group.testing_set
-        self.training_generator = BatchLoader(dataset=training_set,
-                                              batch_size=conf.batch_size,
-                                              seq_len=conf.seq_len,
-                                              sub_sample=True)
+        self.training_loader = BatchLoader(dataset=training_set,
+                                           batch_size=conf.batch_size,
+                                           seq_len=conf.seq_len,
+                                           sub_sample=True)
 
-        self.validation_generator = BatchLoader(dataset=validation_set,
-                                                batch_size=conf.batch_size,
-                                                seq_len=conf.seq_len,
-                                                sub_sample=True)
-
-        self.testing_generator = BatchLoader(dataset=testing_set,
+        self.validation_loader = BatchLoader(dataset=validation_set,
                                              batch_size=conf.batch_size,
                                              seq_len=conf.seq_len,
-                                             sub_sample=conf.sub_sample_test_set)
+                                             sub_sample=True)
+
+        self.testing_loader = BatchLoader(dataset=testing_set,
+                                          batch_size=conf.batch_size,
+                                          seq_len=conf.seq_len,
+                                          sub_sample=conf.sub_sample_test_set)

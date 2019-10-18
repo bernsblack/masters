@@ -1,17 +1,19 @@
-import os
 import logging as log
-from time import strftime
+import os
 from copy import deepcopy
-from torch import nn, optim
+from time import strftime
+
 import torch.nn.functional as F
-from utils.data_processing import *
-from logger.logger import setup_logging
-from utils.configs import BaseConf
-from utils.utils import write_json, Timer
-from models.baseline_models import LinearRegressor
-from dataloaders.mock_loaders import MockDataLoaders
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
+from torch import nn, optim
+
+from dataloaders.mock_loaders import MockDataLoaders
+from logger.logger import setup_logging
+from models.baseline_models import LinearRegressor
+from utils.configs import BaseConf
+from utils.data_processing import *
+from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
+from utils.utils import write_json, Timer
 
 if __name__ == "__main__":
 
@@ -73,7 +75,7 @@ if __name__ == "__main__":
         timer.reset()
         # Training loop
         tmp_trn_loss = []
-        for local_batch, local_labels in loaders.training_generator:
+        for local_batch, local_labels in loaders.training_loader:
             # Transfer to GPU
             local_batch, local_labels = local_batch.to(device), local_labels.to(device)
             out = model(local_batch.float())
@@ -93,7 +95,7 @@ if __name__ == "__main__":
         tmp_val_loss = []
         with torch.set_grad_enabled(False):
             # Transfer to GPU
-            for local_batch, local_labels in loaders.validation_generator:
+            for local_batch, local_labels in loaders.validation_loader:
                 local_batch, local_labels = local_batch.to(device), local_labels.to(device)
                 out = model(local_batch.float())
 
@@ -141,7 +143,7 @@ if __name__ == "__main__":
         y_true = []
         y_pred = []
         probas_pred = []
-        for local_batch, local_labels in loaders.testing_generator:  # loop through is set does not fit in batch
+        for local_batch, local_labels in loaders.testing_loader:  # loop through is set does not fit in batch
             y_true.extend(local_labels.tolist())
             local_batch, local_labels = local_batch.to(device), local_labels.to(device)
             out = model(local_batch.float())

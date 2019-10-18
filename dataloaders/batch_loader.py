@@ -12,12 +12,15 @@ class BatchLoader:
         :param seq_len: length of historic data fed into the model
         :param sub_sample: used to decide if we limit class imbalance by sub-sampling the classes to be equal
         """
+        # SET DATA
         self.dataset = dataset
 
+        # SET LIMITS
         # values use for checking boundaries for the dataset
         self.min_index = dataset.min_index
         self.max_index = dataset.max_index
 
+        # SET SAMPLE INDICES
         flat_targets = self.dataset.targets.flatten()
         class0_args = np.argwhere(flat_targets == 0)
         class0_args = class0_args[class0_args > self.min_index]

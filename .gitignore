@@ -1,3 +1,6 @@
+./.vscode/*
+./.ideavscode/*
+./.tmp.drivedownload
 ./data/*
 ./data/raw/*
 ./data/processed/*/*

@@ -1,19 +1,16 @@
-import os
 import logging as log
-from time import strftime
+import os
 from copy import deepcopy
+from time import strftime
+
 from torch import nn, optim
-import torch.nn.functional as F
-from utils.data_processing import *
-from logger.logger import setup_logging
-from utils.configs import BaseConf
-from utils.utils import write_json, Timer
-from models.kangkang_fnn_models import KangFeedForwardNetwork
+
 from dataloaders.flat_loader import FlatDataLoaders
-from datasets.flat_dataset import FlatDataGroup
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
-from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
-from models.model_result import ModelResult
+from logger.logger import setup_logging
+from models.kangkang_fnn_models import KangFeedForwardNetwork
+from utils.configs import BaseConf
+from utils.data_processing import *
+from utils.utils import Timer
 
 data_dim_str = "T24H-X850M-Y880M"  # "T1H-X1700M-Y1760M"  # needs to exist
 model_name = "FNN-CRIME-MODEL"  # needs to be created
@@ -70,7 +67,7 @@ info["device"] = device.type
 loaders = FlatDataLoaders(data_path=data_path, conf=conf)
 
 # SET MODEL PARAMS
-train_set = loaders.training_generator.dataset
+train_set = loaders.training_loader.dataset
 spc_feats, tmp_feats, env_feats, target = train_set[train_set.min_index]
 spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 
@@ -107,9 +104,9 @@ for epoch in range(conf.max_epochs):
     timer.reset()
     # Training loop
     tmp_trn_loss = []
-    num_batches = loaders.training_generator.num_batches
-    for spc_feats, tmp_feats, env_feats, targets in loaders.training_generator:
-        current_batch = loaders.training_generator.current_batch
+    num_batches = loaders.training_loader.num_batches
+    for spc_feats, tmp_feats, env_feats, targets in loaders.training_loader:
+        current_batch = loaders.training_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
         spc_feats = torch.Tensor(spc_feats).to(device)
@@ -134,7 +131,7 @@ for epoch in range(conf.max_epochs):
     tmp_val_loss = []
     with torch.set_grad_enabled(False):
         # Transfer to GPU
-        for spc_feats, tmp_feats, env_feats, targets in loaders.validation_generator:
+        for spc_feats, tmp_feats, env_feats, targets in loaders.validation_loader:
             # Transfer to GPU
             spc_feats = torch.Tensor(spc_feats).to(device)
             tmp_feats = torch.Tensor(tmp_feats).to(device)

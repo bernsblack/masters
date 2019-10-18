@@ -1,11 +1,13 @@
+import logging as log
+
+import numpy as np
 import torch
+from datasets.mock_dataset import MockDataset
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import WeightedRandomSampler
+
 from utils.configs import BaseConf
 from utils.data_processing import map_to_weights, inv_weights
-from datasets.mock_dataset import MockDataset
-import numpy as np
-import logging as log
 
 """
 Data loader using the PyTorch default data loaders
@@ -83,23 +85,23 @@ class MockDataLoaders:
             validation_sampler = None
             testing_sampler = None
 
-        self.training_generator = DataLoader(dataset=training_set,
-                                             batch_size=conf.batch_size,
-                                             shuffle=conf.shuffle,
-                                             num_workers=conf.num_workers,
-                                             pin_memory=pin_memory,
-                                             sampler=train_sampler)
+        self.training_loader = DataLoader(dataset=training_set,
+                                          batch_size=conf.batch_size,
+                                          shuffle=conf.shuffle,
+                                          num_workers=conf.num_workers,
+                                          pin_memory=pin_memory,
+                                          sampler=train_sampler)
 
-        self.validation_generator = DataLoader(dataset=validation_set,
-                                               batch_size=conf.batch_size,
-                                               shuffle=conf.shuffle,
-                                               num_workers=conf.num_workers,
-                                               pin_memory=pin_memory,
-                                               sampler=validation_sampler)
-
-        self.testing_generator = DataLoader(dataset=testing_set,
+        self.validation_loader = DataLoader(dataset=validation_set,
                                             batch_size=conf.batch_size,
                                             shuffle=conf.shuffle,
                                             num_workers=conf.num_workers,
                                             pin_memory=pin_memory,
-                                            sampler=testing_sampler)
+                                            sampler=validation_sampler)
+
+        self.testing_loader = DataLoader(dataset=testing_set,
+                                         batch_size=conf.batch_size,
+                                         shuffle=conf.shuffle,
+                                         num_workers=conf.num_workers,
+                                         pin_memory=pin_memory,
+                                         sampler=testing_sampler)

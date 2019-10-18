@@ -1,17 +1,19 @@
-import os
 import logging as log
-from time import strftime
+import os
 from copy import deepcopy
-from torch import nn, optim
+from time import strftime
+
 import torch.nn.functional as F
-from utils.data_processing import *
-from logger.logger import setup_logging
-from utils.configs import BaseConf
-from utils.utils import write_json, Timer
-from models.kangkang_fnn_models import KangFeedForwardNetwork
+from torch import nn, optim
+
 from dataloaders.flat_loader import FlatDataLoaders
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
+from logger.logger import setup_logging
+from models.kangkang_fnn_models import KangFeedForwardNetwork
 from models.model_result import ModelResult
+from utils.configs import BaseConf
+from utils.data_processing import *
+from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
+from utils.utils import write_json, Timer
 
 if __name__ == "__main__":
 
@@ -70,7 +72,7 @@ if __name__ == "__main__":
     loaders = FlatDataLoaders(data_path=data_path, conf=conf)
 
     # SET MODEL PARAMS
-    spc_feats, tmp_feats, env_feats, target = loaders.training_generator.dataset[0]
+    spc_feats, tmp_feats, env_feats, target = loaders.training_loader.dataset[0]
     spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 
     model = KangFeedForwardNetwork(spc_size=spc_size, tmp_size=tmp_size, env_size=env_size, dropout_p=conf.dropout)
@@ -106,9 +108,9 @@ if __name__ == "__main__":
         timer.reset()
         # Training loop
         tmp_trn_loss = []
-        num_batches = loaders.training_generator.num_batches
-        for spc_feats, tmp_feats, env_feats, targets in loaders.training_generator:
-            current_batch = loaders.training_generator.current_batch
+        num_batches = loaders.training_loader.num_batches
+        for spc_feats, tmp_feats, env_feats, targets in loaders.training_loader:
+            current_batch = loaders.training_loader.current_batch
 
             # Transfer to GPU
             spc_feats = torch.Tensor(spc_feats).to(device)
@@ -133,7 +135,7 @@ if __name__ == "__main__":
         tmp_val_loss = []
         with torch.set_grad_enabled(False):
             # Transfer to GPU
-            for spc_feats, tmp_feats, env_feats, targets in loaders.validation_generator:
+            for spc_feats, tmp_feats, env_feats, targets in loaders.validation_loader:
                 # Transfer to GPU
                 spc_feats = torch.Tensor(spc_feats).to(device)
                 tmp_feats = torch.Tensor(tmp_feats).to(device)
@@ -187,7 +189,7 @@ if __name__ == "__main__":
         probas_pred = []
 
         # loop through is set does not fit in batch
-        for spc_feats, tmp_feats, env_feats, targets in loaders.testing_generator:
+        for spc_feats, tmp_feats, env_feats, targets in loaders.testing_loader:
             # Transfer to GPU
             spc_feats = torch.Tensor(spc_feats).to(device)
             tmp_feats = torch.Tensor(tmp_feats).to(device)
