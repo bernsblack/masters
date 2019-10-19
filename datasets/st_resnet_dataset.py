@@ -1,12 +1,13 @@
-import pandas as pd
 import numpy as np
-from torch.utils.data import Dataset, DataLoader
+import torch
+
 from utils.constants import *
 
 
 # train/test/validation split should be done before hand
 class STResNetDataLoader:  # add test and train data and validation set
-    def __init__(self, S, E, lc=3, lp=3, lq=3, c=1, p=DAY_IN_HOURS, q=WEEK_IN_HOURS, shuffle=False, trn_tst_split=0.8, trn_val_split=0.8,
+    def __init__(self, S, E, lc=3, lp=3, lq=3, c=1, p=DAY_IN_HOURS, q=WEEK_IN_HOURS, shuffle=False, trn_tst_split=0.8,
+                 trn_val_split=0.8,
                  overlap_in_out=True, norm='none'):
         """
         Args:

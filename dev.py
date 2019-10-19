@@ -67,7 +67,7 @@ info["device"] = device.type
 loaders = FlatDataLoaders(data_path=data_path, conf=conf)
 
 # SET MODEL PARAMS
-train_set = loaders.training_loader.dataset
+train_set = loaders.train_loader.dataset
 spc_feats, tmp_feats, env_feats, target = train_set[train_set.min_index]
 spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 
@@ -104,9 +104,9 @@ for epoch in range(conf.max_epochs):
     timer.reset()
     # Training loop
     tmp_trn_loss = []
-    num_batches = loaders.training_loader.num_batches
-    for spc_feats, tmp_feats, env_feats, targets in loaders.training_loader:
-        current_batch = loaders.training_loader.current_batch
+    num_batches = loaders.train_loader.num_batches
+    for spc_feats, tmp_feats, env_feats, targets in loaders.train_loader:
+        current_batch = loaders.train_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
         spc_feats = torch.Tensor(spc_feats).to(device)

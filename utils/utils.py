@@ -39,15 +39,24 @@ class Timer:
     """
 
     def __init__(self):
+        """
+        initialises the cache to now
+        """
         self.cache = datetime.now()
 
     def check(self):
+        """
+        :return: duration since previous check or since last reset
+        """
         now = datetime.now()
         duration = now - self.cache
         self.cache = now
         return duration.total_seconds()
 
     def reset(self):
+        """
+        :return: resets the cached time to now
+        """
         self.cache = datetime.now()
 
 

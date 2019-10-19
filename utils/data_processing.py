@@ -1,11 +1,13 @@
+from math import sin, cos, sqrt, atan2, radians
+
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import OneHotEncoder
-from math import sin, cos, sqrt, atan2, radians
-from scipy.interpolate import interp2d  # used for super resolution of grids
 import torch
-from torch.autograd import Variable
+from scipy.interpolate import interp2d  # used for super resolution of grids
 from scipy.ndimage import gaussian_filter
+from sklearn.preprocessing import OneHotEncoder
+from torch.autograd import Variable
+
 from utils import deprecated
 
 
@@ -323,6 +325,7 @@ def norm_meanstd(a):
     return a
 
 
+@deprecated  # instead use pad2d
 def pad_with(vector, pad_width, iaxis, kwargs):
     pad_value = kwargs.get('padder', 10)
     vector[:pad_width[0]] = pad_value
@@ -330,8 +333,27 @@ def pad_with(vector, pad_width, iaxis, kwargs):
     return vector
 
 
+@deprecated  # instead use pad2d
 def pad(a, edge_size=1, pad_value=0):
     return np.pad(a, edge_size, pad_with, padder=pad_value)
+
+
+def pad2d(a, value=0, size=1):
+    h, w = list(np.shape(a))[-2:]
+    r = np.ones((h + 2 * size, w + 2 * size)) * value
+
+    r[size:-size, size:-size] = a
+
+    return r
+
+
+def pad4d(a, value=0, size=1):
+    n, c, h, w = np.shape(a)
+    r = np.ones((n, c, h + 2 * size, w + 2 * size)) * value
+
+    r[:, :, size:-size, size:-size] = a
+
+    return r
 
 
 def upsample(a):

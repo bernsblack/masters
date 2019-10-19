@@ -33,7 +33,7 @@ class GRUMLPRegressor(nn.Module):
         out = self.lin1(out)
         out = self.relu(out)
         out = self.lin2(out)
-        # softmax?
+        # softmax - is applied in the loss function - should then explicitly be used when predicting
 
         # Reshape output to (batch_size*seq_len, hidden_size)
         #         out = out.contiguous().view(out.size(0)*out.size(1), out.size(2))

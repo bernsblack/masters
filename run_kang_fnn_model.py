@@ -72,7 +72,7 @@ if __name__ == "__main__":
     loaders = FlatDataLoaders(data_path=data_path, conf=conf)
 
     # SET MODEL PARAMS
-    spc_feats, tmp_feats, env_feats, target = loaders.training_loader.dataset[0]
+    spc_feats, tmp_feats, env_feats, target = loaders.train_loader.dataset[0]
     spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 
     model = KangFeedForwardNetwork(spc_size=spc_size, tmp_size=tmp_size, env_size=env_size, dropout_p=conf.dropout)
@@ -108,9 +108,9 @@ if __name__ == "__main__":
         timer.reset()
         # Training loop
         tmp_trn_loss = []
-        num_batches = loaders.training_loader.num_batches
-        for spc_feats, tmp_feats, env_feats, targets in loaders.training_loader:
-            current_batch = loaders.training_loader.current_batch
+        num_batches = loaders.train_loader.num_batches
+        for spc_feats, tmp_feats, env_feats, targets in loaders.train_loader:
+            current_batch = loaders.train_loader.current_batch
 
             # Transfer to GPU
             spc_feats = torch.Tensor(spc_feats).to(device)
@@ -189,7 +189,7 @@ if __name__ == "__main__":
         probas_pred = []
 
         # loop through is set does not fit in batch
-        for spc_feats, tmp_feats, env_feats, targets in loaders.testing_loader:
+        for spc_feats, tmp_feats, env_feats, targets in loaders.test_loader:
             # Transfer to GPU
             spc_feats = torch.Tensor(spc_feats).to(device)
             tmp_feats = torch.Tensor(tmp_feats).to(device)

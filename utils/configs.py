@@ -35,6 +35,7 @@ class BaseConf:  # args from arg-parser to over write values
             # training parameters
             self.resume = False
             self.early_stopping = False
+            self.tolerance = 1e-8  # Convergence tolerance: difference between the past two validation losses
             self.lr = 1e-3
             self.weight_decay = 1e-8
             self.max_epochs = 1
@@ -42,6 +43,10 @@ class BaseConf:  # args from arg-parser to over write values
             self.dropout = 0
             self.shuffle = False
             self.num_workers = 6
+
+            # attached global variables
+            self.device = None  # pytorch device object [CPU|GPU]
+            self.timer = None
 
     def __str__(self):
         return pformat(self.__dict__)

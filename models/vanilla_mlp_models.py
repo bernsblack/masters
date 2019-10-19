@@ -21,12 +21,12 @@ class MLPClassifier(nn.Module):
         self.lin1 = nn.Linear(input_size, hidden_size)
         self.lin2 = nn.Linear(hidden_size, n_classes)
         self.relu = nn.ReLU()
-        self.logSoftmax = nn.LogSoftmax(dim=1)
+        # self.logSoftmax = nn.LogSoftmax(dim=-1)
 
     def forward(self, x):
         out = self.lin1(x)
         out = self.relu(out)
         out = self.lin2(out)
-        out = self.logSoftmax(out)
+        # out = self.logSoftmax(out) log soft max is called in the cross-entropy function.
 
         return out

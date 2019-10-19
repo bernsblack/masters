@@ -145,7 +145,7 @@ class FlatDataGroup:
     """
     FlatDataGroup class acts as a collection of datasets (training/validation/test)
     The data group loads data from disk, splits in separate sets and normalises according to train set.
-    Crime count related data is first scaled using f(x) = log2(1 + x) and then scaled between -1 and 1.
+    Crime count related data is first scaled using f(x) = log2(1 + x) and then scaled between 0 and 1.
     The data group class also handles reshaping of data.
     """
 
@@ -272,7 +272,6 @@ class FlatDataGroup:
         self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
         # target index - also the index given to the
-        # todo check if time independent values aren't copied every time
         # todo dependency injection of the different types of datasets
         self.training_set = FlatDataset(
             crimes=trn_crimes,

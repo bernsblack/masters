@@ -37,15 +37,17 @@ class BatchLoader:
             self.indices = np.concatenate((class0_args, class1_args), axis=0).flatten()
             np.random.shuffle(self.indices)
 
-        self.len = len(self.indices)
-
         self.batch_size = batch_size
 
         self.num_batches = int(np.ceil(len(self.indices) / self.batch_size))
         self.current_batch = 0
 
     def __len__(self):
-        return self.len
+        """
+        number of batches in the batch loader
+        :return:
+        """
+        return self.num_batches
 
     def __iter__(self):
         self.current_batch = 0
@@ -59,7 +61,23 @@ class BatchLoader:
             start_index = (self.current_batch - 1) * self.batch_size
             stop_index = self.current_batch * self.batch_size
             if stop_index > len(self.indices):
-                stop_index = self.len
+                stop_index = len(self.indices)
             batch_indices = self.indices[start_index:stop_index]  # array of the indices - thus getitem should cater
 
             return self.dataset[batch_indices]
+
+    def __getitem__(self, index):
+        """
+        :param index: the current batch
+        :return: batch of data where batch == index
+        """
+        if 0 <= index < self.num_batches and isinstance(index, int):
+            start_index = index * self.batch_size
+            stop_index = (index + 1) * self.batch_size
+            if stop_index > len(self.indices):
+                stop_index = len(self.indices)
+            batch_indices = self.indices[start_index:stop_index]  # array of the indices - thus getitem should cater
+
+            return self.dataset[batch_indices]
+        else:
+            raise IndexError(f"index {index} must be in range(0{self.num_batches})")

@@ -3,6 +3,8 @@
     <words>
       <w>arange</w>
       <w>argparsers</w>
+      <w>cmap</w>
+      <w>colorbar</w>
       <w>confs</w>
       <w>conv</w>
       <w>convs</w>
@@ -10,6 +12,7 @@
       <w>cuda</w>
       <w>datasets</w>
       <w>demog</w>
+      <w>figsize</w>
       <w>fontset</w>
       <w>hama</w>
       <w>imshow</w>
@@ -20,6 +23,7 @@
       <w>markersize</w>
       <w>mathtext</w>
       <w>meanstd</w>
+      <w>ndarray</w>
       <w>proba</w>
       <w>probas</w>
       <w>pytorch</w>

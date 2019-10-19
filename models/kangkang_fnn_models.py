@@ -37,7 +37,7 @@ class KangFeedForwardNetwork(nn.Module):
         self.envNet = nn.Sequential(nn.Linear(env_size, 256), nn.ReLU(), nn.Linear(256, 256), nn.ReLU(),
                                     nn.Linear(256, 128), nn.ReLU())
         self.finalNet = nn.Sequential(nn.Linear(384, 1024), nn.ReLU(), nn.Linear(1024, 1024), nn.ReLU(),
-                                      nn.Linear(1024, 2))  # ,nn.Softmax(dim=-1))
+                                      nn.Linear(1024, 2))
 
     def forward(self, spc_vec, tmp_vec, env_vec):
         if self.dropout_p > 0:

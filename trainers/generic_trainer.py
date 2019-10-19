@@ -77,7 +77,7 @@ info["device"] = device.type
 loaders = FlatDataLoaders(data_path=data_path, conf=conf)
 
 # SET MODEL PARAMS -----------------------------------------------------------------------------------------------------
-train_set = loaders.training_loader.dataset
+train_set = loaders.train_loader.dataset
 spc_feats, tmp_feats, env_feats, target = train_set[train_set.min_index]
 spc_size, tmp_size, env_size = spc_feats.shape[-1], tmp_feats.shape[-1], env_feats.shape[-1]
 
@@ -119,9 +119,9 @@ for epoch in range(conf.max_epochs):
     timer.reset()
     # Training loop
     tmp_trn_loss = []
-    num_batches = loaders.training_loader.num_batches
-    for spc_feats, tmp_feats, env_feats, targets in loaders.training_loader:
-        current_batch = loaders.training_loader.current_batch
+    num_batches = loaders.train_loader.num_batches
+    for spc_feats, tmp_feats, env_feats, targets in loaders.train_loader:
+        current_batch = loaders.train_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
         spc_feats = torch.Tensor(spc_feats[0]).to(device)  # only taking [0] for fnn
@@ -206,7 +206,7 @@ with torch.set_grad_enabled(False):
     probas_pred = []
 
     # loop through is set does not fit in batch
-    for spc_feats, tmp_feats, env_feats, targets in loaders.testing_loader:
+    for spc_feats, tmp_feats, env_feats, targets in loaders.test_loader:
         """
         IMPORTNANT NOTE: WHEN DOING LSTM - ONLY FEED THE TEMPORAL VECTORS IN THE LSTM
         FEED THE REST INTO THE NORMAL LINEAR NETWORKS
@@ -230,7 +230,7 @@ model_result = ModelResult(model_name="FNN (Kang and Kang)",
                            y_true=y_true,
                            y_pred=y_pred,
                            probas_pred=probas_pred,
-                           t_range=loaders.testing_loader.dataset.t_range,
+                           t_range=loaders.test_loader.dataset.t_range,
                            shape=None)  # todo change to be the shape (N,L) of the original prediction.
 
 log.info(model_result)

@@ -13,7 +13,6 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 """
 from matplotlib import rcParams
 
-
 class BasePlotter:
     """
     Class is used to setup and add plots to a figure and then save or show this figure
@@ -311,7 +310,7 @@ def update_subplots(a, plots):
         plot_.set_data(a[i])
 
 
-def im(data, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis'):
+def im(data, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):
     """
     quick and easy way to view 2d matrices in notebooks
     """
@@ -319,6 +318,7 @@ def im(data, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis'):
     plt.imshow(data, aspect=aspect, cmap=cmap)
     if colorbar:
         plt.colorbar()
+    plt.grid(grid_on)
 
     plt.show()
 

@@ -20,17 +20,17 @@ class GridDataLoaders:
         training_set = data_group.training_set
         validation_set = data_group.validation_set
         testing_set = data_group.testing_set
-        self.training_loader = BatchLoader(dataset=training_set,
-                                           batch_size=conf.batch_size,
-                                           seq_len=conf.seq_len,
-                                           sub_sample=True)
+        self.train_loader = BatchLoader(dataset=training_set,
+                                        batch_size=conf.batch_size,
+                                        seq_len=conf.seq_len,
+                                        sub_sample=True)
 
         self.validation_loader = BatchLoader(dataset=validation_set,
                                              batch_size=conf.batch_size,
                                              seq_len=conf.seq_len,
                                              sub_sample=True)
 
-        self.testing_loader = BatchLoader(dataset=testing_set,
-                                          batch_size=conf.batch_size,
-                                          seq_len=conf.seq_len,
-                                          sub_sample=conf.sub_sample_test_set)
+        self.test_loader = BatchLoader(dataset=testing_set,
+                                       batch_size=conf.batch_size,
+                                       seq_len=conf.seq_len,
+                                       sub_sample=conf.sub_sample_test_set)
