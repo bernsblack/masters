@@ -12,10 +12,8 @@ def get_index_mask(data, threshold=0, top_k=-1):
     """
     N, C, H, W = data.shape
     new_shape = N, H * W
-    # old_shape = list(data.shape)
-    # new_shape = old_shape[:-2]
-    # new_shape.append(old_shape[-1] * old_shape[-2])
 
+    # only looks at the first channel
     flat_data_sum = data[:, 0].reshape(new_shape).sum(0).flatten()
 
     indices = np.argwhere(flat_data_sum > threshold)
@@ -92,7 +90,7 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
     trans_mat = np.array(trans_mat).T
     return trans_mat
 
-
+# todo make use of ellipsis to generalise the shaper to N,H,W and N,C,L
 class Shaper:
     def __init__(self, data, threshold=0, top_k=-1):
         """

@@ -47,6 +47,9 @@ class BaseConf:  # args from arg-parser to over write values
             # attached global variables
             self.device = None  # pytorch device object [CPU|GPU]
             self.timer = None
+            self.model_name = ""
+            self.model_path = ""
+            self.checkpoint = "best"  # ['latest'|'best'] checkpoint to resume from
 
     def __str__(self):
         return pformat(self.__dict__)

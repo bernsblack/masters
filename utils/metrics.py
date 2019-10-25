@@ -24,6 +24,7 @@ from utils.data_processing import get_times
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib import rcParams
+import logging as log
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve, \
     mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
@@ -40,7 +41,7 @@ def best_threshold(y_true, probas_pred, verbose=True):
     scores = np.array(list(map(safe_f1_score, zip(precision, recall))))
     index_array = np.argmax(scores)  # almost always a singular int, and not an array
     if verbose:
-        print(f"f1_score: {scores[index_array]} at index {index_array}, new threshold {thresholds[index_array]}")
+        log.info(f"f1_score: {scores[index_array]} at index {index_array}, new threshold {thresholds[index_array]}")
     return thresholds[index_array]
 
 

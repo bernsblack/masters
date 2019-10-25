@@ -3,7 +3,7 @@ import numpy as np
 from utils.data_processing import pad4d
 
 
-def mock_cnn_data(N=100, C=1, H=16, W=16, filter_size=3, p=.15, thresh=3):
+def mock_cnn_data_classification(N=100, C=1, H=16, W=16, filter_size=3, p=.15, thresh=3):
     """
     C should always be one
 
@@ -28,17 +28,15 @@ def mock_cnn_data(N=100, C=1, H=16, W=16, filter_size=3, p=.15, thresh=3):
     return gen_data, result
 
 
-# todo look into incorporating a
-def mock_rnn_data(seq_len=10, batch_size=2):
+def mock_rnn_data_classification(seq_len=10, batch_size=2):
     """
     Generate mock data that can be used to develop/test RNNs. The output generates 1 if the cumsum of all previous
     input is greater than the threshold, else it generates 0.
     :param seq_len: number of time steps
     :param batch_size: number of independent columns of the data
-    :return: x (seq_len, 1, batch_size) input data, y (seq_len, 1, batch_size) target data
-    return data is in shape (seq_len, 1, batch_size) to mimic the (N,C,L) shape in the crime data, where C = 1
+    :return: x (seq_len, batch_size, 1) input data, y (seq_len, batch_size, 1) target data
     """
-    x = np.random.rand(seq_len, 1, batch_size)
+    x = np.random.rand(seq_len, batch_size, 1)
 
     y = np.cumsum(x, axis=0)
     thresh = np.mean(y)
@@ -48,7 +46,44 @@ def mock_rnn_data(seq_len=10, batch_size=2):
     return x, y
 
 
-def mock_data(n_samples=100, n_feats=5, class_split=0.5):
+# adding problem data generation - regression probem though
+def mock_rnn_data_regression(seq_len=200, batch_size=50):
+    """
+    Adding problem example
+    Generates regression mock data for a RNN model
+    Data has two sequences
+        - sequence one is random numbers between 0 and 1
+        - sequence two is all zeros except for two random indices which are one
+    Output data is the cumulative some of the product of these to sequences.
+
+    returns:
+    X: (seq_len, batch_size, n_features: 2)
+    y: (seq_len, batch_size, class_target: 1)
+
+    Can be trained on:
+        - only the last sample y[-1]
+        - every sample in the sequence y
+    """
+    t = np.zeros((seq_len, batch_size, 1))
+    c = np.zeros((seq_len, batch_size, 2))
+    for i in range(batch_size):
+        a, b = list(np.random.choice(seq_len, 2, replace=False))
+        z = np.zeros(seq_len)
+        r = np.random.rand(seq_len)
+
+        z[a] = 1
+        z[b] = 1
+
+        cum_sum = z * r
+        cum_sum = np.cumsum(cum_sum).reshape(-1, 1)
+
+        t[:, i, :] = cum_sum
+        c[:, i, 0] = z
+        c[:, i, 1] = r
+    return c, t
+
+
+def mock_fnn_data_classification(n_samples=100, n_feats=5, class_split=0.5):
     """
     Produces mock binary classification data.
     Generates input data X (n_samples, n_feats) where each feats value is an i.i.d. sample from bernoulli(p=class_split)

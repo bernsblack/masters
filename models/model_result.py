@@ -18,6 +18,7 @@ class ROCCurve:
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
     def __init__(self, model_name, y_true, y_pred, probas_pred):
+        y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
         self.model_name = model_name
         self.accuracy_score = accuracy_score(y_true, y_pred)
         self.roc_auc_score = roc_auc_score(y_true, probas_pred)
@@ -29,6 +30,7 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
     def __repr__(self):
         r = rf"""
+        MODEL METRICS
             Model Name: {self.model_name}
                 ROC AUC:            {self.roc_auc_score}
                 Average Precision:  {self.average_precision_score}
@@ -65,26 +67,24 @@ class ModelResult:
         self.shaper = shaper
 
     def accuracy(self):
-        return accuracy_score(self.y_true, self.y_pred)
+        return accuracy_score(self.y_true.flatten(), self.y_pred.flatten())
 
     def roc_auc(self):
-        return roc_auc_score(self.y_true, self.probas_pred)
+        return roc_auc_score(self.y_true.flatten(), self.probas_pred.flatten())
 
     def average_precision(self):
-        """
-             
-        """
-        return average_precision_score(self.y_true, self.probas_pred)
+        return average_precision_score(self.y_true.flatten(), self.probas_pred.flatten())
 
     def matthews_corrcoef(self):
         """
         A coefficient of +1 represents a perfect prediction, 0 an average random prediction and -1 an inverse
          prediction. - https://scikit-learn.org/stable/modules/generated/sklearn.metrics.matthews_corrcoef.html
         """
-        return matthews_corrcoef(self.y_true, self.y_pred)
+        return matthews_corrcoef(self.y_true.flatten(), self.y_pred.flatten())
 
     def __repr__(self):
         r = rf"""
+        MODEL RESULT
             Model Name: {self.model_name}
                 ROC AUC:            {self.roc_auc()}
                 Average Precision:  {self.average_precision()}

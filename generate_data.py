@@ -1,10 +1,13 @@
 import os
+import pickle
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from utils.utils import *
 from utils.data_processing import *
 import logging as log
 from logger.logger import setup_logging
+from utils.preprocessing import Shaper
+
 
 if __name__ == "__main__":
     setup_logging(save_dir="./logs/", file_name="generate_data.log")
@@ -16,6 +19,7 @@ if __name__ == "__main__":
     # set all values from the config
     config = read_json("./config/generate_data.json")
     dT = config["dT"]
+
     scale = config["scale"]  # scale the area
 
     # used as info file for the folder where the data is created
@@ -231,6 +235,13 @@ if __name__ == "__main__":
             info_ = tracts[:, tract2index[tr]]
             tract_count_grids[:, y_size - y - 1, x] = np.array(info_)
 
+    # Adding any crime related data to the channels, e.g. tract counts if we want to
+    tract_count_grids = np.expand_dims(tract_count_grids, axis=1)
+    """
+    note: tract_count_grids has values where the shaper loses values - that is why
+    when un-squeezing the tract_count_grids using the shaper the grid counts do not match up  
+    """
+
     ######################################################
     #          DEMOGRAPHIC DATA GENERATION               #
     ######################################################
@@ -386,29 +397,14 @@ if __name__ == "__main__":
     # A = crimes[["t","b","TOTAL","THEFT", "BATTERY", "NARCOTICS","Arrest"]].values # is used when x and y are flattened
 
     crime_type_grids = np.zeros((t_size, A.shape[-1] - 3, y_size, x_size))
-
+    # todo convert to sparse data matrices
     for a in A:
-        crime_type_grids[a[0], :, y_size - 1 - a[2], a[1]] += a[3:]  # todo normalize in channels
-
-    # Adding any crime related data to the channels, e.g. tract counts if we want to
-    crime_feature_indices.append("tract total")
-    tract_count_grids = np.expand_dims(tract_count_grids, axis=1)
-    """
-    note: tract_count_grids has values where the shaper loses values - that is why
-    when un-squeezing the tract_count_grids using the shaper the grid counts do not match up  
-    """
-
-    try:
-        crime_type_grids = np.concatenate((crime_type_grids, tract_count_grids), axis=1)
-    except ValueError as e:
-        err_msg = f"crime_type_grids: {np.shape(crime_type_grids)}, tract_count_grids: {np.shape(tract_count_grids)}"
-        log.error(err_msg)
-        raise ValueError(f"{e} -> {err_msg}")
+        crime_type_grids[a[0], :, y_size - 1 - a[2], a[1]] += a[3:]
 
     #########################################################################
     #                            SAVE DATA                                  #
     #########################################################################
-    save_folder = f"./data/processed/T{dT}-X{int(info['x in metres'])}M-Y{int(info['y in metres'])}M/"
+    save_folder = f"./data/processed/T{dT}-X{int(info['x in metres'])}M-Y{int(info['y in metres'])}M_{info['start_date']}_{info['end_date']}/"
 
     os.makedirs(save_folder, exist_ok=True)
     os.makedirs(save_folder + "plots", exist_ok=True)
@@ -416,25 +412,53 @@ if __name__ == "__main__":
     # save figures
     figsize = (8, 11)
 
+    v,c = np.unique(crime_grids.flatten(), return_counts=True)
+    c = 100*c/np.sum(c)
+    plt.figure(figsize=figsize)
+    plt.bar(v, c)
+    plt.yticks(np.arange(21)*5)
+    plt.title("Maximum Crimes per Time Step")
+    plt.ylabel("Frequency (%)")
+    plt.xlabel("Total Crimes per Time Step per Cell")
+    plt.grid(True)
+    plt.savefig(save_folder + "plots/" + "crime_distribution.png")
+
     plt.figure(figsize=figsize)
     plt.scatter(X, Y, marker=".", label="range")
     plt.scatter(valid_points[:, 0], valid_points[:, 1], marker=".", label="valid", s=1)
     plt.scatter(crimes.X, crimes.Y, marker=".", label="round")
     plt.legend(loc=3, prop={"size": 20})
+    plt.ylabel("Latitude")
+    plt.xlabel("Longitude")
     plt.savefig(save_folder + "plots/" + "scatter_map.png")
 
     plt.figure(figsize=figsize)
-    plt.title("Crimes")
+    plt.title("Maximum Crimes per Time Step")
     plt.imshow(crime_grids.max(0), cmap="viridis")
+    plt.colorbar()
+    plt.ylabel("Y Coordinate")
+    plt.xlabel("X Coordinate")
     plt.savefig(save_folder + "plots/" + "crimes_max.png")
 
     plt.figure(figsize=figsize)
-    plt.title("Demographics")
+    plt.title("Mean Crimes per Time Step")
+    plt.imshow(crime_grids.mean(0), cmap="viridis")
+    plt.colorbar()
+    plt.ylabel("Y Coordinate")
+    plt.xlabel("X Coordinate")
+    plt.savefig(save_folder + "plots/" + "crimes_mean.png")
+
+    plt.figure(figsize=figsize)
+    plt.title("Demographics Max Value")
     plt.imshow(demog_grid.max(0), cmap="viridis")
+    plt.ylabel("Y Coordinate")
+    plt.xlabel("X Coordinate")
     plt.savefig(save_folder + "plots/" + "demographics_max.png")
 
     plt.figure(figsize=figsize)
-    plt.title("Street View Info")
+    plt.title("Street View Data Max Value")
+    plt.ylabel("Y Coordinate")
+    plt.xlabel("X Coordinate")
     plt.imshow(street_grid.max(0), cmap="viridis")
     plt.savefig(save_folder + "plots/" + "street_grid_max.png")
 
@@ -443,23 +467,37 @@ if __name__ == "__main__":
     demog_grid = np.expand_dims(demog_grid, axis=0)
     street_grid = np.expand_dims(street_grid, axis=0)
 
+    # #  compress using shaper
+    # shaper = Shaper(crime_grids)
+    # crime_type_grids = shaper.squeeze(crime_type_grids)
+    # crime_grids = shaper.squeeze(crime_grids)
+    # last_year_crime_grids = shaper.squeeze(last_year_crime_grids)
+    # tract_count_grids = shaper.squeeze(tract_count_grids)
+    # demog_grid = shaper.squeeze(demog_grid)
+    # street_grid = shaper.squeeze(street_grid)
+    # with open(f"{save_folder}shaper.pkl", "wb") as shaper_file:
+    #     pickle.dump(shaper, shaper_file)
+
     # save generated data
     # TODO ENSURE ALL SPATIAL DATA IS IN FORM N, C, H, W -> EVEN IF C = 1 SHOULD BE N, 1, H, W
+    # note - we only normalise later as some models use different normalisation techniques
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,
-                        crime_types_grids=crime_type_grids,  # todo add total crimes to a channel
-                        crime_grids=crime_grids,  # todo remove form script - is embedded in crime_types_grids
+                        crime_types_grids=crime_type_grids,  # sum crimes, crime types, arrests
+                        crime_grids=crime_grids, # sum crimes only
+                        tract_count_grids=tract_count_grids, # sum crimes of tracts
                         demog_grid=demog_grid,
                         street_grid=street_grid,
                         time_vectors=encode_time_vectors(t_range),
-                        weather_vectors=weather_vectors,
+                        weather_vectors=weather_vectors,  # will not be using weather data
                         x_range=x_range,
                         y_range=y_range)
-    pd.to_pickle(t_range, save_folder + "t_range.pkl")
+
+    pd.to_pickle(t_range, f"{save_folder}t_range.pkl")
     # way weather dates are too short time_vectors should be more years
     # - open weather data has more data but has quite a few gaps
     # np.save(folder+"weather_vectors.npy", weather_vectors)
 
-    write_json(info, save_folder + "info.json")
+    write_json(info, f"{save_folder}info.json")
 
     log.info("=====================================END=====================================")

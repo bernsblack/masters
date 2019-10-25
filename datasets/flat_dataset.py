@@ -140,7 +140,6 @@ class BaseDataGroup:  # using the builder pattern
             self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
 
-# todo add set of valid / living sells / to be able to sample the right ones
 class FlatDataGroup:
     """
     FlatDataGroup class acts as a collection of datasets (training/validation/test)
@@ -154,11 +153,10 @@ class FlatDataGroup:
         Args:
             data_path (string): Path to the data folder with all spatial and temporal data.
         """
-        # todo (note): dont use function to get values each time - create join and add table
-        # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D)
-        # [√] number of incidents of crime occurrence by census tract in 2013 (1-D)
-        # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
-        # [√] number of incidents of crime occurrence by date in 2013 (1-D)
+        # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D) :
+        # [√] number of incidents of crime occurrence by census tract in 2013 (1-D) :
+        # [√] number of incidents of crime occurrence by census tract yesterday (1-D) :
+        # [√] number of incidents of crime occurrence by date in 2013 (1-D) : total_crimes
 
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             # print info on the read data
@@ -173,30 +171,34 @@ class FlatDataGroup:
             else:
                 self.crimes = zip_file["crime_grids"]
 
-            # should make shaper on only the testing data so that we don't look at testing cells where nothing actually
-            # happens
+            # fit crime data to shaper
             self.shaper = Shaper(data=self.crimes,
                                  threshold=conf.shaper_threshold,
                                  top_k=conf.shaper_top_k)
 
+            # add tract count to crime grids - done separately in case we do not want crime types or arrests
+            tract_count_grids = zip_file["tract_count_grids"]
+            self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)
+
             # squeeze all spatially related data
-            # reshaped into (N, C, L) from (N, C, H, W)
+            # reshaped (N, C, H, W) -> (N, C, L)
             self.crimes = self.shaper.squeeze(self.crimes)
+
             # used for display purposes - and grouping similarly active cells together.
             self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]
 
+            # (reminder) ensure that the self.crimes are not scaled to -1,1 before
             self.targets = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
-            self.targets[
-                self.targets > 0] = 1  # todo (reminder) ensure that the self.crimes are not scaled to -1,1 before
+            self.targets[self.targets > 0] = 1
 
             self.crimes = self.crimes[:-1]
-            self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)  # todo move to where data is generated
+            self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
 
             self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
             self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
             self.x_range = zip_file["x_range"]
             self.y_range = zip_file["y_range"]
-            self.t_range = t_range[1:]  # todo: t_range match the time of the target
+            self.t_range = t_range[1:]
 
             self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
             self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
@@ -228,8 +230,6 @@ class FlatDataGroup:
         self.crimes = np.log2(1 + self.crimes)  # todo: add hot-encoded option
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
-        print("shape crimes_train -> ", self.crimes[self.trn_indices[0]:self.trn_indices[1]].shape)
-        print("shape crimes -> ", self.crimes.shape)
 
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
@@ -259,7 +259,6 @@ class FlatDataGroup:
 
         # splitting and normalisation of weather data
         self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
-        # todo maybe scale weather with all data so it's season independent
         # self.weather_vector_scaler.fit(self.weather_vectors[self.trn_index[0]:self.trn_index[1]], axis=1)  # norm with trn data
         self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
         self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
@@ -347,11 +346,14 @@ class FlatDataset(Dataset):
         self.weather_vectors = weather_vectors  # remember weather should be the info of the next time step
         self.t_range = t_range
 
+        freqstr = t_range.freqstr
+        self.offset_year = int(365 * 24 / int(freqstr[:freqstr.find("H")]))
+
         self.shaper = shaper
 
         #  [min_index, max_index) are limits of flattened targets
         self.max_index = self.t_size * self.l_size
-        self.min_index = self.seq_len * self.l_size
+        self.min_index = (self.offset_year + self.seq_len) * self.l_size
         self.len = self.min_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
 
         self.shape = self.t_size, self.l_size  # used when saving the model results
@@ -360,14 +362,15 @@ class FlatDataset(Dataset):
         """Denotes the total number of samples"""
         return self.len  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
 
-    def __getitem__(self, index):  # tensorflow version of the pasring function
+    def __getitem__(self, index):
         # when using no teacher forcing
         # target = self.targets[t+self.seq_len, :, l]
         # todo add all other data - should be done in data-generation?
-        # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D)
-        # [√] number of incidents of crime occurrence by census tract in 2013 (1-D)
-        # [√] number of incidents of crime occurrence by census tract yesterday (1-D).
-        # [√] number of incidents of crime occurrence by date in 2013 (1-D)
+        # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D) - crime_grid[t-365]
+        # [√] number of incidents of crime occurrence by census tract in 2013 (1-D) - crime_tract[t-365]
+        # [√] number of incidents of crime occurrence by sampling point yesterday (1-D) - crime_grid[t-1]
+        # [√] number of incidents of crime occurrence by census tract yesterday (1-D) - crime_tract[t-1]
+        # [√] number of incidents of crime occurrence by date in 2013 (1-D) - total[t-365]
         """Generates one sample of data"""
         if isinstance(index, slice):
             index = range(if_none(index.start, self.min_index),
@@ -391,11 +394,12 @@ class FlatDataset(Dataset):
             t_start = t_index - self.seq_len
             t_stop = t_index
 
-            # return shape should be (seq_len, batch, input_size)
-
             crime_vec = self.crimes[t_start:t_stop, :, l_index]
-            # todo add more historical values
-            crime_vec = np.concatenate((crime_vec, self.total_crimes[t_start:t_stop]), axis=-1)
+
+            crimes_last_year = self.crimes[t_start-self.offset_year:t_stop-self.offset_year, :, l_index]
+            crimes_total =  self.total_crimes[t_start:t_stop]
+
+            crime_vec = np.concatenate((crime_vec,crimes_total,crimes_last_year), axis=-1)
 
             time_vec = self.time_vectors[t_start:t_stop]
             weather_vec = self.weather_vectors[t_start:t_stop]
@@ -411,7 +415,7 @@ class FlatDataset(Dataset):
             stack_tmp_feats.append(tmp_vec)
             stack_targets.append(target_vec)
 
-            result_indices.append((t_index, l_index))
+            result_indices.append((t_index, 0, l_index)) # extra dimension C, makes it easier for the shaper
 
         # spc_feats: [demog_vec]
         # env_feats: [street_vec]
