@@ -2,6 +2,16 @@ import json
 from datetime import datetime
 from time import time
 from warnings import warn
+import numpy as np
+
+
+def pshape(*args):
+    """
+    prints the shapes of the arguments
+    """
+
+    for arg in args:
+        print(np.shape(arg))
 
 
 def if_none(a, b):  # common null checker
