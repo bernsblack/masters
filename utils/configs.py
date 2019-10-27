@@ -51,6 +51,9 @@ class BaseConf:  # args from arg-parser to over write values
             self.model_path = ""
             self.checkpoint = "best"  # ['latest'|'best'] checkpoint to resume from
 
+            #  used when train GRU - if loss should be calculated over whole sequence or only last output/prediction
+            self.use_seq_loss =  True,
+
     def __str__(self):
         return pformat(self.__dict__)
 

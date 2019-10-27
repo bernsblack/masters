@@ -195,7 +195,7 @@ class FlatDataGroup:
             self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
 
             self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
-            self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
+            # self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
             self.x_range = zip_file["x_range"]
             self.y_range = zip_file["y_range"]
             self.t_range = t_range[1:]
@@ -203,8 +203,12 @@ class FlatDataGroup:
             self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
             self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
 
+
+        freqstr = t_range.freqstr
+        self.offset_year = int(365 * 24 / int(freqstr[:freqstr.find("H")]))
+
         self.seq_len = conf.seq_len
-        self.total_len = len(self.crimes)  # length of the whole time series
+        self.total_len = len(self.crimes) # length of the whole time series
 
         #  sanity check if time matches up with our grids
         if len(self.t_range) - 1 != len(self.crimes):
@@ -212,14 +216,23 @@ class FlatDataGroup:
                       "len(self.t_range) != len(self.crimes)")
             raise RuntimeError(f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
 
-        #  split the data into ratios
-        val_size = int(self.total_len * conf.val_ratio)
-        tst_size = int(self.total_len * conf.tst_ratio)
+
+        #  split the data into ratios - size represent the targets sizes not the number of time steps
+        total_offset = self.seq_len + self.offset_year
+
+        target_len = self.total_len - total_offset
+        val_size = int(target_len * conf.val_ratio)
+        tst_size = int(target_len * conf.tst_ratio)
+        trn_size = int(target_len - tst_size - val_size)
 
         #  start and stop t_index of each dataset - can be used outside of loader/group
-        self.trn_indices = (0, self.total_len - tst_size - val_size)
-        self.val_indices = (self.trn_indices[1] - self.seq_len, self.total_len - tst_size)
-        self.tst_indices = (self.val_indices[1] - self.seq_len, self.total_len)
+        self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
+        self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
+        self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
+        
+        self.tst_indices[0] = self.tst_indices[0] - total_offset
+        self.val_indices[0] = self.val_indices[0] - total_offset
+        self.trn_indices[0] = self.trn_indices[0] - total_offset
 
         trn_t_range = self.t_range[self.trn_indices[0]:self.trn_indices[1]]
         val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
@@ -257,14 +270,14 @@ class FlatDataGroup:
         val_time_vectors = self.time_vectors[self.val_indices[0]:self.val_indices[1]]
         tst_time_vectors = self.time_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
-        # splitting and normalisation of weather data
-        self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
-        # self.weather_vector_scaler.fit(self.weather_vectors[self.trn_index[0]:self.trn_index[1]], axis=1)  # norm with trn data
-        self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
-        self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
-        trn_weather_vectors = self.weather_vectors[self.trn_indices[0]:self.trn_indices[1]]
-        val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
-        tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
+        # # splitting and normalisation of weather data
+        # self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
+        # # self.weather_vector_scaler.fit(self.weather_vectors[self.trn_index[0]:self.trn_index[1]], axis=1)  # norm with trn data
+        # self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
+        # self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
+        # trn_weather_vectors = self.weather_vectors[self.trn_indices[0]:self.trn_indices[1]]
+        # val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
+        # tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
         # normalise space dependent data - using minmax_scale - no need to save train data norm values
         self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
@@ -278,7 +291,7 @@ class FlatDataGroup:
             total_crimes=trn_total_crimes,
             t_range=trn_t_range,  # t_range is matched to the target index
             time_vectors=trn_time_vectors,
-            weather_vectors=trn_weather_vectors,
+            # weather_vectors=trn_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
@@ -291,7 +304,7 @@ class FlatDataGroup:
             total_crimes=val_total_crimes,
             t_range=val_t_range,  # t_range is matched to the target index
             time_vectors=val_time_vectors,
-            weather_vectors=val_weather_vectors,
+            # weather_vectors=val_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
@@ -304,7 +317,7 @@ class FlatDataGroup:
             total_crimes=tst_total_crimes,
             t_range=tst_t_range,  # t_range is matched to the target index
             time_vectors=tst_time_vectors,
-            weather_vectors=tst_weather_vectors,
+            # weather_vectors=tst_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
@@ -326,7 +339,7 @@ class FlatDataset(Dataset):
             total_crimes,  # time dependent
             t_range,  # time dependent
             time_vectors,  # time dependent
-            weather_vectors,  # time dependent
+            # weather_vectors,  # time dependent
             demog_grid,  # space dependent
             street_grid,  # space dependent
             seq_len,
@@ -343,7 +356,7 @@ class FlatDataset(Dataset):
         self.street_grid = street_grid
 
         self.time_vectors = time_vectors
-        self.weather_vectors = weather_vectors  # remember weather should be the info of the next time step
+        # self.weather_vectors = weather_vectors  # remember weather should be the info of the next time step
         self.t_range = t_range
 
         freqstr = t_range.freqstr
@@ -357,6 +370,10 @@ class FlatDataset(Dataset):
         self.len = self.min_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
 
         self.shape = self.t_size, self.l_size  # used when saving the model results
+
+        # used to map the predictions to the actual targets
+        self.target_shape = self.targets.shape
+        self.target_shape[0] = self.target_shape[0] - self.seq_len - self.offset_year
 
     def __len__(self):
         """Denotes the total number of samples"""
@@ -402,10 +419,12 @@ class FlatDataset(Dataset):
             crime_vec = np.concatenate((crime_vec,crimes_total,crimes_last_year), axis=-1)
 
             time_vec = self.time_vectors[t_start:t_stop]
-            weather_vec = self.weather_vectors[t_start:t_stop]
             demog_vec = self.demog_grid[:, :, l_index]
             street_vec = self.street_grid[:, :, l_index]
-            tmp_vec = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add more historical values
+            # weather_vec = self.weather_vectors[t_start:t_stop]
+            # tmp_vec = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add more historical values
+            tmp_vec = np.concatenate((time_vec, crime_vec), axis=-1)  # todo add more historical values
+
             # todo teacher forcing - if we are using this then we need to return sequence of targets
             target_vec = self.targets[t_start:t_stop, :, l_index]
 
@@ -419,7 +438,7 @@ class FlatDataset(Dataset):
 
         # spc_feats: [demog_vec]
         # env_feats: [street_vec]
-        # tmp_feats: [time_vec, weather_vec, crime_vec]
+        # tmp_feats: [time_vec, weather_vec, crime_vec]  - no more weather for now
         # targets: [targets]
         spc_feats = np.stack(stack_spc_feats)
         tmp_feats = np.stack(stack_tmp_feats)
@@ -433,5 +452,3 @@ class FlatDataset(Dataset):
 
         # output shapes should be - (seq_len, batch_size,, n_feats)
         return result_indices, spc_feats, tmp_feats, env_feats, targets
-
-    ## todo have this as the base class - create new classes where we're just over loading

@@ -20,7 +20,8 @@ if __name__ == "__main__":
     config = read_json("./config/generate_data.json")
     dT = config["dT"]
 
-    scale = config["scale"]  # scale the area
+    x_scale = config["x_scale"]
+    y_scale = config["y_scale"]
 
     # used as info file for the folder where the data is created
     info = dict()
@@ -66,7 +67,9 @@ if __name__ == "__main__":
     # Time dimensions
     info["dT"] = dT
     # Spatial dimensions
-    xy_scale = scale * np.array([10, 8])  # must be integer so that we can easily sample demographic data
+
+    # [20,16] - [10,8] - [5,4] - [3,2] - [1,1]
+    xy_scale = np.array([x_scale, y_scale])  # must be integer so that we can easily sample demographic data
     dx, dy = xy_scale * np.array([0.001, 0.001])
     info["dx"] = float(dx)
     info["dy"] = float(dy)
@@ -75,7 +78,8 @@ if __name__ == "__main__":
 
     log.info("Cell sizes: %.3f m in x direction and %.3f m in y direction" % (85000 * dx, 110000 * dy))
 
-    crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018.pkl")
+    # crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018.pkl")
+    crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018_new.pkl")
 
     # CHOOSE CRIME TYPES
     valid_crime_types = [
