@@ -21,8 +21,9 @@ class TestDatasetIndexing(unittest.TestCase):
     """
 
     def setUp(self) -> None:
-        N, C, H, W = 31, 3, 17, 11
+        N, C, H, W = 100, 3, 17, 11
         seq_len = 4
+        offset_year = 13
 
         # crime_feature_indices_shape = (C,)
         crime_types_grids_shape = (N, C, H, W)
@@ -44,7 +45,7 @@ class TestDatasetIndexing(unittest.TestCase):
         total_crimes = np.ones(total_crimes_shape)
         t_range = np.ones(t_range_shape)  # t_range is matched to the target index
         time_vectors = np.ones(time_vectors_shape)
-        weather_vectors = np.ones(weather_vectors_shape)
+        # weather_vectors = np.ones(weather_vectors_shape)
         demog_grid = shaper.squeeze(np.ones(demog_grid_shape))
         street_grid = shaper.squeeze(np.ones(street_grid_shape))
 
@@ -54,10 +55,11 @@ class TestDatasetIndexing(unittest.TestCase):
             total_crimes=total_crimes,
             t_range=t_range,
             time_vectors=time_vectors,
-            weather_vectors=weather_vectors,
+            # weather_vectors=weather_vectors,
             demog_grid=demog_grid,
             street_grid=street_grid,
             seq_len=seq_len,
+            offset_year=offset_year,
             shaper=shaper,
         )
 
