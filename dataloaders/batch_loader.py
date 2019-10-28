@@ -1,6 +1,6 @@
 import numpy as np
 
-
+# todo rename to flat BatchLoader
 class BatchLoader:
     def __init__(self, dataset, batch_size, sub_sample=True):
         """

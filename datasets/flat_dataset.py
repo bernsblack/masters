@@ -8,10 +8,6 @@ from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
-"""
-Not really faster as the FlatDataset
-"""
-
 
 class FlatDataGroup:
     """
@@ -23,8 +19,9 @@ class FlatDataGroup:
 
     def __init__(self, data_path: str, conf: BaseConf):
         """
-        Args:
-            data_path (string): Path to the data folder with all spatial and temporal data.
+
+        :param data_path: Path to the data folder with all spatial and temporal data.
+        :param conf: Config class with pre-set and global values
         """
         # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D) :
         # [√] number of incidents of crime occurrence by census tract in 2013 (1-D) :

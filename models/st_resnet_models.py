@@ -118,7 +118,7 @@ class Fuse(nn.Module):  # fuse the 3 matrices with parametric matrices
         return Xres
 
 
-class STResNet(nn.Module):
+class STResNetOLD(nn.Module):
     def __init__(self, n_layers, y_size, x_size, lc=1, lp=1, lq=1, n_channels=1, n_ext_features=10):
         """
         n_layers: number of layers
@@ -131,7 +131,7 @@ class STResNet(nn.Module):
         # TODO: See if we can set parallel networks by a param: not just lc,lp,lq, but even more
         # TODO: Add option with no external data
 
-        super(STResNet, self).__init__()
+        super(STResNetOLD, self).__init__()
         self.resNetc = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
         self.resNetp = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
         self.resNetq = ResNet(n_layers, in_channels=lq, n_channels=n_channels)
@@ -167,9 +167,21 @@ class STResNet(nn.Module):
         return Xt_hat
 
 
-class STResNet_Census(nn.Module):
-    def __init__(self, n_layers, y_size, x_size, lc=1, lp=1, lq=1, n_channels=1, n_ext_features=10,
-                 n_census_features=37, n_census_channels=10, n_census_layers=4):
+class STResNet(nn.Module):
+    # todo add docs
+
+    def __init__(self,
+                 n_layers,
+                 y_size,
+                 x_size,
+                 n_channels=1,
+                 lc=1,
+                 lp=1,
+                 lq=1,
+
+                 n_ext_features=10,
+
+                 ):
         """
         n_layers: number of layers
         y_size: grids.shape[-2]
@@ -177,19 +189,16 @@ class STResNet_Census(nn.Module):
         ext_features: number of external features, dimensions of E
         """
 
-        # TODO: check if pytorch has parallel modules like sequential
-        # TODO: See if we can set parallel networks by a param: not just lc,lp,lq, but even more
-        # TODO: Add option with no external data
+        super(STResNet, self).__init__()
 
-        super(STResNet_Census, self).__init__()
-        self.resNetc = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
-        self.resNetp = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
-        self.resNetq = ResNet(n_layers, in_channels=lq, n_channels=n_channels)
-        self.resNetCensus = ResNet(n_census_layers, in_channels=n_census_features, n_channels=n_census_channels)
-        self.extNet = ExternalNet(in_features=n_ext_features, y_size=y_size, x_size=x_size)
+        self.res_net_c = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
+        self.res_net_p = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
+        self.res_net_q = ResNet(n_layers, in_channels=lq, n_channels=n_channels)
+        self.ext_net = ExternalNet(in_features=n_ext_features, y_size=y_size, x_size=x_size)
         self.fuse = Fuse(y_size=y_size, x_size=x_size)
 
-    def forward(self, Sc, Sp, Sq, Et=None, Census=None):
+    def forward(self, seq_c, seq_p, seq_q, seq_e=None):
+        # todo: redo comments for function
         """
         Inputs:
         =======
@@ -201,18 +210,107 @@ class STResNet_Census(nn.Module):
         Xt_hat: Estimated crime grid at time t
         """
         # l indicates the output of the lth ResUnit
-        Xc = self.resNetc(Sc)
-        Xp = self.resNetp(Sp)
-        Xq = self.resNetq(Sq)
-        Xcensus = self.resNetCensus(Census)
-        Xres = self.fuse(Xc, Xp, Xq)
+        x_c = self.res_net_c(seq_c)
+        x_p = self.res_net_p(seq_p)
+        x_q = self.res_net_q(seq_q)
+        x_res = self.fuse(x_c, x_p, x_q)
 
-        # tanh squeezes values between -1 and 1 that's, that's why the cumsum wasn't working
+        # if seq_e:  # time and weather vectors - weather is not used a.t.m. because of missing data
+        #     x_ext = self.ext_net(seq_e)
+        #     x_res = x_res * x_ext
+
+        # tanh squeezes values between -1 and 1 that's, that's why the cum-sum wasn't working
         # Last layer is tanh
-        if Et is None:
-            Xt_hat = torch.tanh(Xres)
+        if seq_e is None:
+            x_t_hat = torch.tanh(x_res)
         else:
-            Xext = self.extNet(Et)
-            Xt_hat = torch.tanh(Xres + Xext)
+            x_ext = self.ext_net(seq_e)
+            # todo: ask why are we adding - why not multiply
+            x_t_hat = torch.tanh(x_res + x_ext)  # output values can only be between -1,1 for tanh
 
-        return Xt_hat
+        return x_t_hat
+
+
+class STResNetExtra(nn.Module):
+    """
+    Extra conv nets to include the google street view, and the demographics
+    """
+
+    def __init__(self,
+                 n_layers,
+                 y_size,
+                 x_size,
+                 n_channels=1,
+                 lc=1,
+                 lp=1,
+                 lq=1,
+
+                 n_ext_features=10,
+
+                 n_demog_features=37,
+                 n_demog_channels=10,
+                 n_demog_layers=3,
+
+                 n_gsv_features=512,  # gsv = GOOGLE STREET VIEW
+                 n_gsv_channels=10,
+                 n_gsv_layers=3,
+
+                 ):
+        """
+        n_layers: number of layers
+        y_size: grids.shape[-2]
+        x_size: grids.shape[-1]
+        ext_features: number of external features, dimensions of E
+        """
+
+        super(STResNetExtra, self).__init__()
+        self.res_net_c = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
+        self.res_net_p = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
+        self.res_net_q = ResNet(n_layers, in_channels=lq, n_channels=n_channels)
+        self.res_net_demog = ResNet(n_demog_layers, in_channels=n_demog_features, n_channels=n_demog_channels)
+        self.res_net_street_view = ResNet(n_gsv_layers, in_channels=n_gsv_features, n_channels=n_gsv_channels)
+        self.ext_net = ExternalNet(in_features=n_ext_features, y_size=y_size, x_size=x_size)
+        self.fuse = Fuse(y_size=y_size, x_size=x_size)
+
+    def forward(self, seq_c, seq_p, seq_q, seq_e=None, seq_demog=None, seq_gsv=None):
+        # todo: redo comments for function
+        """
+        Inputs:
+        =======
+        Sc, Sp, Sq: Sequence of grids - each grid as a channel
+        Et: External features at time t
+
+        Outputs:
+        ========
+        Xt_hat: Estimated crime grid at time t
+        """
+        # l indicates the output of the lth ResUnit
+
+        x_c = self.res_net_c(seq_c)
+        x_p = self.res_net_p(seq_p)
+        x_q = self.res_net_q(seq_q)
+        x_res = self.fuse(x_c, x_p, x_q)
+
+        if seq_demog:
+            x_demog = self.res_net_demog(seq_demog)
+            x_res = x_res * x_demog
+
+        if seq_gsv:
+            x_gsv = self.res_net_demog(seq_gsv)
+            x_res = x_res * x_gsv
+        #
+        # if seq_e:  # time and weather vectors - weather is not used a.t.m. because of missing data
+        #     x_ext = self.ext_net(seq_e)
+        #     x_res = x_res * x_ext
+        #
+
+        # tanh squeezes values between -1 and 1 that's, that's why the cum-sum wasn't working
+        # Last layer is tanh
+        if seq_e is None:
+            x_t_hat = torch.tanh(x_res)
+        else:
+            x_ext = self.ext_net(seq_e)
+            # todo: ask why are we adding - why not multiply
+            x_t_hat = torch.tanh(x_res + x_ext)  # output values can only be between -1,1 for tanh
+
+        return x_t_hat

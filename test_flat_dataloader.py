@@ -22,7 +22,7 @@ class TestDataLoaderIndexing(unittest.TestCase):
 
         new_targets = np.ones(data_group.testing_set.targets.shape)
         c = np.expand_dims(np.expand_dims(np.arange(len(new_targets)), -1), -1)
-        new_targets = c* new_targets
+        new_targets = c * new_targets
         data_group.testing_set.targets = new_targets
 
         probas_pred = np.zeros(data_group.testing_set.target_shape)
@@ -39,11 +39,8 @@ class TestDataLoaderIndexing(unittest.TestCase):
                 ones[n, c, l] = 1
                 count += 1
 
-        self.assertEqual(np.equal(y_true, probas_pred).all(),True)
-
-
+        self.assertEqual(np.equal(y_true, probas_pred).all(), True)
 
 
 if __name__ == "__main__":
-
     unittest.main()

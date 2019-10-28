@@ -188,7 +188,7 @@ class BaseMetricPlotter:  # todo: replace with the BasePlotter in plots
         rcParams["font.family"] = "STIXGeneral"
         rcParams["font.size"] = "18"
         self.title = title
-        self.grid_alpha = 0.2
+        self.grid_alpha = 0.5
         self.setup()
 
     @staticmethod
@@ -401,3 +401,26 @@ class CellPlotter(BaseMetricPlotter):
     def finalise(self):
         plt.title(self.title)
         plt.legend(bbox_to_anchor=(1.04, 0), loc="lower left", borderaxespad=0)
+
+
+class PerTimeStepPlotter(BaseMetricPlotter):
+    """
+    Plot time related things
+    """
+
+    # setup maybe add the size of the figure
+    def __init__(self, time_step, ylabel, title="Total Crime of Test Set Over Time"):
+        super(PerTimeStepPlotter, self).__init__(title)
+
+        plt.figure(figsize=(15, 4))
+
+        plt.ylabel(ylabel)
+        plt.xlabel(f"Time steps ({time_step})")
+
+    @staticmethod
+    def setup():
+        print("setup - done")
+
+    @staticmethod
+    def plot(data, label):
+        plt.plot(data, label=label)
