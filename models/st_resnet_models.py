@@ -102,9 +102,9 @@ class Fuse(nn.Module):  # fuse the 3 matrices with parametric matrices
     def __init__(self, y_size, x_size):
         super(Fuse, self).__init__()
 
-        self.Wc = nn.parameter.Parameter(torch.zeros(y_size, x_size))
-        self.Wp = nn.parameter.Parameter(torch.zeros(y_size, x_size))
-        self.Wq = nn.parameter.Parameter(torch.zeros(y_size, x_size))
+        self.Wc = nn.parameter.Parameter(torch.zeros(y_size, x_size), requires_grad=True)
+        self.Wp = nn.parameter.Parameter(torch.zeros(y_size, x_size), requires_grad=True)
+        self.Wq = nn.parameter.Parameter(torch.zeros(y_size, x_size), requires_grad=True)
 
         # self.init_weights()
 
@@ -215,7 +215,7 @@ class STResNet(nn.Module):
         x_q = self.res_net_q(seq_q)
         x_res = self.fuse(x_c, x_p, x_q)
 
-        # if seq_e:  # time and weather vectors - weather is not used a.t.m. because of missing data
+        # if seq_e is not None:  # time and weather vectors - weather is not used a.t.m. because of missing data
         #     x_ext = self.ext_net(seq_e)
         #     x_res = x_res * x_ext
 
@@ -291,12 +291,12 @@ class STResNetExtra(nn.Module):
         x_q = self.res_net_q(seq_q)
         x_res = self.fuse(x_c, x_p, x_q)
 
-        if seq_demog:
+        if seq_demog is not None:
             x_demog = self.res_net_demog(seq_demog)
             x_res = x_res * x_demog
 
-        if seq_gsv:
-            x_gsv = self.res_net_demog(seq_gsv)
+        if seq_gsv is not None:
+            x_gsv = self.res_net_street_view(seq_gsv)
             x_res = x_res * x_gsv
         #
         # if seq_e:  # time and weather vectors - weather is not used a.t.m. because of missing data
