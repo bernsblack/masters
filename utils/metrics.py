@@ -52,9 +52,12 @@ def get_y_pred(thresh, probas_pred):
     :param probas_pred:  [0,inf) and float values
     :return y_pred: thresholds float values of probas_pred to get hard classifications
     """
+    if thresh < 0:
+        raise Exception("threshold must be greater than 0")
     y_pred = np.copy(probas_pred)
-    y_pred[y_pred >= thresh] = 1
+    # todo unit test - this might fail when threshold is greater than 1
     y_pred[y_pred < thresh] = 0
+    y_pred[y_pred >= thresh] = 1
 
     return y_pred
 

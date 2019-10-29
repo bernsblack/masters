@@ -1,9 +1,14 @@
+import pickle
+
 from numpy import ndarray
 from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
-    , precision_recall_curve, roc_curve
+    , precision_recall_curve, roc_curve, recall_score, precision_score
 
+from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter
 from utils.preprocessing import Shaper
+
+import logging as log
 
 
 class PRCurve:
@@ -22,6 +27,10 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         self.model_name = model_name
         self.accuracy_score = accuracy_score(y_true, y_pred)
         self.roc_auc_score = roc_auc_score(y_true, probas_pred)
+
+        self.recall_score = recall_score(y_true, y_pred)
+        self.precision_score = precision_score(y_true, y_pred)
+
         self.average_precision_score = average_precision_score(y_true, probas_pred)
         self.matthews_corrcoef = matthews_corrcoef(y_true, y_pred)
 
@@ -33,6 +42,8 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         MODEL METRICS
             Model Name: {self.model_name}
                 ROC AUC:            {self.roc_auc_score}
+                Recall:             {self.recall_score}
+                Precision:          {self.precision_score}
                 Average Precision:  {self.average_precision_score}
                 Accuracy:           {self.accuracy_score}
                 MCC:                {self.matthews_corrcoef}          
@@ -69,6 +80,12 @@ class ModelResult:
     def accuracy(self):
         return accuracy_score(self.y_true.flatten(), self.y_pred.flatten())
 
+    def recall_score(self):
+        return recall_score(self.y_true.flatten(), self.y_pred.flatten())
+
+    def precision_score(self):
+        return precision_score(self.y_true.flatten(), self.y_pred.flatten())
+
     def roc_auc(self):
         return roc_auc_score(self.y_true.flatten(), self.probas_pred.flatten())
 
@@ -87,6 +104,8 @@ class ModelResult:
         MODEL RESULT
             Model Name: {self.model_name}
                 ROC AUC:            {self.roc_auc()}
+                Recall:             {self.recall_score()}
+                Precision:          {self.precision_score()}
                 Average Precision:  {self.average_precision()}
                 Accuracy:           {self.accuracy()}
                 MCC:                {self.matthews_corrcoef()}          
@@ -94,5 +113,49 @@ class ModelResult:
 
         return r
 
-    def __str__(self):  # todo change to only have metrics
+    def __str__(self):
         return self.__repr__()
+
+def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
+    """
+    Training the model for a single epoch
+    """
+    # save result
+    # only saves the result of the metrics not the predicted values
+    model_metrics = ModelMetrics(model_name=conf.model_name,
+                                 y_true=y_true,
+                                 y_pred=y_pred,
+                                 probas_pred=probas_pred)
+    log.info(model_metrics)
+
+    # saves the actual target and predicted values to be visualised later on - the one we're actually going to be using
+    model_result = ModelResult(model_name=conf.model_name,
+                               y_true=y_true,
+                               y_pred=y_pred,
+                               probas_pred=probas_pred,
+                               t_range=t_range,
+                               shaper=shaper)
+    log.info(model_result)
+
+    with open(f"{conf.model_path}model_result.pkl", "wb") as file:
+        pickle.dump(model_result, file)
+
+    with open(f"{conf.model_path}model_metric.pkl", "wb") as file:
+        pickle.dump(model_metrics, file)
+
+    # do result plotting and saving
+    pr_plotter = PRCurvePlotter()
+    pr_plotter.add_curve(y_true.flatten(), probas_pred.flatten(), label_name=conf.model_name)
+    pr_plotter.savefig(f"{conf.model_path}plot_pr_curve.png")
+
+    roc_plotter = ROCCurvePlotter()
+    roc_plotter.add_curve(y_true.flatten(), probas_pred.flatten(), label_name=conf.model_name)
+    roc_plotter.savefig(f"{conf.model_path}plot_roc_curve.png")
+
+    total_crime_plot = PerTimeStepPlotter(time_step=t_range.freqstr, ylabel="Total Crimes")
+    total_crime_plot.plot(probas_pred.sum(-1)[:, 0], label="Predicted")
+    total_crime_plot.plot(y_true.sum(-1)[:, 0], label="Actual")
+    total_crime_plot.savefig(f"{conf.model_path}plot_total_crimes.png")
+
+    # todo map of total metric over time
+    # todo map of metric over entire map

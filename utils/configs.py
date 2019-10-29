@@ -22,7 +22,7 @@ class BaseConf:  # args from arg-parser to over write values
 
             # data related hyper-params
             self.val_ratio = 0.1
-            self.tst_ratio = 0.2
+            self.tst_ratio = 0.3
             self.sub_sample_train_set = True
             self.sub_sample_validation_set = True
             self.sub_sample_test_set = False

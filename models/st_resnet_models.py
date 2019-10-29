@@ -226,7 +226,8 @@ class STResNet(nn.Module):
         else:
             x_ext = self.ext_net(seq_e)
             # todo: ask why are we adding - why not multiply
-            x_t_hat = torch.tanh(x_res + x_ext)  # output values can only be between -1,1 for tanh
+            # x_t_hat = torch.tanh(x_res + x_ext)  # output values can only be between -1,1 for tanh
+            x_t_hat = torch.sigmoid(x_res + x_ext)  # target values are between 0,1
 
         return x_t_hat
 
@@ -311,6 +312,9 @@ class STResNetExtra(nn.Module):
         else:
             x_ext = self.ext_net(seq_e)
             # todo: ask why are we adding - why not multiply
-            x_t_hat = torch.tanh(x_res + x_ext)  # output values can only be between -1,1 for tanh
+            # x_t_hat = torch.tanh(x_res + x_ext)  # output values can only be between -1,1 for tanh
+
+            # target values are between 0 and 1
+            x_t_hat = torch.sigmoid(x_res + x_ext)  # output values can only be between 0,1 for tanh
 
         return x_t_hat

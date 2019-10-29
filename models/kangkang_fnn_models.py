@@ -140,7 +140,7 @@ class SmallKangFNN(nn.Module):
 
 def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, conf):
     """
-    Training the model for a single epoch
+    Training the FNN model for a single epoch
     """
     epoch_losses = []
     num_batches = batch_loader.num_batches
