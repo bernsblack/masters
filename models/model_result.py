@@ -69,6 +69,15 @@ class ModelResult:
         :param probas_pred (N,1,L): model floating point values, can be likelihoods [0,1) or count estimates [0,n)
         :param t_range (N,1): range of the times of the test set - also used in plots
         """
+        if len(y_true.shape) != 3:
+            raise Exception("y_true must be in (N,1,L) format, try reshaping the data.")
+
+        if len(y_pred.shape) != 3:
+            raise Exception("y_pred must be in (N,1,L) format, try reshaping the data.")
+
+        if len(probas_pred.shape) != 3:
+            raise Exception("probas_pred must be in (N,1,L) format, try reshaping the data.")
+
 
         self.model_name = model_name
         self.y_true = y_true
@@ -152,7 +161,7 @@ def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
     roc_plotter.add_curve(y_true.flatten(), probas_pred.flatten(), label_name=conf.model_name)
     roc_plotter.savefig(f"{conf.model_path}plot_roc_curve.png")
 
-    total_crime_plot = PerTimeStepPlotter(time_step=t_range.freqstr, ylabel="Total Crimes")
+    total_crime_plot = PerTimeStepPlotter(xlabel=f"Time (step={t_range.freqstr})", ylabel="Total Crimes")
     total_crime_plot.plot(probas_pred.sum(-1)[:, 0], label="Predicted")
     total_crime_plot.plot(y_true.sum(-1)[:, 0], label="Actual")
     total_crime_plot.savefig(f"{conf.model_path}plot_total_crimes.png")

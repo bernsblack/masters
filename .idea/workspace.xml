@@ -2,17 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/kangkang_fnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/kangkang_fnn_models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/st_resnet_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/st_resnet_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_resnet_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_rnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_rnn_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -59,7 +54,7 @@
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/utils" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
     <property name="settings.editor.selected.configurable" value="org.jetbrains.plugins.notebooks.jupyter.connections.configuration.JupyterServerConfigurable" />
@@ -73,11 +68,11 @@
       <recent name="$PROJECT_DIR$/saved" />
     </key>
     <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/utils" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/data/raw" />
       <recent name="$PROJECT_DIR$/datasets" />
       <recent name="$PROJECT_DIR$/dataloaders" />
-      <recent name="$PROJECT_DIR$/logger" />
     </key>
   </component>
   <component name="RunDashboard">
@@ -300,7 +295,7 @@
       <workItem from="1571157258206" duration="14165000" />
       <workItem from="1571254558152" duration="41779000" />
       <workItem from="1571920458880" duration="27258000" />
-      <workItem from="1572082989409" duration="32564000" />
+      <workItem from="1572082989409" duration="42217000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>

@@ -41,7 +41,9 @@
       <w>unsqueeze</w>
       <w>vals</w>
       <w>viridis</w>
+      <w>xlabel</w>
       <w>xticks</w>
+      <w>ylabel</w>
       <w>yticks</w>
       <w>zorder</w>
     </words>

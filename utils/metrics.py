@@ -181,7 +181,7 @@ def plot_roc_and_pr_curve(ground_truth, predictions_list):
 
 
 # Metric Plots
-class BaseMetricPlotter:  # todo: replace with the BasePlotter in plots
+class BaseMetricPlotter:  # todo: replace with fig axis instead
     """
     Class is used to setup and add plots to a figure and then save or show this figure
     """
@@ -192,11 +192,9 @@ class BaseMetricPlotter:  # todo: replace with the BasePlotter in plots
         rcParams["font.size"] = "18"
         self.title = title
         self.grid_alpha = 0.5
-        self.setup()
 
-    @staticmethod
-    def setup():
-        raise NotImplemented
+        self.fig = None
+        self.ax = None
 
     def finalise(self):
         plt.title(self.title)
@@ -209,7 +207,7 @@ class BaseMetricPlotter:  # todo: replace with the BasePlotter in plots
 
     def savefig(self, file_location):
         self.finalise()
-        plt.savefig(file_location)
+        plt.savefig(file_location, bbox_inches='tight')
 
 
 class LossPlotter(BaseMetricPlotter):
@@ -220,8 +218,6 @@ class LossPlotter(BaseMetricPlotter):
     def __init__(self, title):  # setup maybe add the size of the figure
         super(LossPlotter, self).__init__(title)
 
-    @staticmethod
-    def setup():
         plt.figure(figsize=(20, 10))
         plt.ylabel("Loss")
         plt.xlabel("Epoch")
@@ -261,8 +257,6 @@ class PRCurvePlotter(BaseMetricPlotter):
     def __init__(self, title="Precision-Recall Curve"):
         super(PRCurvePlotter, self).__init__(title)
 
-    @staticmethod
-    def setup():
         plt.figure(figsize=(10, 10))
 
         plt.xlabel("Recall")
@@ -306,8 +300,6 @@ class ROCCurvePlotter(BaseMetricPlotter):
     def __init__(self, title="Receiver Operating Characteristic (ROC) Curve"):
         super(ROCCurvePlotter, self).__init__(title)
 
-    @staticmethod
-    def setup():
         plt.figure(figsize=(10, 10))
 
         plt.xlabel("False Positive Rate")
@@ -351,12 +343,6 @@ class CellPlotter(BaseMetricPlotter):
 
     def __init__(self, title=""):  # setup maybe add the size of the figure
         super(CellPlotter, self).__init__(title)
-
-    @staticmethod
-    def setup():
-        rcParams["mathtext.fontset"] = "stix"
-        rcParams["font.family"] = "STIXGeneral"
-        rcParams["font.size"] = "18"
 
     @staticmethod
     def plot_predictions(y_true=None, y_pred=None, probas_pred=None):  # todo maybe just send in model result object?
@@ -412,17 +398,13 @@ class PerTimeStepPlotter(BaseMetricPlotter):
     """
 
     # setup maybe add the size of the figure
-    def __init__(self, time_step, ylabel, title="Total Crime of Test Set Over Time"):
+    def __init__(self, xlabel="Time", ylabel="Score", title="Total Crime of Test Set Over Time"):
         super(PerTimeStepPlotter, self).__init__(title)
 
         plt.figure(figsize=(15, 4))
 
         plt.ylabel(ylabel)
-        plt.xlabel(f"Time steps ({time_step})")
-
-    @staticmethod
-    def setup():
-        print("setup - done")
+        plt.xlabel(xlabel)
 
     @staticmethod
     def plot(data, label):
