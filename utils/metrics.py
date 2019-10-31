@@ -198,7 +198,7 @@ class BaseMetricPlotter:  # todo: replace with fig axis instead
 
     def finalise(self):
         plt.title(self.title)
-        plt.legend(bbox_to_anchor=(1.04, 0), loc="lower left", borderaxespad=0)
+        plt.legend(bbox_to_anchor=(1.01, 0), loc="lower left", borderaxespad=0)
         plt.grid(alpha=self.grid_alpha)
 
     def show(self):
@@ -218,7 +218,7 @@ class LossPlotter(BaseMetricPlotter):
     def __init__(self, title):  # setup maybe add the size of the figure
         super(LossPlotter, self).__init__(title)
 
-        plt.figure(figsize=(20, 10))
+        plt.figure(figsize=(15, 5))
         plt.ylabel("Loss")
         plt.xlabel("Epoch")
 
@@ -387,9 +387,6 @@ class CellPlotter(BaseMetricPlotter):
         if y_pred:
             ax.plot(y_pred, label="y_pred")
 
-    def finalise(self):
-        plt.title(self.title)
-        plt.legend(bbox_to_anchor=(1.04, 0), loc="lower left", borderaxespad=0)
 
 
 class PerTimeStepPlotter(BaseMetricPlotter):
@@ -401,7 +398,7 @@ class PerTimeStepPlotter(BaseMetricPlotter):
     def __init__(self, xlabel="Time", ylabel="Score", title="Total Crime of Test Set Over Time"):
         super(PerTimeStepPlotter, self).__init__(title)
 
-        plt.figure(figsize=(15, 4))
+        plt.figure(figsize=(15, 5))
 
         plt.ylabel(ylabel)
         plt.xlabel(xlabel)
