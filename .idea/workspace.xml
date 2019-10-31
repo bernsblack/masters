@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/batch_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/batch_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/flat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/flat_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataloaders/grid_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/grid_loader.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -294,7 +290,7 @@
       <workItem from="1571254558152" duration="41779000" />
       <workItem from="1571920458880" duration="27258000" />
       <workItem from="1572082989409" duration="46306000" />
-      <workItem from="1572529162443" duration="1558000" />
+      <workItem from="1572529162443" duration="1671000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
