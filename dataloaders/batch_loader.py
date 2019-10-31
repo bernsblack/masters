@@ -27,9 +27,11 @@ class BatchLoader:
         class1_args = np.argwhere(flat_targets > 0)
         class1_args = class1_args[class1_args >= self.min_index]
 
+        # todo - set subsample ratio_cls0_cls1 = 2
         if sub_sample:
             np.random.shuffle(class0_args)
             np.random.shuffle(class1_args)
+            # class0_args = class0_args[:int(ratio_cls0_cls1*len(class1_args))]
             class0_args = class0_args[:len(class1_args)]
             self.indices = np.array(list(zip(class0_args, class1_args))).flatten()
         else:

@@ -24,11 +24,11 @@ class FlatDataLoaders:
 
         self.train_loader = BatchLoader(dataset=self.data_group.training_set,
                                         batch_size=conf.batch_size,
-                                        sub_sample=True)
+                                        sub_sample=conf.sub_sample_train_set)
 
         self.validation_loader = BatchLoader(dataset=self.data_group.validation_set,
                                              batch_size=conf.batch_size,
-                                             sub_sample=True)
+                                             sub_sample=conf.sub_sample_validation_set)
 
         self.test_loader = BatchLoader(dataset=self.data_group.testing_set,
                                        batch_size=conf.batch_size,

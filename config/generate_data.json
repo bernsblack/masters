@@ -1,7 +1,7 @@
 {
   "start_date": "2013-01-01",
   "end_date": "2015-01-01",
-  "dT": "12H",
+  "dT": "3H",
   "x_scale": 10,
   "y_scale": 8,
   "root": "./"

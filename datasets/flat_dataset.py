@@ -30,9 +30,10 @@ class FlatDataGroup:
 
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             # print info on the read data
-            log.info("Data shapes of files in generated_data.npz")
-            for k, v in zip_file.items():
-                log.info(f"\t{k} shape {np.shape(v)}")
+            # wastes loading times and ram - to load each file
+            # log.info("Data shapes of files in generated_data.npz")
+            # for k, v in zip_file.items():
+            #     log.info(f"\t{k} shape {np.shape(v)}")
             t_range = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range shape {np.shape(t_range)}")
 
