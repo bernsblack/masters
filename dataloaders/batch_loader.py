@@ -1,5 +1,5 @@
 import numpy as np
-
+# todo add sequence loader - runs through the entire sets sequence first then
 # todo rename to flat BatchLoader
 class BatchLoader:
     def __init__(self, dataset, batch_size, sub_sample=True):

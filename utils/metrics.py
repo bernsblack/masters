@@ -284,8 +284,19 @@ class PRCurvePlotter(BaseMetricPlotter):
         kwargs = {
             "label": label_name + f" (AP={ap:.3f})",
             "marker": 's',
-            "markersize": 2,
-            "alpha": 0.7,
+            "markersize": 1,
+            "alpha": 0.5,
+        }
+
+        plt.plot(recall, precision, **kwargs)
+
+    @staticmethod
+    def add_curve_(precision, recall, ap, label_name):
+        kwargs = {
+            "label": label_name + f" (AP={ap:.3f})",
+            "marker": 's',
+            "markersize": 1,
+            "alpha": 0.5,
         }
 
         plt.plot(recall, precision, **kwargs)
@@ -329,8 +340,20 @@ class ROCCurvePlotter(BaseMetricPlotter):
         kwargs = {
             "label": label_name + f" (AUC={auc:.3f})",
             "marker": 's',
-            "markersize": 2,
-            "alpha": 0.7,
+            "markersize": 1,
+            "alpha": 0.5,
+        }
+
+        plt.plot(fpr, tpr, **kwargs)
+
+    @staticmethod
+    def add_curve_(fpr, tpr, auc, label_name):
+
+        kwargs = {
+            "label": label_name + f" (AUC={auc:.3f})",
+            "marker": 's',
+            "markersize": 1,
+            "alpha": 0.5,
         }
 
         plt.plot(fpr, tpr, **kwargs)

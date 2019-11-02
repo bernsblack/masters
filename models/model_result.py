@@ -7,8 +7,63 @@ from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_sco
 
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter
 from utils.preprocessing import Shaper
+import os
 
 import logging as log
+
+def compare_models(data_path):
+    model_metrics = []
+    model_names = os.listdir(f"{data_path}models")
+
+    if '.DS_Store' in model_names:
+        model_names.remove('.DS_Store')
+
+    for model_name in model_names:
+        if not os.path.exists(data_path):
+            raise Exception(f"Directory ({data_path}) needs to exist.")
+
+        model_path = f"{data_path}models/{model_name}/"
+
+        file_name = f"{model_path}model_metric.pkl"
+
+        if not os.path.exists(file_name):
+            continue
+
+        with open(file_name, 'rb') as file_pointer:
+            model_metrics.append(pickle.load(file_pointer))
+
+    # pr-curve
+    pr_plot = PRCurvePlotter()
+    for metric in model_metrics:
+        precision = metric.pr_curve.precision
+        recall = metric.pr_curve.recall
+        ap = metric.average_precision_score
+        model_name = metric.model_name
+
+        pr_plot.add_curve_(precision=precision,
+                          recall=recall,
+                          ap=ap,
+                          label_name=model_name)
+
+    pr_plot.show() # save somewhere?
+
+
+    # roc-curve
+    roc_plot = ROCCurvePlotter()
+    for metric in model_metrics:
+        fpr = metric.roc_curve.fpr
+        tpr = metric.roc_curve.tpr
+        auc = metric.roc_auc_score
+        model_name = metric.model_name
+
+        roc_plot.add_curve_(fpr=fpr,
+                          tpr=tpr,
+                          auc=auc,
+                          label_name=model_name)
+
+    roc_plot.show()  # save somewhere?
+
+    # todd add per cel and time plots per metric - should be saved on the metric class
 
 
 class PRCurve:
@@ -125,6 +180,7 @@ class ModelResult:
     def __str__(self):
         return self.__repr__()
 
+
 def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
     """
     Training the model for a single epoch
@@ -151,20 +207,3 @@ def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
 
     with open(f"{conf.model_path}model_metric.pkl", "wb") as file:
         pickle.dump(model_metrics, file)
-
-    # do result plotting and saving
-    pr_plotter = PRCurvePlotter()
-    pr_plotter.add_curve(y_true.flatten(), probas_pred.flatten(), label_name=conf.model_name)
-    pr_plotter.savefig(f"{conf.model_path}plot_pr_curve.png")
-
-    roc_plotter = ROCCurvePlotter()
-    roc_plotter.add_curve(y_true.flatten(), probas_pred.flatten(), label_name=conf.model_name)
-    roc_plotter.savefig(f"{conf.model_path}plot_roc_curve.png")
-
-    total_crime_plot = PerTimeStepPlotter(xlabel=f"Time (step={t_range.freqstr})", ylabel="Total Crimes")
-    total_crime_plot.plot(probas_pred.sum(-1)[:, 0], label="Predicted")
-    total_crime_plot.plot(y_true.sum(-1)[:, 0], label="Actual")
-    total_crime_plot.savefig(f"{conf.model_path}plot_total_crimes.png")
-
-    # todo map of total metric over time
-    # todo map of metric over entire map

@@ -75,7 +75,11 @@ class FlatDataGroup:
             self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
 
         freqstr = t_range.freqstr
-        self.offset_year = int(365 * 24 / int(freqstr[:freqstr.find("H")]))
+        if freqstr == "H":
+            freqstr = "1H"
+        time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+
+        self.offset_year = int(365 * 24 / time_step_hrs)
 
         self.seq_len = conf.seq_len
         self.total_len = len(self.crimes)  # length of the whole time series
