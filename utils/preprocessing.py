@@ -1,6 +1,7 @@
 import numpy as np
 
 from utils import deprecated
+from utils.configs import BaseConf
 
 
 def get_index_mask(data, threshold=0, top_k=-1):
@@ -92,13 +93,14 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
 
 # todo make use of ellipsis to generalise the shaper to N,H,W and N,C,L
 class Shaper:
-    def __init__(self, data, threshold=0, top_k=-1):
+    def __init__(self, data, conf: BaseConf):
         """
-
-        :param top_k: if larger than 0 we filter out only the top k most active cells of the data grid
         :param data: array shaped (N, C, H, W)
-        :param threshold: sum over all time should be above this threshold
         """
+        threshold = conf.shaper_threshold # sum over all time should be above this threshold
+        top_k = conf.shaper_top_k # if larger than 0 we filter out only the top k most active cells of the data grid
+
+
         shape = list(np.shape(data))
 
         self.h, self.w = shape[-2:]

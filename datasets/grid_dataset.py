@@ -39,8 +39,7 @@ class GridDataGroup:
 
             # fit crime data to shaper - only used to squeeze results when calculating the results
             self.shaper = Shaper(data=self.crimes,
-                                 threshold=conf.shaper_threshold,
-                                 top_k=conf.shaper_top_k)
+                                 conf=conf)
 
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
             # tract_count_grids = zip_file["tract_count_grids"]

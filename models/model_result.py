@@ -5,10 +5,12 @@ from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
     , precision_recall_curve, roc_curve, recall_score, precision_score
 
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter
+from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
+    average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
+    recall_score_per_time_slot
 from utils.preprocessing import Shaper
 import os
-
+import numpy as np
 import logging as log
 
 def compare_models(data_path):
@@ -91,6 +93,28 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
         self.pr_curve = PRCurve(*precision_recall_curve(y_true, probas_pred))
         self.roc_curve = ROCCurve(*roc_curve(y_true, probas_pred, drop_intermediate=False))
+
+        ap_per_time = average_precision_score_per_time_slot(y_true=y_true,
+                                                            probas_pred=probas_pred)
+        self.ap_per_time = np.nan_to_num(ap_per_time)
+
+        roc_per_time = roc_auc_score_per_time_slot(y_true=y_true,
+                                                   probas_pred=probas_pred)
+        self.roc_per_time = np.nan_to_num(roc_per_time)
+
+        acc_per_time = accuracy_score_per_time_slot(y_true=y_true,
+                                                    y_pred=y_pred)
+        self.acc_per_time = np.nan_to_num(acc_per_time)
+
+        p_per_time = precision_score_per_time_slot(y_true=y_true,
+                                                   y_pred=y_pred)
+        self.p_per_time = np.nan_to_num(p_per_time)
+
+        r_per_time = recall_score_per_time_slot(y_true=y_true,
+                                                y_pred=y_pred)
+        self.r_per_time = np.nan_to_num(r_per_time)
+
+
 
     def __repr__(self):
         r = rf"""

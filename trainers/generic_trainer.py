@@ -115,4 +115,4 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
     loss_plotter.plot_losses(trn_epoch_losses, trn_batch_losses[skip:], val_epoch_losses, val_batch_losses[skip:])
     loss_plotter.savefig(f"{conf.model_path}plot_train_val_epoch_losses.png")
 
-    return trn_epoch_losses, val_epoch_losses_best, stopped_early
+    return trn_epoch_losses, val_epoch_losses, stopped_early

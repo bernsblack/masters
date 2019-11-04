@@ -196,6 +196,13 @@ class BaseMetricPlotter:  # todo: replace with fig axis instead
         self.fig = None
         self.ax = None
 
+        self.plot_kwargs =  {
+            # "marker": 's',
+            # "markersize": .5,
+            # "lw": 1,
+            "alpha": .5,
+        }
+
     def finalise(self):
         plt.title(self.title)
         plt.legend(bbox_to_anchor=(1.01, 0), loc="lower left", borderaxespad=0)
@@ -276,30 +283,17 @@ class PRCurvePlotter(BaseMetricPlotter):
                 l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
             plt.annotate('F1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
 
-    @staticmethod
-    def add_curve(y_true, probas_pred, label_name):
+    def add_curve(self, y_true, probas_pred, label_name):
         precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
         ap = average_precision_score(y_true, probas_pred)
 
-        kwargs = {
-            "label": label_name + f" (AP={ap:.3f})",
-            "marker": 's',
-            "markersize": 1,
-            "alpha": 0.5,
-        }
+        self.plot_kwargs["label"] =  label_name + f" (AP={ap:.3f})"
+        plt.plot(recall, precision, **self.plot_kwargs)
 
-        plt.plot(recall, precision, **kwargs)
+    def add_curve_(self, precision, recall, ap, label_name):
 
-    @staticmethod
-    def add_curve_(precision, recall, ap, label_name):
-        kwargs = {
-            "label": label_name + f" (AP={ap:.3f})",
-            "marker": 's',
-            "markersize": 1,
-            "alpha": 0.5,
-        }
-
-        plt.plot(recall, precision, **kwargs)
+        self.plot_kwargs["label"] = label_name + f" (AP={ap:.3f})"
+        plt.plot(recall, precision, **self.plot_kwargs)
 
 
 class ROCCurvePlotter(BaseMetricPlotter):
@@ -319,8 +313,7 @@ class ROCCurvePlotter(BaseMetricPlotter):
         plt.xlim(-0.01, 1.1)
         plt.ylim(0, 1.1)
 
-    @staticmethod
-    def add_curve(y_true, probas_pred, label_name):
+    def add_curve(self, y_true, probas_pred, label_name):
         """
         :param y_true: array, shape = [n_samples] or [n_samples, n_classes]
         True binary labels or binary label indicators.
@@ -337,26 +330,13 @@ class ROCCurvePlotter(BaseMetricPlotter):
         fpr, tpr, thresholds = roc_curve(y_true, probas_pred, drop_intermediate=False)
         auc = roc_auc_score(y_true, probas_pred)
 
-        kwargs = {
-            "label": label_name + f" (AUC={auc:.3f})",
-            "marker": 's',
-            "markersize": 1,
-            "alpha": 0.5,
-        }
+        self.plot_kwargs["label"] = label_name + f" (AUC={auc:.3f})"
+        plt.plot(fpr, tpr, **self.plot_kwargs)
 
-        plt.plot(fpr, tpr, **kwargs)
+    def add_curve_(self, fpr, tpr, auc, label_name):
 
-    @staticmethod
-    def add_curve_(fpr, tpr, auc, label_name):
-
-        kwargs = {
-            "label": label_name + f" (AUC={auc:.3f})",
-            "marker": 's',
-            "markersize": 1,
-            "alpha": 0.5,
-        }
-
-        plt.plot(fpr, tpr, **kwargs)
+        self.plot_kwargs["label"] =  label_name + f" (AUC={auc:.3f})"
+        plt.plot(fpr, tpr, **self.plot_kwargs)
 
 
 class CellPlotter(BaseMetricPlotter):
@@ -429,3 +409,203 @@ class PerTimeStepPlotter(BaseMetricPlotter):
     @staticmethod
     def plot(data, label):
         plt.plot(data, label=label)
+
+
+def accuracy_score_per_cell(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (1,1,L)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(L)
+
+    for i in range(L):
+        result[i] = accuracy_score(y_true=y_true[:, :, i].flatten(),
+                                   y_pred=y_pred[:, :, i].flatten())
+
+    result = np.expand_dims(result, axis=0)
+    result = np.expand_dims(result, axis=0)
+
+    return result
+
+
+def precision_score_per_cell(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (1,1,L)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(L)
+
+    for i in range(L):
+        result[i] = precision_score(y_true=y_true[:, :, i].flatten(),
+                                    y_pred=y_pred[:, :, i].flatten())
+
+    result = np.expand_dims(result, axis=0)
+    result = np.expand_dims(result, axis=0)
+
+    return result
+
+
+def recall_score_per_cell(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (1,1,L)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(L)
+
+    for i in range(L):
+        result[i] = recall_score(y_true=y_true[:, :, i].flatten(),
+                                 y_pred=y_pred[:, :, i].flatten())
+
+    result = np.expand_dims(result, axis=0)
+    result = np.expand_dims(result, axis=0)
+
+    return result
+
+
+def average_precision_score_per_cell(y_true, probas_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (1,1,L)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(L)
+
+    for i in range(L):
+        result[i] = average_precision_score(y_true=y_true[:, :, i].flatten(),
+                                            y_score=probas_pred[:, :, i].flatten())
+
+    result = np.expand_dims(result, axis=0)
+    result = np.expand_dims(result, axis=0)
+
+    return result
+
+
+def roc_auc_score_per_cell(y_true, probas_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (1,1,L)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(L)
+
+    for i in range(L):
+        result[i] = average_precision_score(y_true=y_true[:, :, i].flatten(),
+                                            y_score=probas_pred[:, :, i].flatten())
+
+    result = np.expand_dims(result, axis=0)
+    result = np.expand_dims(result, axis=0)
+
+    return result
+
+
+def average_precision_score_per_time_slot(y_true, probas_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = average_precision_score(y_true=y_true[i, :, :].flatten(),
+                                            y_score=probas_pred[i, :, :].flatten())
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+    return result
+
+
+def roc_auc_score_per_time_slot(y_true, probas_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = roc_auc_score(y_true=y_true[i, :, :].flatten(),
+                                  y_score=probas_pred[i, :, :].flatten())
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+    return result
+
+
+def accuracy_score_per_time_slot(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = accuracy_score(y_true=y_true[i, :, :].flatten(),
+                                   y_pred=y_pred[i, :, :].flatten())
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+
+    return result
+
+
+def precision_score_per_time_slot(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = precision_score(y_true=y_true[i, :, :].flatten(),
+                                    y_pred=y_pred[i, :, :].flatten())
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+
+    return result
+
+
+def recall_score_per_time_slot(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = recall_score(y_true=y_true[i, :, :].flatten(),
+                                 y_pred=y_pred[i, :, :].flatten())
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+
+    return result
+
+# metric_per_time_step - get the auc or ap

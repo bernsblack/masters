@@ -28,24 +28,57 @@ class FlatDataGroup:
         # [√] number of incidents of crime occurrence by census tract yesterday (1-D) :
         # [√] number of incidents of crime occurrence by date in 2013 (1-D) : total_crimes
 
-        with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
-            # print info on the read data
-            # wastes loading times and ram - to load each file
-            # log.info("Data shapes of files in generated_data.npz")
-            # for k, v in zip_file.items():
-            #     log.info(f"\t{k} shape {np.shape(v)}")
-            t_range = pd.read_pickle(data_path + "t_range.pkl")
-            log.info(f"\tt_range shape {np.shape(t_range)}")
 
+        with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             if conf.use_crime_types:
                 self.crimes = zip_file["crime_types_grids"]
             else:
                 self.crimes = zip_file["crime_grids"]
 
+            self.t_range = pd.read_pickle(data_path + "t_range.pkl")
+            log.info(f"\tt_range shape {np.shape(self.t_range)}")
+
+            freqstr = self.t_range.freqstr
+            if freqstr == "H":
+                freqstr = "1H"
+            time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+
+            self.offset_year = int(365 * 24 / time_step_hrs)
+
+            self.seq_len = conf.seq_len
+            self.total_len = len(self.crimes)  # length of the whole time series
+
+            #  sanity check if time matches up with our grids
+            if len(self.t_range) - 1 != len(self.crimes):
+                log.error("time series and time range lengths do not match up -> " +
+                          "len(self.t_range) != len(self.crimes)")
+                raise RuntimeError(
+                    f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
+
+            #  split the data into ratios - size represent the targets sizes not the number of time steps
+            total_offset = self.seq_len + self.offset_year
+
+            target_len = self.total_len - total_offset
+            val_size = int(target_len * conf.val_ratio)
+            tst_size = int(target_len * conf.tst_ratio)
+            trn_size = int(target_len - tst_size - val_size)
+
+            #  start and stop t_index of each dataset - can be used outside of loader/group
+            self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
+            self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
+            self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
+
+            # used to create the shaper so that all datasets have got values in them
+            tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
+            tmp_val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1], 0:1]
+            tmp_tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1], 0:1]
+            shaper_crimes = np.max(tmp_trn_crimes,axis=0, keepdims=True) * \
+                            np.max(tmp_val_crimes, axis=0, keepdims=True) * \
+                            np.max(tmp_tst_crimes, axis=0, keepdims=True)
+
             # fit crime data to shaper
-            self.shaper = Shaper(data=self.crimes,
-                                 threshold=conf.shaper_threshold,
-                                 top_k=conf.shaper_top_k)
+            self.shaper = Shaper(data=shaper_crimes,
+                                 conf=conf)
 
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
             tract_count_grids = zip_file["tract_count_grids"]
@@ -69,39 +102,10 @@ class FlatDataGroup:
             # self.weather_vectors = zip_file["weather_vectors"][1:]  # get weather for target date
             self.x_range = zip_file["x_range"]
             self.y_range = zip_file["y_range"]
-            self.t_range = t_range[1:]
+            self.t_range = self.t_range[1:]
 
             self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
             self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
-
-        freqstr = t_range.freqstr
-        if freqstr == "H":
-            freqstr = "1H"
-        time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
-
-        self.offset_year = int(365 * 24 / time_step_hrs)
-
-        self.seq_len = conf.seq_len
-        self.total_len = len(self.crimes)  # length of the whole time series
-
-        #  sanity check if time matches up with our grids
-        if len(self.t_range) - 1 != len(self.crimes):
-            log.error("time series and time range lengths do not match up -> " +
-                      "len(self.t_range) != len(self.crimes)")
-            raise RuntimeError(f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
-
-        #  split the data into ratios - size represent the targets sizes not the number of time steps
-        total_offset = self.seq_len + self.offset_year
-
-        target_len = self.total_len - total_offset
-        val_size = int(target_len * conf.val_ratio)
-        tst_size = int(target_len * conf.tst_ratio)
-        trn_size = int(target_len - tst_size - val_size)
-
-        #  start and stop t_index of each dataset - can be used outside of loader/group
-        self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
-        self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
-        self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
 
         self.tst_indices[0] = self.tst_indices[0] - total_offset
         self.val_indices[0] = self.val_indices[0] - total_offset

@@ -105,14 +105,14 @@ def visualize_weights(model):
     plt.show()
 
 
-def plot(x):
+def plot(*args):
     """
     simple quick plot
     """
-    plt.figure()
-    plt.plot(x)
+    plt.figure(figsize=(15,5))
+    for x in args:
+        plt.plot(x)
     plt.show()
-
 
 def imshow(a, ax, title=""):
     """
