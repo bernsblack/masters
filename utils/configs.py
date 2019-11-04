@@ -14,6 +14,9 @@ class BaseConf:  # args from arg-parser to over write values
     """
 
     def __init__(self, conf_dict=None):  # get conf_dict either from a file, construct it or set it
+        self.n_steps_q = 3
+        self.n_steps_p = 3
+        self.n_steps_c = 3
         if conf_dict:
             self.__dict__ = deepcopy(conf_dict)
         else:  # default values

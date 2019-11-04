@@ -9,6 +9,7 @@ from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
 
+# todo: split train/val/test first then make shaper with prod of the max of each set - ensuring one crime for all cells
 class GridDataGroup:
     """
     GridDataGroup class acts as a collection of datasets (training/validation/test)
@@ -25,20 +26,37 @@ class GridDataGroup:
         """
 
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
-            # print info on the read data
-            log.info("Data shapes of files in generated_data.npz")
-            for k, v in zip_file.items():
-                log.info(f"\t{k} shape {np.shape(v)}")
-            t_range = pd.read_pickle(data_path + "t_range.pkl")
-            log.info(f"\tt_range shape {np.shape(t_range)}")
-
             if conf.use_crime_types:
                 self.crimes = zip_file["crime_types_grids"]
             else:
                 self.crimes = zip_file["crime_grids"]
 
+            t_range = pd.read_pickle(data_path + "t_range.pkl")
+            log.info(f"\tt_range shape {np.shape(t_range)}")
+
+            #  split the data into ratios - size represent the targets sizes not the number of time steps
+            total_offset = self.step_q * self.n_steps_q
+
+            target_len = self.total_len - total_offset
+            val_size = int(target_len * conf.val_ratio)
+            tst_size = int(target_len * conf.tst_ratio)
+            trn_size = int(target_len - tst_size - val_size)
+
+            #  start and stop t_index of each dataset - can be used outside of loader/group
+            self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
+            self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
+            self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
+
+            # used to create the shaper so that all datasets have got values in them
+            tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
+            tmp_val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1], 0:1]
+            tmp_tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1], 0:1]
+            shaper_crimes = np.max(tmp_trn_crimes,axis=0, keepdims=True) * \
+                            np.max(tmp_val_crimes, axis=0, keepdims=True) * \
+                            np.max(tmp_tst_crimes, axis=0, keepdims=True)
+
             # fit crime data to shaper - only used to squeeze results when calculating the results
-            self.shaper = Shaper(data=self.crimes,
+            self.shaper = Shaper(data=shaper_crimes,
                                  conf=conf)
 
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
@@ -69,9 +87,9 @@ class GridDataGroup:
         self.step_q = int(168 / time_step_hrs)  # maximum offset
 
         # todo set values through conf
-        self.n_steps_c = 3  # conf.n_steps_c
-        self.n_steps_p = 3  # conf.n_steps_p
-        self.n_steps_q = 3  # conf.n_steps_q
+        self.n_steps_c =  conf.n_steps_c # 3
+        self.n_steps_p =  conf.n_steps_p # 3
+        self.n_steps_q =  conf.n_steps_q # 3
 
         self.total_len = len(self.crimes)  # length of the whole time series
 
@@ -81,18 +99,6 @@ class GridDataGroup:
                       "len(self.t_range) != len(self.crimes)")
             raise RuntimeError(f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
 
-        #  split the data into ratios - size represent the targets sizes not the number of time steps
-        total_offset = self.step_q * self.n_steps_q
-
-        target_len = self.total_len - total_offset
-        val_size = int(target_len * conf.val_ratio)
-        tst_size = int(target_len * conf.tst_ratio)
-        trn_size = int(target_len - tst_size - val_size)
-
-        #  start and stop t_index of each dataset - can be used outside of loader/group
-        self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
-        self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
-        self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
 
         self.tst_indices[0] = self.tst_indices[0] - total_offset
         self.val_indices[0] = self.val_indices[0] - total_offset

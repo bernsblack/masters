@@ -15,6 +15,11 @@ import logging as log
 
 
 def get_model_metrics(data_path):
+    """
+    Reads all model results give the path to a certain data-source/discretisation
+    :param data_path: path to a certain data-source/discretisation
+    :return: list of model metrics for the data discretisation
+    """
     model_metrics = []
     model_names = os.listdir(f"{data_path}models")
 

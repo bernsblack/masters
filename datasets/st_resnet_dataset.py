@@ -3,6 +3,10 @@ import torch
 
 from utils.constants import *
 
+"""
+IMPORTANT NOTE: RATHER USE GRID DATASET
+"""
+
 
 # train/test/validation split should be done before hand
 class STResNetDataLoader:  # add test and train data and validation set
