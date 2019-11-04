@@ -5,11 +5,34 @@ from warnings import warn
 import numpy as np
 
 
+def pmax(*args):
+    """
+    prints the shapes of the arguments
+    """
+    for arg in args:
+        print(np.max(arg))
+
+
+def pmin(*args):
+    """
+    prints the shapes of the arguments
+    """
+    for arg in args:
+        print(np.min(arg))
+
+
+def pmean(*args):
+    """
+    prints the shapes of the arguments
+    """
+    for arg in args:
+        print(np.mean(arg))
+
+
 def pshape(*args):
     """
     prints the shapes of the arguments
     """
-
     for arg in args:
         print(np.shape(arg))
 

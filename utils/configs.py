@@ -5,6 +5,8 @@ hyper parameters for training
 from copy import deepcopy
 from pprint import pformat
 
+from utils import Timer
+
 
 class BaseConf:  # args from arg-parser to over write values
     """
@@ -46,9 +48,10 @@ class BaseConf:  # args from arg-parser to over write values
 
             # attached global variables
             self.device = None  # pytorch device object [CPU|GPU]
-            self.timer = None
+            self.timer = Timer()
             self.model_name = ""
-            self.model_path = ""
+            self.model_path = ""  # is data_path/models/{model_name}
+            self.data_path = ""
             self.checkpoint = "best"  # ['latest'|'best'] checkpoint to resume from
 
             #  used when train GRU - if loss should be calculated over whole sequence or only last output/prediction

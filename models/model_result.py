@@ -13,7 +13,8 @@ import os
 import numpy as np
 import logging as log
 
-def compare_models(data_path):
+
+def get_model_metrics(data_path):
     model_metrics = []
     model_names = os.listdir(f"{data_path}models")
 
@@ -34,6 +35,14 @@ def compare_models(data_path):
         with open(file_name, 'rb') as file_pointer:
             model_metrics.append(pickle.load(file_pointer))
 
+    if len(model_metrics) == 0:
+        raise EnvironmentError("No model metrics in this directory")
+
+    return model_metrics
+
+
+def compare_models(data_path):
+    model_metrics = get_model_metrics(data_path)
     # pr-curve
     pr_plot = PRCurvePlotter()
     for metric in model_metrics:
@@ -80,20 +89,6 @@ class ROCCurve:
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
     def __init__(self, model_name, y_true, y_pred, probas_pred):
-        y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
-        self.model_name = model_name
-        self.accuracy_score = accuracy_score(y_true, y_pred)
-        self.roc_auc_score = roc_auc_score(y_true, probas_pred)
-
-        self.recall_score = recall_score(y_true, y_pred)
-        self.precision_score = precision_score(y_true, y_pred)
-
-        self.average_precision_score = average_precision_score(y_true, probas_pred)
-        self.matthews_corrcoef = matthews_corrcoef(y_true, y_pred)
-
-        self.pr_curve = PRCurve(*precision_recall_curve(y_true, probas_pred))
-        self.roc_curve = ROCCurve(*roc_curve(y_true, probas_pred, drop_intermediate=False))
-
         ap_per_time = average_precision_score_per_time_slot(y_true=y_true,
                                                             probas_pred=probas_pred)
         self.ap_per_time = np.nan_to_num(ap_per_time)
@@ -113,6 +108,21 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         r_per_time = recall_score_per_time_slot(y_true=y_true,
                                                 y_pred=y_pred)
         self.r_per_time = np.nan_to_num(r_per_time)
+
+        # flatten array for the next functions
+        y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
+        self.model_name = model_name
+        self.accuracy_score = accuracy_score(y_true, y_pred)
+        self.roc_auc_score = roc_auc_score(y_true, probas_pred)
+
+        self.recall_score = recall_score(y_true, y_pred)
+        self.precision_score = precision_score(y_true, y_pred)
+
+        self.average_precision_score = average_precision_score(y_true, probas_pred)
+        self.matthews_corrcoef = matthews_corrcoef(y_true, y_pred)
+
+        self.pr_curve = PRCurve(*precision_recall_curve(y_true, probas_pred))
+        self.roc_curve = ROCCurve(*roc_curve(y_true, probas_pred, drop_intermediate=False))
 
 
 
@@ -206,9 +216,6 @@ class ModelResult:
 
 
 def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
-    """
-    Training the model for a single epoch
-    """
     # save result
     # only saves the result of the metrics not the predicted values
     model_metrics = ModelMetrics(model_name=conf.model_name,
