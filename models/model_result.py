@@ -7,11 +7,12 @@ from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_sco
 
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
-    recall_score_per_time_slot
+    recall_score_per_time_slot, safe_f1_score
 from utils.preprocessing import Shaper
 import os
 import numpy as np
 import logging as log
+import pandas as pd
 
 
 def get_models_results(data_path):
@@ -78,40 +79,50 @@ def get_models_metrics(data_path):
     return model_metrics
 
 
+# remember pandas df.to_latex for the columns
+def get_metrics_table(model_metrics):
+    col = ['Accuracy', 'ROC AUC', 'Avg. Precision', 'Recall', 'Precision', 'F1 Score','Matthews Corrcoef']
+    data = []
+    names = []
+    for m in model_metrics:
+        names.append(m.model_name)
+        f1 = safe_f1_score((m.average_precision_score, m.recall_score))
+        row = [m.accuracy_score, m.roc_auc_score, m.average_precision_score, m.recall_score, m.precision_score,
+               f1, m.matthews_corrcoef]
+        data.append(row)
+
+    df = pd.DataFrame(columns=col, data=data, index=names)
+    df.index.name = "Model Name"
+
+    return df
+
+
 def compare_models(data_path):
     model_metrics = get_models_metrics(data_path)
+
+    metrics_table = get_metrics_table(model_metrics)
+    log.info(f"\n{metrics_table}")
+
     # pr-curve
     pr_plot = PRCurvePlotter()
     for metric in model_metrics:
-        precision = metric.pr_curve.precision
-        recall = metric.pr_curve.recall
-        ap = metric.average_precision_score
-        model_name = metric.model_name
-
-        pr_plot.add_curve_(precision=precision,
-                          recall=recall,
-                          ap=ap,
-                          label_name=model_name)
-
-    pr_plot.show() # save somewhere?
-
+        pr_plot.add_curve_(precision=metric.pr_curve.precision,
+                           recall=metric.pr_curve.recall,
+                           ap=metric.average_precision_score,
+                           label_name=metric.model_name)
+    pr_plot.show()  # save somewhere?
 
     # roc-curve
     roc_plot = ROCCurvePlotter()
     for metric in model_metrics:
-        fpr = metric.roc_curve.fpr
-        tpr = metric.roc_curve.tpr
-        auc = metric.roc_auc_score
-        model_name = metric.model_name
-
-        roc_plot.add_curve_(fpr=fpr,
-                          tpr=tpr,
-                          auc=auc,
-                          label_name=model_name)
-
+        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
+                            tpr=metric.roc_curve.tpr,
+                            auc=metric.roc_auc_score,
+                            label_name=metric.model_name)
     roc_plot.show()  # save somewhere?
-
     # todd add per cel and time plots per metric - should be saved on the metric class
+
+    return metrics_table  # by returning the table - makes visualisation in notebooks easier
 
 
 class PRCurve:
@@ -161,8 +172,6 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         self.pr_curve = PRCurve(*precision_recall_curve(y_true, probas_pred))
         self.roc_curve = ROCCurve(*roc_curve(y_true, probas_pred, drop_intermediate=False))
 
-
-
     def __repr__(self):
         r = rf"""
         MODEL METRICS
@@ -203,7 +212,6 @@ class ModelResult:
 
         if len(probas_pred.shape) != 3:
             raise Exception("probas_pred must be in (N,1,L) format, try reshaping the data.")
-
 
         self.model_name = model_name
         self.y_true = y_true

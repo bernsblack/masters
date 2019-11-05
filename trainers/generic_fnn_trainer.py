@@ -159,15 +159,16 @@ for epoch in range(conf.max_epochs):
     val_loss.append(np.mean(tmp_val_loss))
     log.debug(f"Epoch {epoch} -> Validation Loop Duration: {timer.check()}")
 
-    log.info(f"\tLoss (Trn): \t{trn_loss[-1]:.5f}")
-    log.info(f"\tLoss (Val): \t{val_loss[-1]:.5f}")
-    log.info(f"\tLoss (Dif): \t{np.abs(val_loss[-1] - trn_loss[-1]):.5f}\n")
-
     # save best model
     if min(val_loss) < val_loss_best:
         val_loss_best = min(val_loss)
         torch.save(model.state_dict(), model_path + "model_best.pth")
         torch.save(optimiser.state_dict(), model_path + "optimiser_best.pth")
+
+    log.info(f"\tLoss (Trn): \t{trn_loss[-1]:.5f}")
+    log.info(f"\tLoss (Val): \t{val_loss[-1]:.5f}")
+    log.info(f"\tLoss (Best Val): \t{val_loss_best:.5f}")
+    log.info(f"\tLoss (Dif): \t{np.abs(val_loss[-1] - trn_loss[-1]):.5f}\n")
 
     # model has been over-fitting stop maybe? # average of val_loss has increase - starting to over-fit
     if conf.early_stopping and epoch != 0 and val_loss[-1] > val_loss[-2]:

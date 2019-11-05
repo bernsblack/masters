@@ -29,14 +29,14 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, roc
     mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
 
 
-def best_threshold(y_true, probas_pred, verbose=True):
-    def safe_f1_score(pr):
-        p, r = pr
-        if p + r == 0:
-            return 0
-        else:
-            return 2 * (p * r) / (p + r)
+def safe_f1_score(pr):
+    p, r = pr
+    if p + r == 0:
+        return 0
+    else:
+        return 2 * (p * r) / (p + r)
 
+def best_threshold(y_true, probas_pred, verbose=True):
     precision, recall, thresholds = precision_recall_curve(y_true.flatten(), probas_pred.flatten())
     scores = np.array(list(map(safe_f1_score, zip(precision, recall))))
     index_array = np.argmax(scores)  # almost always a singular int, and not an array
