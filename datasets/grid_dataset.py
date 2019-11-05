@@ -31,8 +31,23 @@ class GridDataGroup:
             else:
                 self.crimes = zip_file["crime_grids"]
 
+            self.total_len = len(self.crimes)  # length of the whole time series
+
             t_range = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range shape {np.shape(t_range)}")
+
+            freqstr = t_range.freqstr
+            if freqstr == "H":
+                freqstr = "1H"
+            time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+
+            self.step_c = 1
+            self.step_p = int(24 / time_step_hrs)
+            self.step_q = int(168 / time_step_hrs)  # maximum offset
+
+            self.n_steps_c = conf.n_steps_c  # 3
+            self.n_steps_p = conf.n_steps_p  # 3
+            self.n_steps_q = conf.n_steps_q  # 3
 
             #  split the data into ratios - size represent the targets sizes not the number of time steps
             total_offset = self.step_q * self.n_steps_q
@@ -76,22 +91,6 @@ class GridDataGroup:
 
             self.demog_grid = zip_file["demog_grid"]
             self.street_grid = zip_file["street_grid"]
-
-        freqstr = t_range.freqstr
-        if freqstr == "H":
-            freqstr = "1H"
-        time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
-
-        self.step_c = 1
-        self.step_p = int(24 / time_step_hrs)
-        self.step_q = int(168 / time_step_hrs)  # maximum offset
-
-        # todo set values through conf
-        self.n_steps_c =  conf.n_steps_c # 3
-        self.n_steps_p =  conf.n_steps_p # 3
-        self.n_steps_q =  conf.n_steps_q # 3
-
-        self.total_len = len(self.crimes)  # length of the whole time series
 
         #  sanity check if time matches up with our grids
         if len(self.t_range) - 1 != len(self.crimes):

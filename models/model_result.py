@@ -14,9 +14,41 @@ import numpy as np
 import logging as log
 
 
-def get_model_metrics(data_path):
+def get_models_results(data_path):
     """
     Reads all model results give the path to a certain data-source/discretisation
+    :param data_path: path to a certain data-source/discretisation
+    :return: list of model metrics for the data discretisation
+    """
+    model_results = []
+    model_names = os.listdir(f"{data_path}models")
+
+    if '.DS_Store' in model_names:
+        model_names.remove('.DS_Store')
+
+    for model_name in model_names:
+        if not os.path.exists(data_path):
+            raise Exception(f"Directory ({data_path}) needs to exist.")
+
+        model_path = f"{data_path}models/{model_name}/"
+
+        file_name = f"{model_path}model_result.pkl"
+
+        if not os.path.exists(file_name):
+            continue
+
+        with open(file_name, 'rb') as file_pointer:
+            model_results.append(pickle.load(file_pointer))
+
+    if len(model_results) == 0:
+        raise EnvironmentError("No model results in this directory")
+
+    return model_results
+
+
+def get_models_metrics(data_path):
+    """
+    Reads all model metrics give the path to a certain data-source/discretisation
     :param data_path: path to a certain data-source/discretisation
     :return: list of model metrics for the data discretisation
     """
@@ -47,7 +79,7 @@ def get_model_metrics(data_path):
 
 
 def compare_models(data_path):
-    model_metrics = get_model_metrics(data_path)
+    model_metrics = get_models_metrics(data_path)
     # pr-curve
     pr_plot = PRCurvePlotter()
     for metric in model_metrics:
