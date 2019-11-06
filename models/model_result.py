@@ -92,6 +92,7 @@ def get_metrics_table(model_metrics):
         data.append(row)
 
     df = pd.DataFrame(columns=col, data=data, index=names)
+    df.sort_values('F1 Score')
     df.index.name = "Model Name"
 
     return df

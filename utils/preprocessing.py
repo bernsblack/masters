@@ -248,7 +248,7 @@ class MinMaxScaler:
 
     def transform(self, data):
         if np.any(self.scale_old == 0):
-            raise ValueError(f"self.scale_old is {self.scale_old}. Cannot device by zero")
+            raise ValueError(f"self.scale_old is {self.scale_old}. Cannot device by zero. Data shape -> {data.shape}")
         return self.scale_new * (data - self.min_old) / self.scale_old + self.min_new
 
     def inverse_transform(self, data):
