@@ -64,9 +64,10 @@ class FlatDataGroup:
             trn_size = int(target_len - tst_size - val_size)
 
             #  start and stop t_index of each dataset - can be used outside of loader/group
+            # runs -> val_set, trn_set, tst_set: trn and tst set are more correlated
             self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
-            self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
-            self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
+            self.trn_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
+            self.val_indices = np.array([self.trn_indices[0] - trn_size, self.trn_indices[0]])
 
             # used to create the shaper so that all datasets have got values in them
             tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
