@@ -92,8 +92,8 @@ def get_metrics_table(model_metrics):
         data.append(row)
 
     df = pd.DataFrame(columns=col, data=data, index=names)
-    df.sort_values('F1 Score')
     df.index.name = "Model Name"
+    df.sort_values('F1 Score', inplace=True, ascending=False)
 
     return df
 
@@ -138,6 +138,16 @@ class ROCCurve:
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
     def __init__(self, model_name, y_true, y_pred, probas_pred):
+        # y_true must be in format N,1,L to be able to correctly compare all the models
+        if len(y_true.shape) != 3 or y_true.shape[1] != 1:
+            raise Exception(f"y_true must be in (N,1,L) not {y_true.shape}.")
+
+        if len(y_pred.shape) != 3 or y_pred.shape[1] != 1:
+            raise Exception(f"y_pred must be in (N,1,L) not {y_pred.shape}.")
+
+        if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
+            raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
+
         ap_per_time = average_precision_score_per_time_slot(y_true=y_true,
                                                             probas_pred=probas_pred)
         self.ap_per_time = np.nan_to_num(ap_per_time)
@@ -205,14 +215,14 @@ class ModelResult:
         :param probas_pred (N,1,L): model floating point values, can be likelihoods [0,1) or count estimates [0,n)
         :param t_range (N,1): range of the times of the test set - also used in plots
         """
-        if len(y_true.shape) != 3:
-            raise Exception("y_true must be in (N,1,L) format, try reshaping the data.")
+        if len(y_true.shape) != 3 or y_true.shape[1] != 1:
+            raise Exception(f"y_true must be in (N,1,L) not {y_true.shape}.")
 
-        if len(y_pred.shape) != 3:
-            raise Exception("y_pred must be in (N,1,L) format, try reshaping the data.")
+        if len(y_pred.shape) != 3 or y_pred.shape[1] != 1:
+            raise Exception(f"y_pred must be in (N,1,L) not {y_pred.shape}.")
 
-        if len(probas_pred.shape) != 3:
-            raise Exception("probas_pred must be in (N,1,L) format, try reshaping the data.")
+        if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
+            raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
 
         self.model_name = model_name
         self.y_true = y_true

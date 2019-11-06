@@ -26,8 +26,12 @@
       <w>mathtext</w>
       <w>meanstd</w>
       <w>ndarray</w>
+      <w>pmax</w>
+      <w>pmean</w>
+      <w>pmin</w>
       <w>proba</w>
       <w>probas</w>
+      <w>pshape</w>
       <w>pytorch</w>
       <w>regressor</w>
       <w>relu</w>

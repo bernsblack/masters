@@ -272,16 +272,18 @@ class PRCurvePlotter(BaseMetricPlotter):
         plt.xlim(-0.01, 1.1)
         plt.ylim(0, 1.1)
 
+        beta = 1
         # plot f score contours`
         f_scores = [.4, 0.5, .6, 0.7, .8, .9]
         for i, f_score in enumerate(f_scores):
             x = np.linspace(0.01, 1.1)
-            y = f_score * x / (2 * x - f_score)
+            y = f_score * x / ((1 + (beta ** 2)) * x - f_score * (beta ** 2))
+            # y = f_score * x / (2 * x - f_score)
             if i == 0:  # used to add the f_score label
                 l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2, label='F1 score')
             else:
                 l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
-            plt.annotate('F1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
+            plt.annotate('F{0}={1:0.1f}'.format(beta,f_score), xy=(0.9, y[45] + 0.02))
 
     def add_curve(self, y_true, probas_pred, label_name):
         precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)

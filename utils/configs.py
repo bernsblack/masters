@@ -14,9 +14,7 @@ class BaseConf:  # args from arg-parser to over write values
     """
 
     def __init__(self, conf_dict=None):  # get conf_dict either from a file, construct it or set it
-        self.n_steps_q = 3
-        self.n_steps_p = 3
-        self.n_steps_c = 3
+
         if conf_dict:
             self.__dict__ = deepcopy(conf_dict)
         else:  # default values
@@ -58,7 +56,15 @@ class BaseConf:  # args from arg-parser to over write values
             self.checkpoint = "best"  # ['latest'|'best'] checkpoint to resume from
 
             #  used when train GRU - if loss should be calculated over whole sequence or only last output/prediction
-            self.use_seq_loss =  True,
+            self.use_seq_loss =  True
+
+            # cnn values
+            self.n_layers = 3  # number of res-unit layers
+            self.n_channels = 3  # inner channel size of the res-units
+            
+            self.n_steps_q = 3
+            self.n_steps_p = 3
+            self.n_steps_c = 3
 
     def __str__(self):
         return pformat(self.__dict__)

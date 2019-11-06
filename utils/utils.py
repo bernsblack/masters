@@ -3,6 +3,15 @@ from datetime import datetime
 from time import time
 from warnings import warn
 import numpy as np
+import os
+
+
+def get_data_sub_paths():
+    data_sub_paths = os.listdir("./data/processed/")
+    if '.DS_Store' in data_sub_paths:
+        data_sub_paths.remove('.DS_Store')
+
+    return data_sub_paths
 
 
 def pmax(*args):

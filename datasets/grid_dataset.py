@@ -78,8 +78,6 @@ class GridDataGroup:
             # tract_count_grids = zip_file["tract_count_grids"]
             # self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)
 
-            self.crimes = self.crimes[:, 0]  # only use totals
-
             # (reminder) ensure that the self.crimes are not scaled to -1,1 before
             self.targets = np.copy(self.crimes[1:])  # only check for totals > 0
 
@@ -111,6 +109,9 @@ class GridDataGroup:
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
+
+        self.crimes = self.crimes[:, 0]  # only select totals after scaling channel wise
+
         trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
         val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1]]
         tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
@@ -118,6 +119,8 @@ class GridDataGroup:
         # targets
         self.targets = np.log2(1 + self.targets)
         self.targets = self.crime_scaler.transform(self.targets)
+        self.targets = self.targets[:, 0]
+
         trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
         val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
         tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]

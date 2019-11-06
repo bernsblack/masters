@@ -169,6 +169,7 @@ class STResNetOLD(nn.Module):
 
 class STResNet(nn.Module):
     # todo add docs
+    # todo use model_arch instead
 
     def __init__(self,
                  n_layers,
@@ -222,7 +223,7 @@ class STResNet(nn.Module):
         # tanh squeezes values between -1 and 1 that's, that's why the cum-sum wasn't working
         # Last layer is tanh
         if seq_e is None:
-            x_t_hat = torch.tanh(x_res)
+            x_t_hat = torch.sigmoid(x_res)
         else:
             x_ext = self.ext_net(seq_e)
             # todo: ask why are we adding - why not multiply
@@ -318,3 +319,5 @@ class STResNetExtra(nn.Module):
             x_t_hat = torch.sigmoid(x_res + x_ext)  # output values can only be between 0,1 for tanh
 
         return x_t_hat
+
+
