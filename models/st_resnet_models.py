@@ -1,5 +1,7 @@
 import torch
 import torch.nn as nn
+import logging as log
+import numpy as np
 
 """
 General notes on module:
@@ -321,3 +323,170 @@ class STResNetExtra(nn.Module):
         return x_t_hat
 
 
+# training loops
+def train_epoch_for_st_res_net_extra(model, optimiser, batch_loader, loss_fn, total_losses, conf):
+    """
+    Training the STResNetExtra model for a single epoch
+    """
+    epoch_losses = []
+    num_batches = batch_loader.num_batches
+
+    demog_grid = torch.Tensor(batch_loader.dataset.demog_grid).to(conf.device)
+    street_grid = torch.Tensor(batch_loader.dataset.street_grid).to(conf.device)
+
+    for batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t in batch_loader:
+        current_batch = batch_loader.current_batch
+
+        batch_seq_c = torch.Tensor(batch_seq_c).to(conf.device)
+        batch_seq_p = torch.Tensor(batch_seq_p).to(conf.device)
+        batch_seq_q = torch.Tensor(batch_seq_q).to(conf.device)
+        batch_seq_e = torch.Tensor(batch_seq_e).to(conf.device)
+        batch_seq_t = torch.Tensor(batch_seq_t).to(conf.device)
+
+        batch_pred = model(seq_c=batch_seq_c,
+                           seq_p=batch_seq_p,
+                           seq_q=batch_seq_q,
+                           seq_e=batch_seq_e,
+                           seq_demog=demog_grid,
+                           seq_gsv=street_grid)
+
+        # might need to flatten
+        loss = loss_fn(input=batch_pred, target=batch_seq_t)
+        epoch_losses.append(loss.item())
+        total_losses.append(epoch_losses[-1])
+
+        if model.training:
+            optimiser.zero_grad()
+            loss.backward()
+            optimiser.step()
+            log.debug(f"Batch: {current_batch:04d}/{num_batches:04d} \t Loss: {epoch_losses[-1]:.4f}")
+    mean_epoch_loss = np.mean(epoch_losses)
+
+    return mean_epoch_loss
+
+
+def train_epoch_for_st_res_net(model, optimiser, batch_loader, loss_fn, total_losses, conf):
+    """
+    Training the STResNet model for a single epoch
+    """
+    epoch_losses = []
+    num_batches = batch_loader.num_batches
+
+    for batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t in batch_loader:
+        current_batch = batch_loader.current_batch
+
+        batch_seq_c = torch.Tensor(batch_seq_c).to(conf.device)
+        batch_seq_p = torch.Tensor(batch_seq_p).to(conf.device)
+        batch_seq_q = torch.Tensor(batch_seq_q).to(conf.device)
+        batch_seq_e = torch.Tensor(batch_seq_e).to(conf.device)
+        batch_seq_t = torch.Tensor(batch_seq_t).to(conf.device)
+
+        batch_pred = model(seq_c=batch_seq_c,
+                           seq_p=batch_seq_p,
+                           seq_q=batch_seq_q,
+                           seq_e=batch_seq_e)
+
+        # might need to flatten
+        loss = loss_fn(input=batch_pred, target=batch_seq_t)
+        epoch_losses.append(loss.item())
+        total_losses.append(epoch_losses[-1])
+
+        if model.training:
+            optimiser.zero_grad()
+            loss.backward()
+            optimiser.step()
+            log.debug(f"Batch: {current_batch:04d}/{num_batches:04d} \t Loss: {epoch_losses[-1]:.4f}")
+
+    mean_epoch_loss = np.mean(epoch_losses)
+
+    return mean_epoch_loss
+
+
+# evaluation loops
+def evaluate_st_res_net_extra(model, batch_loader, conf):
+    """
+    Only used to get probas in a time and location based format. The hard predictions should be done outside
+    this function where the threshold is determined using only the training data
+    """
+
+    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_counts = batch_loader.dataset.targets[-len(probas_pred):]
+    y_true = np.copy(y_counts)
+    if y_true.min() < 0:
+        raise ValueError(f"Data must be normalised between (0,1), min value is {y_true.min()}")
+
+    y_true[y_true > 0] = 1  # ensure normalisation between 0 and 1 not -1 and 1
+
+    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+
+    with torch.set_grad_enabled(False):
+        model.eval()
+
+        num_batches = batch_loader.num_batches
+
+        demog_grid = torch.Tensor(batch_loader.dataset.demog_grid).to(conf.device)
+        street_grid = torch.Tensor(batch_loader.dataset.street_grid).to(conf.device)
+
+        for batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t in batch_loader:
+            current_batch = batch_loader.current_batch
+
+            batch_seq_c = torch.Tensor(batch_seq_c).to(conf.device)
+            batch_seq_p = torch.Tensor(batch_seq_p).to(conf.device)
+            batch_seq_q = torch.Tensor(batch_seq_q).to(conf.device)
+            batch_seq_e = torch.Tensor(batch_seq_e).to(conf.device)
+            batch_seq_t = torch.Tensor(batch_seq_t).to(conf.device)
+
+            batch_probas_pred = model(seq_c=batch_seq_c,
+                                      seq_p=batch_seq_p,
+                                      seq_q=batch_seq_q,
+                                      seq_e=batch_seq_e,
+                                      seq_demog=demog_grid,
+                                      seq_gsv=street_grid)
+
+            for i, p in zip(batch_indices, batch_probas_pred.cpu().numpy()):
+                probas_pred[i] = p
+
+    return y_counts, y_true, probas_pred, t_range
+
+
+def evaluate_st_res_net(model, batch_loader, conf):
+    """
+    Only used to get probas in a time and location based format. The hard predictions should be done outside
+    this function where the threshold is determined using only the training data
+    """
+
+    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_counts = batch_loader.dataset.targets[-len(probas_pred):]
+    y_true = np.copy(y_counts)
+    if y_true.min() < 0:
+        raise ValueError(f"Data must be normalised between (0,1), min value is {y_true.min()}")
+    y_true[y_true > 0] = 1
+
+    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+
+    with torch.set_grad_enabled(False):
+        model.eval()
+
+        num_batches = batch_loader.num_batches
+
+        demog_grid = torch.Tensor(batch_loader.dataset.demog_grid).to(conf.device)
+        street_grid = torch.Tensor(batch_loader.dataset.street_grid).to(conf.device)
+
+        for batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t in batch_loader:
+            current_batch = batch_loader.current_batch
+
+            batch_seq_c = torch.Tensor(batch_seq_c).to(conf.device)
+            batch_seq_p = torch.Tensor(batch_seq_p).to(conf.device)
+            batch_seq_q = torch.Tensor(batch_seq_q).to(conf.device)
+            batch_seq_e = torch.Tensor(batch_seq_e).to(conf.device)
+            batch_seq_t = torch.Tensor(batch_seq_t).to(conf.device)
+
+            batch_probas_pred = model(seq_c=batch_seq_c,
+                                      seq_p=batch_seq_p,
+                                      seq_q=batch_seq_q,
+                                      seq_e=batch_seq_e)
+
+            for i, p in zip(batch_indices, batch_probas_pred.cpu().numpy()):
+                probas_pred[i] = p
+
+    return y_counts, y_true, probas_pred, t_range

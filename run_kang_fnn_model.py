@@ -151,6 +151,7 @@ if __name__ == "__main__":
 
         log.info(f"\tLoss (Trn): \t{trn_loss[-1]:.5f}")
         log.info(f"\tLoss (Val): \t{val_loss[-1]:.5f}")
+        log.info(f"\tLoss (Best Val): \t{val_loss_best:.5f}")
         log.info(f"\tLoss (Dif): \t{np.abs(val_loss[-1] - trn_loss[-1]):.5f}\n")
 
         # save best model

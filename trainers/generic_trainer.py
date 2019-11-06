@@ -16,6 +16,10 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
 
     :returns: best validation loss of all the epochs - used to tune the hyper-parameters of the models/optimiser
     """
+    log.info(f"\n ====================== Training {conf.model_name} ====================== \n")
+    log.info(f"\n ====================== Config Values ====================== \n{conf}" +
+             "\n ====================== Config Values ====================== \n")
+
     stopped_early = False
     trn_batch_losses = []
     val_batch_losses = []
@@ -71,10 +75,6 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
             val_epoch_losses.append(epoch_loss)
             log.debug(f"Epoch {epoch} -> Validation Loop Duration: {conf.timer.check()}")
 
-        log.info(f"\tLoss (Trn): \t{trn_epoch_losses[-1]:.5f}")
-        log.info(f"\tLoss (Val): \t{val_epoch_losses[-1]:.5f}")
-        log.info(f"\tLoss (Dif): \t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.5f}\n")
-
         # save best model
         if val_epoch_losses[-1] < val_epoch_losses_best:
             val_epoch_losses_best = val_epoch_losses[-1]
@@ -86,6 +86,11 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
                                 trn_epoch_losses=trn_epoch_losses,
                                 trn_batch_losses=trn_batch_losses,
                                 val_epoch_losses_best=val_epoch_losses_best)
+
+        log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.5f}")
+        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.5f}")
+        log.info(f"\tLoss (Val Best): \t\t{val_epoch_losses_best:.5f}")
+        log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.5f}\n")
 
         # increasing moving average of val_epoch_losses
         if conf.early_stopping and epoch > 5 and np.sum(np.diff(val_epoch_losses[-5:])) > 0:

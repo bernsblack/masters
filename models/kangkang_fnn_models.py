@@ -138,6 +138,7 @@ class SmallKangFNN(nn.Module):
 
         return out_vec
 
+# training loops
 def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, conf):
     """
     Training the FNN model for a single epoch
@@ -165,3 +166,35 @@ def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, c
             log.debug(f"Batch: {current_batch:04d}/{num_batches:04d} \t Loss: {epoch_losses[-1]:.4f}")
     mean_epoch_loss = np.mean(epoch_losses)
     return mean_epoch_loss
+
+# evaluation loops
+def evaluate_fnn(model, batch_loader, conf):
+    """
+    Only used to get probas in a time and location based format. The hard predictions should be done outside
+    this function where the threshold is determined using only the training data
+    """
+    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_true = batch_loader.dataset.targets[-len(probas_pred):]
+    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+
+    with torch.set_grad_enabled(False):
+        model.eval()
+
+        num_batches = batch_loader.num_batches
+        for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+            current_batch = batch_loader.current_batch
+
+            # Transfer to PyTorch Tensor and GPU
+            spc_feats = torch.Tensor(spc_feats[0]).to(conf.device)  # only taking [0] for fnn
+            tmp_feats = torch.Tensor(tmp_feats[0]).to(conf.device)  # only taking [0] for fnn
+            env_feats = torch.Tensor(env_feats[0]).to(conf.device)  # only taking [0] for fnn
+            targets = torch.LongTensor(targets[0, :, 0]).to(conf.device)  # only taking [0] for fnn
+            out = model(spc_feats, tmp_feats, env_feats)
+
+            batch_probas_pred = F.softmax(out, dim=-1)[:, 1].cpu().numpy()  # select class1 prediction
+
+            for i, p in zip(indices, batch_probas_pred):
+                n, c, l = i
+                probas_pred[n, c, l] = p
+
+    return y_true, probas_pred, t_range
