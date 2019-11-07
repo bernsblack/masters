@@ -236,9 +236,9 @@ class LossPlotter(BaseMetricPlotter):
         that epoch.
         """
         kwargs = {
-            "marker": "s",
+            "marker": "|",
             "markersize": 6,
-            "alpha": 0.7,
+            "alpha": 0.5,
         }
 
         # plt.xticks(list(range(len(trn_loss)))) # plot the x ticks of grid on the epochs

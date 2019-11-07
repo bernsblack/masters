@@ -5,6 +5,7 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 from utils.configs import BaseConf
+from utils.constants import TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
@@ -28,7 +29,6 @@ class FlatDataGroup:
         # [√] number of incidents of crime occurrence by census tract yesterday (1-D) :
         # [√] number of incidents of crime occurrence by date in 2013 (1-D) : total_crimes
 
-
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             if conf.use_crime_types:
                 self.crimes = zip_file["crime_types_grids"]
@@ -42,8 +42,11 @@ class FlatDataGroup:
             if freqstr == "H":
                 freqstr = "1H"
             time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+            time_step_days = 24 / time_step_hrs
 
-            self.offset_year = int(365 * 24 / time_step_hrs)
+            # todo set test/val/train
+
+            self.offset_year = int(365 * time_step_days)
 
             self.seq_len = conf.seq_len
             self.total_len = len(self.crimes)  # length of the whole time series
@@ -58,22 +61,22 @@ class FlatDataGroup:
             #  split the data into ratios - size represent the targets sizes not the number of time steps
             total_offset = self.seq_len + self.offset_year
 
-            target_len = self.total_len - total_offset
-            val_size = int(target_len * conf.val_ratio)
-            tst_size = int(target_len * conf.tst_ratio)
-            trn_size = int(target_len - tst_size - val_size)
+            # target_len = self.total_len - total_offset
+            tst_size = int((conf.tst_ratio / conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)  # int(target_len * conf.tst_ratio)
+            val_size = int((conf.val_ratio / conf.tst_ratio) * tst_size)  # int(target_len * conf.val_ratio)
+            trn_size = int(((1 - conf.val_ratio - conf.tst_ratio) / conf.tst_ratio) * tst_size) # int(target_len - tst_size - val_size)
 
             #  start and stop t_index of each dataset - can be used outside of loader/group
             # runs -> val_set, trn_set, tst_set: trn and tst set are more correlated
             self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
-            self.trn_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
-            self.val_indices = np.array([self.trn_indices[0] - trn_size, self.trn_indices[0]])
+            self.trn_indices = np.array([self.tst_indices[0] - trn_size, self.tst_indices[0]])
+            self.val_indices = np.array([self.trn_indices[0] - val_size, self.trn_indices[0]])
 
             # used to create the shaper so that all datasets have got values in them
             tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
             tmp_val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1], 0:1]
             tmp_tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1], 0:1]
-            shaper_crimes = np.max(tmp_trn_crimes,axis=0, keepdims=True) * \
+            shaper_crimes = np.max(tmp_trn_crimes, axis=0, keepdims=True) * \
                             np.max(tmp_val_crimes, axis=0, keepdims=True) * \
                             np.max(tmp_tst_crimes, axis=0, keepdims=True)
 

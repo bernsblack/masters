@@ -81,14 +81,14 @@ def get_models_metrics(data_path):
 
 # remember pandas df.to_latex for the columns
 def get_metrics_table(model_metrics):
-    col = ['Accuracy', 'ROC AUC', 'Avg. Precision', 'Recall', 'Precision', 'F1 Score','Matthews Corrcoef']
+    col = ['ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score','Accuracy','Matthews Corrcoef']
     data = []
     names = []
     for m in model_metrics:
         names.append(m.model_name)
         f1 = safe_f1_score((m.average_precision_score, m.recall_score))
-        row = [m.accuracy_score, m.roc_auc_score, m.average_precision_score, m.recall_score, m.precision_score,
-               f1, m.matthews_corrcoef]
+        row = [m.roc_auc_score, m.average_precision_score, m.precision_score, m.recall_score,
+               f1, m.accuracy_score, m.matthews_corrcoef]
         data.append(row)
 
     df = pd.DataFrame(columns=col, data=data, index=names)
@@ -187,10 +187,10 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         r = rf"""
         MODEL METRICS
             Model Name: {self.model_name}
-                ROC AUC:            {self.roc_auc_score}
-                Recall:             {self.recall_score}
-                Precision:          {self.precision_score}
+                ROC AUC:            {self.roc_auc_score}                
                 Average Precision:  {self.average_precision_score}
+                Precision:          {self.precision_score}
+                Recall:             {self.recall_score}
                 Accuracy:           {self.accuracy_score}
                 MCC:                {self.matthews_corrcoef}          
         """
@@ -258,9 +258,9 @@ class ModelResult:
         MODEL RESULT
             Model Name: {self.model_name}
                 ROC AUC:            {self.roc_auc()}
-                Recall:             {self.recall_score()}
+                Average Precision:  {self.average_precision()}                
                 Precision:          {self.precision_score()}
-                Average Precision:  {self.average_precision()}
+                Recall:             {self.recall_score()}
                 Accuracy:           {self.accuracy()}
                 MCC:                {self.matthews_corrcoef()}          
         """

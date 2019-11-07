@@ -89,7 +89,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
 
         log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.5f}")
         log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.5f}")
-        log.info(f"\tLoss (Val Best): \t\t{val_epoch_losses_best:.5f}")
+        log.info(f"\tLoss (Val Best): \t{val_epoch_losses_best:.5f}")
         log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.5f}\n")
 
         # increasing moving average of val_epoch_losses
@@ -116,7 +116,15 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
 
     # Save training and validation plots - add flag to actually save or display
     skip = 0
-    loss_plotter = LossPlotter(title=f"Cross Entropy Loss ({conf.model_name})")
+
+    if str(loss_fn) == 'CrossEntropyLoss()':
+        loss_plot_title = "Cross Entropy Loss"
+    elif str(loss_fn) == 'MSELoss()':
+        loss_plot_title = "MSE Loss"
+    else:
+        loss_plot_title = "Loss"
+
+    loss_plotter = LossPlotter(title=f"{loss_plot_title} ({conf.model_name})")
     loss_plotter.plot_losses(trn_epoch_losses, trn_batch_losses[skip:], val_epoch_losses, val_batch_losses[skip:])
     loss_plotter.savefig(f"{conf.model_path}plot_train_val_epoch_losses.png")
 

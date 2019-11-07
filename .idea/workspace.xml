@@ -5,6 +5,14 @@
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/grid_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/grid_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_resnet_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -295,7 +303,7 @@
       <workItem from="1572529162443" duration="2220000" />
       <workItem from="1572609502201" duration="200000" />
       <workItem from="1572610056926" duration="21163000" />
-      <workItem from="1573023896555" duration="7328000" />
+      <workItem from="1573023896555" duration="14685000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
