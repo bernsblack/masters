@@ -36,6 +36,7 @@ def safe_f1_score(pr):
     else:
         return 2 * (p * r) / (p + r)
 
+
 def best_threshold(y_true, probas_pred, verbose=True):
     precision, recall, thresholds = precision_recall_curve(y_true.flatten(), probas_pred.flatten())
     scores = np.array(list(map(safe_f1_score, zip(precision, recall))))
@@ -60,6 +61,26 @@ def get_y_pred(thresh, probas_pred):
     y_pred[y_pred >= thresh] = 1
 
     return y_pred
+
+
+def best_thresholds(y_true, probas_pred):
+    N, C, L = y_true.shape
+    thresholds = np.empty(L)
+    for l in range(L):
+        # IMPORTANT NOT THIS SHOULD BE CALCULATED ON THE TRAINING SET
+        thresholds[l] = best_threshold(y_true=y_true[:, :, l], probas_pred=probas_pred[:, :, l])
+
+    return thresholds
+
+
+def get_y_pred_by_thresholds(thresholds, probas_pred):
+    N, C, L = probas_pred.shape
+    y_pred = np.empty(probas_pred.shape)  # (N,C,L)
+    for l in range(L):
+        y_pred[:, :, l] = get_y_pred(thresh=thresholds[l],
+                                     probas_pred=probas_pred[:, :, l])
+
+    return thresholds
 
 
 def mean_absolute_scaled_error(y_true, y_pred):
@@ -196,7 +217,7 @@ class BaseMetricPlotter:  # todo: replace with fig axis instead
         self.fig = None
         self.ax = None
 
-        self.plot_kwargs =  {
+        self.plot_kwargs = {
             # "marker": 's',
             # "markersize": .5,
             # "lw": 1,
@@ -283,13 +304,13 @@ class PRCurvePlotter(BaseMetricPlotter):
                 l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2, label='F1 score')
             else:
                 l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
-            plt.annotate('F{0}={1:0.1f}'.format(beta,f_score), xy=(0.9, y[45] + 0.02))
+            plt.annotate('F{0}={1:0.1f}'.format(beta, f_score), xy=(0.9, y[45] + 0.02))
 
     def add_curve(self, y_true, probas_pred, label_name):
         precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
         ap = average_precision_score(y_true, probas_pred)
 
-        self.plot_kwargs["label"] =  label_name + f" (AP={ap:.3f})"
+        self.plot_kwargs["label"] = label_name + f" (AP={ap:.3f})"
         plt.plot(recall, precision, **self.plot_kwargs)
 
     def add_curve_(self, precision, recall, ap, label_name):
@@ -336,8 +357,7 @@ class ROCCurvePlotter(BaseMetricPlotter):
         plt.plot(fpr, tpr, **self.plot_kwargs)
 
     def add_curve_(self, fpr, tpr, auc, label_name):
-
-        self.plot_kwargs["label"] =  label_name + f" (AUC={auc:.3f})"
+        self.plot_kwargs["label"] = label_name + f" (AUC={auc:.3f})"
         plt.plot(fpr, tpr, **self.plot_kwargs)
 
 
@@ -391,7 +411,6 @@ class CellPlotter(BaseMetricPlotter):
             ax.plot(probas_pred, label="probas_pred")
         if y_pred:
             ax.plot(y_pred, label="y_pred")
-
 
 
 class PerTimeStepPlotter(BaseMetricPlotter):

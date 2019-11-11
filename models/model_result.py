@@ -80,13 +80,13 @@ def get_models_metrics(data_path):
 
 
 # remember pandas df.to_latex for the columns
-def get_metrics_table(model_metrics):
-    col = ['ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score','Accuracy','Matthews Corrcoef']
+def get_metrics_table(models_metrics):
+    col = ['ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score', 'Accuracy', 'Matthews Corrcoef']
     data = []
     names = []
-    for m in model_metrics:
+    for m in models_metrics:
         names.append(m.model_name)
-        f1 = safe_f1_score((m.average_precision_score, m.recall_score))
+        f1 = safe_f1_score((m.precision_score, m.recall_score))
         row = [m.roc_auc_score, m.average_precision_score, m.precision_score, m.recall_score,
                f1, m.accuracy_score, m.matthews_corrcoef]
         data.append(row)
@@ -99,14 +99,18 @@ def get_metrics_table(model_metrics):
 
 
 def compare_models(data_path):
-    model_metrics = get_models_metrics(data_path)
+    """
+    :param data_path: string path to the data directory
+    :return: pandas data-frame table with all model metrics for all the models found under data_path
+    """
+    models_metrics = get_models_metrics(data_path)
 
-    metrics_table = get_metrics_table(model_metrics)
+    metrics_table = get_metrics_table(models_metrics)
     log.info(f"\n{metrics_table}")
 
     # pr-curve
     pr_plot = PRCurvePlotter()
-    for metric in model_metrics:
+    for metric in models_metrics:
         pr_plot.add_curve_(precision=metric.pr_curve.precision,
                            recall=metric.pr_curve.recall,
                            ap=metric.average_precision_score,
@@ -115,7 +119,7 @@ def compare_models(data_path):
 
     # roc-curve
     roc_plot = ROCCurvePlotter()
-    for metric in model_metrics:
+    for metric in models_metrics:
         roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
                             tpr=metric.roc_curve.tpr,
                             auc=metric.roc_auc_score,

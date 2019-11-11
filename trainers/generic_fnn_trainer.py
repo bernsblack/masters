@@ -37,9 +37,9 @@ conf_dict = {
     # data related hyper-params
     "val_ratio": 0.1,  # ratio of the total dataset
     "tst_ratio": 0.2,  # ratio of the total dataset
-    "sub_sample_train_set": True,
-    "sub_sample_validation_set": True,
-    "sub_sample_test_set": False,
+    "sub_sample_train_set": 1,
+    "sub_sample_validation_set": 1,
+    "sub_sample_test_set": 0,
     "flatten_grid": True,  # if the shaper should be used to squeeze the data
     "seq_len": 1,
     "shaper_top_k": -1,  # if less then 0, top_k will not be applied

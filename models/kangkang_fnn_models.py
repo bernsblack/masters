@@ -2,6 +2,7 @@ import torch
 from torch import nn
 import logging as log
 import numpy as np
+import torch.nn.functional as F
 
 """
 ### Feed Forward Network (Kang and Kang)

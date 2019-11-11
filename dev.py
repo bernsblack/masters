@@ -52,9 +52,9 @@ if __name__ == '__main__':
         "shaper_threshold": 0,
 
         # data loader related
-        "sub_sample_train_set": True,
-        "sub_sample_validation_set": True,
-        "sub_sample_test_set": False,
+        "sub_sample_train_set": 1,
+        "sub_sample_validation_set": 1,
+        "sub_sample_test_set": 0,
 
         # training parameters
         "resume": False,

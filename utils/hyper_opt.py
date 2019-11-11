@@ -5,9 +5,24 @@ import pandas as pd
 import itertools
 
 """
-Important note: for GP to function properly the y values should have a mean close to zero and a std close to 1
-"""
+Important note: for GP to function properly the y values should have a mean close to zero and a std close to 1, this
+is taken care of by keep a normalised copy of the parameters domain.
 
+To use GP hyper parameter function define a train_network function that returns a loss value and takes a dictionary of
+hyper parameters and their possible values. For example:
+
+hyper_param = {
+    "lr": [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]
+    "batch_size": [32, 64, 128]
+}
+
+def train_network(hyper_param):
+    model = Model(**hyper_param)
+    x, y_true = get_data(path)
+    y_pred = model.fit_transform(x)
+    loss = evaluate(y_true, y_pred)
+    return loss
+"""
 
 def gaussian_process(x_samples, y_samples, x_estimates, alpha=1e-8):
     """
@@ -15,7 +30,6 @@ def gaussian_process(x_samples, y_samples, x_estimates, alpha=1e-8):
 
     Alpha: Value added to the diagonal of the kernel matrix during fitting.
     """
-
     gp = GaussianProcessRegressor(alpha=alpha)
     gp.fit(x_samples, y_samples)
     y_mean, y_std = gp.predict(x_estimates, return_std=True)
@@ -89,20 +103,20 @@ def hyper_param_selection(func, hyper_parameters_domain, n_iter=5, goal="minimiz
                                          x_estimates=X_estimates_normed,
                                          alpha=gp_alpha)
 
-        # #################################################################################
-        # # only for 1 d array
-        # plt.figure()
-        # plt.fill_between(X_estimates.flatten(), (y_mean - y_std).flatten(), (y_mean + y_std).flatten(), alpha=0.2)
-        # plt.plot(X_estimates, y_mean)
-        # plt.scatter(X_samples, y_samples, zorder=10, marker="D", s=150, c="m", alpha=0.3)
-        # plt.show()
-        # #################################################################################
+        #################################################################################
+        # only for 1 d array
+        if y_mean.shape[-1] == 1:
+            plt.figure()
+            plt.fill_between(X_estimates.flatten(), (y_mean - y_std).flatten(), (y_mean + y_std).flatten(), alpha=0.2)
+            plt.plot(X_estimates, y_mean, linewidth=.1)
+            plt.scatter(X_samples, y_samples, zorder=10, marker="|", s=15, c="m", alpha=0.5)
+            plt.show()
+        #################################################################################
 
         # get best new estimate
         X_next_sample = next_parameter_by_ei(y_best, y_mean, y_std, x_choices=X_estimates, goal=goal)
 
         # sample neural net
-        # todo bernard use kwargs to be more explicit - dictionary keys are sorted can create a mixup
         y_next_sample = func(*X_next_sample)
 
         # add new samples to previous samples and normalise for GP
@@ -125,3 +139,5 @@ def hyper_param_selection(func, hyper_parameters_domain, n_iter=5, goal="minimiz
 
     # all samples from the network, to view if there are multiple combinations that work well.
     return X_samples, y_samples
+
+

@@ -44,8 +44,6 @@ class FlatDataGroup:
             time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
             time_step_days = 24 / time_step_hrs
 
-            # todo set test/val/train
-
             self.offset_year = int(365 * time_step_days)
 
             self.seq_len = conf.seq_len

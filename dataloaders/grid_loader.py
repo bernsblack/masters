@@ -9,15 +9,15 @@ class GridDataLoaders:
 
         self.train_loader = GridBatchLoader(dataset=self.data_group.training_set,
                                             batch_size=conf.batch_size,
-                                            shuffle=conf.sub_sample_train_set)
+                                            shuffle=conf.shuffle)
 
         self.validation_loader = GridBatchLoader(dataset=self.data_group.validation_set,
                                                  batch_size=conf.batch_size,
-                                                 shuffle=conf.sub_sample_validation_set)
+                                                 shuffle=conf.shuffle)
 
         self.test_loader = GridBatchLoader(dataset=self.data_group.testing_set,
                                            batch_size=conf.batch_size,
-                                           shuffle=conf.sub_sample_test_set)
+                                           shuffle=conf.shuffle)
 
 
 class GridBatchLoader:

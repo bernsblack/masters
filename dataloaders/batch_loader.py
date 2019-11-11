@@ -2,7 +2,7 @@ import numpy as np
 # todo add sequence loader - runs through the entire sets sequence first then
 # todo rename to flat BatchLoader
 class BatchLoader:
-    def __init__(self, dataset, batch_size, sub_sample=True):
+    def __init__(self, dataset, batch_size, sub_sample=0):
         """
         BatchLoader is a iterator that produces batches of data that can be fed into a model during a training
         loop. BatchLoader is used to iterate through and sample the indices for a whole epoch.
@@ -28,14 +28,15 @@ class BatchLoader:
         class1_args = class1_args[class1_args >= self.min_index]
 
         # todo - set subsample ratio_cls0_cls1 = 2 - and let np.choose(class0_args, take_len_class1)
-        if sub_sample:
+        sub_sample = int(sub_sample)
+        if sub_sample > 0: # options: 0, 1, 2, 3 should always be int
             np.random.shuffle(class0_args)
             np.random.shuffle(class1_args)
             # class0_args = class0_args[:int(ratio_cls0_cls1*len(class1_args))]
-            class0_args = class0_args[:len(class1_args)]
+            class0_args = class0_args[:sub_sample*len(class1_args)]
             self.indices = np.array(list(zip(class0_args, class1_args))).flatten()
         else:
-            self.indices = np.concatenate((class0_args, class1_args), axis=0).flatten()
+            self.indices = np.concatenate((class0_args, class1_args), axis=0).flatten() # [0,0,1,1] format
             np.random.shuffle(self.indices)
 
         self.batch_size = batch_size

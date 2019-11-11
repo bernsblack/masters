@@ -26,9 +26,9 @@ class BaseConf:  # args from arg-parser to over write values
             # data related hyper-params
             self.val_ratio = 0.1
             self.tst_ratio = 0.3
-            self.sub_sample_train_set = True
-            self.sub_sample_validation_set = True
-            self.sub_sample_test_set = False
+            self.sub_sample_train_set = 1  # will sample class 0 and 1 with 1:1 ratio
+            self.sub_sample_validation_set = 1 # will sample class 0 and 1 with 1:1 ratio
+            self.sub_sample_test_set = 0 # will not sub sample class 0 and 1
             self.flatten_grid = True  # if the shaper should be used to squeeze the data
 
             self.seq_len = 1
