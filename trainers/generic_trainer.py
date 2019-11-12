@@ -104,6 +104,12 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
             stopped_early = True
             break
 
+        if epoch > 5 and val_epoch_losses[-1] == val_epoch_losses[-2] and val_epoch_losses[-3] == val_epoch_losses[-2]:
+            log.warning(f"Converged: Past 3 validation losses are all the same,"
+                        + f" local optima has been reached")
+            stopped_early = True
+            break
+
         # checkpoint - save models and loss values
         torch.save(model.state_dict(), f"{conf.model_path}model_latest.pth")
         torch.save(optimiser.state_dict(), f"{conf.model_path}optimiser_latest.pth")
