@@ -12,6 +12,7 @@ class HawkesModelGeneral:
     """
 
     def __init__(self, kernel_size):
+        self.name = "Hawkes"
         self.kernel_size = kernel_size
         self.kernel = None
         self.baseline = None
@@ -68,6 +69,7 @@ class IndHawkesModel:
     """
 
     def __init__(self, kernel_size):
+        self.name = "IndHawkes"
         self.kernel_size = kernel_size
         self.baselines = []
         self.kernels = []

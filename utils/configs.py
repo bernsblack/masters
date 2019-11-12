@@ -19,7 +19,7 @@ class BaseConf:  # args from arg-parser to over write values
             self.__dict__ = deepcopy(conf_dict)
         else:  # default values
             self.seed = 3
-            self.use_cuda = False
+            # self.use_cuda = False
 
             self.use_crime_types = False
 

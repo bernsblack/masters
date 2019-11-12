@@ -28,8 +28,10 @@ class ResUnit(nn.Module):
     #         self.init_weights()
 
     def init_weights(self):
+        # torch.nn.init.xavier_uniform(self.conv1.weight)
         self.conv1.weight.data.uniform_(-0.5, 0.5)
         self.conv2.bias.data.fill_(0)
+        # torch.nn.init.xavier_uniform(self.conv2.weight)
         self.conv1.weight.data.uniform_(-0.5, 0.5)
         self.conv2.bias.data.fill_(0)
 
@@ -63,8 +65,10 @@ class ResNet(nn.Module):
         # self.init_weights()
 
     def init_weights(self):
+        # torch.nn.init.xavier_uniform(self.conv1.weight)
         self.conv1.weight.data.uniform_(-0.5, 0.5)
         self.conv2.bias.data.fill_(0)
+        # torch.nn.init.xavier_uniform(self.conv2.weight)
         self.conv1.weight.data.uniform_(-0.5, 0.5)
         self.conv2.bias.data.fill_(0)
 
@@ -90,8 +94,10 @@ class ExternalNet(nn.Module):  # need to add
         # self.init_weights()
 
     def init_weights(self):
+        # torch.nn.init.xavier_uniform(self.fc1.weight)
         self.fc1.weight.data.uniform_(-0.5, 0.5)
         self.fc1.bias.data.fill_(0)
+        # torch.nn.init.xavier_uniform(self.fc2.weight)
         self.fc2.weight.data.uniform_(-0.5, 0.5)
         self.fc2.bias.data.fill_(0)
 
@@ -181,9 +187,7 @@ class STResNet(nn.Module):
                  lc=1,
                  lp=1,
                  lq=1,
-
                  n_ext_features=10,
-
                  ):
         """
         n_layers: number of layers

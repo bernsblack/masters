@@ -16,7 +16,9 @@
       <w>figsize</w>
       <w>fontset</w>
       <w>freqstr</w>
+      <w>grufnn</w>
       <w>hama</w>
+      <w>hawkes</w>
       <w>imshow</w>
       <w>jaccard</w>
       <w>kaiming</w>
@@ -35,6 +37,7 @@
       <w>pytorch</w>
       <w>regressor</w>
       <w>relu</w>
+      <w>rfnn</w>
       <w>rmse</w>
       <w>savefig</w>
       <w>scaler</w>
