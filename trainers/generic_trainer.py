@@ -87,10 +87,10 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
                                 trn_batch_losses=trn_batch_losses,
                                 val_epoch_losses_best=val_epoch_losses_best)
 
-        log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.5f}")
-        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.5f}")
-        log.info(f"\tLoss (Val Best): \t{val_epoch_losses_best:.5f}")
-        log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.5f}\n")
+        log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
+        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
+        log.info(f"\tLoss (Val Best): \t{val_epoch_losses_best:.8f}")
+        log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         # increasing moving average of val_epoch_losses
         if conf.early_stopping and epoch > 5 and np.sum(np.diff(val_epoch_losses[-5:])) > 0:
@@ -130,7 +130,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
     else:
         loss_plot_title = "Loss"
 
-    loss_plotter = LossPlotter(title=f"{loss_plot_title} ({conf.model_name})")
+    loss_plotter = LossPlotter(title=f"{loss_plot_title} - {conf.model_name}")
     loss_plotter.plot_losses(trn_epoch_losses, trn_batch_losses[skip:], val_epoch_losses, val_batch_losses[skip:])
     loss_plotter.savefig(f"{conf.model_path}plot_train_val_epoch_losses.png")
 

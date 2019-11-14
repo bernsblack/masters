@@ -80,7 +80,7 @@ def get_y_pred_by_thresholds(thresholds, probas_pred):
         y_pred[:, :, l] = get_y_pred(thresh=thresholds[l],
                                      probas_pred=probas_pred[:, :, l])
 
-    return thresholds
+    return y_pred
 
 
 def mean_absolute_scaled_error(y_true, y_pred):

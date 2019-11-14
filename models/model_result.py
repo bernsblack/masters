@@ -93,7 +93,8 @@ def get_metrics_table(models_metrics):
 
     df = pd.DataFrame(columns=col, data=data, index=names)
     df.index.name = "Model Name"
-    df.sort_values('F1 Score', inplace=True, ascending=False)
+    # df.sort_values('F1 Score', inplace=True, ascending=False)
+    df.sort_values('Avg. Precision', inplace=True, ascending=False)
 
     return df
 

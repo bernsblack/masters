@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 
+from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.constants import TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
@@ -84,7 +85,11 @@ class FlatDataGroup:
 
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
             tract_count_grids = zip_file["tract_count_grids"]
-            self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)
+
+            ha = HistoricAverage(step=time_step_hrs)
+            historic_average = ha.fit_transform(self.crimes[:,0:1])
+
+            self.crimes = np.concatenate((self.crimes, tract_count_grids, historic_average), axis=1)
 
             # squeeze all spatially related data
             # reshaped (N, C, H, W) -> (N, C, L)

@@ -4,32 +4,72 @@ from torch import nn
 from utils.data_processing import get_period
 
 
+def get_max_steps(data, step):
+    """
+    data shape: (N,C,L)
+    """
+    print("finding best max_steps parameter...")
+    inpt = np.copy(data[:, 0])
+    trgs = np.copy(inpt)
+    trgs = trgs[1:]
+    inpt = inpt[:-1]
+
+    tst_len = int(0.3 * len(inpt))
+
+    results = {}
+
+    for max_steps in range(1, 40):
+        ha = HistoricAverage(step=step, max_steps=max_steps)
+        out = ha(inpt)
+
+        mae = np.mean(np.abs(trgs[tst_len:] - out[tst_len:]))
+        #         print(f"mae:{mae} max_steps:{max_steps}")
+        results[mae] = max_steps
+    best = results[min(list(results.keys()))]
+
+    print(f"best max_steps -> {best}")
+    return best
+
+
+def historic_average(data, step, max_steps):
+    r = np.empty(data.shape)
+    r.fill(np.nan)
+    for i in range(step + 1, len(r)):
+        a_subset = data[i - step + 1:0:-step]  # +1 to take the historic average of the next time step
+        if max_steps > 0:
+            a_subset = a_subset[:max_steps]
+
+        x = np.mean(a_subset, axis=0)
+        r[i] = x
+
+    return r
+
+
 class HistoricAverage:
-    """
-    Note: the first values of the predictions will be
-    """
-
-    def __init__(self, step=1, max_steps=-1):
+    def __init__(self, step=1, max_steps=0):
         self.step = step
-
-        # max steps when to start ignoring previous values: if -1 means get all values
         self.max_steps = max_steps
+        self.fitted = False
 
-    # def fit(self, data):
-    #     self.step = get_period(data)
+    def fit(self, data):
+        """
+        determines the optimal
+        """
+        self.max_steps = get_max_steps(data, self.step)
+        self.fitted = True
+
+    def transform(self, data):
+        if not self.fitted:
+            raise RuntimeError("Model needs to be fitted to the data first")
+
+        return historic_average(data, self.step, self.max_steps)
+
+    def fit_transform(self, data):
+        self.fit(data)
+        return self.transform(data)
 
     def __call__(self, data):
-        r = np.empty(data.shape)
-        r.fill(np.nan)
-        for i in range(self.step + 1, len(r)):
-            a_subset = data[i - self.step + 1:0:-self.step]  # +1 to take the historic average of the next time step
-            if self.max_steps > 0:
-                a_subset = a_subset[-self.max_steps:]
-
-            x = np.mean(a_subset, axis=0)
-            r[i] = x
-
-        return r
+        return self.transform(data)
 
 
 class BaseMovingAverage:
