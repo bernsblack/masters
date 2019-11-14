@@ -148,58 +148,62 @@ def plot_conf(y_true, y_pred):
     plt.show()
 
 
-def plot_roc_and_pr_curve(ground_truth, predictions_list):
+def plot_roc_and_pr_curve(y_true, probas_pred_dict):
     # ROC and PR Are binary so the class should be specified, one-vs-many
     # selecting and setting the class
-    fig, axs = plt.subplots(1, 2)
+    fig, (ax0, ax1) = plt.subplots(1, 2, )
     fig.set_figwidth(15)
+    fig.set_figheight(10)
 
-    axs[0].set_title("Receiver Operating Characteristic (ROC) Curve")  # (AUC = %.4f)"%auc)
-    axs[0].set_xlabel("False Positive Rate")
-    axs[0].set_ylabel("True Positive Rate")
-    axs[0].set_aspect(1)
-    axs[1].set_title("Precision-Recall Curve")  # (AUC = %.4f)"%auc)
-    axs[1].set_ylabel("Precision")
-    axs[1].set_xlabel("Recall")
-    axs[1].set_aspect(1.)
+    ax0.set_title("Receiver Operating Characteristic (ROC) Curve")  # (AUC = %.4f)"%auc)
+    ax0.set_xlabel("False Positive Rate")
+    ax0.set_ylabel("True Positive Rate")
+    ax0.set_aspect(1)
+    ax0.set_xlim(0, 1.)
+    ax0.set_ylim(0, 1.)
+    ax1.set_title("Precision-Recall Curve")  # (AUC = %.4f)"%auc)
+    ax1.set_ylabel("Precision")
+    ax1.set_xlabel("Recall")
+    ax1.set_aspect(1.)
+    ax1.set_xlim(0, 1.)
+    ax1.set_ylim(0, 1.)
 
-    y_true = ground_truth.ravel()  # ground truth
-    y_true[y_true > 1] = 1
-
-    predictions_list_names = ['HA', 'MA', 'HAMA', 'KNN', 'GT']  # change the input to a dictionary instead
-
-    for i, y_score in enumerate(predictions_list):
-        y_score = y_score.ravel()
+    for name, probas_pred in probas_pred_dict.items():
+        probas_pred = probas_pred.ravel()
 
         # ROC Curve
-        fpr, tpr, thresholds = roc_curve(y_true, y_score, drop_intermediate=False)
+        fpr, tpr, thresholds = roc_curve(y_true, probas_pred, drop_intermediate=False)
         thresholds = thresholds / np.max(thresholds)
-        auc = roc_auc_score(y_true, y_score)
-        axs[0].plot(fpr, tpr, label=predictions_list_names[i] + " (AUC: %.3f)" % auc, alpha=0.5)
-        axs[0].scatter(fpr, tpr, alpha=0.5, s=50 * thresholds, marker='D')
+        auc = roc_auc_score(y_true, probas_pred)
+        ax0.plot(fpr, tpr, label=name + " (AUC: %.3f)" % auc, alpha=0.5)
+        ax0.scatter(fpr, tpr, alpha=0.5, s=5 * thresholds, marker='D')
 
         # Precision Recall Curve
-        precision, recall, thresholds = precision_recall_curve(y_true, y_score)
+        precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
         thresholds = thresholds / np.max(thresholds)
-        ap = average_precision_score(y_true, y_score)
-        axs[1].plot(recall, precision, label=predictions_list_names[i] + " (AP: %.3f)" % ap, alpha=0.5)
-        axs[1].scatter(recall, precision, alpha=0.5, s=50 * thresholds, marker='D')
+        ap = average_precision_score(y_true, probas_pred)
+        ax1.plot(recall, precision, label=name + " (AP: %.3f)" % ap, alpha=0.5)
+        ax1.scatter(recall, precision, alpha=0.5, s=5 * thresholds, marker='D')
 
-    # f_scores = [.4,0.5,.6,.8,.9]
-    # for f_score in f_scores:
-    #     x = np.linspace(0.01, 1.1)
-    #     y = f_score * x / (2 * x - f_score)
-    #     l, = axs[1].plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
-    #     plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
+    f_scores = [.2, .3, .4, 0.5, .6, .7, .8, .9]
+    for f_score in f_scores:
+        x = np.linspace(0.0001, 1.1, 200)
+        y = f_score * x / (2 * x - f_score)
 
-    axs[0].legend()
-    axs[0].plot([0, 1], [0, 1], c='k', alpha=0.2)
+        x = x[y >= 0]
+        y = y[y >= 0]
 
-    axs[1].legend()
+        l, = ax1.plot(x, y, color='gray', alpha=0.2)
+    #         plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
+
+    ax0.legend(bbox_to_anchor=(1.01, 0), loc="lower left", borderaxespad=0)
+
+    ax0.plot([0, 1], [0, 1], c='k', alpha=0.2)
+
+    ax1.legend(bbox_to_anchor=(1.01, 0), loc="lower left", borderaxespad=0)
 
     plt.tight_layout()
     plt.show()
-
 
 # Metric Plots
 class BaseMetricPlotter:  # todo: replace with fig axis instead

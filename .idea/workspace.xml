@@ -3,15 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/hyper_opt.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/hyper_opt.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_resnet_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_rnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_rnn_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
@@ -303,7 +294,7 @@
       <workItem from="1572529162443" duration="2220000" />
       <workItem from="1572609502201" duration="200000" />
       <workItem from="1572610056926" duration="21163000" />
-      <workItem from="1573023896555" duration="36553000" />
+      <workItem from="1573023896555" duration="37749000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
