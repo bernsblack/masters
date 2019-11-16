@@ -5,6 +5,7 @@ from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
     , precision_recall_curve, roc_curve, recall_score, precision_score
 
+from utils import get_data_sub_paths
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
     recall_score_per_time_slot, safe_f1_score
@@ -13,6 +14,49 @@ import os
 import numpy as np
 import logging as log
 import pandas as pd
+
+# remember pandas df.to_latex for the columns
+def parse_data_path(s):
+    dt, s = s.split("T")[-1].split('H')
+    dx, dy, s = s.split("X")[-1].split('M')
+    _, dy = dy.split("Y")
+    _, start_date, end_date = s.split("_")
+    r = {"dt": int(dt),
+         "dx": int(dx),
+         "dy": int(dy),
+         "start_date": start_date,
+         "stop_date": end_date}
+    return r
+
+def get_all_metrics():
+    """
+    """
+    data = []
+    paths = get_data_sub_paths()
+    for data_sub_path in paths:
+        data_path = f"./data/processed/{data_sub_path}/"
+        models_metrics = get_models_metrics(data_path)
+        for m in models_metrics:
+            row = {
+                **parse_data_path(data_sub_path),
+                "Model": m.model_name,
+                "ROC AUC": m.roc_auc_score,
+                "Avg. Precision": m.average_precision_score,
+                "Precision": m.precision_score,
+                "Recall": m.recall_score,
+                "F1 Score": safe_f1_score((m.precision_score, m.recall_score)),
+                "Accuracy": m.accuracy_score,
+                "Matthews Corrcoef": m.matthews_corrcoef,
+            }
+            data.append(row)
+
+    df = pd.DataFrame(data)
+#     df.index.name = "Model Name"
+    # df.sort_values("F1 Score", inplace=True, ascending=False)
+    df.sort_values("Avg. Precision", inplace=True, ascending=False)
+    col = ["Model","dt","dx","dy","start_date", "stop_date","ROC AUC","Avg. Precision",
+           "Precision","Recall","F1 Score", "Accuracy", "Matthews Corrcoef"]
+    return df[col]
 
 
 def get_models_results(data_path):
@@ -73,8 +117,8 @@ def get_models_metrics(data_path):
         with open(file_name, 'rb') as file_pointer:
             model_metrics.append(pickle.load(file_pointer))
 
-    if len(model_metrics) == 0:
-        raise EnvironmentError("No model metrics in this directory")
+    # if len(model_metrics) == 0:
+    #     raise EnvironmentError("No model metrics in this directory")
 
     return model_metrics
 
@@ -153,25 +197,26 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
             raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
 
-        ap_per_time = average_precision_score_per_time_slot(y_true=y_true,
-                                                            probas_pred=probas_pred)
-        self.ap_per_time = np.nan_to_num(ap_per_time)
-
-        roc_per_time = roc_auc_score_per_time_slot(y_true=y_true,
-                                                   probas_pred=probas_pred)
-        self.roc_per_time = np.nan_to_num(roc_per_time)
-
-        acc_per_time = accuracy_score_per_time_slot(y_true=y_true,
-                                                    y_pred=y_pred)
-        self.acc_per_time = np.nan_to_num(acc_per_time)
-
-        p_per_time = precision_score_per_time_slot(y_true=y_true,
-                                                   y_pred=y_pred)
-        self.p_per_time = np.nan_to_num(p_per_time)
-
-        r_per_time = recall_score_per_time_slot(y_true=y_true,
-                                                y_pred=y_pred)
-        self.r_per_time = np.nan_to_num(r_per_time)
+        # todo move to separate function
+        # ap_per_time = average_precision_score_per_time_slot(y_true=y_true,
+        #                                                     probas_pred=probas_pred)
+        # self.ap_per_time = np.nan_to_num(ap_per_time)
+        #
+        # roc_per_time = roc_auc_score_per_time_slot(y_true=y_true,
+        #                                            probas_pred=probas_pred)
+        # self.roc_per_time = np.nan_to_num(roc_per_time)
+        #
+        # acc_per_time = accuracy_score_per_time_slot(y_true=y_true,
+        #                                             y_pred=y_pred)
+        # self.acc_per_time = np.nan_to_num(acc_per_time)
+        #
+        # p_per_time = precision_score_per_time_slot(y_true=y_true,
+        #                                            y_pred=y_pred)
+        # self.p_per_time = np.nan_to_num(p_per_time)
+        #
+        # r_per_time = recall_score_per_time_slot(y_true=y_true,
+        #                                         y_pred=y_pred)
+        # self.r_per_time = np.nan_to_num(r_per_time)
 
         # flatten array for the next functions
         y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
@@ -285,6 +330,11 @@ def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
                                  probas_pred=probas_pred)
     log.info(model_metrics)
 
+    with open(f"{conf.model_path}model_metric.pkl", "wb") as file:
+        pickle.dump(model_metrics, file)
+
+
+def save_results(y_true, y_pred, probas_pred, t_range, shaper, conf):
     # saves the actual target and predicted values to be visualised later on - the one we're actually going to be using
     model_result = ModelResult(model_name=conf.model_name,
                                y_true=y_true,
@@ -296,6 +346,3 @@ def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
 
     with open(f"{conf.model_path}model_result.pkl", "wb") as file:
         pickle.dump(model_result, file)
-
-    with open(f"{conf.model_path}model_metric.pkl", "wb") as file:
-        pickle.dump(model_metrics, file)

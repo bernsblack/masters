@@ -196,11 +196,13 @@ def plot_roc_and_pr_curve(y_true, probas_pred_dict):
         l, = ax1.plot(x, y, color='gray', alpha=0.2)
     #         plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
 
-    ax0.legend(bbox_to_anchor=(1.01, 0), loc="lower left", borderaxespad=0)
+    ax0.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+            fancybox=True, shadow=True, ncol=2)
 
     ax0.plot([0, 1], [0, 1], c='k', alpha=0.2)
 
-    ax1.legend(bbox_to_anchor=(1.01, 0), loc="lower left", borderaxespad=0)
+    ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
+            fancybox=True, shadow=True, ncol=2)
 
     plt.tight_layout()
     plt.show()
@@ -409,7 +411,7 @@ class CellPlotter(BaseMetricPlotter):
 
         if y_true:
             ax.plot(y_true, label="y_true")
-            mean = np.ones_like(y_true) * np.mean(y_true)
+            mean = np.ones(y_true.shape) * np.mean(y_true)
             ax.plot(mean, label="mean")
         if probas_pred:
             ax.plot(probas_pred, label="probas_pred")

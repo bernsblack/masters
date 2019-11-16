@@ -98,7 +98,7 @@ def visualize_weights(model):
     keys = []
     for i, k in enumerate(state_dict):
         values = state_dict[k].squeeze().data.numpy()
-        plt.scatter(i * np.ones_like(values), values, alpha=0.5)
+        plt.scatter(i * np.ones(values.shape), values, alpha=0.5)
         keys.append(k)
 
     plt.xticks(np.arange(len(keys)), keys, rotation=45, fontsize=30)
@@ -424,7 +424,7 @@ def plot3D(a):
         j = int((i * len(_z)) / len(x))
         z[i] = _z[j]
 
-    bottom = np.zeros_like(z)
+    bottom = np.zeros(z.shape)
     width = depth = 1
 
     cmap = cm.get_cmap('viridis')  # Get desired colormap - you can change this!

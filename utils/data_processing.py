@@ -416,7 +416,7 @@ def reverse_cumsum(s, T=24):
     T is cumsum period
     """
     s = s.data.numpy()
-    r = np.zeros_like(s)
+    r = np.zeros(s.shape)
 
     if len(s) % T == 0:
         ns = len(s) // T

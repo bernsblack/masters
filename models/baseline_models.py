@@ -8,6 +8,9 @@ def get_max_steps(data, step):
     """
     data shape: (N,C,L)
     """
+    if len(data.shape) != 3:
+        raise ValueError("Data should be in format (N,C,L)")
+
     print("finding best max_steps parameter...")
     inpt = np.copy(data[:, 0])
     trgs = np.copy(inpt)
@@ -18,12 +21,13 @@ def get_max_steps(data, step):
 
     results = {}
 
-    for max_steps in range(1, 40):
-        ha = HistoricAverage(step=step, max_steps=max_steps)
-        out = ha(inpt)
+    for max_steps in range(1, 10):
+        out = historic_average(data=inpt,
+                               step=step,
+                               max_steps=max_steps)
 
         mae = np.mean(np.abs(trgs[tst_len:] - out[tst_len:]))
-        #         print(f"mae:{mae} max_steps:{max_steps}")
+        # print(f"mae:{mae} max_steps:{max_steps}")
         results[mae] = max_steps
     best = results[min(list(results.keys()))]
 
@@ -32,8 +36,19 @@ def get_max_steps(data, step):
 
 
 def historic_average(data, step, max_steps):
-    r = np.empty(data.shape)
-    r.fill(np.nan)
+    """
+    historic_average get's the historic average of the following time step without including that time step.
+    it get's the the historic average of each cell and then moves it one time step forward.
+    We do not want to use the input cell's historic average because it's less related to the target cell
+
+    :param data: (N, ...) shape
+    :param step: interval used to calculate the average
+    :param max_steps: number of intervals to sample
+    :return: historic average of the next time steps
+    """
+    r = np.zeros(data.shape)  # so that calculation can still be done on the first few cells
+    # r = np.empty(data.shape)
+    # r.fill(np.nan)
     for i in range(step + 1, len(r)):
         a_subset = data[i - step + 1:0:-step]  # +1 to take the historic average of the next time step
         if max_steps > 0:
@@ -57,10 +72,11 @@ class HistoricAverage:
         """
         self.max_steps = get_max_steps(data, self.step)
         self.fitted = True
+        print(f"fitted historic average: step ({self.step}) and max_steps ({self.max_steps})")
 
     def transform(self, data):
         if not self.fitted:
-            raise RuntimeError("Model needs to be fitted to the data first")
+            raise RuntimeError(f"Model needs to be fitted to the data first: model.fitted = {self.fitted}")
 
         return historic_average(data, self.step, self.max_steps)
 
@@ -140,7 +156,7 @@ def get_historic_average(data, step=24):
     for i in range(step):
         ha.append(data[i::step].mean(0))
 
-    b = -1 * np.ones_like(data)  # minus one there to check if anything went wrong
+    b = -1 * np.ones(data.shape)  # minus one there to check if anything went wrong
     for i in range(len(b)):
         b[i] = ha[i % step]
 

@@ -228,7 +228,7 @@ if __name__ == "__main__":
         tracts[t, tr] += 1
 
     # make grid by the number of crimes in that tract
-    tract_count_grids = np.zeros_like(crime_grids)
+    tract_count_grids = np.zeros(crime_grids.shape)
 
     # for x, y in valid_crime_spots:  # leads to some missing data
     for x, y in valid_points:

@@ -4,7 +4,6 @@ from utils.configs import BaseConf
 import numpy as np
 import pandas as pd
 
-# todo (rename) to Loader
 from utils.mock_data import mock_fnn_data_classification
 
 

@@ -47,7 +47,7 @@ class HawkesModelGeneral:
         # kernels -> (N,L,kernel_size)
         # baselines -> (N,L,1)
         N, L = np.shape(data)
-        result = np.empty_like(data)
+        result = np.empty(data.shape)
         for i in range(L):
             result[:, i] = self.baseline + np.convolve(data[:, i], self.kernel)[:N]
         return result
@@ -107,7 +107,7 @@ class IndHawkesModel:
         # kernels -> (N,L,kernel_size)
         # baselines -> (N,L,1)
         N, L = np.shape(data)
-        result = np.empty_like(data)
+        result = np.empty(data.shape)
         for i in range(L):
             result[:, i] = self.baselines[i] + np.convolve(data[:, i], self.kernels[i])[:N]
         return result

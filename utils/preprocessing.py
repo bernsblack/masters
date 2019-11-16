@@ -211,8 +211,8 @@ def minmax_scale(data, feature_range=(0, 1), axis=0):
     if np.any(scale_old == 0):
         raise ValueError(f"scale_old is {scale_old}. Division by zero is not allowed.")
 
-    min_new = np.ones_like(min_old) * feature_range[0]
-    max_new = np.ones_like(max_old) * feature_range[1]
+    min_new = np.ones(min_old.shape) * feature_range[0]
+    max_new = np.ones(max_old.shape) * feature_range[1]
     scale_new = max_new - min_new
 
     return scale_new * (data - min_old) / scale_old + min_new
@@ -242,8 +242,8 @@ class MinMaxScaler:
         self.max_old = np.max(data, axis=sum_axis, keepdims=True)
         self.scale_old = self.max_old - self.min_old
 
-        self.min_new = np.ones_like(self.min_old) * self.feature_range[0]
-        self.max_new = np.ones_like(self.max_old) * self.feature_range[1]
+        self.min_new = np.ones(self.min_old.shape) * self.feature_range[0]
+        self.max_new = np.ones(self.max_old.shape) * self.feature_range[1]
         self.scale_new = self.max_new - self.min_new
 
     def transform(self, data):
