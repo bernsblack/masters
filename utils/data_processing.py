@@ -348,6 +348,9 @@ def pad2d(a, value=0, size=1):
 
 
 def pad4d(a, value=0, size=1):
+    if size <= 0:
+        return a
+    
     n, c, h, w = np.shape(a)
     r = np.ones((n, c, h + 2 * size, w + 2 * size)) * value
 

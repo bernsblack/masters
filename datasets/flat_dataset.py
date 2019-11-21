@@ -167,7 +167,7 @@ class FlatDataset(Dataset):
             street_vec = self.street_grid[:, :, l_index]
             # weather_vec = self.weather_vectors[t_start:t_stop]
             # tmp_vec = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add more historical values
-            tmp_vec = np.concatenate((time_vec, crime_vec), axis=-1)  # todo add more historical values
+            tmp_vec = np.concatenate((crime_vec, time_vec), axis=-1)  # todo add more historical values
 
             # todo teacher forcing - if we are using this then we need to return sequence of targets
             target_vec = self.targets[t_start:t_stop, :, l_index]

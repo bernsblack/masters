@@ -10,6 +10,7 @@
       <w>convs</w>
       <w>corrcoef</w>
       <w>cuda</w>
+      <w>cumsum</w>
       <w>datasets</w>
       <w>demog</w>
       <w>discretisation</w>
@@ -47,6 +48,7 @@
       <w>tbptt</w>
       <w>thresholded</w>
       <w>unsqueeze</w>
+      <w>upsampled</w>
       <w>vals</w>
       <w>viridis</w>
       <w>xlabel</w>

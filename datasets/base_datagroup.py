@@ -36,6 +36,7 @@ class BaseDataGroup:
             self.offset_year = int(365 * time_step_days)
 
             self.seq_len = conf.seq_len
+            self.pad_width = conf.pad_width
             self.total_len = len(self.crimes)  # length of the whole time series
 
             #  sanity check if time matches up with our grids

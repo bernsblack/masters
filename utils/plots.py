@@ -29,7 +29,7 @@ class BasePlotter:
         self.xlabel = xlabel
         self.ylabel = ylabel
 
-        self.grid_alpha = 0.2
+        self.grid_alpha = 0.5
         self.setup()
 
     @staticmethod

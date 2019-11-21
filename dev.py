@@ -9,91 +9,112 @@ from logger.logger import setup_logging
 from utils.configs import BaseConf
 from utils.utils import write_json, Timer
 from models.kangkang_fnn_models import KangFeedForwardNetwork
+from models.hawkes_model import HawkesModelGeneral, IndHawkesModel
 from dataloaders.flat_loader import FlatDataLoaders
-from datasets.flat_dataset import FlatDataGroup, BaseDataGroup
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
-from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
-from models.model_result import ModelResult
-from utils.mock_data import mock_data
+from datasets.flat_dataset import FlatDataGroup
+
+from dataloaders.grid_loader import GridDataLoaders
+from datasets.grid_dataset import GridDataGroup
+
+from dataloaders.cell_loader import CellDataLoaders
+from datasets.cell_dataset import CellDataGroup
+
+
+from utils.plots import DistributionPlotter
+from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter, CellPlotter
+from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, classification_report
+import pickle
+from utils.utils import pshape, pmax, pmin, pmean, get_data_sub_paths
+import os
+from utils.mock_data import mock_fnn_data_classification
 import matplotlib.pyplot as plt
 from utils.plots import im
-from torch.nn.utils import clip_grad_norm_
-from utils.mock_data import mock_adding_problem_data, mock_rnn_data
+from utils.metrics import best_threshold, get_y_pred
+from models.model_result import ModelResult, ModelMetrics, save_metrics, compare_models,\
+                                get_models_metrics, get_models_results, get_metrics_table
+from models.baseline_models import ExponentialMovingAverage, UniformMovingAverage, \
+                                    TriangularMovingAverage, HistoricAverage
+from pprint import pprint
 
 if __name__ == '__main__':
+    data_sub_paths = get_data_sub_paths()
+    pprint(data_sub_paths)
 
-    data_dim_str = "T24H-X850M-Y880M"  # "T1H-X1700M-Y1760M"  # needs to exist
-    model_name = "RNN-CRIME-MODEL"  # needs to be created
+    data_sub_paths = ['T24H-X850M-Y880M_2013-01-01_2015-01-01']
 
-    data_path = f"./data/processed/{data_dim_str}/"
-    model_path = f"{data_path}models/{model_name}/"
-    os.makedirs(data_path, exist_ok=True)
-    os.makedirs(model_path, exist_ok=True)
+    # run HAWKES INDEPENDENT MODEL for all data dimensions
+    for data_sub_path in data_sub_paths:
+        conf = BaseConf()
 
-    # logging config is set globally thus we only need to call this in this file
-    # imported function logs will follow the configuration
-    setup_logging(save_dir=model_path, log_config='./logger/standard_logger_config.json', default_level=log.INFO)
+        conf.data_path = f"./data/processed/{data_sub_path}/"
+        setup_logging(save_dir=conf.data_path,
+                      log_config='./logger/standard_logger_config.json',
+                      default_level=log.INFO)
 
-    # manually set the config
-    conf_dict = {
-        "seed": 3,
-        "use_cuda": False,
+        log.info("\n====================================================" + \
+                 "===============================================================\n" + \
+                 f"CALCULATING BASE LINE RESULTS FOR {data_sub_path}\n" + \
+                 "==============================================================" + \
+                 "=====================================================")
 
-        "use_crime_types": False,
+        if not os.path.exists(conf.data_path):
+            raise Exception(f"Directory ({conf.data_path}) needs to exist.")
 
-        # data group/data set related
-        "val_ratio": 0.1,  # ratio of the total dataset
-        "tst_ratio": 0.2,  # ratio of the total dataset
-        "seq_len": 1,
-        "flatten_grid": True,  # if the shaper should be used to squeeze the data
+        # LOAD DATA
+        conf.shaper_threshold = 0
+        conf.shaper_top_k = -1
+        data_group = FlatDataGroup(data_path=conf.data_path, conf=conf)
+        loaders = FlatDataLoaders(data_group=data_group, conf=conf)
 
-        # shaper related
-        "shaper_top_k": -1,  # if less then 0, top_k will not be applied
-        "shaper_threshold": 0,
+        # ------------ HAWKES INDEPENDENT MODEL
+        conf.model_name = f"Ind-Hawkes Model"  # tod add the actual parameters as well
+        conf.model_path = f"{conf.data_path}models/{conf.model_name}/"
+        os.makedirs(conf.model_path, exist_ok=True)
+        setup_logging(save_dir=conf.model_path,
+                      log_config='./logger/standard_logger_config.json',
+                      default_level=log.INFO)
 
-        # data loader related
-        "sub_sample_train_set": 1,
-        "sub_sample_validation_set": 1,
-        "sub_sample_test_set": 0,
+        log.info("=====================================BEGIN=====================================")
+        test_set_size = data_group.testing_set.target_shape[0]
 
-        # training parameters
-        "resume": False,
-        "early_stopping": False,
-        "tolerance": 1e-8,
-        "lr": 1e-3,
-        "weight_decay": 1e-8,
-        "max_epochs": 1,
-        "batch_size": 64,
-        "dropout": 0.2,
-        "shuffle": False,
-        "num_workers": 6,
+        trn_crimes = data_group.training_set.crimes[:, 0]
+        trn_y_true = data_group.training_set.targets
 
-        # attached global variables - bad practice -find alternative
-        "device": None,  # pytorch device object [CPU|GPU]
-        "timer": Timer(),
-        "model_name": model_name,
-        "model_path": model_path,
-    }
+        tst_crimes = data_group.testing_set.crimes[:, 0]
+        tst_y_true = data_group.testing_set.targets
+        tst_t_range = data_group.testing_set.t_range
 
-    conf = BaseConf(conf_dict=conf_dict)
+        # time step in this context is used for
+        freqstr = data_group.t_range.freqstr
+        if freqstr == "H":
+            freqstr = "1H"
+        time_step = int(24 / int(freqstr[:freqstr.find("H")]))
 
-    info = deepcopy(conf.__dict__)
-    info["start_time"] = strftime("%Y-%m-%dT%H:%M:%S")
+        kernel_size = time_step * 30
 
-    # DATA LOADER SETUP
-    np.random.seed(conf.seed)
-    use_cuda = torch.cuda.is_available()
-    if use_cuda:
-        torch.cuda.manual_seed(conf.seed)
-    else:
-        torch.manual_seed(conf.seed)
+        N, L = np.shape(trn_crimes)
 
-    conf.device = torch.device("cuda:0" if use_cuda else "cpu")
+        model = IndHawkesModel(kernel_size=kernel_size)
+        trn_probas_pred = model.fit_transform(trn_crimes)
 
-    base_data_group = BaseDataGroup(data_path=data_path, conf=conf) \
-        .with_time_vectors() \
-        .with_weather_vectors() \
-        .with_demog_grid() \
-        .with_street_grid()
+        thresh = best_threshold(y_true=trn_y_true,
+                                probas_pred=trn_probas_pred)
 
-    data_group = FlatDataGroup(data_path=data_path, conf=conf)
+        tst_probas_pred = model.transform(tst_crimes)
+        tst_y_pred = get_y_pred(thresh, tst_probas_pred)
+
+        tst_y_true = tst_y_true[-test_set_size:]
+        tst_y_pred = tst_y_pred[-test_set_size:]
+        tst_y_pred = np.expand_dims(tst_y_pred, axis=1)
+        tst_probas_pred = tst_probas_pred[-test_set_size:]
+        tst_probas_pred = np.expand_dims(tst_probas_pred, axis=1)
+        tst_t_range = tst_t_range[-test_set_size:]
+
+        save_metrics(y_true=tst_y_true,
+                     y_pred=tst_y_pred,
+                     probas_pred=tst_probas_pred,
+                     t_range=tst_t_range,
+                     shaper=data_group.shaper,
+                     conf=conf)
+
+        # ------------HAWKES INDEPENDENT MODEL

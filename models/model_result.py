@@ -3,17 +3,18 @@ import pickle
 from numpy import ndarray
 from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
-    , precision_recall_curve, roc_curve, recall_score, precision_score
+    , precision_recall_curve, roc_curve, recall_score, precision_score, mean_absolute_error, mean_squared_error
 
 from utils import get_data_sub_paths
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
-    recall_score_per_time_slot, safe_f1_score
+    recall_score_per_time_slot, safe_f1_score, mae_per_time_slot, rmse_per_time_slot
 from utils.preprocessing import Shaper
 import os
 import numpy as np
 import logging as log
 import pandas as pd
+
 
 # remember pandas df.to_latex for the columns
 def parse_data_path(s):
@@ -28,6 +29,7 @@ def parse_data_path(s):
          "stop_date": end_date}
     return r
 
+
 def get_all_metrics():
     """
     """
@@ -40,6 +42,8 @@ def get_all_metrics():
             row = {
                 **parse_data_path(data_sub_path),
                 "Model": m.model_name,
+                "RMSE": m.root_mean_squared_error,
+                "MAE": m.mean_absolute_error,
                 "ROC AUC": m.roc_auc_score,
                 "Avg. Precision": m.average_precision_score,
                 "Precision": m.precision_score,
@@ -51,11 +55,11 @@ def get_all_metrics():
             data.append(row)
 
     df = pd.DataFrame(data)
-#     df.index.name = "Model Name"
+    #     df.index.name = "Model Name"
     # df.sort_values("F1 Score", inplace=True, ascending=False)
-    df.sort_values("Avg. Precision", inplace=True, ascending=False)
-    col = ["Model","dt","dx","dy","start_date", "stop_date","ROC AUC","Avg. Precision",
-           "Precision","Recall","F1 Score", "Accuracy", "Matthews Corrcoef"]
+    df.sort_values(["dt", "dx", "dy", "start_date", "stop_date", "Avg. Precision"], inplace=True, ascending=False)
+    col = ["Model", "dt", "dx", "dy", "start_date", "stop_date", "MAE", "RMSE",
+           "ROC AUC", "Avg. Precision", "Precision", "Recall", "F1 Score", "Accuracy", "Matthews Corrcoef"]
     return df[col]
 
 
@@ -125,13 +129,15 @@ def get_models_metrics(data_path):
 
 # remember pandas df.to_latex for the columns
 def get_metrics_table(models_metrics):
-    col = ['ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score', 'Accuracy', 'Matthews Corrcoef']
+    col = ['RMSE', 'MAE', 'ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score', 'Accuracy',
+           'Matthews Corrcoef']
     data = []
     names = []
     for m in models_metrics:
         names.append(m.model_name)
         f1 = safe_f1_score((m.precision_score, m.recall_score))
-        row = [m.roc_auc_score, m.average_precision_score, m.precision_score, m.recall_score,
+        row = [m.root_mean_squared_error, m.mean_absolute_error, m.roc_auc_score,
+               m.average_precision_score, m.precision_score, m.recall_score,
                f1, m.accuracy_score, m.matthews_corrcoef]
         data.append(row)
 
@@ -197,46 +203,55 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
             raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
 
-        # todo move to separate function
-        # ap_per_time = average_precision_score_per_time_slot(y_true=y_true,
-        #                                                     probas_pred=probas_pred)
-        # self.ap_per_time = np.nan_to_num(ap_per_time)
-        #
-        # roc_per_time = roc_auc_score_per_time_slot(y_true=y_true,
-        #                                            probas_pred=probas_pred)
-        # self.roc_per_time = np.nan_to_num(roc_per_time)
-        #
-        # acc_per_time = accuracy_score_per_time_slot(y_true=y_true,
-        #                                             y_pred=y_pred)
-        # self.acc_per_time = np.nan_to_num(acc_per_time)
-        #
-        # p_per_time = precision_score_per_time_slot(y_true=y_true,
-        #                                            y_pred=y_pred)
-        # self.p_per_time = np.nan_to_num(p_per_time)
-        #
-        # r_per_time = recall_score_per_time_slot(y_true=y_true,
-        #                                         y_pred=y_pred)
-        # self.r_per_time = np.nan_to_num(r_per_time)
+        ap_per_time = average_precision_score_per_time_slot(y_true=y_true, probas_pred=probas_pred)
+        self.ap_per_time = np.nan_to_num(ap_per_time)
+
+        roc_per_time = roc_auc_score_per_time_slot(y_true=y_true, probas_pred=probas_pred)
+        self.roc_per_time = np.nan_to_num(roc_per_time)
+
+        acc_per_time = accuracy_score_per_time_slot(y_true=y_true, y_pred=y_pred)
+        self.acc_per_time = np.nan_to_num(acc_per_time)
+
+        p_per_time = precision_score_per_time_slot(y_true=y_true, y_pred=y_pred)
+        self.p_per_time = np.nan_to_num(p_per_time)
+
+        r_per_time = recall_score_per_time_slot(y_true=y_true, y_pred=y_pred)
+        self.r_per_time = np.nan_to_num(r_per_time)
+
+        mae_per_time = mae_per_time_slot(y_true=y_true, y_pred=probas_pred)
+        self.mae_per_time = np.nan_to_num(mae_per_time)
+
+        rmse_per_time = rmse_per_time_slot(y_true=y_true, y_pred=probas_pred)
+        self.rmse_per_time = np.nan_to_num(rmse_per_time)
 
         # flatten array for the next functions
         y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
+
+        y_class = np.copy(y_true)
+        y_class[y_class > 0] = 1
+
         self.model_name = model_name
-        self.accuracy_score = accuracy_score(y_true, y_pred)
-        self.roc_auc_score = roc_auc_score(y_true, probas_pred)
+        self.accuracy_score = accuracy_score(y_class, y_pred)
+        self.roc_auc_score = roc_auc_score(y_class, probas_pred)
 
-        self.recall_score = recall_score(y_true, y_pred)
-        self.precision_score = precision_score(y_true, y_pred)
+        self.recall_score = recall_score(y_class, y_pred)
+        self.precision_score = precision_score(y_class, y_pred)
 
-        self.average_precision_score = average_precision_score(y_true, probas_pred)
-        self.matthews_corrcoef = matthews_corrcoef(y_true, y_pred)
+        self.average_precision_score = average_precision_score(y_class, probas_pred)
+        self.matthews_corrcoef = matthews_corrcoef(y_class, y_pred)
 
-        self.pr_curve = PRCurve(*precision_recall_curve(y_true, probas_pred))
-        self.roc_curve = ROCCurve(*roc_curve(y_true, probas_pred, drop_intermediate=False))
+        self.mean_absolute_error = mean_absolute_error(y_true=y_true, y_pred=probas_pred)
+        self.root_mean_squared_error = np.sqrt(mean_squared_error(y_true=y_true, y_pred=probas_pred))
+
+        self.pr_curve = PRCurve(*precision_recall_curve(y_class, probas_pred))
+        self.roc_curve = ROCCurve(*roc_curve(y_class, probas_pred, drop_intermediate=False))
 
     def __repr__(self):
         r = rf"""
         MODEL METRICS
             Model Name: {self.model_name}
+                MAE:                {self.mean_absolute_error}
+                RMSE:               {self.root_mean_squared_error}
                 ROC AUC:            {self.roc_auc_score}                
                 Average Precision:  {self.average_precision_score}
                 Precision:          {self.precision_score}

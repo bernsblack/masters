@@ -25,7 +25,6 @@ class GridDataGroup:
         :param data_path:
         :param conf:
         """
-
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             if conf.use_crime_types:
                 self.crimes = zip_file["crime_types_grids"]

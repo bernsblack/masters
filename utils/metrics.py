@@ -26,7 +26,7 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import logging as log
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve, \
-    mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix
+    mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, mean_squared_error
 
 
 def safe_f1_score(pr):
@@ -197,15 +197,16 @@ def plot_roc_and_pr_curve(y_true, probas_pred_dict):
     #         plt.annotate('f1={0:0.1f}'.format(f_score), xy=(0.9, y[45] + 0.02))
 
     ax0.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-            fancybox=True, shadow=True, ncol=2)
+               fancybox=True, shadow=True, ncol=2)
 
     ax0.plot([0, 1], [0, 1], c='k', alpha=0.2)
 
     ax1.legend(loc='upper center', bbox_to_anchor=(0.5, -0.05),
-            fancybox=True, shadow=True, ncol=2)
+               fancybox=True, shadow=True, ncol=2)
 
     plt.tight_layout()
     plt.show()
+
 
 # Metric Plots
 class BaseMetricPlotter:  # todo: replace with fig axis instead
@@ -635,4 +636,42 @@ def recall_score_per_time_slot(y_true, y_pred):
 
     return result
 
-# metric_per_time_step - get the auc or ap
+
+def rmse_per_time_slot(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)  float values varying between (0,1)
+    probas_pred: (N,1,L) float values varying between (0,1)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = np.sqrt(mean_squared_error(y_true=y_true[i, :, :].flatten(),
+                                               y_pred=y_pred[i, :, :].flatten()))
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+
+    return result
+
+
+def mae_per_time_slot(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)  float values varying between (0,1)
+    probas_pred: (N,1,L) float values varying between (0,1)
+
+    return: (N,1,1)
+    """
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = mean_absolute_error(y_true=y_true[i, :, :].flatten(),
+                                        y_pred=y_pred[i, :, :].flatten())
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+
+    return result

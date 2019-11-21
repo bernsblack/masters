@@ -66,6 +66,8 @@ class BaseConf:  # args from arg-parser to over write values
             self.n_steps_p = 3
             self.n_steps_c = 3
 
+            self.pad_width = 0
+
     def __str__(self):
         return pformat(self.__dict__)
 

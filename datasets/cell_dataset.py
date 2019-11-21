@@ -7,9 +7,11 @@ from torch.utils.data import Dataset
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.constants import TEST_SET_SIZE_DAYS
+from utils.data_processing import pad4d
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
+
 
 class CellDataGroup(BaseDataGroup):
     def __init__(self, data_path: str, conf: BaseConf):
@@ -30,6 +32,7 @@ class CellDataGroup(BaseDataGroup):
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
+            pad_width=self.pad_width,
             offset_year=self.offset_year,
             shaper=self.shaper,
         )
@@ -44,6 +47,7 @@ class CellDataGroup(BaseDataGroup):
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
+            pad_width=self.pad_width,
             offset_year=self.offset_year,
             shaper=self.shaper,
         )
@@ -58,6 +62,7 @@ class CellDataGroup(BaseDataGroup):
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
+            pad_width=self.pad_width,
             offset_year=self.offset_year,
             shaper=self.shaper,
         )
@@ -75,9 +80,12 @@ class CellDataset(Dataset):
             demog_grid,  # space dependent
             street_grid,  # space dependent
             seq_len,
+            pad_width,
             offset_year,
             shaper,
     ):
+        self.pad_width = pad_width  # how much of the surrounding area do we take
+
         self.shaper = shaper
 
         self.seq_len = seq_len
@@ -106,14 +114,18 @@ class CellDataset(Dataset):
         self.target_shape = list(self.targets.shape)
         self.target_shape[0] = self.target_shape[0] - self.seq_len - self.offset_year
 
+        self.crimes = pad4d(self.crimes, value=0, size=self.pad_width)
+        self.targets = pad4d(self.targets, value=0, size=self.pad_width)
+        self.demog_grid = pad4d(self.demog_grid, value=0, size=self.pad_width)
+        self.street_grid = pad4d(self.street_grid, value=0, size=self.pad_width)
+
     def __len__(self):
         """Denotes the total number of samples"""
-        return self.len  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
+        return self.len
 
     def __getitem__(self, index):
         # when using no teacher forcing
         # target = self.targets[t+self.seq_len, :, l]
-        # todo add all other data - should be done in data-generation?
         # [√] number of incidents of crime occurrence by sampling point in 2013 (1-D) - crime_grid[t-365]
         # [√] number of incidents of crime occurrence by census tract in 2013 (1-D) - crime_tract[t-365]
         # [√] number of incidents of crime occurrence by sampling point yesterday (1-D) - crime_grid[t-1]
@@ -139,25 +151,33 @@ class CellDataset(Dataset):
                 raise IndexError(f"index value {i} is not in range({self.min_index},{self.max_index})")
 
             t_index, h_index, w_index = np.unravel_index(i, (self.t_size, self.h_size, self.w_size))
+
             t_start = t_index - self.seq_len + 1
             t_stop = t_index + 1
 
-            crime_vec = self.crimes[t_start:t_stop, :, h_index, w_index]
+            h_index = h_index + self.pad_width  # insert padding difference
+            w_index = w_index + self.pad_width
+
+            crime_vec = self.crimes[t_start:t_stop, :,
+                        h_index - self.pad_width: h_index + 1 + self.pad_width,
+                        w_index - self.pad_width: w_index + 1 + self.pad_width]
+            crime_vec = np.reshape(crime_vec, (crime_vec.shape[0], -1)) # (seq_len,crime_channels*(1+2*pad_with)**2))
+
+            demog_vec = self.demog_grid[:, :, h_index, w_index]  # (1,demog_channels)
+            street_vec = self.street_grid[:, :, h_index, w_index] # (1,street_view_channels)
 
             crimes_last_year = self.crimes[t_start - self.offset_year:t_stop - self.offset_year, :, h_index, w_index]
+
+            target_vec = self.targets[t_start:t_stop, :, h_index, w_index]
+
             crimes_total = self.total_crimes[t_start:t_stop]
 
             crime_vec = np.concatenate((crime_vec, crimes_total, crimes_last_year), axis=-1)
 
             time_vec = self.time_vectors[t_start:t_stop]
-            demog_vec = self.demog_grid[:, :, h_index, w_index]
-            street_vec = self.street_grid[:, :, h_index, w_index]
             # weather_vec = self.weather_vectors[t_start:t_stop]
             # tmp_vec = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add more historical values
-            tmp_vec = np.concatenate((time_vec, crime_vec), axis=-1)  # todo add more historical values
-
-            # todo teacher forcing - if we are using this then we need to return sequence of targets
-            target_vec = self.targets[t_start:t_stop, :, h_index, w_index]
+            tmp_vec = np.concatenate((crime_vec, time_vec), axis=-1)  # todo add more historical values
 
             stack_spc_feats.append(demog_vec)  # todo stacking the same grid might cause memory issues
             stack_env_feats.append(street_vec)  # todo stacking the same grid might cause memory issues
@@ -182,5 +202,5 @@ class CellDataset(Dataset):
         env_feats = np.swapaxes(env_feats, 0, 1)
         targets = np.swapaxes(targets, 0, 1)
 
-        # output shapes should be - (seq_len, batch_size,, n_feats)
+        # output shapes should be - (seq_len, batch_size, n_feats)
         return result_indices, spc_feats, tmp_feats, env_feats, targets

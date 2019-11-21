@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from torch import nn
+import logging as log
 from utils.data_processing import get_period
 
 
@@ -11,7 +12,7 @@ def get_max_steps(data, step):
     if len(data.shape) != 3:
         raise ValueError("Data should be in format (N,C,L)")
 
-    print("finding best max_steps parameter...")
+    log.info("finding best max_steps parameter...")
     inpt = np.copy(data[:, 0])
     trgs = np.copy(inpt)
     trgs = trgs[1:]
@@ -31,7 +32,7 @@ def get_max_steps(data, step):
         results[mae] = max_steps
     best = results[min(list(results.keys()))]
 
-    print(f"best max_steps -> {best}")
+    log.info(f"best max_steps -> {best}")
     return best
 
 
@@ -70,7 +71,7 @@ class HistoricAverage:
         """
         determines the optimal
         """
-        self.max_steps = get_max_steps(data, self.step)
+        self.max_steps = -1#get_max_steps(data, self.step)
         self.fitted = True
         print(f"fitted historic average: step ({self.step}) and max_steps ({self.max_steps})")
 
