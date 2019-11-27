@@ -18,17 +18,20 @@ class BaseConf:  # args from arg-parser to over write values
         if conf_dict:
             self.__dict__ = deepcopy(conf_dict)
         else:  # default values
+            # if the regression or classification version of the data loader should be used
+            self.use_classification = True
+            self.use_historic_average = True
+            self.use_crime_types = False
+
             self.seed = 3
             # self.use_cuda = False
-
-            self.use_crime_types = False
 
             # data related hyper-params
             self.val_ratio = 0.1
             self.tst_ratio = 0.3
             self.sub_sample_train_set = 1  # will sample class 0 and 1 with 1:1 ratio
-            self.sub_sample_validation_set = 1 # will sample class 0 and 1 with 1:1 ratio
-            self.sub_sample_test_set = 0 # will not sub sample class 0 and 1
+            self.sub_sample_validation_set = 1  # will sample class 0 and 1 with 1:1 ratio
+            self.sub_sample_test_set = 0  # will not sub sample class 0 and 1
             self.flatten_grid = True  # if the shaper should be used to squeeze the data
 
             self.seq_len = 1
@@ -56,12 +59,12 @@ class BaseConf:  # args from arg-parser to over write values
             self.checkpoint = "best"  # ['latest'|'best'] checkpoint to resume from
 
             #  used when train GRU - if loss should be calculated over whole sequence or only last output/prediction
-            self.use_seq_loss =  True
+            self.use_seq_loss = True
 
             # cnn values
             self.n_layers = 3  # number of res-unit layers
             self.n_channels = 3  # inner channel size of the res-units
-            
+
             self.n_steps_q = 3
             self.n_steps_p = 3
             self.n_steps_c = 3
@@ -73,7 +76,6 @@ class BaseConf:  # args from arg-parser to over write values
 
     def __repr__(self):
         return self.__str__()
-
 
 #  create different confs that can be set and easily used from any where
 #  argparsers should be able to overwrite some of confs values

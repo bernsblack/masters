@@ -3,6 +3,9 @@ import torch.nn as nn
 import logging as log
 import numpy as np
 
+from dataloaders.grid_loader import GridBatchLoader
+from utils.configs import BaseConf
+
 """
 General notes on module:
 ========================
@@ -453,7 +456,7 @@ def evaluate_st_res_net_extra(model, batch_loader, conf):
     return y_counts, y_true, probas_pred, t_range
 
 
-def evaluate_st_res_net(model, batch_loader, conf):
+def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf:BaseConf):
     """
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data

@@ -148,8 +148,39 @@ def get_metrics_table(models_metrics):
 
     return df
 
+def compare_models(models_metrics):
+    """
+    Allows us to filter certain model metrics and only compare their values instead of comparing all the metrics
 
-def compare_models(data_path):
+    :param models_metrics: list of model metrics
+    :return: pandas data-frame table with all model metrics for all the models found under data_path
+    """
+
+    metrics_table = get_metrics_table(models_metrics)
+    log.info(f"\n{metrics_table}")
+
+    # pr-curve
+    pr_plot = PRCurvePlotter()
+    for metric in models_metrics:
+        pr_plot.add_curve_(precision=metric.pr_curve.precision,
+                           recall=metric.pr_curve.recall,
+                           ap=metric.average_precision_score,
+                           label_name=metric.model_name)
+    pr_plot.show()  # todo - save somewhere?
+
+    # roc-curve
+    roc_plot = ROCCurvePlotter()
+    for metric in models_metrics:
+        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
+                            tpr=metric.roc_curve.tpr,
+                            auc=metric.roc_auc_score,
+                            label_name=metric.model_name)
+    roc_plot.show()  # todo - save somewhere?
+    # todd add per cel and time plots per metric - should be saved on the metric class
+
+    return metrics_table  # by returning the table - makes visualisation in notebooks easier
+
+def compare_all_models(data_path: str):
     """
     :param data_path: string path to the data directory
     :return: pandas data-frame table with all model metrics for all the models found under data_path
@@ -192,7 +223,7 @@ class ROCCurve:
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
-    def __init__(self, model_name, y_true, y_pred, probas_pred):
+    def     __init__(self, model_name, y_true, y_pred, probas_pred):
         # y_true must be in format N,1,L to be able to correctly compare all the models
         if len(y_true.shape) != 3 or y_true.shape[1] != 1:
             raise Exception(f"y_true must be in (N,1,L) not {y_true.shape}.")
@@ -203,32 +234,34 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
             raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
 
-        ap_per_time = average_precision_score_per_time_slot(y_true=y_true, probas_pred=probas_pred)
-        self.ap_per_time = np.nan_to_num(ap_per_time)
-
-        roc_per_time = roc_auc_score_per_time_slot(y_true=y_true, probas_pred=probas_pred)
-        self.roc_per_time = np.nan_to_num(roc_per_time)
-
-        acc_per_time = accuracy_score_per_time_slot(y_true=y_true, y_pred=y_pred)
-        self.acc_per_time = np.nan_to_num(acc_per_time)
-
-        p_per_time = precision_score_per_time_slot(y_true=y_true, y_pred=y_pred)
-        self.p_per_time = np.nan_to_num(p_per_time)
-
-        r_per_time = recall_score_per_time_slot(y_true=y_true, y_pred=y_pred)
-        self.r_per_time = np.nan_to_num(r_per_time)
-
         mae_per_time = mae_per_time_slot(y_true=y_true, y_pred=probas_pred)
         self.mae_per_time = np.nan_to_num(mae_per_time)
 
+        # rmse is not intuitive and skews the scores when test samples are few
         rmse_per_time = rmse_per_time_slot(y_true=y_true, y_pred=probas_pred)
         self.rmse_per_time = np.nan_to_num(rmse_per_time)
 
-        # flatten array for the next functions
-        y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
-
         y_class = np.copy(y_true)
         y_class[y_class > 0] = 1
+
+        ap_per_time = average_precision_score_per_time_slot(y_true=y_class, probas_pred=probas_pred)
+        self.ap_per_time = np.nan_to_num(ap_per_time)
+
+        roc_per_time = roc_auc_score_per_time_slot(y_true=y_class, probas_pred=probas_pred)
+        self.roc_per_time = np.nan_to_num(roc_per_time)
+
+        acc_per_time = accuracy_score_per_time_slot(y_true=y_class, y_pred=y_pred)
+        self.acc_per_time = np.nan_to_num(acc_per_time)
+
+        p_per_time = precision_score_per_time_slot(y_true=y_class, y_pred=y_pred)
+        self.p_per_time = np.nan_to_num(p_per_time)
+
+        r_per_time = recall_score_per_time_slot(y_true=y_class, y_pred=y_pred)
+        self.r_per_time = np.nan_to_num(r_per_time)
+
+        # flatten array for the next functions
+        y_class = y_class.flatten()
+        y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
 
         self.model_name = model_name
         self.accuracy_score = accuracy_score(y_class, y_pred)
@@ -240,7 +273,17 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         self.average_precision_score = average_precision_score(y_class, probas_pred)
         self.matthews_corrcoef = matthews_corrcoef(y_class, y_pred)
 
+        """
+        Extra info on MAE vs RMSE:
+        MAE <= RMSE: if all errors are equal, e.g. only guessing between one and zero, error is max 1.
+        RMSE <= (MAE * sqrt(n_samples)):  usually occurs when the n_samples is small.   
+        """
+
+        # treats all errors linearly
         self.mean_absolute_error = mean_absolute_error(y_true=y_true, y_pred=probas_pred)
+
+        # penalises large variations in error - high weight to large errors - great for training, not intuitive, when
+        # comparing models especially when the number of test samples can become large.
         self.root_mean_squared_error = np.sqrt(mean_squared_error(y_true=y_true, y_pred=probas_pred))
 
         self.pr_curve = PRCurve(*precision_recall_curve(y_class, probas_pred))

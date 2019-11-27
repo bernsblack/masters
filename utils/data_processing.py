@@ -359,6 +359,16 @@ def pad4d(a, value=0, size=1):
     return r
 
 
+def crop4d(a, size):
+    """
+    serves as inverse of pad4d
+    """
+    if size <= 0:
+        return a
+
+    return a[:,:,size:-size,size:-size]
+
+
 def upsample(a):
     """
     upscale 2D array a: from size n to 2n + 1

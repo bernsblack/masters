@@ -91,6 +91,33 @@ class DistributionPlotter(BasePlotter):
 
         plt.grid(alpha=self.grid_alpha)
 
+def visualise_cells_over_time(data_group):
+    """
+    Data group in shape (N,C,L)
+    """
+
+    lim = 150
+
+    a = data_group.crimes[:lim,0,data_group.sorted_indices]
+    a = a[:,0:-1:1]
+
+    plt.figure(figsize=(15,100))
+    I = a.shape[-1]
+
+    for i in range(I):
+        r = 1-(0.5*(i)/(I+1))
+        b = .1
+        g = .1
+        c = (r,.1,.1)
+        plt.plot(a[:,i]+i,c=c)
+
+    plt.xlim(-1,len(a))
+    plt.ylim(-1,I+1)
+    plt.yticks(np.arange(a.shape[-1]))
+    plt.xticks(np.arange(lim))
+    plt.grid(True,alpha=.5)
+    plt.show()
+
 
 def visualize_weights(model):
     plt.figure(figsize=(15, 5))

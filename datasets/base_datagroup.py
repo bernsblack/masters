@@ -86,7 +86,8 @@ class BaseDataGroup:
 
             # (reminder) ensure that the self.crimes are not scaled to -1,1 before
             self.targets = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
-            self.targets[self.targets > 0] = 1
+            if conf.use_classification:
+                self.targets[self.targets > 0] = 1
 
             self.crimes = self.crimes[:-1]
             self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
@@ -110,16 +111,17 @@ class BaseDataGroup:
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
-        self.crimes = np.log2(1 + self.crimes)  # todo: add hot-encoded option
+        self.crimes = np.log2(1 + self.crimes)
+        self.targets = np.log2(1 + self.targets)
 
         # get historic average on the log2+1 normed values
-        ha = HistoricAverage(step=time_step_days)
-        historic_average = ha.fit_transform(+ self.crimes[:, 0:1])
-        self.crimes = np.concatenate((self.crimes, historic_average), axis=1)
+        if conf.use_historic_average:
+            ha = HistoricAverage(step=time_step_days)
+            historic_average = ha.fit_transform(+ self.crimes[:, 0:1])
+            self.crimes = np.concatenate((self.crimes, historic_average), axis=1)
 
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
-
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
         self.trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
@@ -127,6 +129,11 @@ class BaseDataGroup:
         self.tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # targets
+        self.target_scaler = MinMaxScaler(feature_range=(0, 1))
+        # should be axis of the channels - only fit scaler on training data
+        self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+        self.targets = self.target_scaler.transform(self.targets)
+
         self.trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
         self.val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
         self.tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]

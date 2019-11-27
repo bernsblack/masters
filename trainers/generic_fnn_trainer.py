@@ -124,10 +124,10 @@ for epoch in range(conf.max_epochs):
         current_batch = loaders.train_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
-        spc_feats = torch.Tensor(spc_feats[0]).to(device)  # only taking [0] for fnn
-        tmp_feats = torch.Tensor(tmp_feats[0]).to(device)  # only taking [0] for fnn
-        env_feats = torch.Tensor(env_feats[0]).to(device)  # only taking [0] for fnn
-        targets = torch.LongTensor(targets[0, :, 0]).to(device)  # only taking [0] for fnn
+        spc_feats = torch.Tensor(spc_feats[-1]).to(device)  # only taking [-1] for fnn
+        tmp_feats = torch.Tensor(tmp_feats[-1]).to(device)  # only taking [-1] for fnn
+        env_feats = torch.Tensor(env_feats[-1]).to(device)  # only taking [-1] for fnn
+        targets = torch.LongTensor(targets[-1, :, 0]).to(device)  # only taking [-1] for fnn
         out = model(spc_feats, tmp_feats, env_feats)
         loss = loss_function(input=out, target=targets)
         tmp_trn_loss.append(loss.item())
@@ -147,10 +147,10 @@ for epoch in range(conf.max_epochs):
         # Transfer to GPU
         for spc_feats, tmp_feats, env_feats, targets in loaders.validation_loader:
             # Transfer to GPU
-            spc_feats = torch.Tensor(spc_feats[0]).to(device)  # only taking [0] for fnn
-            tmp_feats = torch.Tensor(tmp_feats[0]).to(device)  # only taking [0] for fnn
-            env_feats = torch.Tensor(env_feats[0]).to(device)  # only taking [0] for fnn
-            targets = torch.LongTensor(targets[0, :, 0]).to(device)  # only taking [0] for fnn
+            spc_feats = torch.Tensor(spc_feats[-1]).to(device)  # only taking [-1] for fnn
+            tmp_feats = torch.Tensor(tmp_feats[-1]).to(device)  # only taking [-1] for fnn
+            env_feats = torch.Tensor(env_feats[-1]).to(device)  # only taking [-1] for fnn
+            targets = torch.LongTensor(targets[-1, :, 0]).to(device)  # only taking [-1] for fnn
             out = model(spc_feats, tmp_feats, env_feats)
 
             loss = loss_function(input=out, target=targets)

@@ -106,7 +106,7 @@ class CellDataset(Dataset):
         #  [min_index, max_index) are limits of flattened targets
         self.max_index = self.t_size * self.h_size * self.w_size
         self.min_index = (self.offset_year + self.seq_len) * self.h_size * self.w_size
-        self.len = self.min_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
+        self.len = self.min_index - self.min_index
 
         self.shape = self.t_size, self.h_size * self.w_size  # used when saving the model results
 
@@ -138,7 +138,7 @@ class CellDataset(Dataset):
                           if_none(index.step, 1))
 
         indices = np.array([index]).flatten()  # brackets and flatten caters where index is a single number
-        # todo review the code below - list are bad find a better way!!
+
         stack_spc_feats = []
         stack_tmp_feats = []
         stack_env_feats = []
@@ -146,11 +146,16 @@ class CellDataset(Dataset):
 
         result_indices = []
 
-        for i in indices:
+        for i in indices:  # create a batch
             if not (self.min_index <= i < self.max_index):
                 raise IndexError(f"index value {i} is not in range({self.min_index},{self.max_index})")
 
             t_index, h_index, w_index = np.unravel_index(i, (self.t_size, self.h_size, self.w_size))
+            # set indices before adding the  - allows to reconstruct the target-shape without the padding
+            result_indices.append((t_index - self.offset_year - self.seq_len,
+                                   0,
+                                   h_index,
+                                   w_index))  # extra dimension C, makes it easier for the shaper
 
             t_start = t_index - self.seq_len + 1
             t_stop = t_index + 1
@@ -176,17 +181,14 @@ class CellDataset(Dataset):
 
             time_vec = self.time_vectors[t_start:t_stop]
             # weather_vec = self.weather_vectors[t_start:t_stop]
-            # tmp_vec = np.concatenate((time_vec, weather_vec, crime_vec), axis=-1)  # todo add more historical values
-            tmp_vec = np.concatenate((crime_vec, time_vec), axis=-1)  # todo add more historical values
+            # tmp_vec = np.concatenate((crime_vec, time_vec, weather_vec), axis=-1)
+            tmp_vec = np.concatenate((crime_vec, time_vec), axis=-1)  #
 
             stack_spc_feats.append(demog_vec)  # todo stacking the same grid might cause memory issues
             stack_env_feats.append(street_vec)  # todo stacking the same grid might cause memory issues
 
             stack_tmp_feats.append(tmp_vec)
             stack_targets.append(target_vec)
-
-            result_indices.append((t_index - self.offset_year - self.seq_len, 0,
-                                   h_index, w_index))  # extra dimension C, makes it easier for the shaper
 
         # spc_feats: [demog_vec]
         # env_feats: [street_vec]
@@ -198,8 +200,8 @@ class CellDataset(Dataset):
         targets = np.stack(stack_targets)
 
         spc_feats = np.swapaxes(spc_feats, 0, 1)
-        tmp_feats = np.swapaxes(tmp_feats, 0, 1)
-        env_feats = np.swapaxes(env_feats, 0, 1)
+        tmp_feats = np.swapaxes(tmp_feats, 0, 1)  # (seq_len, batch_size, n_feats=37)
+        env_feats = np.swapaxes(env_feats, 0, 1)  # (seq_len, batch_size, n_feats=512)
         targets = np.swapaxes(targets, 0, 1)
 
         # output shapes should be - (seq_len, batch_size, n_feats)

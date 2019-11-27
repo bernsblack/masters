@@ -2,28 +2,34 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
-      <change afterPath="$PROJECT_DIR$/Model Comparisons.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_logistic_regression.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/run_rfnn_model.ipynb" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/test_cell_dataloader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.ipynb_checkpoints/visualize_generated_data-checkpoint.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/.ipynb_checkpoints/visualize_generated_data-checkpoint.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Model Comparisons.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Model Comparisons.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataloaders/batch_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/batch_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataloaders/cell_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/cell_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataloaders/flat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/flat_loader.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/base_datagroup.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/base_datagroup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/cell_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/cell_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/grid_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/grid_dataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/hawkes_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/hawkes_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/kangkang_fnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/kangkang_fnn_models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/rnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/rnn_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/st_resnet_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/st_resnet_models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_logistic_regression.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_logistic_regression.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_resnet_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_rnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_rnn_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_flat_dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_flat_dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_rfnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_rfnn_model.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/test_cell_dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_cell_dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trainers/generic_fnn_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_fnn_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -147,6 +153,38 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for test_cell_dataloader.TestCellDataLoaderIndexing" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_cell_dataloader.TestCellDataLoaderIndexing&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for test_cell_dataloader.TestCellDataLoaderIndexing.test_test_loader_indices" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;test_cell_dataloader.TestCellDataLoaderIndexing.test_test_loader_indices&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for test_flat_dataloader.TestCellDataLoaderIndexing" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -160,38 +198,6 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
       <option name="_new_target" value="&quot;test_flat_dataloader.TestCellDataLoaderIndexing&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_flat_dataloader.TestDataLoaderIndexing" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_flat_dataloader.TestDataLoaderIndexing&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_flat_dataloader.TestFlatDataLoaderIndexing" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_flat_dataloader.TestFlatDataLoaderIndexing&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -213,19 +219,19 @@
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python tests.pytest for test_flat_dataloader.TestDataLoaderIndexing" />
-      <item itemvalue="Python tests.pytest for test_flat_dataloader.TestFlatDataLoaderIndexing" />
       <item itemvalue="Python tests.pytest for test_flat_dataloader.TestCellDataLoaderIndexing" />
       <item itemvalue="Python.dev" />
       <item itemvalue="Python tests.pytest in test_cell_dataloader.py" />
+      <item itemvalue="Python tests.pytest for test_cell_dataloader.TestCellDataLoaderIndexing.test_test_loader_indices" />
+      <item itemvalue="Python tests.pytest for test_cell_dataloader.TestCellDataLoaderIndexing" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.pytest in test_cell_dataloader.py" />
+        <item itemvalue="Python tests.pytest for test_cell_dataloader.TestCellDataLoaderIndexing" />
+        <item itemvalue="Python tests.pytest for test_cell_dataloader.TestCellDataLoaderIndexing.test_test_loader_indices" />
         <item itemvalue="Python.dev" />
         <item itemvalue="Python tests.pytest for test_flat_dataloader.TestCellDataLoaderIndexing" />
-        <item itemvalue="Python tests.pytest for test_flat_dataloader.TestFlatDataLoaderIndexing" />
-        <item itemvalue="Python tests.pytest for test_flat_dataloader.TestDataLoaderIndexing" />
       </list>
     </recent_temporary>
   </component>
@@ -309,7 +315,7 @@
       <workItem from="1572609502201" duration="200000" />
       <workItem from="1572610056926" duration="21163000" />
       <workItem from="1573023896555" duration="51157000" />
-      <workItem from="1573917915091" duration="20165000" />
+      <workItem from="1573917915091" duration="51782000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -375,9 +381,10 @@
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_test_max_index_gt.coverage" NAME="pytest for test_datasets.test_max_index_gt Coverage Results" MODIFIED="1571327324407" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$pytest_for_test_cell_dataloader_TestCellDataLoaderIndexing.coverage" NAME="pytest for test_cell_dataloader.TestCellDataLoaderIndexing Coverage Results" MODIFIED="1574536265467" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$generate_mock_data.coverage" NAME="generate_mock_data Coverage Results" MODIFIED="1569335381277" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_TestDatasetIndexing_test_min_index.coverage" NAME="pytest for test_datasets.TestDatasetIndexing.test_min_index Coverage Results" MODIFIED="1571327098471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/masters$pytest_in_test_cell_dataloader_py.coverage" NAME="pytest in test_cell_dataloader.py Coverage Results" MODIFIED="1574270342129" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$pytest_in_test_cell_dataloader_py.coverage" NAME="pytest in test_cell_dataloader.py Coverage Results" MODIFIED="1574536281749" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_flat_dataloader_TestFlatDataLoaderIndexing.coverage" NAME="pytest for test_flat_dataloader.TestFlatDataLoaderIndexing Coverage Results" MODIFIED="1573853084806" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_flat_dataloader_TestCellDataLoaderIndexing.coverage" NAME="pytest for test_flat_dataloader.TestCellDataLoaderIndexing Coverage Results" MODIFIED="1573853257616" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_grid_datasets_TestDataGroup.coverage" NAME="pytest for test_grid_datasets.TestDataGroup Coverage Results" MODIFIED="1572216100925" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
@@ -387,6 +394,7 @@
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_TestDatasetIndexing_test_index_error.coverage" NAME="pytest for test_datasets.TestDatasetIndexing.test_index_error Coverage Results" MODIFIED="1571330123500" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_in_test_generic_dataset_py.coverage" NAME="pytest in test_generic_dataset.py Coverage Results" MODIFIED="1565797661413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/datasets" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_TestDatasetIndexing_test_single_index.coverage" NAME="pytest for test_datasets.TestDatasetIndexing.test_single_index Coverage Results" MODIFIED="1571324777788" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$pytest_for_test_cell_dataloader_TestCellDataLoaderIndexing_test_test_loader_indices.coverage" NAME="pytest for test_cell_dataloader.TestCellDataLoaderIndexing.test_test_loader_indices Coverage Results" MODIFIED="1574524376423" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_dataloader_TestDataLoaderIndexing_test_test_loader_indices.coverage" NAME="pytest for test_dataloader.TestDataLoaderIndexing.test_test_loader_indices Coverage Results" MODIFIED="1572199454465" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_flat_dataloader_TestDataLoaderIndexing.coverage" NAME="pytest for test_flat_dataloader.TestDataLoaderIndexing Coverage Results" MODIFIED="1573852862643" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_TestDatasetIndexing.coverage" NAME="pytest for test_datasets.TestDatasetIndexing Coverage Results" MODIFIED="1572199603053" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />

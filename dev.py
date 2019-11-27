@@ -30,7 +30,7 @@ from utils.mock_data import mock_fnn_data_classification
 import matplotlib.pyplot as plt
 from utils.plots import im
 from utils.metrics import best_threshold, get_y_pred
-from models.model_result import ModelResult, ModelMetrics, save_metrics, compare_models,\
+from models.model_result import ModelResult, ModelMetrics, save_metrics, compare_all_models,\
                                 get_models_metrics, get_models_results, get_metrics_table
 from models.baseline_models import ExponentialMovingAverage, UniformMovingAverage, \
                                     TriangularMovingAverage, HistoricAverage

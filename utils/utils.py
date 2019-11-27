@@ -4,6 +4,22 @@ from time import time
 from warnings import warn
 import numpy as np
 import os
+import pandas as pd
+
+def get_data_resolutions():
+    def parse_st_resolution(s):
+        dt, s = s.split("T")[-1].split('H')
+        dx, dy, s = s.split("X")[-1].split('M')
+        _, dy = dy.split("Y")
+        _, start_date, end_date = s.split("_")
+        r = {"Hours": int(dt),
+             "Metres (x-direction)": int(dx),
+             "Metres (y-direction)": int(dy)}
+        return r
+
+    df = pd.DataFrame(list(map(parse_st_resolution, get_data_sub_paths())))
+    df = df.sort_values(["Hours", "Metres (x-direction)"], ascending=[False,True])
+    return df
 
 
 def get_data_sub_paths():

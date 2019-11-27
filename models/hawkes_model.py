@@ -7,7 +7,7 @@ class HawkesModelGeneral:
     """
     Using the HawkesEM learner from Tick library
 
-    Using Tikc library from:
+    Using Tick library from:
     - https://x-datainitiative.github.io/tick/modules/generated/tick.hawkes.HawkesSumExpKern.html
     """
 
@@ -62,9 +62,9 @@ class HawkesModelGeneral:
 
 class IndHawkesModel:
     """
-    Indipendent Hawkes Modles where all cells are indipendent
+    Independent Hawkes Models where all cells are independent
 
-    Using Tikc library from:
+    Using Tick library from:
     - https://x-datainitiative.github.io/tick/modules/generated/tick.hawkes.HawkesSumExpKern.html
     """
 

@@ -244,10 +244,10 @@ def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, 
         current_batch = batch_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
-        spc_feats = torch.Tensor(spc_feats[0]).to(conf.device)  # only taking [0] for fnn
-        tmp_feats = torch.Tensor(tmp_feats).to(conf.device)  # only taking [0] for fnn
-        env_feats = torch.Tensor(env_feats[0]).to(conf.device)  # only taking [0] for fnn
-        targets = torch.LongTensor(targets[-1, :, 0]).to(conf.device)  # only taking [0] for fnn
+        spc_feats = torch.Tensor(spc_feats[-1]).to(conf.device)  # only taking [-1] for fnn
+        tmp_feats = torch.Tensor(tmp_feats).to(conf.device)  # only taking [-1] for fnn
+        env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [-1] for fnn
+        targets = torch.LongTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
 
         out = model(spc_feats, tmp_feats, env_feats)
         loss = loss_fn(input=out, target=targets)
@@ -282,9 +282,9 @@ def evaluate_rfnn(model, batch_loader, conf):
             current_batch = batch_loader.current_batch
 
             # Transfer to PyTorch Tensor and GPU
-            spc_feats = torch.Tensor(spc_feats[0]).to(conf.device)  # only taking [0] for fnn
+            spc_feats = torch.Tensor(spc_feats[-1]).to(conf.device)  # only taking [0] for fnn
             tmp_feats = torch.Tensor(tmp_feats).to(conf.device)  # only taking [0] for fnn
-            env_feats = torch.Tensor(env_feats[0]).to(conf.device)  # only taking [0] for fnn
+            env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [0] for fnn
             # targets = torch.LongTensor(targets[0, :, 0]).to(conf.device)  # only taking [0] for fnn
             out = model(spc_feats, tmp_feats, env_feats)
 

@@ -93,12 +93,12 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
         log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         # increasing moving average of val_epoch_losses
-        if conf.early_stopping and epoch > 5 and np.sum(np.diff(val_epoch_losses[-5:])) > 0:
+        if conf.early_stopping and epoch > 10 and np.sum(np.diff(val_epoch_losses[-5:])) >= 0:
             log.warning("Early stopping: Over-fitting has taken place")
             stopped_early = True
             break
 
-        if conf.early_stopping and epoch > 5 and np.abs(val_epoch_losses[-1] - val_epoch_losses[-2]) < conf.tolerance:
+        if conf.early_stopping and epoch > 10 and np.abs(val_epoch_losses[-1] - val_epoch_losses[-2]) < conf.tolerance:
             log.warning(f"Converged: Difference between the past two"
                         + f" validation losses is within tolerance of {conf.tolerance}")
             stopped_early = True
