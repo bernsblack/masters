@@ -16,7 +16,7 @@ class TestCellDataLoaderIndexing(unittest.TestCase):
     def test_test_loader_indices(self):
         # CRIME DATA
         conf = BaseConf()
-        data_path = './data/processed/T24H-X850M-Y880M_2013-01-01_2015-01-01/'
+        data_path = './data/processed/T24H-X850M-Y880M_2013-01-01_2017-01-01/'
         conf.sub_sample_test_set = 0
         conf.sub_sample_train_set = 0
         conf.sub_sample_validation_set = 0

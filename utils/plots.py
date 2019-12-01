@@ -381,10 +381,13 @@ def plot_convs(a):
         plt.show()
 
 
-def plot_dist(a):
+def plot_dist(a, zoom=True):
     val, cnt = np.unique(a, return_counts=True)
     dst = cnt / np.sum(cnt) * 100
     plt.title("Distribution")
+    if not zoom:
+        plt.ylim(0, 100)
+    plt.yticks(np.arange(0,101,10))
     if type(val[0]) == str:
         plt.xlabel("Percentage")
         plt.grid()

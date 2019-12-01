@@ -130,8 +130,11 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
     else:
         loss_plot_title = "Loss"
 
+    # plot the whole plot
     loss_plotter = LossPlotter(title=f"{loss_plot_title} - {conf.model_name}")
     loss_plotter.plot_losses(trn_epoch_losses, trn_batch_losses[skip:], val_epoch_losses, val_batch_losses[skip:])
     loss_plotter.savefig(f"{conf.model_path}plot_train_val_epoch_losses.png")
+
+    # todo: plot only the last_n
 
     return trn_epoch_losses, val_epoch_losses, stopped_early

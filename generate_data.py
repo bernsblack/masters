@@ -428,9 +428,9 @@ if __name__ == "__main__":
     plt.savefig(save_folder + "plots/" + "crime_distribution.png")
 
     plt.figure(figsize=figsize)
-    plt.scatter(X, Y, marker=".", label="range")
-    plt.scatter(valid_points[:, 0], valid_points[:, 1], marker=".", label="valid", s=1)
-    plt.scatter(crimes.X, crimes.Y, marker=".", label="round")
+    plt.scatter(X, Y, marker=".", label="Ranged")
+    plt.scatter(valid_points[:, 0], valid_points[:, 1], marker=".", label="Valid", s=1)
+    plt.scatter(crimes.X, crimes.Y, marker=".", label="Rounded")
     plt.legend(loc=3, prop={"size": 20})
     plt.ylabel("Latitude")
     plt.xlabel("Longitude")

@@ -111,8 +111,8 @@ class BaseDataGroup:
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
-        self.crimes = np.log2(1 + self.crimes)
-        self.targets = np.log2(1 + self.targets)
+        self.crimes = np.floor(np.log2(1 + self.crimes))
+        self.targets = np.floor(np.log2(1 + self.targets))
 
         # get historic average on the log2+1 normed values
         if conf.use_historic_average:
@@ -139,7 +139,7 @@ class BaseDataGroup:
         self.tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
-        self.total_crimes = np.log2(1 + self.total_crimes)
+        self.total_crimes = np.floor(np.log2(1 + self.total_crimes))
         self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         self.total_crimes_scaler.fit(self.total_crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)

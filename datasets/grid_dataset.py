@@ -107,7 +107,7 @@ class GridDataGroup:
         val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
 
-        self.crimes = np.log2(1 + self.crimes)
+        self.crimes = np.floor(np.log2(1 + self.crimes))
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
@@ -119,7 +119,7 @@ class GridDataGroup:
         tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # targets
-        self.targets = np.log2(1 + self.targets)
+        self.targets = np.floor(np.log2(1 + self.targets))
         self.targets = self.crime_scaler.transform(self.targets)
         self.targets = self.targets[:, 0]
 
