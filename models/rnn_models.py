@@ -122,10 +122,6 @@ class RecurrentFeedForwardNetwork(nn.Module):
         self.dropout = nn.Dropout(p=self.dropout_p)
 
         if model_arch:
-            h_size0 = model_arch.get("h_size0")
-            h_size1 = model_arch.get("h_size1")
-            h_size2 = model_arch.get("h_size2")
-
             scp_net_h0 = model_arch.get("scp_net_h0")
             scp_net_h1 = model_arch.get("scp_net_h1")
             tmp_net_h0 = model_arch.get("tmp_net_h0")

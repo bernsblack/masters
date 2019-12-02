@@ -3,6 +3,7 @@ import unittest
 import numpy as np
 
 from datasets.flat_dataset import FlatDataset
+from utils.configs import BaseConf
 from utils.preprocessing import Shaper
 
 
@@ -25,6 +26,8 @@ class TestDatasetIndexing(unittest.TestCase):
         seq_len = 4
         offset_year = 13
 
+        conf = BaseConf()
+
         # crime_feature_indices_shape = (C,)
         crime_types_grids_shape = (N, C, H, W)
         total_crimes_shape = (N, 1)
@@ -38,7 +41,7 @@ class TestDatasetIndexing(unittest.TestCase):
         t_range_shape = (N + 1,)
 
         original_crime_data = np.ones(crime_types_grids_shape)
-        shaper = Shaper(original_crime_data)
+        shaper = Shaper(original_crime_data, conf)
 
         crimes = shaper.squeeze(original_crime_data)
         targets = np.copy(crimes)[1:, 0:1]

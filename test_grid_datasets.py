@@ -10,7 +10,7 @@ from utils.preprocessing import Shaper
 
 class TestDataGroup(unittest.TestCase):
     def test_input_target_offset(self):
-        data_path = './data/processed/T1H-X1700M-Y1760M_2013-01-01_2015-01-01/'
+        data_path = './data/processed/T1H-X1700M-Y1760M_2013-01-01_2017-01-01/'
 
         conf = BaseConf()
         data_group = GridDataGroup(data_path=data_path, conf=conf)
