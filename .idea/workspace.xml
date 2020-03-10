@@ -2,15 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
-      <change afterPath="$PROJECT_DIR$/utils/mutual_information.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_comparisons.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/model_comparisons.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/mutual_information.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_resnet_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -309,7 +302,7 @@
       <workItem from="1583042101425" duration="233000" />
       <workItem from="1583134015173" duration="5000" />
       <workItem from="1583776071437" duration="93000" />
-      <workItem from="1583776280045" duration="4635000" />
+      <workItem from="1583776280045" duration="5232000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -378,28 +371,32 @@
       <screen x="0" y="23" width="1440" height="877" />
     </state>
     <state x="408" y="229" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.877@0.23.1440.877" timestamp="1581448575341" />
-    <state width="1398" height="-12" key="GridCell.Tab.0.bottom" timestamp="1583779260533">
+    <state width="1398" height="-12" key="GridCell.Tab.0.bottom" timestamp="1583824304903">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="1398" height="526" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1583133160253" />
+    <state width="1398" height="-12" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@0.23.1440.804" timestamp="1583824304903" />
     <state width="1398" height="-12" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1583779260533" />
     <state width="1398" height="198" key="GridCell.Tab.0.bottom/0.23.1440.877@0.23.1440.877" timestamp="1581449537983" />
-    <state width="1398" height="-12" key="GridCell.Tab.0.center" timestamp="1583779260532">
+    <state width="1398" height="-12" key="GridCell.Tab.0.center" timestamp="1583824304901">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="1398" height="526" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1583133160250" />
+    <state width="1398" height="-12" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@0.23.1440.804" timestamp="1583824304901" />
     <state width="1398" height="-12" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1583779260532" />
     <state width="1398" height="198" key="GridCell.Tab.0.center/0.23.1440.877@0.23.1440.877" timestamp="1581449537983" />
-    <state width="1398" height="-12" key="GridCell.Tab.0.left" timestamp="1583779260532">
+    <state width="1398" height="-12" key="GridCell.Tab.0.left" timestamp="1583824304901">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="1398" height="526" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1583133160248" />
+    <state width="1398" height="-12" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@0.23.1440.804" timestamp="1583824304901" />
     <state width="1398" height="-12" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1583779260532" />
     <state width="1398" height="198" key="GridCell.Tab.0.left/0.23.1440.877@0.23.1440.877" timestamp="1581449537982" />
-    <state width="1398" height="-12" key="GridCell.Tab.0.right" timestamp="1583779260532">
+    <state width="1398" height="-12" key="GridCell.Tab.0.right" timestamp="1583824304902">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="1398" height="526" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1583133160251" />
+    <state width="1398" height="-12" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@0.23.1440.804" timestamp="1583824304902" />
     <state width="1398" height="-12" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1583779260532" />
     <state width="1398" height="198" key="GridCell.Tab.0.right/0.23.1440.877@0.23.1440.877" timestamp="1581449537983" />
     <state x="198" y="-1106" key="SettingsEditor" timestamp="1581518968608">
