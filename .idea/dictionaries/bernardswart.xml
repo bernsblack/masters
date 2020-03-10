@@ -29,6 +29,7 @@
       <w>mathtext</w>
       <w>meanstd</w>
       <w>ndarray</w>
+      <w>nunique</w>
       <w>pmax</w>
       <w>pmean</w>
       <w>pmin</w>
@@ -52,6 +53,7 @@
       <w>vals</w>
       <w>viridis</w>
       <w>xlabel</w>
+      <w>xlog</w>
       <w>xticks</w>
       <w>ylabel</w>
       <w>yticks</w>

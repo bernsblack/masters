@@ -5,6 +5,8 @@ from warnings import warn
 import numpy as np
 import os
 import pandas as pd
+from pprint import pformat
+
 
 def get_data_resolutions():
     def parse_st_resolution(s):
@@ -18,7 +20,7 @@ def get_data_resolutions():
         return r
 
     df = pd.DataFrame(list(map(parse_st_resolution, get_data_sub_paths())))
-    df = df.sort_values(["Hours", "Metres (x-direction)"], ascending=[False,True])
+    df = df.sort_values(["Hours", "Metres (x-direction)"], ascending=[False, True])
     return df
 
 
@@ -127,3 +129,24 @@ def read_json(file_name):
 def write_json(data, file_name):
     with open(file_name, "w") as fp:
         json.dump(data, fp)
+
+
+def describe_array(a):
+    """
+
+    :param a: array we need some common statistics on
+    :return string format data
+    """
+    d = {
+        "min": np.min(a),
+        "max": np.max(a),
+        "mean": np.mean(a),
+        "std": np.std(a),
+        #             "median":np.median(a),
+        "shape": np.shape(a),
+        #             "nunique":len(np.unique(a)),
+        # dist becomes an issue with continuous variables
+        #             "dist": dict(
+        #                 zip(v,c))
+    }
+    return f"____________________________________________________________\n{pformat(d)}\n" + "____________________________________________________________"

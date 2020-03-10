@@ -56,22 +56,26 @@ def encode_time_vectors(t_range):
     is_weekend[is_weekend < 5] = 0
     is_weekend[is_weekend >= 5] = 1
 
-    is_gte_24hours = 'D' in time_frame or time_frame == '24H'
+    is_gte_24hours = "D" in time_frame or time_frame == "24H"
 
-    df = pd.DataFrame({'datetime': t_range, 'hour': t_range.hour,
-                       'dow': t_range.dayofweek, 'day': t_range.day, 'month': t_range.month, 'is_weekend': is_weekend})
+    df = pd.DataFrame({"datetime": t_range,
+                       "hour": t_range.hour,
+                       "dow": t_range.dayofweek,
+                       "day": t_range.day,
+                       "month": t_range.month,
+                       "is_weekend": is_weekend})
 
     if is_gte_24hours:  # working on daily time slots
-        time_values = df[['month', 'day', 'dow', 'is_weekend']].values  # swap hour for month
+        time_values = df[["month", "day", "dow", "is_weekend"]].values  # swap hour for month
         time_values[:, 0] = time_values[:, 0] - 1  # minus one for month OHE expects range [0,n_values)
     else:  # working on hourly time slots
-        # left out month because our hourly data isn't more than a year
-        time_values = df[['hour', 'day', 'dow', 'is_weekend']].values
+        # left out month because our hourly data isn"t more than a year
+        time_values = df[["hour", "day", "dow", "is_weekend"]].values
 
     time_values[:, 1] = time_values[:, 1] - 1  # minus one OHE expects range [0,n_values)
 
     # OneHotEncoder for categorical data
-    ohe = OneHotEncoder(categories='auto', sparse=False)  # It is assumed that input features take on values
+    ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
     # in the range[0, n_values). Thus days minus 1
     time_value_ohe = ohe.fit_transform(time_values)
 
@@ -105,15 +109,19 @@ def get_E(t_range):
     is_weekend[is_weekend < 5] = 0
     is_weekend[is_weekend >= 5] = 1
 
-    df = pd.DataFrame({'datetime': t_range, 'hour': t_range.hour,
-                       'dow': t_range.dayofweek, 'day': t_range.day, 'month': t_range.month, 'is_weekend': is_weekend})
+    df = pd.DataFrame({"datetime": t_range,
+                       "hour": t_range.hour,
+                       "dow": t_range.dayofweek,
+                       "day": t_range.day,
+                       "month": t_range.month,
+                       "is_weekend": is_weekend})
 
-    if time_frame == 'D':  # working on daily time slots
-        A = df[['month', 'day', 'dow', 'is_weekend']].as_matrix()  # swap hourr for month
+    if time_frame == "D":  # working on daily time slots
+        A = df[["month", "day", "dow", "is_weekend"]].as_matrix()  # swap hourr for month
         A[:, 0] = A[:, 0] - 1  # minus one for month OHE expects range [0,n_values)
     else:  # working on hourly time slots
-        A = df[['hour', 'day', 'dow',
-                'is_weekend']].as_matrix()  # left out month because our hourly data isn't more than a year
+        A = df[["hour", "day", "dow",
+                "is_weekend"]].as_matrix()  # left out month because our hourly data isn"t more than a year
 
     A[:, 1] = A[:, 1] - 1  # minus one OHE expects range [0,n_values)
 
@@ -122,7 +130,7 @@ def get_E(t_range):
         sparse=False)  # It is assumed that input features take on values in the range[0, n_values). Thus days minus 1
     A_ohe = ohe.fit_transform(A)
 
-    if time_frame != 'D':  # only if we are working on a hourly time scale
+    if time_frame != "D":  # only if we are working on a hourly time scale
         # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
         sin_hour = np.sin(2 * np.pi * (A[:, 2] % 24) / 24)
         sin_hour = np.reshape(sin_hour, (len(sin_hour), 1))
@@ -231,7 +239,7 @@ def get_dead_cells(a):  # finding all the living cells
             if np.max(a[:, i, j], axis=0) == 0:
                 dead_cells.append((i, j))
 
-    print('Percentage of cells that are living: ', 100 * len(dead_cells) / (a.shape[-1] ** 2))
+    print("Percentage of cells that are living: ", 100 * len(dead_cells) / (a.shape[-1] ** 2))
 
     return dead_cells
 
@@ -247,7 +255,7 @@ def get_living_cells(a):  # finding all the living cells
             if np.max(a[:, i, j], axis=0) != 0:
                 living_cells.append((i, j))
 
-    print('Percentage of cells that are living: ', 100 * len(living_cells) / (a.shape[-1] ** 2))
+    print("Percentage of cells that are living: ", 100 * len(living_cells) / (a.shape[-1] ** 2))
 
     return living_cells
 
@@ -290,7 +298,7 @@ def get_moving_square_data(N=5000, n=33, s=1, gaus=True):
         try:
             m[int(x), int(y)] = 1
         except:
-            print('e:', int(x), int(y), dx, dy)
+            print("e:", int(x), int(y), dx, dy)
 
         if (x + dx >= n) or (x + dx < 0):
             dx = -1 * dx
@@ -327,7 +335,7 @@ def norm_meanstd(a):
 
 @deprecated  # instead use pad2d
 def pad_with(vector, pad_width, iaxis, kwargs):
-    pad_value = kwargs.get('padder', 10)
+    pad_value = kwargs.get("padder", 10)
     vector[:pad_width[0]] = pad_value
     vector[-pad_width[1]:] = pad_value
     return vector
@@ -350,7 +358,7 @@ def pad2d(a, value=0, size=1):
 def pad4d(a, value=0, size=1):
     if size <= 0:
         return a
-    
+
     n, c, h, w = np.shape(a)
     r = np.ones((n, c, h + 2 * size, w + 2 * size)) * value
 
@@ -366,7 +374,7 @@ def crop4d(a, size):
     if size <= 0:
         return a
 
-    return a[:,:,size:-size,size:-size]
+    return a[:, :, size:-size, size:-size]
 
 
 def upsample(a):
@@ -444,7 +452,7 @@ def reverse_cumsum(s, T=24):
 
 def make_grid(A, t_size, x_size, y_size):
     """
-    Note: np.histogramdd() can also be used - it's a bit
+    Note: np.histogramdd() can also be used - it"s a bit
     A: matrix with time, x and y coordinates
     returns grid matrix with each index filled where crimes occurred
     X and Y axis are swapped to make displaying easier
@@ -456,12 +464,12 @@ def make_grid(A, t_size, x_size, y_size):
     return grids
 
 
-def upsample_interpolate(a, scale=2, interpolate_kind='linear'):
+def upsample_interpolate(a, scale=2, interpolate_kind="linear"):
     """
-    mighht rather use cv2.pyrUp and pyerDown - seem to give less issues
+    might rather use cv2.pyrUp and pyrDown - seem to give less issues
     upsamlpe 2d grid array a
     scale: can be one value or tuple (nscale, dscale), default 2
-    kind: 'linear', 'cubic', 'quintic'
+    kind: "linear", "cubic", "quintic"
     """
     a = pad(a, 2)
 
@@ -652,7 +660,7 @@ def threshold(a, thresh=1):
     cap all vals above or equal to 1 to 1 and all below to zero
     """
     r = a >= thresh
-    return r.astype('int')
+    return r.astype("int")
 
 
 def concentric_squares(a):
