@@ -61,9 +61,15 @@ def entropy(p_dist, axis=None):
     """
     p_dist: array of all probabilities
 
+    entropy should always be nonnegative, .i.e. > 0
+
     entropy = -sum(p_i*log(p_i))
     """
-    return -1 * np.sum(xlog2x(p_dist), axis=axis)
+    h = -1 * np.sum(xlog2x(p_dist), axis=axis)
+    if h < 0:  # todo add tolerence for computation rounding errors
+        raise Exception(f"Entropy should always be non negative => result was {h}")
+
+    return h
 
 
 def get_probabilities(a, b, axis=0):

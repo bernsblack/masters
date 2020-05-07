@@ -1,7 +1,11 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project version="4">
   <component name="ChangeListManager">
-    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models." />
+    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/mutual_information.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/mutual_information.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -298,7 +302,7 @@
       <workItem from="1586336887969" duration="1170000" />
       <workItem from="1586615558666" duration="1668000" />
       <workItem from="1586868429728" duration="88000" />
-      <workItem from="1588880984994" duration="786000" />
+      <workItem from="1588880984994" duration="1461000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
