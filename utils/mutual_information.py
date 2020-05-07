@@ -66,13 +66,8 @@ def entropy(p_dist, axis=None):
     return -1 * np.sum(xlog2x(p_dist), axis=axis)
 
 
-def get_entropies(a, b, axis=0):
-    """returns entropy of a, b and joint entropy of a"""
-
-    # todo re-evaluate does not necessarily need to be 2-d -> what about summation
-    # assert len(np.shape(a)) == 2, "a must be 2-d matrix"
-    # assert len(np.shape(b)) == 2, "b must be 2-d matrix"
-
+def get_probabilities(a, b, axis=0):
+    """returns probability table of a, b and joint entropy of a"""
     assert (np.unique(a) == np.array([0, 1])).all(), f"a values must be [0,1], not {np.unique(a)}"
     assert (np.unique(b) == np.array([0, 1])).all(), f"a values must be [0,1], not {np.unique(b)}"
 
@@ -89,14 +84,14 @@ def get_entropies(a, b, axis=0):
     p_ab_10 = f_10(a, b).sum(axis=axis) / size
     p_ab_11 = f_11(a, b).sum(axis=axis) / size
 
-    p_b = np.stack([
-        p_b_0,
-        p_b_1,
-    ], axis=axis)
-
     p_a = np.stack([
         p_a_0,
         p_a_1,
+    ], axis=axis)
+
+    p_b = np.stack([
+        p_b_0,
+        p_b_1,
     ], axis=axis)
 
     p_ab = np.stack([
@@ -105,6 +100,18 @@ def get_entropies(a, b, axis=0):
         p_ab_10,
         p_ab_11,
     ], axis=axis)
+
+    return p_a, p_b, p_ab
+
+
+def get_entropies(a, b, axis=0):
+    """returns entropy of a, b and joint entropy of a"""
+
+    # todo re-evaluate does not necessarily need to be 2-d -> what about summation
+    # assert len(np.shape(a)) == 2, "a must be 2-d matrix"
+    # assert len(np.shape(b)) == 2, "b must be 2-d matrix"
+
+    p_a, p_b, p_ab = get_probabilities(a, b, axis)
 
     h_a = entropy(p_a, axis=axis)
     h_b = entropy(p_b, axis=axis)
