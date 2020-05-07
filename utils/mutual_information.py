@@ -66,10 +66,8 @@ def entropy(p_dist, axis=None):
     return -1 * np.sum(xlog2x(p_dist), axis=axis)
 
 
-def mutual_info(a, b, axis=0):
-    """
-    Mutual information only for binary distributions - for our purposes input shape should be (N,L)
-    """
+def get_entropies(a, b, axis=0):
+    """returns entropy of a, b and joint entropy of a"""
 
     # todo re-evaluate does not necessarily need to be 2-d -> what about summation
     # assert len(np.shape(a)) == 2, "a must be 2-d matrix"
@@ -112,6 +110,15 @@ def mutual_info(a, b, axis=0):
     h_b = entropy(p_b, axis=axis)
     h_ab = entropy(p_ab, axis=axis)
 
+    return h_a, h_b, h_ab
+
+
+def mutual_info(a, b, axis=0):
+    """
+    Mutual information only for binary distributions - for our purposes input shape should be (N,L)
+    """
+    h_a, h_b, h_ab = get_entropies(a, b, axis)
+
     mi_ab = h_a + h_b - h_ab
 
     # should always be greater than SMALLEST_TOLERANCE
@@ -130,6 +137,18 @@ def mutual_info(a, b, axis=0):
     # print(f"\n\n<= h_ab => {describe_array(h_ab)}")
 
     return mi_ab
+
+
+# TODO calculate for more than two variables
+def conditional_entropy(a, b, axis=0):
+    """
+    returns H(A|B) = H(A,B) - H(B)
+    for H(B|A) = H(A,B) - H(A) just swap a and b around
+    """
+    _, h_b, h_ab = get_entropies(a, b, axis)
+
+    # TODO LOOK INTO TOLERENCE HANDLING
+    return h_ab - h_b
 
 
 # ===========================================    UNIT TESTS    =========================================================
