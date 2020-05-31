@@ -1,7 +1,19 @@
 # operations multiply, divide, sum
 from __future__ import annotations
 
-from typing import Callable, List, Dict
+from typing import Callable, List, Dict, Union, Tuple
+import numpy as np
+
+FLOAT_TOLERANCE_VALUE = 1e-8
+
+
+# todo move to utils
+def union_lists(list_0: List, list_1: List):
+    return list(set(list_0 + list_1))
+
+
+def float_equal(x: float, y: float) -> bool:
+    return abs(x - y) < FLOAT_TOLERANCE_VALUE
 
 
 def add(x, y):
@@ -80,8 +92,33 @@ def apply_function(func: Callable, rv0: SparseDiscreteTable,
         rv1_k = tuple([rv0_k[i] for i in indices])
         rv1_v = rv1.table.get(rv1_k)
         if rv1_v:  # is not None
-            new_table[rv0_k] = func(rv1_v, rv1_v)
-    return SparseDiscreteTable(rv_names=rv_names_intersection, table=new_table)
+            new_table[rv0_k] = func(rv0_v, rv1_v)
+    return SparseDiscreteTable(rv_names=rv0.rv_names, table=new_table)
+
+
+def xlog2x_inner(x):
+    if x == 0:
+        return 0
+    elif x < 0:
+        raise Exception(f"x should be greater or equal than zero, x = {x}")
+    else:
+        return x * np.log2(x)
+
+
+xlog2x = np.vectorize(xlog2x_inner)
+
+
+# casting into array might be quicker operationaly but heavy on memory
+def entropy(table: Dict):
+    """
+    shannon entropy should always be nonnegative, .i.e. > 0
+    entropy = -sum(p_i*log(p_i))
+    """
+    probs = np.array(list(table.values()))
+    h = -1 * np.sum(xlog2x(probs))
+    if h < 0:  # todo add tolerence for computation rounding errors
+        raise Exception(f"Entropy should always be non negative => result was {h}")
+    return h
 
 
 class SparseDiscreteTable:
@@ -95,20 +132,24 @@ class SparseDiscreteTable:
                 (1,0):.2,
                 (1,1):.7,
             }
+
+    is only a discrete table not a probability mass function - values do not need to sum to 1
     """
 
     def __init__(self, rv_names: List[str], table: Dict):
         """
-
         :type rv_names: List[str]
+        :arg rv_names:  list of random variable names, e.g. ['X','Y','Z']
+        :arg table: sparse probability mass function in a dictionary format with tuple of values as keys
         :type table: Dict
         """
         if sorted(rv_names) != rv_names:
             raise ValueError("rv_names must be sorted")
 
-        if not is_normalized_table(table):
-            raise ValueError("table must be normalized")
-        # list of random variable names, e.g. ['X','Y','Z']
+        # cannot be guaranteed in calculations because of floating point issues
+        # if not is_normalized_table(table):
+        #     raise ValueError("table must be normalized")
+
         self.rv_names = rv_names
         self.table = table
 
@@ -153,6 +194,52 @@ class SparseDiscreteTable:
         """
         return apply_function(func=func, rv0=self, rv1=ext_rv)
 
+    def __getitem__(self, keys: Union[str, Tuple]):
+        return self.marginal(list(keys))
+
+    def condition(self, rv_names: List[str]):
+        return self / self.marginal(rv_names=rv_names)
+
+    def entropy(self):
+        """
+        uses numpy
+        :return: shannon entropy
+        """
+        return entropy(self.table)
+
+    def conditional_entropy(self,
+                            rv_names: List[str],
+                            rv_names_condition: List[str]):
+        """
+        entropy is symmetric H(X,Y) = H(Y,X)
+        conditional entropy H(X|Y) = H(X,Y) - H(Y)
+        """
+
+    def conditional_mutual_information(self,
+                                       rv_names_0: List[str],
+                                       rv_names_1: List[str],
+                                       rv_names_condition: List[str]):
+        """        
+        conditional mutual information chain rule: I(X;Y|Z) = I(X;Y,Z) - I(X;Z)
+        this will measure the mutual information between x and y given z
+        
+        :param rv_names_0: random variable name(s) we want to measure MI with
+        :param rv_names_1: random variable name(s) we want to measure MI with
+        :param rv_names_condition: random variable name(s) we want to condition the MI measurement with
+        :return: 
+        """
+        union_names = sorted(union_lists(rv_names_1, rv_names_condition))
+
+        return self.mutual_information(rv_names_0, union_names) - self.mutual_information(rv_names_0,
+                                                                                          rv_names_condition)
+
+    def mutual_information(self, rv_names_0: List[str], rv_names_1: List[str]):
+        # todo refactor: symbolic simple but too many loops in calculations?
+        h_01 = self.entropy()
+        h_0 = self.marginal(rv_names=rv_names_0).entropy()
+        h_1 = self.marginal(rv_names=rv_names_1).entropy()
+        return h_0 + h_1 - h_01
+
     def get_order(self) -> int:
         return len(self.rv_names)
 
@@ -174,7 +261,7 @@ class SparseDiscreteTable:
 
         union_keys = set(self.table.keys()).union(other.table.keys())
         for k in union_keys:
-            if self.table.get(k, None) != other.table.get(k, None):
+            if not float_equal(self.table.get(k, None), other.table.get(k, None)):
                 return False
         return True
 
@@ -187,5 +274,5 @@ class SparseDiscreteTable:
     def __mul__(self, other: SparseDiscreteTable) -> SparseDiscreteTable:
         return self.apply(func=mul, ext_rv=other)
 
-    def __div__(self, other: SparseDiscreteTable) -> SparseDiscreteTable:
+    def __truediv__(self, other: SparseDiscreteTable) -> SparseDiscreteTable:
         return self.apply(func=div, ext_rv=other)
