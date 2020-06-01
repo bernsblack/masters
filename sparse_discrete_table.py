@@ -208,12 +208,16 @@ class SparseDiscreteTable:
         return entropy(self.table)
 
     def conditional_entropy(self,
-                            rv_names: List[str],
+                            rv_names_0: List[str],
                             rv_names_condition: List[str]):
         """
         entropy is symmetric H(X,Y) = H(Y,X)
         conditional entropy H(X|Y) = H(X,Y) - H(Y)
         """
+        union_names = sorted(union_lists(rv_names_0, rv_names_condition))
+        p_0c = self.marginal(union_names)
+        p_c = p_0c.marginal(rv_names_condition)
+        return p_0c.entropy() - p_c.entropy()
 
     def conditional_mutual_information(self,
                                        rv_names_0: List[str],
