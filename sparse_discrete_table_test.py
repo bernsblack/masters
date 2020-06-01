@@ -155,10 +155,12 @@ class TestSparseDiscreteTable(unittest.TestCase):
                 (p_z_val * p_xyz_val) / (p_xz_val * p_yz_val))
 
         print("explicit_conditional_mi", explicit_conditional_mi)  # 0.07489542832637161
-        print("implicit_conditional_mi", implicit_conditional_mi)  # 0.07489542832637142
-        print("implicit_conditional_mi_alt", implicit_conditional_mi_alt)  # 0.9335317672179189
+        print("implicit_conditional_mi", implicit_conditional_mi)  # 0.07489542832637164
+        print("implicit_conditional_mi_alt", implicit_conditional_mi_alt)  # 0.07489542832637142
 
         self.assertAlmostEqual(explicit_conditional_mi, implicit_conditional_mi)
+        self.assertAlmostEqual(explicit_conditional_mi, implicit_conditional_mi_alt)
+        self.assertAlmostEqual(implicit_conditional_mi_alt, implicit_conditional_mi_alt)
 
     def test_get_item(self):
         p_xy = get_mock_p_xy()

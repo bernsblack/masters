@@ -223,22 +223,15 @@ class SparseDiscreteTable:
         uses entropy to calculate value
         conditional mutual information indentity alt.: I(X;Y|Z) = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
         this will measure the mutual information between x and y given z
-        
+
         :param rv_names_0: random variable name(s) we want to measure MI with
         :param rv_names_1: random variable name(s) we want to measure MI with
         :param rv_names_condition: random variable name(s) we want to condition the MI measurement with
-        :return: 
+        :return:
         """
-        # todo check that none of the rv_names_condition are in rv_names_0 or rv_names_1
-        # alternative way of calculating cmi
-        union_names_0c = sorted(union_lists(rv_names_0, rv_names_condition))
-        union_names_1c = sorted(union_lists(rv_names_1, rv_names_condition))
-        union_names_01c = sorted(union_lists(union_names_0c, rv_names_1))
-        h_0c = self.marginal(union_names_0c).entropy()
-        h_1c = self.marginal(union_names_1c).entropy()
-        h_01c = self.marginal(union_names_01c).entropy()
-        h_c = self.marginal(rv_names_condition).entropy()
-        return h_0c + h_1c - h_01c - h_c
+        union_names = sorted(union_lists(rv_names_1, rv_names_condition))
+        return self.mutual_information(rv_names_0, union_names) - self.mutual_information(rv_names_0,
+                                                                                          rv_names_condition)
 
     def conditional_mutual_information_alt(self,
                                            rv_names_0: List[str],
@@ -247,22 +240,27 @@ class SparseDiscreteTable:
         """
         uses mutual information to calculate value
         conditional mutual information chain rule: I(X;Y|Z) = I(X;Y,Z) - I(X;Z)
+
+        :param rv_names_0: random variable name(s) we want to measure MI with
+        :param rv_names_1: random variable name(s) we want to measure MI with
+        :param rv_names_condition: random variable name(s) we want to condition the MI measurement with
+        :return:
         """
         # alternative way of calculating cmi
-        union_names = sorted(union_lists(rv_names_1, rv_names_condition))
-        return self.mutual_information(rv_names_0, union_names) - self.mutual_information(rv_names_0,
-                                                                                          rv_names_condition)
+        # todo check that none of the rv_names_condition are in rv_names_0 or rv_names_1
+        union_names_0c = sorted(union_lists(rv_names_0, rv_names_condition))
+        union_names_1c = sorted(union_lists(rv_names_1, rv_names_condition))
+        union_names_01c = sorted(union_lists(union_names_0c, rv_names_1))
+
+        p_01c = self.marginal(union_names_01c)
+        p_0c = p_01c.marginal(union_names_0c)
+        p_1c = p_01c.marginal(union_names_1c)
+        p_c = p_1c.marginal(rv_names_condition)
+        return p_0c.entropy() + p_1c.entropy() - p_01c.entropy() - p_c.entropy()  # more summing might lead to greater floating point errors
 
     def mutual_information(self, rv_names_0: List[str], rv_names_1: List[str]):
-        # todo refactor: symbolic simple but too many loops in calculations?
         union_names = sorted(union_lists(rv_names_0, rv_names_1))
-
-        print("mutual_information => self.rv_names, ", self.rv_names)
-        print("mutual_information => rv_names_1, rv_names_condition", rv_names_0, rv_names_1)
-        print("mutual_information => union_names", union_names)
-
         p_01 = self.marginal(union_names)
-        # by using p_01.marginal we loop over a smaller subset of the table
         p_0 = p_01.marginal(rv_names=rv_names_0)
         p_1 = p_01.marginal(rv_names=rv_names_1)
 
