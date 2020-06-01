@@ -1,6 +1,23 @@
 import unittest
 
 from sparse_discrete_table import SparseDiscreteTable
+import numpy as np
+
+
+def get_mock_p_xyz():
+    mock_rv_names = ['x', 'y', 'z']
+    mock_table = {
+        (0, 0, 0): .2,
+        (0, 0, 1): .2,
+        (0, 1, 0): .04,
+        (0, 1, 1): .06,
+        (1, 0, 0): .125,
+        (1, 0, 1): .125,
+        (1, 1, 0): .125,
+        (1, 1, 1): .125,
+    }
+    mock_rv = SparseDiscreteTable(rv_names=mock_rv_names, table=mock_table)
+    return mock_rv
 
 
 def get_mock_p_xy():
@@ -79,6 +96,10 @@ class TestSparseDiscreteTable(unittest.TestCase):
         print("p_xy.entropy()", h)
         self.assertAlmostEqual(h, 1.721928094887362)
 
+    def test_conitional_entropy(self):
+        # TODO IMPLEMENT
+        raise NotImplementedError
+
     def test_mutual_information(self):
         p_xy = get_mock_p_xy()
         print("p_xy", p_xy)
@@ -99,6 +120,45 @@ class TestSparseDiscreteTable(unittest.TestCase):
         print("mi_xy_implicit", mi_xy_implicit)
 
         self.assertAlmostEquals(mi_xy_explicit, mi_xy_implicit)
+
+    def test_conitional_mutual_information(self):
+        """                        +-                                   -+
+                                   |                 +-               -+ |
+                                   |                 | p(z) * p(x,y,z) | |
+        I(X;Y|Z) = SUM_xSUM_ySUM_z | p(x,y,z) * log2 |-----------------| |
+                                   |                 | p(x,z) * p(y,z) | |
+                                   |                 +-               -+ |
+                                   +-                                   -+
+        """
+        p_xyz = get_mock_p_xyz()
+        p_yz = p_xyz.marginal(['y', 'z'])
+        p_xz = p_xyz.marginal(['x', 'z'])
+        p_z = p_xyz.marginal(['z'])
+
+        implicit_conditional_mi = p_xyz.conditional_mutual_information(rv_names_0=['x'],
+                                                                       rv_names_1=['y'],
+                                                                       rv_names_condition=['z'])
+
+        implicit_conditional_mi_alt = p_xyz.conditional_mutual_information_alt(rv_names_0=['x'],
+                                                                               rv_names_1=['y'],
+                                                                               rv_names_condition=['z'])
+        # todo profle explicit vs implicit vs alt
+        explicit_conditional_mi = 0
+        for k, v in p_xyz.table.items():
+            x, y, z = k
+            p_xyz_val = p_xyz.table[x, y, z]
+            p_yz_val = p_yz.table[y, z]
+            p_xz_val = p_xz.table[x, z]
+            p_z_val = p_z.table[z,]
+
+            explicit_conditional_mi += p_xyz_val * np.log2(
+                (p_z_val * p_xyz_val) / (p_xz_val * p_yz_val))
+
+        print("explicit_conditional_mi", explicit_conditional_mi)  # 0.07489542832637161
+        print("implicit_conditional_mi", implicit_conditional_mi)  # 0.07489542832637142
+        print("implicit_conditional_mi_alt", implicit_conditional_mi_alt)  # 0.9335317672179189
+
+        self.assertAlmostEqual(explicit_conditional_mi, implicit_conditional_mi)
 
     def test_get_item(self):
         p_xy = get_mock_p_xy()
