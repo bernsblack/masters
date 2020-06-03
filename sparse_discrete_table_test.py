@@ -97,7 +97,11 @@ class TestSparseDiscreteTable(unittest.TestCase):
         self.assertAlmostEqual(h, 1.721928094887362)
 
     def test_conitional_entropy(self):
-        # TODO IMPLEMENT
+        p_xy = get_mock_p_xy()
+        h_xy = p_xy.entropy()
+
+
+
         raise NotImplementedError
 
     def test_mutual_information(self):

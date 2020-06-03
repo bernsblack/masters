@@ -96,29 +96,10 @@ def apply_function(func: Callable, rv0: SparseDiscreteTable,
     return SparseDiscreteTable(rv_names=rv0.rv_names, table=new_table)
 
 
-def xlog2x_inner(x):
-    if x == 0:
-        return 0
-    elif x < 0:
-        raise Exception(f"x should be greater or equal than zero, x = {x}")
-    else:
-        return x * np.log2(x)
-
-
-xlog2x = np.vectorize(xlog2x_inner)
-
-
-# casting into array might be quicker operationaly but heavy on memory
 def entropy(table: Dict):
-    """
-    shannon entropy should always be nonnegative, .i.e. > 0
-    entropy = -sum(p_i*log(p_i))
-    """
-    probs = np.array(list(table.values()))
-    h = -1 * np.sum(xlog2x(probs))
-    if h < 0:  # todo add tolerence for computation rounding errors
-        raise Exception(f"Entropy should always be non negative => result was {h}")
-    return h
+    arr = np.array(list(table.values()))
+    arr_filtered = arr[arr > 0]
+    return -1 * np.sum(arr_filtered * np.log2(arr_filtered))
 
 
 class SparseDiscreteTable:
@@ -154,6 +135,11 @@ class SparseDiscreteTable:
         self.table = table
 
     def marginal(self, rv_names: List[str]) -> SparseDiscreteTable:
+        if self.rv_names == rv_names:
+            return self
+            # return self.copy()
+            # return SparseDiscreteTable(rv_names=self.rv_names.copy(), table=self.table.copy())
+
         indices = get_rv_names_indices(self.rv_names, rv_names)
         new_table = {}
         for old_k, old_v in self.table.items():
@@ -199,6 +185,9 @@ class SparseDiscreteTable:
 
     def condition(self, rv_names: List[str]):
         return self / self.marginal(rv_names=rv_names)
+
+    def conditional(self, rv_names_0: List[str], rv_names_1: List[str]):
+        return self.marginal(rv_names=rv_names_0) / self.marginal(rv_names=rv_names_1)
 
     def entropy(self) -> float:
         """
