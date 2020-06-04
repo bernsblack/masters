@@ -4,8 +4,6 @@
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/mutual_information.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -76,7 +74,7 @@
       <recent name="$PROJECT_DIR$/saved" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_mutual_information">
+  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -99,7 +97,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -112,7 +110,7 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional&quot;" />
+      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestSparseDiscreteTable&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -186,19 +184,19 @@
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_entropy" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_get_item" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_mutual_information" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_mutual_information" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_mutual_information" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_mutual_information" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_get_item" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_entropy" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
       </list>
     </recent_temporary>
   </component>
@@ -302,7 +300,7 @@
       <workItem from="1586868429728" duration="88000" />
       <workItem from="1588880984994" duration="1630000" />
       <workItem from="1590856524812" duration="17706000" />
-      <workItem from="1591166920689" duration="722000" />
+      <workItem from="1591166920689" duration="1707000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -436,7 +434,7 @@
     <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_case_0.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_case_0 Coverage Results" MODIFIED="1590949398632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_in_test_generic_dataset_py.coverage" NAME="pytest in test_generic_dataset.py Coverage Results" MODIFIED="1565797661413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/datasets" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_cell_dataloader_TestCellDataLoaderIndexing_test_test_loader_indices.coverage" NAME="pytest for test_cell_dataloader.TestCellDataLoaderIndexing.test_test_loader_indices Coverage Results" MODIFIED="1574524376423" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable Coverage Results" MODIFIED="1590948298042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable Coverage Results" MODIFIED="1591183806525" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_TestDatasetIndexing_test_min_index.coverage" NAME="pytest for test_datasets.TestDatasetIndexing.test_min_index Coverage Results" MODIFIED="1571327098471" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_flat_datasets_TestDatasetIndexing.coverage" NAME="pytest for test_flat_datasets.TestDatasetIndexing Coverage Results" MODIFIED="1575192506144" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$scratch.coverage" NAME="scratch Coverage Results" MODIFIED="1574961518042" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$APPLICATION_CONFIG_DIR$/scratches" />

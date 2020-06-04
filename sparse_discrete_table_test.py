@@ -98,11 +98,12 @@ class TestSparseDiscreteTable(unittest.TestCase):
 
     def test_conitional_entropy(self):
         p_xy = get_mock_p_xy()
-        h_xy = p_xy.entropy()
 
+        hc_xy = p_xy.conditional_entropy(rv_names_0=['x'],
+                                           rv_names_condition=['y'])
 
-
-        raise NotImplementedError
+        print(hc_xy)
+        self.assertAlmostEqual(hc_xy,0.7219280948873621)
 
     def test_mutual_information(self):
         p_xy = get_mock_p_xy()
