@@ -7,7 +7,6 @@ import numpy as np
 FLOAT_TOLERANCE_VALUE = 1e-8
 
 
-# todo move to utils
 def union_lists(list_0: List, list_1: List):
     return list(set(list_0 + list_1))
 
@@ -66,7 +65,7 @@ def get_rv_names_indices(rv_names_0: List[str], rv_names_1: List[str]):
     """
     returns the indices of the values of rv_names_1 in rv_names_0
 
-    prefered that the order(rv_names_0) > order(rv_names_1)
+    preferred that the order(rv_names_0) > order(rv_names_1)
     """
     intersection = get_rv_names_intersection(rv_names_0, rv_names_1)
     return sorted([rv_names_0.index(name) for name in intersection])
@@ -79,13 +78,12 @@ def apply_function(func: Callable, rv0: SparseDiscreteTable,
     rv0, rv1: discrete random variable
     returns a newly created object
 
-    restulting rv_names will be of rv with biggest order
+    resulting rv_names will be of rv with biggest order
     """
     if rv0.get_order() < rv1.get_order():  # pointer swap only happens in scope of the function
         raise ValueError("rv0.get_order() < rv1.get_order()")
         # rv0, rv1 = rv1, rv0
 
-    rv_names_intersection = get_rv_names_intersection(rv0.rv_names, rv1.rv_names)
     indices = get_rv_names_indices(rv0.rv_names, rv1.rv_names)
     new_table = {}
     for rv0_k, rv0_v in rv0.table.items():

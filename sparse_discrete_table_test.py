@@ -126,7 +126,7 @@ class TestSparseDiscreteTable(unittest.TestCase):
 
         self.assertAlmostEquals(mi_xy_explicit, mi_xy_implicit)
 
-    def test_conitional_mutual_information(self):
+    def test_conditional_mutual_information(self):
         """                        +-                                   -+
                                    |                 +-               -+ |
                                    |                 | p(z) * p(x,y,z) | |
