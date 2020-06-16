@@ -3,6 +3,8 @@
 .pytest_cache
 .ipynb_checkpoints
 .tmp.drivedownload
+venv
+data
 __pycache__
 .vscode
 utils/__pycache__
