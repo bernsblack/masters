@@ -1,11 +1,13 @@
 import base64
 import io
+from pprint import pformat
 
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
 from mpl_toolkits.axes_grid1 import make_axes_locatable
+import logging as log
 
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
@@ -13,6 +15,73 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 """
 from matplotlib import rcParams
 
+def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
+    """
+    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
+    mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
+    """
+    _, _, n_rows, n_cols = mi_grid.shape
+
+    fig = plt.figure(figsize=(9, 8))  # , constrained_layout=True)
+    gs = fig.add_gridspec(2, 2)
+    ax0 = fig.add_subplot(gs[0, 0])
+    ax1 = fig.add_subplot(gs[0, 1])
+    ax2 = fig.add_subplot(gs[1, :])
+
+    _img0 = ax0.imshow(mi_grid.mean(axis=(0, 1)))
+    _img1 = ax1.imshow(crime_grid.mean(axis=(0, 1)))
+    line, = ax2.plot([0], [0])
+
+    ax1.set_title("Mean Crime Count")
+    if is_conditional_mi:
+        ax0.set_title("Conditional Mutual Information (CMI) Mean over Offset")
+        ax2.set_title("CMI per Temporal Offset")
+        ax2.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$")  # give I(C)
+        ax2.set_xlabel("Offset in Days (k)")
+    else:
+        ax0.set_title("Mutual Information (MI) Mean over Offset")
+        ax1.set_title("Crime Rate Grid")
+        ax2.set_title("MI per Temporal Offset")
+        ax2.set_ylabel("MI - $I(C_{t},C_{t-k})$")  # give I(C)
+        ax2.set_xlabel("Offset in Days (k)")
+
+    def draw(row_ind, col_ind):
+        f = mi_grid[0, :, row_ind, col_ind]
+        t = np.arange(1, len(f) + 1)  # start at one because offset starts at 1
+
+        t_min = np.min(t)
+        t_max = np.max(t)
+        t_pad = (t_max - t_min) * 0.05
+        t_min = t_min - t_pad
+        t_max = t_max + t_pad
+
+        f_min = np.min(f)
+        f_max = np.max(f)
+        f_pad = (f_max - f_min) * 0.05
+        f_min = f_min - f_pad
+        f_max = f_max + f_pad
+
+        if t_min != t_max:
+            ax2.set_xlim(t_min, t_max)
+            ax2.set_xticks(t)
+            ax2.grid(True)
+        if f_min != f_max:
+            ax2.set_ylim(f_min, f_max)
+
+        line.set_data(t, f)
+        fig.canvas.draw()
+
+    def on_click(event):
+        log.info(f"event => {pformat(event.__dict__)}")
+        if hasattr(event, "xdata") and hasattr(event, "ydata"):
+            if event.xdata and event.ydata:  # check that axis is the imshow
+                row_ind = int(np.round(event.ydata))
+                col_ind = int(np.round(event.xdata))
+                draw(row_ind, col_ind)
+        return True
+
+    fig.canvas.mpl_connect('button_press_event', on_click)
+    plt.show()
 
 class BasePlotter:
     """
@@ -144,19 +213,60 @@ def plot(*args):
     plt.show()
 
 
+def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):
+    """
+    quick and easy way to view 2d matrices in notebooks
+    """
+    plt.figure(figsize=figsize)
+    if title:
+        plt.title(title)
+
+    plt.imshow(data, aspect=aspect, cmap=cmap)
+    if colorbar:
+        plt.colorbar()
+    plt.grid(grid_on)
+
+    plt.show()
+
+
 def imshow(a, ax, title=""):
     """
     a: 2D array (Image)
     ax: subplot axis
     """
-    im = ax.imshow(a, cmap="viridis")
+    im_ = ax.imshow(a, cmap="viridis")
     ax.set_title(title)
     #  ax.set_xticks(np.arange(a.shape[-2]))
     #  ax.set_yticks(np.arange(a.shape[-1]))
     plt.grid(False)
     divider = make_axes_locatable(ax)
     cax = divider.append_axes("right", size="5%", pad=0.05)
-    plt.colorbar(im, cax=cax, cmap="viridis")
+    plt.colorbar(im_, cax=cax, cmap="viridis")
+
+
+def imshow_compare(arr0, arr1, arr0_title=None, arr1_title=None, figsize=(9.8, 8)):
+    """similar to plot_compare but with individual colorbars per plot"""
+    fig, axes = plt.subplots(1, 2, sharex=True, figsize=figsize)
+    fig.subplots_adjust(wspace=0.4)
+    ax0, ax1 = axes
+    if arr0_title:
+        ax0.set_title(arr0_title)
+    im0 = ax0.imshow(arr0)
+    cax0 = fig.add_axes([ax0.get_position().x1 + 0.01,
+                         ax0.get_position().y0,
+                         0.02,
+                         ax0.get_position().height])
+    fig.colorbar(im0, ax=ax0, cax=cax0)
+
+    if arr1_title:
+        ax1.set_title(arr1_title)
+    im1 = ax1.imshow(arr1)
+    cax1 = fig.add_axes([ax1.get_position().x1 + 0.01,
+                         ax1.get_position().y0,
+                         0.02,
+                         ax0.get_position().height])
+    fig.colorbar(im1, ax=ax1, cax=cax1)
+    plt.show()
 
 
 def plot_compare(a, b, times, relative=True, a_title="A", b_title="B"):
@@ -338,19 +448,6 @@ def setup_subplots(a):
 def update_subplots(a, plots):
     for i, plot_ in enumerate(plots):
         plot_.set_data(a[i])
-
-
-def im(data, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):
-    """
-    quick and easy way to view 2d matrices in notebooks
-    """
-    plt.figure(figsize=figsize)
-    plt.imshow(data, aspect=aspect, cmap=cmap)
-    if colorbar:
-        plt.colorbar()
-    plt.grid(grid_on)
-
-    plt.show()
 
 
 def getNearFactors(C):

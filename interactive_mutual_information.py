@@ -1,70 +1,71 @@
+import matplotlib.pyplot as plt
+import numpy as np
+from pprint import pformat
+
+from sparse_discrete_table import SparseDiscreteTable
+from utils.mutual_information import construct_mi_grid
+from utils.plots import interactive_mi_grid
+from utils.setup import setup
+import logging as log
+
+_info = log.info
 
 
-def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
-    """
-    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
-    mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
-    """
+def main():
+    conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01")
 
-    _,_,n_rows,n_cols = mi_grid.shape
+    squeezed_crimes = shaper.squeeze(sparse_crimes)
+    # squeezed_crimes[squeezed_crimes > 0] = 1
+    squeezed_crimes[squeezed_crimes > 40] = 40
+    squeezed_crimes = np.round(np.log2(1 + squeezed_crimes))
+    _info(f"squeezed_crimes values =>{np.unique(squeezed_crimes)}")
 
-    fig = plt.figure(figsize=(9, 8), constrained_layout=True)
-    gs = fig.add_gridspec(2, 2)
-    ax0 = fig.add_subplot(gs[0, 0])
-    ax1 = fig.add_subplot(gs[0, 1])
-    ax2 = fig.add_subplot(gs[1, :])
+    n, c, l = squeezed_crimes.shape
+
+    # setup the day of the week variables
+    dow_n = np.arange(n)%7
+    dow_nc = np.expand_dims(dow_n,(1,2))
+    dow_ncl = np.ones((n,c,l))*dow_nc
+
+    data = np.concatenate([squeezed_crimes,dow_ncl],axis=1)
 
 
-    img0 = ax0.imshow(mi_grid.mean(axis=(0,1)))
-    img1 = ax1.imshow(crime_grid.mean(axis=(0,1)))
-    line, = ax2.plot([0], [0])
+    # todo abstract into function
+    K = 22
+    rv_names = ['RV0_Ct','RV0_Dt','RV1_Ct-k','RV1_Dt-k'] # Ct: crime at t. Dt: day of week at t
+    mi_list = []
+    cmi_list = []
+    for i in range(l):
+        if i % (l//10) == 0:
+            print(f"{i+1}/{l} => {(i+1)/l*100}%")
+        mi_list.append([])
+        cmi_list.append([])
+        for k in range(0,K+1): # K is the maximum
+            if k == 0:
+                joint = np.concatenate([data[:,:,i],data[:,:,i]],axis=1)
+            else:
+                joint = np.concatenate([data[k:,:,i],data[:-k,:,i]],axis=1)
+            val,cnt = np.unique(joint,return_counts=True,axis=0)
+            prb = cnt / np.sum(cnt)
+            table = {}
+            for k_,v_ in zip(list(map(tuple, val)),list(prb)):
+                table[k_] = v_
+            rv = SparseDiscreteTable(rv_names=rv_names,table=table)
+            mi = rv.mutual_information(rv_names_0=['RV0_Ct'],
+                                       rv_names_1=['RV1_Ct-k'])
+            cmi = rv.conditional_mutual_information(rv_names_0=['RV0_Ct'],
+                                                    rv_names_1=['RV1_Ct-k'],
+                                                    rv_names_condition=['RV0_Dt','RV1_Dt-k'])
+            cmi_list[i].append(cmi)
+            mi_list[i].append(mi)
 
-    ax1.set_title("Mean Crime Count")
-    if is_conditional_mi:
-        ax0.set_title("Conditional Mutual Information (CMI) Mean over Offset")
-        ax2.set_title("CMI per Temporal Offset")
-        ax2.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$") # give I(C)
-        ax2.set_xlabel("Offset in Days (k)")
-    else:
-        ax0.set_title("Mutual Information (MI) Mean over Offset")
-        ax1.set_title("Crime Rate Grid")
-        ax2.set_title("MI per Temporal Offset")
-        ax2.set_ylabel("MI - $I(C_{t},C_{t-k})$") # give I(C)
-        ax2.set_xlabel("Offset in Days (k)")
 
-    def draw(row_ind, col_ind):
-        f = mi_grid[0,:,row_ind, col_ind]
-        t = np.arange(1,len(f)+1) # start at one because offset starts at 1
+    cmi_grid = construct_mi_grid(cmi_list)
+    mi_grid = construct_mi_grid(mi_list)
 
-        t_min = t.min()
-        t_max = t.max()
-        t_pad = (t_max - t_min) * 0.05
-        t_min = t_min - t_pad
-        t_max = t_max + t_pad
+    interactive_mi_grid(mi_grid=mi_grid, crime_grid=sparse_crimes,is_conditional_mi=False)
+    interactive_mi_grid(mi_grid=cmi_grid, crime_grid=sparse_crimes,is_conditional_mi=True)
 
-        f_min = f.min()
-        f_max = f.max()
-        f_pad = (f_max - f_min) * 0.05
-        f_min = f_min - f_pad
-        f_max = f_max + f_pad
 
-        if t_min != t_max:
-            ax2.set_xlim(t_min, t_max)
-            ax2.set_xticks(t)
-            ax2.grid(True)
-        if f_min != f_max:
-            ax2.set_ylim(f_min, f_max)
-
-        line.set_data(t, f)
-
-    def on_click(event):
-        print(f"event => {pformat(event.__dict__)}")
-        if hasattr(event, "xdata") and hasattr(event, "ydata"):
-            if event.xdata and event.ydata:  # check that axis is the imshow
-                row_ind = int(np.round(event.ydata))
-                col_ind = int(np.round(event.xdata))
-                draw(row_ind, col_ind)
-        return True
-
-    fig.canvas.mpl_connect('button_press_event', on_click)
-    plt.show()
+if __name__ == '__main__':
+    main()

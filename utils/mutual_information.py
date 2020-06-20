@@ -5,6 +5,15 @@ from utils import describe_array
 SMALLEST_TOLERANCE = 1e-14
 
 
+def construct_mi_grid(mi_list, shaper):
+    mi_arr = np.array(mi_list)
+    self_mi_arr, mi_arr = mi_arr[:,:1] , mi_arr[:,1:]
+    mi_arr = mi_arr/self_mi_arr
+    mi_arr = np.swapaxes(mi_arr,0,1)
+    mi_grid = shaper.unsqueeze(np.expand_dims(mi_arr,(0)))
+    return mi_grid
+
+
 def not_(a):
     return np.invert(a.astype(np.bool)).astype(a.dtype)
 
