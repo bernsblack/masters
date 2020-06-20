@@ -2,8 +2,15 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
+      <change afterPath="$PROJECT_DIR$/interactive_mutual_information.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dictionaries/bernardswart.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/mutual_information.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/README.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/simple_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/simple_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -49,6 +56,7 @@
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
+    <option name="sortByType" value="true" />
   </component>
   <component name="PropertiesComponent">
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
@@ -307,6 +315,7 @@
       <workItem from="1592322993225" duration="2196000" />
       <workItem from="1592395466884" duration="292000" />
       <workItem from="1592398327213" duration="2028000" />
+      <workItem from="1592641840787" duration="4301000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -374,6 +383,10 @@
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state x="320" y="73" key="#Plugins/0.23.1440.804@0.23.1440.804" timestamp="1591454923949" />
+    <state x="411" y="-900" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1592644093027">
+      <screen x="-583" y="-1417" width="2560" height="1417" />
+    </state>
+    <state x="411" y="-900" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592644093027" />
     <state x="339" y="342" key="#com.jetbrains.python.refactoring.move.PyMakeFunctionTopLevelDialog" timestamp="1592137031053">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
@@ -418,22 +431,25 @@
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
     <state x="93" y="-1005" key="com.intellij.ide.util.TipDialog/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1586868568602" />
-    <state x="380" y="257" key="com.intellij.ide.util.TipDialog/0.23.1440.804@0.23.1440.804" timestamp="1583863429729" />
     <state x="93" y="-1026" key="com.intellij.ide.util.TipDialog/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1586336899180" />
-    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1590955252315">
+    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1592645152013">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1590955252315" />
-    <state x="529" y="288" width="680" height="482" key="find.popup" timestamp="1592136914605">
+    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592645152013" />
+    <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1592643180500">
+      <screen x="-583" y="-1417" width="2560" height="1417" />
+    </state>
+    <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
+    <state x="529" y="288" width="680" height="486" key="find.popup" timestamp="1592660279382">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
-    <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1590953739814" />
-    <state x="529" y="288" width="680" height="482" key="find.popup/0.23.1440.804@0.23.1440.804" timestamp="1592136914605" />
+    <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592644764193" />
+    <state x="529" y="288" width="680" height="486" key="find.popup/0.23.1440.804@0.23.1440.804" timestamp="1592660279382" />
     <state x="357" y="-974" width="1209" height="807" key="find.popup/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015744488" />
-    <state x="385" y="151" width="670" height="676" key="search.everywhere.popup" timestamp="1592324271139">
-      <screen x="0" y="23" width="1440" height="804" />
+    <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup" timestamp="1592645316727">
+      <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591006380832" />
+    <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592645316727" />
     <state x="385" y="151" width="670" height="676" key="search.everywhere.popup/0.23.1440.804@0.23.1440.804" timestamp="1592324271139" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">

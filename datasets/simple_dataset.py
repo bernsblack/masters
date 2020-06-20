@@ -7,6 +7,8 @@ DataLoader allows us to:
 - Batch the data
 - Shuffle the data
 - Load the data in parallel using multiprocessing workers
+- Save a list of valid cells, i.e. living cells on the class then when you give the index 
+    you just mod the length of that and and spit out a coordinate value to use as index 
 """
 
 
@@ -37,14 +39,7 @@ class SimpleDataSet(Dataset):
         return sample
 
 
-"""
-DataLoader allows us to:
-- Batch the data
-- Shuffle the data
-- Load the data in parallel using multiprocessing workers
-- Save a list of valid cells, i.e. living cells on the class then when you give the index 
-    you just mod the length of that and and spit out a coordinate value to use as index 
-"""
+
 dataset = SimpleDataSet("./data/original/Crimes_Chicago_2001_to_2019.csv")
 dataloader = DataLoader(dataset, batch_size=4,
                         shuffle=True, num_workers=4)

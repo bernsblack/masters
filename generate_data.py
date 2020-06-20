@@ -8,7 +8,6 @@ import logging as log
 from logger.logger import setup_logging
 from utils.preprocessing import Shaper
 
-
 if __name__ == "__main__":
     setup_logging(save_dir="./logs/", file_name="generate_data.log")
     log.info("=====================================BEGIN=====================================")
@@ -416,11 +415,11 @@ if __name__ == "__main__":
     # save figures
     figsize = (8, 11)
 
-    v,c = np.unique(crime_grids.flatten(), return_counts=True)
-    c = 100*c/np.sum(c)
+    v, c = np.unique(crime_grids.flatten(), return_counts=True)
+    c = 100 * c / np.sum(c)
     plt.figure(figsize=figsize)
     plt.bar(v, c)
-    plt.yticks(np.arange(21)*5)
+    plt.yticks(np.arange(21) * 5)
     plt.title("Maximum Crimes per Time Step")
     plt.ylabel("Frequency (%)")
     plt.xlabel("Total Crimes per Time Step per Cell")
@@ -488,8 +487,8 @@ if __name__ == "__main__":
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,
                         crime_types_grids=crime_type_grids,  # sum crimes, crime types, arrests
-                        crime_grids=crime_grids, # sum crimes only
-                        tract_count_grids=tract_count_grids, # sum crimes of tracts
+                        crime_grids=crime_grids,  # sum crimes only
+                        tract_count_grids=tract_count_grids,  # sum crimes of tracts
                         demog_grid=demog_grid,
                         street_grid=street_grid,
                         time_vectors=encode_time_vectors(t_range),
@@ -503,5 +502,6 @@ if __name__ == "__main__":
     # np.save(folder+"weather_vectors.npy", weather_vectors)
 
     write_json(info, f"{save_folder}info.json")
+    write_json(config, f"{save_folder}generate_data_config.json")
 
     log.info("=====================================END=====================================")
