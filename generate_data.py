@@ -407,7 +407,7 @@ if __name__ == "__main__":
     #########################################################################
     #                            SAVE DATA                                  #
     #########################################################################
-    save_folder = f"./data/processed/T{dT}-X{int(info['x in metres'])}M-Y{int(info['y in metres'])}M_{info['start_date']}_{info['end_date']}/"
+    save_folder = f"./data/processed/T{dT:02d}-X{int(info['x in metres']):04d}M-Y{int(info['y in metres']):04d}M_{info['start_date']}_{info['end_date']}/"
 
     os.makedirs(save_folder, exist_ok=True)
     os.makedirs(save_folder + "plots", exist_ok=True)
