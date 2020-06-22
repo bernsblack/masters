@@ -115,18 +115,20 @@ def interactive_mi(mi_grid, cmi_grid, crime_grid):
     line_mi, = ax_mi_curve.plot([0], [0])
     line_cmi, = ax_cmi_curve.plot([0], [0])
 
-    ax_cmi_curve_title = "CMI per Temporal Offset"
-    ax_mi_curve_title = "MI per Temporal Offset"
     ax_crime_img.set_title("Mean Crime Count")
-    ax_cmi_img.set_title("Conditional Mutual Information (CMI)\nMean over Time Offset")
-    ax_cmi_curve.set_title(ax_mi_curve_title)
-    ax_cmi_curve.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$")  # give I(C)
-    ax_cmi_curve.set_xlabel("Offset in Days (k)")
-    ax_mi_img.set_title("Mutual Information (MI)\nMean over Time Offset")
     ax_crime_img.set_title("Crime Rate Grid")
-    ax_mi_curve.set_title(ax_cmi_curve_title)
+
+    ax_mi_curve_title = "MI per Temporal Offset"
+    ax_mi_img.set_title("Mutual Information (MI)\nMean over Time Offset")
+    ax_mi_curve.set_title(ax_mi_curve_title)
     ax_mi_curve.set_ylabel("MI - $I(C_{t},C_{t-k})$")  # give I(C)
     ax_mi_curve.set_xlabel("Offset in Days (k)")
+
+    ax_cmi_curve_title = "CMI per Temporal Offset"
+    ax_cmi_img.set_title("Conditional Mutual Information (CMI)\nMean over Time Offset")
+    ax_cmi_curve.set_title(ax_cmi_curve_title)
+    ax_cmi_curve.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$")  # give I(C)
+    ax_cmi_curve.set_xlabel("Offset in Days (k)")
 
     def set_line(f, t, ax, line):
         global MAX_Y_LIM
@@ -147,16 +149,20 @@ def interactive_mi(mi_grid, cmi_grid, crime_grid):
             ax.set_xticks(t)
             ax.grid(True)
         if f_min != f_max:
-            if np.max(f) > MAX_Y_LIM * .33:
-                ax.set_ylim(-MAX_Y_LIM * 0.1, MAX_Y_LIM * 1.1)  # f_min, f_max)
+
+            lower_limit = 0.08  # MAX_Y_LIM * .33
+            if np.max(f) > lower_limit:
+                ax.set_yticks(np.arange(0, MAX_Y_LIM * 1.2, 0.01))
+                ax.set_ylim(0, MAX_Y_LIM * 1.1)  # f_min, f_max)
             else:
-                ax.set_ylim(-MAX_Y_LIM * 0.1, MAX_Y_LIM * .55)  # f_min, f_max)
+                ax.set_yticks(np.arange(0, lower_limit * 1.1, 0.01))
+                ax.set_ylim(0, lower_limit)  # f_min, f_max)
 
         line.set_data(t, f)
 
     def draw(row_ind, col_ind):
-        ax_cmi_curve.set_title(f"{ax_mi_curve_title} for {col_ind, row_ind}")
-        ax_mi_curve.set_title(f"{ax_cmi_curve_title} for {col_ind, row_ind}")
+        ax_mi_curve.set_title(f"{ax_mi_curve_title} for {col_ind, row_ind}")
+        ax_cmi_curve.set_title(f"{ax_cmi_curve_title} for {col_ind, row_ind}")
 
         f_mi = mi_grid[0, :, row_ind, col_ind]
         f_cmi = cmi_grid[0, :, row_ind, col_ind]
@@ -266,13 +272,16 @@ def main():
         np.savez_compressed(file=file_location,
                             cmi_arr=cmi_arr,
                             mi_arr=mi_arr)
-        _info(f"Saved mutual infromation arrays at: {file_location}")
+        _info(f"Saved mutual information arrays at: {file_location}")
 
-    mi_grid = construct_mi_grid(mi_arr=mi_arr, shaper=shaper)
-    cmi_grid = construct_mi_grid(mi_arr=cmi_arr, shaper=shaper)
+    normalize = False
+    mi_grid = construct_mi_grid(mi_arr=mi_arr, shaper=shaper, normalize=normalize)
+    cmi_grid = construct_mi_grid(mi_arr=cmi_arr, shaper=shaper, normalize=normalize)
 
     global MAX_Y_LIM
     MAX_Y_LIM = max(mi_grid.max(), cmi_grid.max())
+    _info(f"mi_grid.max(), cmi_grid.max() => {mi_grid.max(), cmi_grid.max()}")
+    _info(f"MAX_Y_LIM => {MAX_Y_LIM}")
 
     interactive_mi(mi_grid=mi_grid,
                    cmi_grid=cmi_grid,
