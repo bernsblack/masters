@@ -210,7 +210,7 @@ def main():
 
     data = np.concatenate([squeezed_crimes, dow_ncl], axis=1)
 
-    K = 4  # 7 * 6
+    K = 7 * 6
     file_name = f"arrays_K{K:02d}"
     file_dir = f"{conf.data_path}mutual_info"
     file_location = f"{file_dir}/{file_name}.npy.npz"
