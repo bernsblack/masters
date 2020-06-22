@@ -4,6 +4,8 @@ from __future__ import annotations
 from typing import Callable, List, Dict, Union, Tuple
 import numpy as np
 
+from utils import deprecated
+
 FLOAT_TOLERANCE_VALUE = 1e-8
 
 
@@ -122,8 +124,9 @@ class SparseDiscreteTable:
         :arg table: sparse probability mass function in a dictionary format with tuple of values as keys
         :type table: Dict
         """
-        if sorted(rv_names) != rv_names:
-            raise ValueError("rv_names must be sorted")
+
+        if isinstance(rv_names, list) and sorted(rv_names) != rv_names:
+            raise ValueError(f"rv_names must be sorted => {sorted(rv_names)} != {rv_names}")
 
         # cannot be guaranteed in calculations because of floating point issues
         # if not is_normalized_table(table):
@@ -179,13 +182,22 @@ class SparseDiscreteTable:
         return apply_function(func=func, rv0=self, rv1=ext_rv)
 
     def __getitem__(self, keys: Union[str, Tuple]):
-        return self.marginal(list(keys))
+        if isinstance(keys, str):
+            rv_names = [keys]
+        else:
+            rv_names = list(keys)
 
-    def condition(self, rv_names: List[str]):
+        return self.marginal(rv_names)
+
+    @deprecated
+    def _condition(self, rv_names: List[str]):
         return self / self.marginal(rv_names=rv_names)
 
-    def conditional(self, rv_names_0: List[str], rv_names_1: List[str]):
-        return self.marginal(rv_names=rv_names_0) / self.marginal(rv_names=rv_names_1)
+    def conditional(self,
+                    rv_names_0: List[str],
+                    rv_names_condition: List[str]):
+        union_names = sorted(union_lists(rv_names_0, rv_names_condition))
+        return self.marginal(rv_names=union_names) / self.marginal(rv_names=rv_names_condition)
 
     def entropy(self) -> float:
         """
@@ -256,6 +268,18 @@ class SparseDiscreteTable:
         p_1 = p_01.marginal(rv_names=rv_names_1)
 
         return p_0.entropy() + p_1.entropy() - p_01.entropy()
+
+    def self_information(self, rv_names_0: List[str]):
+        """
+        H(Y|Y) = 0
+        I(Y,Y) = H(Y) - H(Y|Y) = H(Y)
+
+        :param rv_names_0: variable names we want the measure the information shared with it self
+        :return: entropy of rv_names_0
+        """
+
+        p_0 = self.marginal(rv_names=rv_names_0)
+        return p_0.entropy()
 
     def get_order(self) -> int:
         return len(self.rv_names)

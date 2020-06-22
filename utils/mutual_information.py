@@ -1,16 +1,30 @@
+from typing import List
+
 import numpy as np
 import unittest
 from utils import describe_array
+from utils.preprocessing import Shaper
 
 SMALLEST_TOLERANCE = 1e-14
 
 
-def construct_mi_grid(mi_list, shaper):
-    mi_arr = np.array(mi_list)
-    self_mi_arr, mi_arr = mi_arr[:,:1] , mi_arr[:,1:]
-    mi_arr = mi_arr/self_mi_arr
-    mi_arr = np.swapaxes(mi_arr,0,1)
-    mi_grid = shaper.unsqueeze(np.expand_dims(mi_arr,(0)))
+def construct_mi_grid(mi_arr: np.ndarray, shaper: Shaper, normalize=True):
+    """
+    mi_arr: shape (L,K+1) where L is the number of cells and K is the maximum time offset
+             each value represents the mutual information between a cells crime at time t and t - k.
+             the first value in axis 1 is mi(crime at t, crime at t)
+    normalize: if true normalize the cells relative to their self-information
+
+    mi_grid: return ndarray in the shape (1,K,H,W)
+             where K is the max time offset
+             each value is normalised according to its own
+    """
+    self_mi_arr, mi_arr = mi_arr[:, :1], mi_arr[:, 1:]
+    if normalize:
+        mi_arr = mi_arr / self_mi_arr
+
+    mi_arr = np.swapaxes(mi_arr, 0, 1)
+    mi_grid = shaper.unsqueeze(np.expand_dims(mi_arr, (0,)))
     return mi_grid
 
 

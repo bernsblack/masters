@@ -2,12 +2,12 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
-      <change afterPath="$PROJECT_DIR$/utils/setup.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/examples/rectangular_select_examlple.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/interactive_mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/mutual_information.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/mutual_information.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
     </list>
@@ -66,6 +66,13 @@
     <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/examples" />
+      <recent name="$PROJECT_DIR$/models" />
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/datasets" />
+      <recent name="$PROJECT_DIR$/data" />
+    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/utils" />
       <recent name="$PROJECT_DIR$" />
@@ -73,15 +80,8 @@
       <recent name="$PROJECT_DIR$/data/raw" />
       <recent name="$PROJECT_DIR$/datasets" />
     </key>
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/examples" />
-      <recent name="$PROJECT_DIR$/datasets" />
-      <recent name="$PROJECT_DIR$/data" />
-      <recent name="$PROJECT_DIR$/saved" />
-    </key>
   </component>
-  <component name="RunManager" selected="Python.interactive_mutual_information">
+  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -143,6 +143,23 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -177,38 +194,21 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_mutual_information" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestSparseDiscreteTable.test_mutual_information&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_mutual_information" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_entropy" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
       <item itemvalue="Python.interactive_mutual_information" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
         <item itemvalue="Python.interactive_mutual_information" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_entropy" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_mutual_information" />
       </list>
     </recent_temporary>
   </component>
@@ -319,7 +319,7 @@
       <workItem from="1592322993225" duration="2196000" />
       <workItem from="1592395466884" duration="292000" />
       <workItem from="1592398327213" duration="2028000" />
-      <workItem from="1592641840787" duration="10277000" />
+      <workItem from="1592641840787" duration="24134000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -404,31 +404,31 @@
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state x="100" y="123" width="1240" height="604" key="DiffContextDialog/0.23.1440.804@0.23.1440.804" timestamp="1592338232736" />
-    <state width="2518" height="405" key="GridCell.Tab.0.bottom" timestamp="1592674509793">
+    <state width="2518" height="381" key="GridCell.Tab.0.bottom" timestamp="1592746022799">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state width="2518" height="405" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592674509793" />
+    <state width="2518" height="381" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022799" />
     <state width="1398" height="202" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1592324255792" />
     <state width="1183" height="378" key="GridCell.Tab.0.bottom/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528634" />
     <state width="2518" height="378" key="GridCell.Tab.0.bottom/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762929" />
-    <state width="2518" height="405" key="GridCell.Tab.0.center" timestamp="1592674509791">
+    <state width="2518" height="381" key="GridCell.Tab.0.center" timestamp="1592746022797">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state width="2518" height="405" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592674509791" />
+    <state width="2518" height="381" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022797" />
     <state width="1398" height="202" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1592324255791" />
     <state width="1183" height="378" key="GridCell.Tab.0.center/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528633" />
     <state width="2518" height="378" key="GridCell.Tab.0.center/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762928" />
-    <state width="2518" height="405" key="GridCell.Tab.0.left" timestamp="1592674509790">
+    <state width="2518" height="381" key="GridCell.Tab.0.left" timestamp="1592746022796">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state width="2518" height="405" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592674509790" />
+    <state width="2518" height="381" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022796" />
     <state width="1398" height="202" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1592324255791" />
     <state width="1183" height="378" key="GridCell.Tab.0.left/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528633" />
     <state width="2518" height="378" key="GridCell.Tab.0.left/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762928" />
-    <state width="2518" height="405" key="GridCell.Tab.0.right" timestamp="1592674509792">
+    <state width="2518" height="381" key="GridCell.Tab.0.right" timestamp="1592746022798">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state width="2518" height="405" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592674509792" />
+    <state width="2518" height="381" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022798" />
     <state width="1398" height="202" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1592324255792" />
     <state width="1183" height="378" key="GridCell.Tab.0.right/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528634" />
     <state width="2518" height="378" key="GridCell.Tab.0.right/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762929" />
@@ -449,16 +449,16 @@
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
-    <state x="529" y="288" width="680" height="486" key="find.popup" timestamp="1592660279382">
-      <screen x="0" y="23" width="1440" height="804" />
+    <state x="357" y="-950" width="1209" height="850" key="find.popup" timestamp="1592745271900">
+      <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592644764193" />
+    <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592745271900" />
     <state x="529" y="288" width="680" height="486" key="find.popup/0.23.1440.804@0.23.1440.804" timestamp="1592660279382" />
     <state x="357" y="-974" width="1209" height="807" key="find.popup/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015744488" />
-    <state x="385" y="151" width="670" height="676" key="search.everywhere.popup" timestamp="1592665157034">
-      <screen x="0" y="23" width="1440" height="804" />
+    <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup" timestamp="1592804759273">
+      <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592645316727" />
+    <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592804759273" />
     <state x="385" y="151" width="670" height="676" key="search.everywhere.popup/0.23.1440.804@0.23.1440.804" timestamp="1592665157034" />
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
@@ -482,10 +482,10 @@
     <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_conitional_mutual_information.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_mutual_information Coverage Results" MODIFIED="1591015761282" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_flat_dataloader_TestFlatDataLoaderIndexing.coverage" NAME="pytest for test_flat_dataloader.TestFlatDataLoaderIndexing Coverage Results" MODIFIED="1575192527411" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_entropy.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_entropy Coverage Results" MODIFIED="1590955436364" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_conditional.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional Coverage Results" MODIFIED="1590953447130" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_conditional.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional Coverage Results" MODIFIED="1592745892917" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_TestDatasetIndexing_test_min_index_eq.coverage" NAME="pytest for test_datasets.TestDatasetIndexing.test_min_index_eq Coverage Results" MODIFIED="1571327792166" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_grid_datasets_TestDataGroup.coverage" NAME="pytest for test_grid_datasets.TestDataGroup Coverage Results" MODIFIED="1575192518268" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
-    <SUITE FILE_PATH="coverage/masters$interactive_mutual_information.coverage" NAME="interactive_mutual_information Coverage Results" MODIFIED="1592674457001" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$interactive_mutual_information.coverage" NAME="interactive_mutual_information Coverage Results" MODIFIED="1592724965534" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_in_test_cell_dataloader_py.coverage" NAME="pytest in test_cell_dataloader.py Coverage Results" MODIFIED="1574536281749" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_case_0.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_case_0 Coverage Results" MODIFIED="1590949398632" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_in_test_generic_dataset_py.coverage" NAME="pytest in test_generic_dataset.py Coverage Results" MODIFIED="1565797661413" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$/datasets" />

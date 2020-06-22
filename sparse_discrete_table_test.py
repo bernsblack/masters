@@ -73,18 +73,16 @@ class TestSparseDiscreteTable(unittest.TestCase):
         p_x = p_xy.marginal(rv_names=['x'])
         p_y = p_xy.marginal(rv_names=['y'])
 
+        # test the operational functions
         p_y_given_x = p_xy / p_x
         p_x_given_y = p_xy / p_y
 
-        print("p_xy", p_xy)
-        print("p_x", p_x)
-        print("p_y", p_y)
+        self.assertEqual(p_xy, p_y_given_x * p_x)
+        self.assertEqual(p_xy, p_x_given_y * p_y)
 
-        print("p_y_given_x", p_y_given_x)
-        print("p_x_given_y", p_x_given_y)
-
-        print("p_y_given_x*p_x", p_y_given_x * p_x)
-        print("p_x_given_y*p_y", p_x_given_y * p_y)
+        # test the built in methods
+        p_y_given_x = p_xy.conditional(['y'], ['x'])
+        p_x_given_y = p_xy.conditional(['x'], ['y'])
 
         self.assertEqual(p_xy, p_y_given_x * p_x)
         self.assertEqual(p_xy, p_x_given_y * p_y)
@@ -96,14 +94,14 @@ class TestSparseDiscreteTable(unittest.TestCase):
         print("p_xy.entropy()", h)
         self.assertAlmostEqual(h, 1.721928094887362)
 
-    def test_conitional_entropy(self):
+    def test_conditional_entropy(self):
         p_xy = get_mock_p_xy()
 
         hc_xy = p_xy.conditional_entropy(rv_names_0=['x'],
-                                           rv_names_condition=['y'])
+                                         rv_names_condition=['y'])
 
         print(hc_xy)
-        self.assertAlmostEqual(hc_xy,0.7219280948873621)
+        self.assertAlmostEqual(hc_xy, 0.7219280948873621)
 
     def test_mutual_information(self):
         p_xy = get_mock_p_xy()
