@@ -224,7 +224,7 @@ class SparseDiscreteTable:
                                        rv_names_condition: List[str]):
         """
         uses entropy to calculate value
-        conditional mutual information indentity alt.: I(X;Y|Z) = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
+        conditional mutual information chain rule: I(X;Y|Z) = I(X;Y,Z) - I(X;Z)
         this will measure the mutual information between x and y given z
 
         :param rv_names_0: random variable name(s) we want to measure MI with
@@ -242,8 +242,7 @@ class SparseDiscreteTable:
                                            rv_names_condition: List[str]):
         """
         uses mutual information to calculate value
-        conditional mutual information chain rule: I(X;Y|Z) = I(X;Y,Z) - I(X;Z)
-
+        conditional mutual information identity alt.: I(X;Y|Z) = H(X,Z) + H(Y,Z) - H(X,Y,Z) - H(Z)
         :param rv_names_0: random variable name(s) we want to measure MI with
         :param rv_names_1: random variable name(s) we want to measure MI with
         :param rv_names_condition: random variable name(s) we want to condition the MI measurement with
@@ -262,6 +261,13 @@ class SparseDiscreteTable:
         return p_0c.entropy() + p_1c.entropy() - p_01c.entropy() - p_c.entropy()  # more summing might lead to greater floating point errors
 
     def mutual_information(self, rv_names_0: List[str], rv_names_1: List[str]):
+        """
+        Mutual information: the reduction in uncertainty about one random variable given knowledge of another
+        Measures how much rv_0 tells us about rv_1 or vice-versa
+        :param rv_names_0:
+        :param rv_names_1:
+        :return: mutual information in bits (log2 is used in calculating the entropy)
+        """
         union_names = sorted(union_lists(rv_names_0, rv_names_1))
         p_01 = self.marginal(union_names)
         p_0 = p_01.marginal(rv_names=rv_names_0)

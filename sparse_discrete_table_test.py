@@ -145,7 +145,7 @@ class TestSparseDiscreteTable(unittest.TestCase):
         implicit_conditional_mi_alt = p_xyz.conditional_mutual_information_alt(rv_names_0=['x'],
                                                                                rv_names_1=['y'],
                                                                                rv_names_condition=['z'])
-        # todo profle explicit vs implicit vs alt
+        # todo profile explicit vs implicit vs alt
         explicit_conditional_mi = 0
         for k, v in p_xyz.table.items():
             x, y, z = k

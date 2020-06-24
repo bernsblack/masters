@@ -16,6 +16,38 @@ import os
 
 _info = log.info
 global MAX_Y_LIM
+global normalize
+
+
+def set_line(f, t, ax, line):
+    global MAX_Y_LIM
+    t_min = np.min(t)
+    t_max = np.max(t)
+    t_pad = (t_max - t_min) * 0.05
+    t_min = t_min - t_pad
+    t_max = t_max + t_pad
+
+    f_min = np.min(f)
+    f_max = np.max(f)
+    f_pad = (f_max - f_min) * 0.05
+    f_min = f_min - f_pad
+    f_max = f_max + f_pad
+
+    if t_min != t_max:
+        ax.set_xlim(t_min, t_max)
+        ax.set_xticks(t)
+        ax.grid(True)
+    if f_min != f_max:
+
+        lower_limit = 0.08  # MAX_Y_LIM * .33
+        if np.max(f) > lower_limit:
+            ax.set_yticks(np.arange(0, MAX_Y_LIM * 1.2, 0.01))
+            ax.set_ylim(0, MAX_Y_LIM * 1.1)  # f_min, f_max)
+        else:
+            ax.set_yticks(np.arange(0, lower_limit * 1.1, 0.01))
+            ax.set_ylim(0, lower_limit)  # f_min, f_max)
+
+    line.set_data(t, f)
 
 
 def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
@@ -91,7 +123,7 @@ def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
     plt.show()
 
 
-def interactive_mi(mi_grid, cmi_grid, crime_grid):
+def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     """
     crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
@@ -130,36 +162,6 @@ def interactive_mi(mi_grid, cmi_grid, crime_grid):
     ax_cmi_curve.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$")  # give I(C)
     ax_cmi_curve.set_xlabel("Offset in Days (k)")
 
-    def set_line(f, t, ax, line):
-        global MAX_Y_LIM
-        t_min = np.min(t)
-        t_max = np.max(t)
-        t_pad = (t_max - t_min) * 0.05
-        t_min = t_min - t_pad
-        t_max = t_max + t_pad
-
-        f_min = np.min(f)
-        f_max = np.max(f)
-        f_pad = (f_max - f_min) * 0.05
-        f_min = f_min - f_pad
-        f_max = f_max + f_pad
-
-        if t_min != t_max:
-            ax.set_xlim(t_min, t_max)
-            ax.set_xticks(t)
-            ax.grid(True)
-        if f_min != f_max:
-
-            lower_limit = 0.08  # MAX_Y_LIM * .33
-            if np.max(f) > lower_limit:
-                ax.set_yticks(np.arange(0, MAX_Y_LIM * 1.2, 0.01))
-                ax.set_ylim(0, MAX_Y_LIM * 1.1)  # f_min, f_max)
-            else:
-                ax.set_yticks(np.arange(0, lower_limit * 1.1, 0.01))
-                ax.set_ylim(0, lower_limit)  # f_min, f_max)
-
-        line.set_data(t, f)
-
     def draw(row_ind, col_ind):
         ax_mi_curve.set_title(f"{ax_mi_curve_title} for {col_ind, row_ind}")
         ax_cmi_curve.set_title(f"{ax_cmi_curve_title} for {col_ind, row_ind}")
@@ -183,15 +185,84 @@ def interactive_mi(mi_grid, cmi_grid, crime_grid):
 
     fig.canvas.mpl_connect('button_press_event', on_click)
     plt.subplots_adjust(
-
-        left=0.,  # the left side of the subplots of the figure
-        right=0.9,  # the right side of the subplots of the figure
-        bottom=0.1,  # the bottom of the subplots of the figure
-        top=0.95,  # the top of the subplots of the figure
+        left=0.,
+        right=0.9,
+        bottom=0.1,
+        top=0.95,
         wspace=0.3,
-        # the amount of width reserved for space between subplots, expressed as a fraction of the average axis width
         hspace=0.1,
-        # the amount of height reserved for space between subplots, expressed as a fraction of the average axis height
+    )
+
+    plt.tight_layout()
+    plt.show()
+
+
+def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid):
+    """
+    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
+    mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
+    cmi_grid: grid with shape 1,K,H,W where K is the max number of time offset
+    """
+    _, _, n_rows, n_cols = mi_grid.shape
+
+    fig = plt.figure(figsize=(9, 8))  # , constrained_layout=True)
+
+    gs = fig.add_gridspec(2, 3)
+    ax_crime_img = fig.add_subplot(gs[0, 0])
+    ax_mi_img = fig.add_subplot(gs[0, 1])
+    ax_cmi_img = fig.add_subplot(gs[0, 2])
+    ax_mi_curve = fig.add_subplot(gs[1, :])
+
+    _img_mi = ax_mi_img.imshow(mi_grid.mean(axis=(0, 1)))
+    _img_cmi = ax_cmi_img.imshow(cmi_grid.mean(axis=(0, 1)))
+    _img_crime = ax_crime_img.imshow(crime_grid.mean(axis=(0, 1)))
+    line_mi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k})$")
+    line_cmi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k}|DoW_{t},DoW_{t-k})$")
+
+    ax_crime_img.set_title("Mean Crime Count")
+    ax_crime_img.set_title("Crime Rate Grid")
+
+    global normalize
+    if normalize:
+        ax_mi_curve_title = "Mutual Information per Temporal Offset (Normalized)"
+    else:
+        ax_mi_curve_title = "Mutual Information per Temporal Offset"
+
+    ax_mi_img.set_title("Mutual Information (MI)\nMean over Time Offset")
+    ax_cmi_img.set_title("Conditional Mutual Information (CMI)\nMean over Time Offset")
+    ax_mi_curve.set_title(ax_mi_curve_title)
+    ax_mi_curve.set_ylabel("Mutual Information (bits)")  # give I(C)
+    ax_mi_curve.set_xlabel("Offset in Days (k)")
+    plt.legend()
+
+    def draw(row_ind, col_ind):
+        ax_mi_curve.set_title(f"{ax_mi_curve_title} for {col_ind, row_ind}")
+
+        f_mi = mi_grid[0, :, row_ind, col_ind]
+        f_cmi = cmi_grid[0, :, row_ind, col_ind]
+        t = np.arange(1, len(f_mi) + 1)  # start at one because offset starts at 1
+
+        set_line(f=f_mi, t=t, ax=ax_mi_curve, line=line_mi)
+        set_line(f=f_cmi, t=t, ax=ax_mi_curve, line=line_cmi)
+        fig.canvas.draw()
+
+    def on_click(event):
+        # log.info(f"event => {pformat(event.__dict__)}")
+        if hasattr(event, "xdata") and hasattr(event, "ydata"):
+            if event.xdata and event.ydata:  # check that axis is the imshow
+                row_ind = int(np.round(event.ydata))
+                col_ind = int(np.round(event.xdata))
+                draw(row_ind, col_ind)
+        return True
+
+    fig.canvas.mpl_connect('button_press_event', on_click)
+    plt.subplots_adjust(
+        left=0.,
+        right=0.9,
+        bottom=0.1,
+        top=0.95,
+        wspace=0.3,
+        hspace=0.1,
     )
 
     plt.tight_layout()
@@ -200,6 +271,7 @@ def interactive_mi(mi_grid, cmi_grid, crime_grid):
 
 def main():
     conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01")
+    # conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X425M-Y440M_2013-01-01_2017-01-01")
 
     squeezed_crimes = shaper.squeeze(sparse_crimes)
     # squeezed_crimes[squeezed_crimes > 0] = 1
@@ -216,7 +288,7 @@ def main():
 
     data = np.concatenate([squeezed_crimes, dow_ncl], axis=1)
 
-    K = 7 * 6
+    K = 90 # 7 * 6
     file_name = f"arrays_K{K:02d}"
     file_dir = f"{conf.data_path}mutual_info"
     file_location = f"{file_dir}/{file_name}.npy.npz"
@@ -274,6 +346,7 @@ def main():
                             mi_arr=mi_arr)
         _info(f"Saved mutual information arrays at: {file_location}")
 
+    global normalize
     normalize = False
     mi_grid = construct_mi_grid(mi_arr=mi_arr, shaper=shaper, normalize=normalize)
     cmi_grid = construct_mi_grid(mi_arr=cmi_arr, shaper=shaper, normalize=normalize)
@@ -283,9 +356,14 @@ def main():
     _info(f"mi_grid.max(), cmi_grid.max() => {mi_grid.max(), cmi_grid.max()}")
     _info(f"MAX_Y_LIM => {MAX_Y_LIM}")
 
-    interactive_mi(mi_grid=mi_grid,
-                   cmi_grid=cmi_grid,
-                   crime_grid=sparse_crimes)
+    interactive_mi_one_plot(mi_grid=mi_grid,
+                            cmi_grid=cmi_grid,
+                            crime_grid=sparse_crimes)
+
+    # interactive_mi_two_plots(mi_grid=mi_grid,
+    #                          cmi_grid=cmi_grid,
+    #                          crime_grid=sparse_crimes)
+
     # interactive_mi_grid(mi_grid=mi_grid, crime_grid=sparse_crimes, is_conditional_mi=False)
     # interactive_mi_grid(mi_grid=cmi_grid, crime_grid=sparse_crimes,is_conditional_mi=True)
 

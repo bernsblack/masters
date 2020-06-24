@@ -4,6 +4,10 @@
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Feature: More mock data generators for the RNN and CNN type models.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/interactive_mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/mutual_information.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -75,7 +79,7 @@
       <recent name="$PROJECT_DIR$/datasets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional">
+  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -190,19 +194,19 @@
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
+      <item itemvalue="Python.interactive_mutual_information" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_entropy" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
-      <item itemvalue="Python.interactive_mutual_information" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
         <item itemvalue="Python.interactive_mutual_information" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conitional_entropy" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
       </list>
     </recent_temporary>
   </component>
@@ -313,7 +317,8 @@
       <workItem from="1592322993225" duration="2196000" />
       <workItem from="1592395466884" duration="292000" />
       <workItem from="1592398327213" duration="2028000" />
-      <workItem from="1592641840787" duration="25535000" />
+      <workItem from="1592641840787" duration="26057000" />
+      <workItem from="1592937936766" duration="4928000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -394,38 +399,58 @@
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state x="339" y="342" key="#com.jetbrains.python.refactoring.move.PyMakeFunctionTopLevelDialog/0.23.1440.804@0.23.1440.804" timestamp="1592137031053" />
+    <state x="502" y="-811" key="#com.jetbrains.python.refactoring.move.PyMoveModuleMembersDialog" timestamp="1592941882110">
+      <screen x="-583" y="-1417" width="2560" height="1417" />
+    </state>
+    <state x="502" y="-811" key="#com.jetbrains.python.refactoring.move.PyMoveModuleMembersDialog/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592941882110" />
     <state x="100" y="123" width="1240" height="604" key="DiffContextDialog" timestamp="1592338232736">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state x="100" y="123" width="1240" height="604" key="DiffContextDialog/0.23.1440.804@0.23.1440.804" timestamp="1592338232736" />
-    <state width="2518" height="381" key="GridCell.Tab.0.bottom" timestamp="1592746022799">
-      <screen x="-583" y="-1417" width="2560" height="1417" />
+    <state width="1398" height="204" key="GridCell.Tab.0.bottom" timestamp="1592977063857">
+      <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="2518" height="381" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022799" />
-    <state width="1398" height="202" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1592324255792" />
+    <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
     <state width="1183" height="378" key="GridCell.Tab.0.bottom/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528634" />
-    <state width="2518" height="378" key="GridCell.Tab.0.bottom/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762929" />
-    <state width="2518" height="381" key="GridCell.Tab.0.center" timestamp="1592746022797">
-      <screen x="-583" y="-1417" width="2560" height="1417" />
+    <state width="2518" height="381" key="GridCell.Tab.0.bottom/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265818" />
+    <state width="1398" height="204" key="GridCell.Tab.0.center" timestamp="1592977063857">
+      <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="2518" height="381" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022797" />
-    <state width="1398" height="202" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1592324255791" />
+    <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
     <state width="1183" height="378" key="GridCell.Tab.0.center/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528633" />
-    <state width="2518" height="378" key="GridCell.Tab.0.center/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762928" />
-    <state width="2518" height="381" key="GridCell.Tab.0.left" timestamp="1592746022796">
-      <screen x="-583" y="-1417" width="2560" height="1417" />
+    <state width="2518" height="381" key="GridCell.Tab.0.center/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265816" />
+    <state width="1398" height="204" key="GridCell.Tab.0.left" timestamp="1592977063856">
+      <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="2518" height="381" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022796" />
-    <state width="1398" height="202" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1592324255791" />
+    <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1592977063856" />
     <state width="1183" height="378" key="GridCell.Tab.0.left/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528633" />
-    <state width="2518" height="378" key="GridCell.Tab.0.left/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762928" />
-    <state width="2518" height="381" key="GridCell.Tab.0.right" timestamp="1592746022798">
-      <screen x="-583" y="-1417" width="2560" height="1417" />
+    <state width="2518" height="381" key="GridCell.Tab.0.left/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265814" />
+    <state width="1398" height="204" key="GridCell.Tab.0.right" timestamp="1592977063857">
+      <screen x="0" y="23" width="1440" height="804" />
     </state>
     <state width="2518" height="381" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592746022798" />
-    <state width="1398" height="202" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1592324255792" />
+    <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
     <state width="1183" height="378" key="GridCell.Tab.0.right/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528634" />
-    <state width="2518" height="378" key="GridCell.Tab.0.right/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015762929" />
+    <state width="2518" height="381" key="GridCell.Tab.0.right/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265817" />
+    <state width="1398" height="173" key="GridCell.Tab.1.bottom" timestamp="1592976858001">
+      <screen x="0" y="23" width="1440" height="804" />
+    </state>
+    <state width="1398" height="173" key="GridCell.Tab.1.bottom/0.23.1440.804@0.23.1440.804" timestamp="1592976858001" />
+    <state width="1398" height="173" key="GridCell.Tab.1.center" timestamp="1592976857998">
+      <screen x="0" y="23" width="1440" height="804" />
+    </state>
+    <state width="1398" height="173" key="GridCell.Tab.1.center/0.23.1440.804@0.23.1440.804" timestamp="1592976857998" />
+    <state width="1398" height="173" key="GridCell.Tab.1.left" timestamp="1592976857997">
+      <screen x="0" y="23" width="1440" height="804" />
+    </state>
+    <state width="1398" height="173" key="GridCell.Tab.1.left/0.23.1440.804@0.23.1440.804" timestamp="1592976857997" />
+    <state width="1398" height="173" key="GridCell.Tab.1.right" timestamp="1592976857998">
+      <screen x="0" y="23" width="1440" height="804" />
+    </state>
+    <state width="1398" height="173" key="GridCell.Tab.1.right/0.23.1440.804@0.23.1440.804" timestamp="1592976857998" />
     <state x="114" y="64" width="1252" height="722" key="SettingsEditor" timestamp="1591454632557">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
@@ -435,10 +460,10 @@
     </state>
     <state x="93" y="-1005" key="com.intellij.ide.util.TipDialog/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1586868568602" />
     <state x="93" y="-1026" key="com.intellij.ide.util.TipDialog/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1586336899180" />
-    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1592645152013">
+    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1592942578926">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
-    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592645152013" />
+    <state x="345" y="-1124" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592942578926" />
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1592643180500">
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
@@ -459,6 +484,7 @@
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_datasets_test_max_index_gt.coverage" NAME="pytest for test_datasets.test_max_index_gt Coverage Results" MODIFIED="1571327324407" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_in_test_mutual_information_py.coverage" NAME="pytest in test_mutual_information.py Coverage Results" MODIFIED="1581449469874" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/masters$pytest_for_sparse_discrete_table_test_TestSparseDiscreteTable_test_conditional_mutual_information.coverage" NAME="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information Coverage Results" MODIFIED="1592976857945" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$pytest_for_test_dataloader_TestDataLoaderIndexing_test_test_loader_indices.coverage" NAME="pytest for test_dataloader.TestDataLoaderIndexing.test_test_loader_indices Coverage Results" MODIFIED="1572199454465" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$dev.coverage" NAME="dev Coverage Results" MODIFIED="1573996533006" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/masters$generate_mock_data.coverage" NAME="generate_mock_data Coverage Results" MODIFIED="1569335381277" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
