@@ -1,18 +1,14 @@
+import logging as log
 import os
+from pprint import pformat
+from sys import argv
 
 import matplotlib.pyplot as plt
 import numpy as np
-from pprint import pformat
-
-from matplotlib.axis import Axis
-from matplotlib.lines import Line2D
 
 from sparse_discrete_table import SparseDiscreteTable
 from utils.mutual_information import construct_mi_grid
 from utils.setup import setup
-import logging as log
-
-import os
 
 _info = log.info
 global MAX_Y_LIM
@@ -269,8 +265,10 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid):
     plt.show()
 
 
-def main():
-    conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01")
+def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
+    _info(f"Running interactive plotting -> data_sub_path => {data_sub_path} K => {K}")
+
+    conf, shaper, sparse_crimes = setup(data_sub_path=data_sub_path)
     # conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X425M-Y440M_2013-01-01_2017-01-01")
 
     squeezed_crimes = shaper.squeeze(sparse_crimes)
@@ -288,7 +286,7 @@ def main():
 
     data = np.concatenate([squeezed_crimes, dow_ncl], axis=1)
 
-    K = 90 # 7 * 6
+    # K = 90 # 7 * 6
     file_name = f"arrays_K{K:02d}"
     file_dir = f"{conf.data_path}mutual_info"
     file_location = f"{file_dir}/{file_name}.npy.npz"
@@ -303,7 +301,6 @@ def main():
     else:
         _info(f"Mutual information does not exist at: {file_dir}")
         _info(f"Generating mutual information")
-        # todo abstract into function - persist under data_sub_path
         rv_names = ['RV0_Ct', 'RV0_Dt', 'RV1_Ct-k', 'RV1_Dt-k']  # Ct: crime at t. Dt: day of week at t
         mi_list = []
         cmi_list = []
@@ -347,7 +344,7 @@ def main():
         _info(f"Saved mutual information arrays at: {file_location}")
 
     global normalize
-    normalize = False
+    normalize = True
     mi_grid = construct_mi_grid(mi_arr=mi_arr, shaper=shaper, normalize=normalize)
     cmi_grid = construct_mi_grid(mi_arr=cmi_arr, shaper=shaper, normalize=normalize)
 
@@ -369,4 +366,15 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+
+    if len(argv) < 3:
+        data_sub_path = "T24H-X850M-Y880M_2012-01-01_2019-01-01"
+        K = 90
+    else:
+        data_sub_path = argv[1]
+        K = int(argv[2])
+
+    # main(data_sub_path, K)
+    main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90)
+    # main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=42)
+    # main(data_sub_path="T24H-X425M-Y440M_2013-01-01_2017-01-01", K=42)
