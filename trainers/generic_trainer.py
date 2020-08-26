@@ -5,7 +5,7 @@ from utils.metrics import LossPlotter
 
 
 # generic training loop
-def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
+def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None):
     """
     Generic training loop that handles:
     - early stopping
@@ -13,6 +13,8 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
     - logging
     - model checkpoints
     - saving epoch and batch losses
+    - scheduler: is used to systematically update the learning rate if a plateau is reached
+        if scheduler is None it will be ignored. Sheduler mode should be set to 'min'
 
     :returns: best validation loss of all the epochs - used to tune the hyper-parameters of the models/optimiser
     """
@@ -74,6 +76,9 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
 
             val_epoch_losses.append(epoch_loss)
             log.debug(f"Epoch {epoch} -> Validation Loop Duration: {conf.timer.check()}")
+
+            if scheduler:
+                scheduler.step(epoch_loss)
 
         # save best model
         if val_epoch_losses[-1] < val_epoch_losses_best:

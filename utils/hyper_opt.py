@@ -40,7 +40,7 @@ def gaussian_process(x_samples, y_samples, x_estimates, alpha=1e-8):
 
 
 def next_parameter_by_ei(y_best, y_mean, y_std, x_choices, goal="minimize"):
-    # Calculate expecte improvement from 95% confidence interval
+    # Calculate expected improvement from 95% confidence interval
     if goal == "minimize":
         expected_improvement = y_best - (y_mean - 1.96 * y_std)
     elif goal == "maximize":
@@ -55,7 +55,7 @@ def next_parameter_by_ei(y_best, y_mean, y_std, x_choices, goal="minimize"):
     return next_parameter
 
 
-# Addapted from http://neupy.com/2016/12/17/hyperparameter_optimization_for_neural_networks.html#bayesian-optimization
+# Adapted from http://neupy.com/2016/12/17/hyperparameter_optimization_for_neural_networks.html#bayesian-optimization
 def hyper_param_selection(func, hyper_parameters_domain, n_iter=5, goal="minimize", gp_alpha=1e-8):
     """
     func: function used to sample network, training and validation data should be global in the notebook
@@ -63,11 +63,11 @@ def hyper_param_selection(func, hyper_parameters_domain, n_iter=5, goal="minimiz
     hyper_parameters_domain: dictionary containing all hyper parameters and all their possible values
     n_iter: maximum number of iterations
     goal: [minimize|maximize] states if function needs to be maximized/minimized
-    gp_alpha: alpha of gaussian process (GP). Alpha is the number added to the covariance matrix diagnol when fitting
+    gp_alpha: alpha of gaussian process (GP). Alpha is the number added to the covariance matrix diagonal when fitting
     the GP
 
     ::return::
-    X_samples: combination of hyper-paramets
+    X_samples: combination of hyper-parameters
     y_sample: matching func out for those samples
     """
     # set up hyper-param limits

@@ -209,8 +209,7 @@ class GridDataGroup:
 
 class GridDataset(Dataset):
     """
-    Grid datasets operate on un-flattened data where the map/grid of data has been is in
-    (N,C,H,W) format.
+    Grid datasets operate on un-flattened data where the map/grid of data has been is in (N,C,H,W) format.
     """
 
     def __init__(

@@ -21,7 +21,9 @@ def construct_mi_grid(mi_arr: np.ndarray, shaper: Shaper, normalize=True):
     """
     self_mi_arr, mi_arr = mi_arr[:, :1], mi_arr[:, 1:]
     if normalize:
-        mi_arr = mi_arr / self_mi_arr
+        # mi_arr = mi_arr / self_mi_arr # old faulty code
+        # np.divide will leave numerator as zero if denominator is zero - preventing div by zero error
+        mi_arr = np.divide(mi_arr, self_mi_arr, out=np.zeros_like(mi_arr), where=self_mi_arr!=0)
 
     mi_arr = np.swapaxes(mi_arr, 0, 1)
     mi_grid = shaper.unsqueeze(np.expand_dims(mi_arr, (0,)))

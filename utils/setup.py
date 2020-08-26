@@ -1,7 +1,7 @@
 """
 Used for shorthand setup functions to get shaper, doata, and config files
 """
-from typing import Tuple, Any
+from typing import Tuple, Any, List
 
 from logger import setup_logging
 from utils.configs import BaseConf
@@ -11,7 +11,7 @@ import os
 import numpy as np
 
 
-def setup(data_sub_path: str) -> Tuple[BaseConf, Shaper, Any]:
+def setup(data_sub_path: str) -> Tuple[BaseConf, Shaper, Any, List[str]]:
     """
     gets data conf and sets up logging
 
@@ -37,12 +37,11 @@ def setup(data_sub_path: str) -> Tuple[BaseConf, Shaper, Any]:
                   default_level=log.INFO)
 
     with np.load(conf.data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
-        if conf.use_crime_types:
-            sparse_crimes = zip_file["crime_types_grids"]
-        else:
-            sparse_crimes = zip_file["crime_grids"]
+        sparse_crimes = zip_file["crime_types_grids"]
+        crime_feature_indices = zip_file["crime_feature_indices"]
+
 
     shaper = Shaper(data=sparse_crimes,
                     conf=conf)
 
-    return conf, shaper, sparse_crimes
+    return conf, shaper, sparse_crimes, crime_feature_indices

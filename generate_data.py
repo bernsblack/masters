@@ -1,5 +1,7 @@
 import os
 import pickle
+from pprint import pprint
+
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from utils.utils import *
@@ -23,8 +25,8 @@ if __name__ == "__main__":
     y_scale = config["y_scale"]
 
     # used as info file for the folder where the data is created
-    info = dict()
-    info["createdOn"] = datetime.now().strftime("%Y%m%dT%H%M")
+    meta_info = dict()
+    meta_info["createdOn"] = datetime.now().strftime("%Y%m%dT%H%M")
     load_folder_raw = "./data/raw/"
     load_folder_original = "./data/original/"
 
@@ -64,16 +66,18 @@ if __name__ == "__main__":
     #                PREPROCESS DATA                     #
     ######################################################
     # Time dimensions
-    info["dT"] = dT
+    meta_info["dT"] = dT
     # Spatial dimensions
 
     # [20,16] - [10,8] - [5,4] - [3,2] - [1,1]
     xy_scale = np.array([x_scale, y_scale])  # must be integer so that we can easily sample demographic data
     dx, dy = xy_scale * np.array([0.001, 0.001])
-    info["dx"] = float(dx)
-    info["dy"] = float(dy)
-    info["x in metres"] = 85000 * float(dx)
-    info["y in metres"] = 110000 * float(dy)
+    meta_info["x_scale"] = x_scale
+    meta_info["y_scale"] = y_scale
+    meta_info["dx"] = float(dx)
+    meta_info["dy"] = float(dy)
+    meta_info["x in metres"] = 85000 * float(dx)
+    meta_info["y in metres"] = 110000 * float(dy)
 
     log.info("Cell sizes: %.3f m in x direction and %.3f m in y direction" % (85000 * dx, 110000 * dy))
 
@@ -99,8 +103,8 @@ if __name__ == "__main__":
 
     start_date = config["start_date"]
     end_date = config["end_date"]
-    info["start_date"] = start_date
-    info["end_date"] = end_date
+    meta_info["start_date"] = start_date
+    meta_info["end_date"] = end_date
 
     t_range = pd.date_range(start_date, end_date, freq=dT)
     crimes = crimes[crimes.Date < t_range[-1]]  # choose only crimes which lie in the valid time range
@@ -193,16 +197,16 @@ if __name__ == "__main__":
     log.info(f"t_range[-1] -> {t_range[-1]}")
     log.info(f"t_range[0] -> {t_range[0]}")
 
-    info["t_size"] = t_size
-    info["x_size"] = x_size
-    info["y_size"] = y_size
+    meta_info["t_size"] = t_size
+    meta_info["x_size"] = x_size
+    meta_info["y_size"] = y_size
 
-    info["crimes.t.max()"] = int(crimes.t.max())
-    info["crimes.t.min()"] = int(crimes.t.min())
-    info["crimes.x.max()"] = int(crimes.x.max())
-    info["crimes.x.min()"] = int(crimes.x.min())
-    info["crimes.y.max()"] = int(crimes.y.max())
-    info["crimes.y.min()"] = int(crimes.y.min())
+    meta_info["crimes.t.max()"] = int(crimes.t.max())
+    meta_info["crimes.t.min()"] = int(crimes.t.min())
+    meta_info["crimes.x.max()"] = int(crimes.x.max())
+    meta_info["crimes.x.min()"] = int(crimes.x.min())
+    meta_info["crimes.y.max()"] = int(crimes.y.max())
+    meta_info["crimes.y.min()"] = int(crimes.y.min())
 
     crime_grids = make_grid(A, t_size, x_size, y_size)
 
@@ -315,14 +319,16 @@ if __name__ == "__main__":
     #                           CRIME TYPES GRID                            #
     #########################################################################
 
-    c2i = {"THEFT": 0,
-           "BATTERY": 1,
-           "CRIMINAL DAMAGE": 2,
-           "NARCOTICS": 3,
-           "ASSAULT": 4,
-           "BURGLARY": 5,
-           "MOTOR VEHICLE THEFT": 6,
-           "ROBBERY": 7}  # can also change the values to group certain crimes into a class
+    c2i = {
+        "THEFT": 0,
+        "BATTERY": 1,
+        "CRIMINAL DAMAGE": 2,
+        "NARCOTICS": 3,
+        "ASSAULT": 4,
+        "BURGLARY": 5,
+        "MOTOR VEHICLE THEFT": 6,
+        "ROBBERY": 7,
+    }  # can also change the values to group certain crimes into a class
 
 
     #                       - like battery and assault into a type and theft and robbery and
@@ -393,7 +399,8 @@ if __name__ == "__main__":
         "BURGLARY",
         "MOTOR VEHICLE THEFT",
         "ROBBERY",
-        "Arrest"]
+        "Arrest",
+    ]
 
     A = crimes[["t", "x", "y", "TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
                 "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]].values
@@ -407,7 +414,7 @@ if __name__ == "__main__":
     #########################################################################
     #                            SAVE DATA                                  #
     #########################################################################
-    save_folder = f"./data/processed/T{dT:02d}-X{int(info['x in metres']):04d}M-Y{int(info['y in metres']):04d}M_{info['start_date']}_{info['end_date']}/"
+    save_folder = f"./data/processed/T{dT}-X{int(meta_info['x in metres'])}M-Y{int(meta_info['y in metres'])}M_{meta_info['start_date']}_{meta_info['end_date']}/"
 
     os.makedirs(save_folder, exist_ok=True)
     os.makedirs(save_folder + "plots", exist_ok=True)
@@ -501,7 +508,7 @@ if __name__ == "__main__":
     # - open weather data has more data but has quite a few gaps
     # np.save(folder+"weather_vectors.npy", weather_vectors)
 
-    write_json(info, f"{save_folder}info.json")
+    write_json(meta_info, f"{save_folder}info.json")
     write_json(config, f"{save_folder}generate_data_config.json")
 
     log.info("=====================================END=====================================")

@@ -8,6 +8,7 @@ import numpy as np
 
 from sparse_discrete_table import SparseDiscreteTable
 from utils.mutual_information import construct_mi_grid
+from utils.preprocessing import Shaper
 from utils.setup import setup
 
 _info = log.info
@@ -193,7 +194,7 @@ def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     plt.show()
 
 
-def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid):
+def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
     """
     crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
@@ -202,6 +203,8 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid):
     _, _, n_rows, n_cols = mi_grid.shape
 
     fig = plt.figure(figsize=(9, 8))  # , constrained_layout=True)
+    if suptitle:
+        fig.suptitle()
 
     gs = fig.add_gridspec(2, 3)
     ax_crime_img = fig.add_subplot(gs[0, 0])
@@ -265,15 +268,31 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid):
     plt.show()
 
 
-def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
-    _info(f"Running interactive plotting -> data_sub_path => {data_sub_path} K => {K}")
+def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL'):
+    _info(f"Running interactive plotting -> data_sub_path => {data_sub_path} K => {max_offset}")
 
-    conf, shaper, sparse_crimes = setup(data_sub_path=data_sub_path)
+    conf, shaper, sparse_crimes, crime_feature_indices = setup(data_sub_path=data_sub_path)
     # conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X425M-Y440M_2013-01-01_2017-01-01")
+
+    crime_types_mapping = {
+        'TOTAL': 0,
+        'THEFT': 1,
+        'BATTERY': 2,
+        'CRIMINAL DAMAGE': 3,
+        'NARCOTICS': 4,
+        'ASSAULT': 5,
+        'BURGLARY': 6,
+        'MOTOR VEHICLE THEFT': 7,
+        'ROBBERY': 8,
+        'Arrest': 9,
+    }
+    crime_type_index = crime_types_mapping[crime_type]
+    sparse_crimes = sparse_crimes[:, crime_type_index:crime_type_index + 1]
+    shaper = Shaper(sparse_crimes, conf)
 
     squeezed_crimes = shaper.squeeze(sparse_crimes)
     # squeezed_crimes[squeezed_crimes > 0] = 1
-    squeezed_crimes[squeezed_crimes > 40] = 40
+    squeezed_crimes[squeezed_crimes > 32] = 32
     squeezed_crimes = np.round(np.log2(1 + squeezed_crimes))
     _info(f"squeezed_crimes values =>{np.unique(squeezed_crimes)}")
 
@@ -287,7 +306,7 @@ def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
     data = np.concatenate([squeezed_crimes, dow_ncl], axis=1)
 
     # K = 90 # 7 * 6
-    file_name = f"arrays_K{K:02d}"
+    file_name = f"arrays_K{max_offset:02d}_{crime_type}"
     file_dir = f"{conf.data_path}mutual_info"
     file_location = f"{file_dir}/{file_name}.npy.npz"
     if not os.path.exists(file_dir):
@@ -295,9 +314,10 @@ def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
 
     if os.path.exists(file_location):
         _info(f"Loading existing mutual information data from: {file_dir}")
-        with np.load(file_location) as zip_file:  # context helper ensures zip_file is closed
+        with np.load(file_location, allow_pickle=True) as zip_file:  # context helper ensures zip_file is closed
             mi_arr = zip_file["mi_arr"]
             cmi_arr = zip_file["cmi_arr"]
+            return sparse_crimes, mi_arr, cmi_arr, shaper
     else:
         _info(f"Mutual information does not exist at: {file_dir}")
         _info(f"Generating mutual information")
@@ -309,7 +329,7 @@ def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
                 print(f"{i + 1}/{l} => {(i + 1) / l * 100}%")
             mi_list.append([])
             cmi_list.append([])
-            for k in range(0, K + 1):  # K is the maximum
+            for k in range(0, max_offset + 1):  # K is the maximum
                 if k == 0:
                     joint = np.concatenate([data[:, :, i], data[:, :, i]], axis=1)
                 else:
@@ -323,7 +343,7 @@ def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
                 # self_information is just the entropy of the variables
                 rv = SparseDiscreteTable(rv_names=rv_names, table=table)
                 if k == 0:
-                    # entropy of the variable we are trying to measure - minum bytes needed to encode the distribution
+                    # entropy of the variable we are trying to measure - minimum bits needed to encode the distribution
                     self_information = rv['RV0_Ct',].entropy()
                     cmi_list[i].append(self_information)
                     mi_list[i].append(self_information)
@@ -340,11 +360,42 @@ def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
         cmi_arr = np.array(cmi_list)
         np.savez_compressed(file=file_location,
                             cmi_arr=cmi_arr,
-                            mi_arr=mi_arr)
+                            mi_arr=mi_arr,
+                            allow_pickle=True)
         _info(f"Saved mutual information arrays at: {file_location}")
+        return sparse_crimes, mi_arr, cmi_arr, shaper
 
+
+def generate_grids_for_all(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90):
+    crime_types = [
+        'TOTAL',
+        'THEFT',
+        'BATTERY',
+        'CRIMINAL DAMAGE',
+        'NARCOTICS',
+        'ASSAULT',
+        'BURGLARY',
+        'MOTOR VEHICLE THEFT',
+        'ROBBERY',
+    ]
+    for crime_type in crime_types:
+        _info(f"START => Generating MI grids for crime type: {crime_type}")
+        sparse_crimes, mi_arr, cmi_arr, shaper = generate_mi_maps(data_sub_path, max_offset, crime_type)
+        global normalize
+        normalize = False
+        mi_grid = construct_mi_grid(mi_arr=mi_arr, shaper=shaper, normalize=normalize)
+        cmi_grid = construct_mi_grid(mi_arr=cmi_arr, shaper=shaper, normalize=normalize)
+
+        global MAX_Y_LIM
+        MAX_Y_LIM = max(mi_grid.max(), cmi_grid.max())
+        _info(f"mi_grid.max(), cmi_grid.max() => {mi_grid.max(), cmi_grid.max()}")
+        _info(f"MAX_Y_LIM => {MAX_Y_LIM}")
+        _info(f"END => Generating MI grids for crime type: {crime_type}")
+
+def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL'):
+    sparse_crimes, mi_arr, cmi_arr, shaper = generate_mi_maps(data_sub_path, max_offset, crime_type)
     global normalize
-    normalize = True
+    normalize = False
     mi_grid = construct_mi_grid(mi_arr=mi_arr, shaper=shaper, normalize=normalize)
     cmi_grid = construct_mi_grid(mi_arr=cmi_arr, shaper=shaper, normalize=normalize)
 
@@ -366,15 +417,30 @@ def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90):
 
 
 if __name__ == '__main__':
-
-    if len(argv) < 3:
-        data_sub_path = "T24H-X850M-Y880M_2012-01-01_2019-01-01"
-        K = 90
+    if len(argv) < 4:
+        data_sub_path_ = argv[1]
+        K_ = int(argv[2])
+        generate_grids_for_all(data_sub_path_, K_)
+        # raise Exception("Please specify data_sub_path, max_offset and crime type")
     else:
-        data_sub_path = argv[1]
-        K = int(argv[2])
+        data_sub_path_ = argv[1]
+        K_ = int(argv[2])
+        crime_type_ = argv[3]
 
-    # main(data_sub_path, K)
-    main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=90)
-    # main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", K=42)
-    # main(data_sub_path="T24H-X425M-Y440M_2013-01-01_2017-01-01", K=42)
+        # crime_types_mapping = {
+        #     'TOTAL': 0,
+        #     'THEFT': 1,
+        #     'BATTERY': 2,
+        #     'CRIMINAL DAMAGE': 3,
+        #     'NARCOTICS': 4,
+        #     'ASSAULT': 5,
+        #     'BURGLARY': 6,
+        #     'MOTOR VEHICLE THEFT': 7,
+        #     'ROBBERY': 8,
+        #     'Arrest': 9,
+        # }
+
+
+        main(data_sub_path_, K_, crime_type_)
+
+

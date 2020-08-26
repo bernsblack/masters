@@ -432,6 +432,22 @@ def plot_dist(a, zoom=True):
         plt.bar(val, dst)
 
 
+def plot_count(a):
+    val, cnt = np.unique(a, return_counts=True)
+    plt.title("Value Counts")
+    plt.yticks(np.arange(0, 101, 10))
+    if type(val[0]) == str:
+        plt.xlabel("Count")
+        plt.grid()
+        plt.ylabel("Class")
+        plt.barh(val, cnt)
+    else:
+        plt.xlabel("Value")
+        plt.grid()
+        plt.ylabel("Count")
+        plt.bar(val, cnt)
+
+
 def plot_grid_sum_over_time(a):
     plt.plot(a.sum(1).sum(1))
 

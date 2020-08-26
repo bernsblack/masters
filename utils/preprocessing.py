@@ -95,7 +95,9 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
 class Shaper:
     def __init__(self, data, conf: BaseConf):
         """
+
         :param data: array shaped (N, C, H, W)
+        :param conf: contains: shaper_threshold and shaper_top_k used to determine cells to keep in dense representation
         """
         threshold = conf.shaper_threshold # sum over all time should be above this threshold
         top_k = conf.shaper_top_k # if larger than 0 we filter out only the top k most active cells of the data grid
