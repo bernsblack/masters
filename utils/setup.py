@@ -1,14 +1,15 @@
 """
 Used for shorthand setup functions to get shaper, doata, and config files
 """
+import logging as log
+import os
 from typing import Tuple, Any, List
+
+import numpy as np
 
 from logger import setup_logging
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper
-import logging as log
-import os
-import numpy as np
 
 
 def setup(data_sub_path: str) -> Tuple[BaseConf, Shaper, Any, List[str]]:
