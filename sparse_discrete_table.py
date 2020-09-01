@@ -323,3 +323,17 @@ class SparseDiscreteTable:
 
     def __truediv__(self, other: SparseDiscreteTable) -> SparseDiscreteTable:
         return self.apply(func=div, ext_rv=other)
+
+
+def build_discrete_table(obs_arr: np.ndarray, rv_names: List[str]) -> SparseDiscreteTable:
+    """
+    obs_arr: array of observations N,D where N is number of observations and D the number of RVs
+    rv_names: list of D rv names in same order as the obs_arr axis 1
+    """
+    val, cnt = np.unique(obs_arr, return_counts=True, axis=0)
+    prb = cnt / np.sum(cnt)
+    table = {}
+    for k, v in zip(list(map(tuple, val)), list(prb)):
+        table[k] = v
+    dt = SparseDiscreteTable(rv_names=rv_names, table=table)
+    return dt

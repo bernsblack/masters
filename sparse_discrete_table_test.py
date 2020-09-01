@@ -1,6 +1,6 @@
 import unittest
 
-from sparse_discrete_table import SparseDiscreteTable
+from sparse_discrete_table import SparseDiscreteTable, build_discrete_table
 import numpy as np
 
 
@@ -122,7 +122,7 @@ class TestSparseDiscreteTable(unittest.TestCase):
         mi_xy_implicit = p_xy.mutual_information(rv_names_0=['x'], rv_names_1=['y'])
         print("mi_xy_implicit", mi_xy_implicit)
 
-        self.assertAlmostEquals(mi_xy_explicit, mi_xy_implicit)
+        self.assertAlmostEqual(mi_xy_explicit, mi_xy_implicit)
 
     def test_conditional_mutual_information(self):
         """                        +-                                   -+
@@ -172,3 +172,42 @@ class TestSparseDiscreteTable(unittest.TestCase):
 
         print("p_xy['x','y']", p_xy['x', 'y'])
         self.assertEqual(p_xy['x', 'y'], p_xy.marginal(['x', 'y']))
+
+class TestConditionalMutualInformation(unittest.TestCase):
+
+    def test_conditional_references(self):
+        """
+        MI(X,Y) = 0.133086
+        MI(X,Y|Z=0) = 0.000852316
+
+        H(Y) = 1.48242
+        H(Y|Z=0) = 1.15378
+        """
+        decimal_place = 5
+
+        rv_names = ['x', 'y', 'z']
+        arr_zxy = np.loadtxt('zxy.txt')
+        arr_x, arr_y, arr_z = arr_zxy[:, 1], arr_zxy[:, 2], arr_zxy[:, 0]
+
+        arr_xyz = np.stack([arr_x, arr_y, arr_z], axis=1)  # xyz
+        arr_xyz0 = arr_xyz[arr_z == 0]
+        arr_xyz1 = arr_xyz[arr_z == 1]
+
+        dt_xyz = build_discrete_table(obs_arr=arr_xyz, rv_names=rv_names)
+        dt_xyz0 = build_discrete_table(obs_arr=arr_xyz0, rv_names=rv_names)
+        # dt_xyz1 = build_discrete_table(obs_arr=arr_xyz1, rv_names=rv_names)
+
+        mi = dt_xyz.mutual_information(rv_names_0=['x'], rv_names_1=['y'])
+        hy = dt_xyz.marginal(['y']).entropy()
+
+        mi_xyz0 = dt_xyz0.mutual_information(rv_names_0=['x'], rv_names_1=['y'])
+        hy_xyz0 = dt_xyz0.marginal(['y']).entropy()
+
+        # mi_xyz1 = dt_xyz1.mutual_information(rv_names_0=['x'], rv_names_1=['y'])
+        # hy_xyz1 = dt_xyz1.marginal(['y']).entropy()
+        # mic_z = dt_xyz.conditional_mutual_information(rv_names_0=['x'], rv_names_1=['y'], rv_names_condition=['z'])
+
+        self.assertAlmostEqual(0.133086, mi, places=decimal_place)
+        self.assertAlmostEqual(0.000852316, mi_xyz0, places=decimal_place)
+        self.assertAlmostEqual(1.48242, hy, places=decimal_place)
+        self.assertAlmostEqual(1.15378, hy_xyz0, places=decimal_place)

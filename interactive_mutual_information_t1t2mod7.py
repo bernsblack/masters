@@ -69,7 +69,7 @@ def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
         ax2_title = "CMI per Temporal Offset"
         ax0.set_title("Conditional Mutual Information (CMI) Mean over Offset")
         ax2.set_title(ax2_title)
-        ax2.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$")  # give I(C)
+        ax2.set_ylabel("CMI - $I(C_{t},C_{t-k}|kmod7)$")  # give I(C)
         ax2.set_xlabel("Offset in Days (k)")
     else:
         ax0.set_title("Mutual Information (MI) Mean over Offset")
@@ -141,8 +141,8 @@ def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     _img_mi = ax_mi_img.imshow(mi_grid.mean(axis=(0, 1)))
     _img_cmi = ax_cmi_img.imshow(cmi_grid.mean(axis=(0, 1)))
     _img_crime = ax_crime_img.imshow(crime_grid.mean(axis=(0, 1)))
-    line_mi, = ax_mi_curve.plot([0], [0])
-    line_cmi, = ax_cmi_curve.plot([0], [0])
+    line_mi, = ax_mi_curve.plot([0], [0], marker='+')
+    line_cmi, = ax_cmi_curve.plot([0], [0], marker='x')
 
     ax_crime_img.set_title("Mean Crime Count")
     ax_crime_img.set_title("Crime Rate Grid")
@@ -156,7 +156,7 @@ def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     ax_cmi_curve_title = "CMI per Temporal Offset"
     ax_cmi_img.set_title("Conditional Mutual Information (CMI)\nMean over Time Offset")
     ax_cmi_curve.set_title(ax_cmi_curve_title)
-    ax_cmi_curve.set_ylabel("CMI - $I(C_{t},C_{t-k}|DoW_{t},DoW_{t-k})$")  # give I(C)
+    ax_cmi_curve.set_ylabel("CMI - $I(C_{t},C_{t-k}|kmod7)$")  # give I(C)
     ax_cmi_curve.set_xlabel("Offset in Days (k)")
 
     def draw(row_ind, col_ind):
@@ -215,8 +215,8 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
     _img_mi = ax_mi_img.imshow(mi_grid.mean(axis=(0, 1)))
     _img_cmi = ax_cmi_img.imshow(cmi_grid.mean(axis=(0, 1)))
     _img_crime = ax_crime_img.imshow(crime_grid.mean(axis=(0, 1)))
-    line_mi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k})$")
-    line_cmi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k}|DoW_{t},DoW_{t-k})$")
+    line_mi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k})$", alpha=0.6, marker='x')
+    line_cmi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k}|kmod7)$", alpha=0.6, marker='+')
 
     ax_crime_img.set_title("Mean Crime Count")
     ax_crime_img.set_title("Crime Rate Grid")
@@ -291,24 +291,24 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
     shaper = Shaper(sparse_crimes, conf)
 
     squeezed_crimes = shaper.squeeze(sparse_crimes)
-    cap = 8 # 1
-    squeezed_crimes[squeezed_crimes > cap] = cap
-
+    # squeezed_crimes[squeezed_crimes > 0] = 1
+    squeezed_crimes[squeezed_crimes > 32] = 32
     squeezed_crimes = np.round(np.log2(1 + squeezed_crimes))
     _info(f"squeezed_crimes values =>{np.unique(squeezed_crimes)}")
 
     n, c, l = squeezed_crimes.shape
 
     # setup the day of the week variables
-    dow_n = np.arange(n) % 7
+    dow_n = np.arange(n)
     dow_nc = np.expand_dims(dow_n, (1, 2))
     dow_ncl = np.ones((n, c, l)) * dow_nc
 
-    data = np.concatenate([squeezed_crimes, dow_ncl], axis=1)
+    # data = np.concatenate([squeezed_crimes, dow_ncl], axis=1)
+    data = squeezed_crimes
 
     # K = 90 # 7 * 6
-    file_name = f"arrays_K{max_offset:02d}_{crime_type}_CAP{cap}"
-    file_dir = f"{conf.data_path}mutual_info"
+    file_name = f"arrays_K{max_offset:02d}_{crime_type}"
+    file_dir = f"{conf.data_path}mutual_info_t1t2mod7"
     file_location = f"{file_dir}/{file_name}.npy.npz"
     if not os.path.exists(file_dir):
         os.mkdir(file_dir)
@@ -322,7 +322,7 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
     else:
         _info(f"Mutual information does not exist at: {file_dir}")
         _info(f"Generating mutual information")
-        rv_names = ['RV0_Ct', 'RV0_Dt', 'RV1_Ct-k', 'RV1_Dt-k']  # Ct: crime at t. Dt: day of week at t
+        rv_names = ['RV0_Ct', 'RV1_Ct-k', 'k_mod_7']  # Ct: crime at t. Dt: day of week at t
         mi_list = []
         cmi_list = []
         for i in range(l):
@@ -332,9 +332,10 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
             cmi_list.append([])
             for k in range(0, max_offset + 1):  # K is the maximum
                 if k == 0:
-                    joint = np.concatenate([data[k:, :, i], data[k:, :, i]], axis=1)
+                    joint = np.concatenate([data[k:, :, i], data[k:, :, i], dow_ncl[k:, :, i]], axis=1)
                 else:
-                    joint = np.concatenate([data[k:, :, i], data[:-k, :, i]], axis=1)
+                    dow_ncl_diff = (dow_ncl[k:, :, i] - dow_ncl[:-k, :, i]) % 7
+                    joint = np.concatenate([data[k:, :, i], data[:-k, :, i], dow_ncl_diff], axis=1)
                 val, cnt = np.unique(joint, return_counts=True, axis=0)
                 prb = cnt / np.sum(cnt)
                 table = {}
@@ -353,7 +354,7 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
                                                rv_names_1=['RV1_Ct-k'])
                     cmi = rv.conditional_mutual_information(rv_names_0=['RV0_Ct'],
                                                             rv_names_1=['RV1_Ct-k'],
-                                                            rv_names_condition=['RV0_Dt', 'RV1_Dt-k'])
+                                                            rv_names_condition=['k_mod_7'])
                     cmi_list[i].append(cmi)
                     mi_list[i].append(mi)
 
