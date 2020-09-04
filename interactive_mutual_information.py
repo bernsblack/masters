@@ -268,7 +268,7 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
     plt.show()
 
 
-def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL'):
+def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL', cap=32):
     _info(f"Running interactive plotting -> data_sub_path => {data_sub_path} K => {max_offset}")
 
     conf, shaper, sparse_crimes, crime_feature_indices = setup(data_sub_path=data_sub_path)
@@ -291,7 +291,7 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
     shaper = Shaper(sparse_crimes, conf)
 
     squeezed_crimes = shaper.squeeze(sparse_crimes)
-    cap = 8 # 1
+    cap = 32 # 1
     squeezed_crimes[squeezed_crimes > cap] = cap
 
     squeezed_crimes = np.round(np.log2(1 + squeezed_crimes))
@@ -394,12 +394,12 @@ def generate_grids_for_all(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01
         _info(f"END => Generating MI grids for crime type: {crime_type}")
 
 def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL'):
-    '''
+    """
 
     :param data_sub_path: location of the data
     :param max_offset: maximum days offset to compare mutual info to
     :param crime_type: string of crime type
-    '''
+    """
     sparse_crimes, mi_arr, cmi_arr, shaper = generate_mi_maps(data_sub_path, max_offset, crime_type)
     global normalize
     normalize = False

@@ -11,6 +11,32 @@ from torch.autograd import Variable
 from utils import deprecated
 
 
+def freq_to_nano(freq: str):
+    return pd.to_timedelta(freq).delta
+
+def time_series_to_time_index(t_series: pd.Series, t_step: str = '1D', floor: bool = True):
+    """
+    Convert a datetime series into a more comparable number series (helps with counting and multi-d histograms)
+    - starts at 0
+    - 1 unit represents the t_step specified in the arguments
+
+    Args:
+    =====
+    t_series: date time pandas series
+    t_step: string describing time step
+    floor: if the time index values should be floored to integers or kept as floats
+
+    """
+
+    dt_nano = freq_to_nano(t_step)
+
+    result = t_series.astype('int64')
+    t_min = result.min()
+
+    result = (result - t_min) // dt_nano if floor else (result - t_min) / dt_nano
+    return result
+
+
 def get_period(a):
     n = len(a)
     corr_list = []

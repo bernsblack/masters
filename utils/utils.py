@@ -8,6 +8,18 @@ import pandas as pd
 from pprint import pformat
 
 
+def ffloor(value, delta):
+    """
+    floors value to the nearest multiple of delta where delta can be a float
+    """
+    return np.floor(value/delta)*delta
+
+def fceil(value, delta):
+    """
+    ceils value to the nearest multiple of delta where delta can be a float
+    """
+    return np.ceil(value/delta)*delta
+
 def get_data_resolutions():
     def parse_st_resolution(s):
         dt, s = s.split("T")[-1].split('H')
