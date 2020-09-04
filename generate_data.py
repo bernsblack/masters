@@ -70,7 +70,7 @@ if __name__ == "__main__":
     # Spatial dimensions
 
     # [20,16] - [10,8] - [5,4] - [3,2] - [1,1]
-    xy_scale = np.array([t_ts, y_scale])  # must be integer so that we can easily sample demographic data
+    xy_scale = np.array([x_scale, y_scale])  # must be integer so that we can easily sample demographic data
     dx, dy = xy_scale * np.array([0.001, 0.001])
     meta_info["x_scale"] = x_scale
     meta_info["y_scale"] = y_scale
