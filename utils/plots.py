@@ -514,3 +514,34 @@ def plot3D(a):
     ax.bar3d(x, y, bottom, width, depth, z, shade=True, color=rgba)
 
     plt.show()
+
+
+# helper functions for heatmaps on plotly mapbox plots
+from geojson import Feature, FeatureCollection, Polygon
+from pandas import DataFrame
+def hist2d_to_geo(counts: np.ndarray, xbins: np.ndarray, ybins: np.ndarray, filter_zero=True):
+    feat_values = []
+
+    features = []
+    for i in range(len(xbins) - 1):
+        for j in range(len(ybins) - 1):
+            if filter_zero and counts[j, i] == 0:
+                continue
+            # coord (x,y)
+            x0, x1 = xbins[i], xbins[i + 1]
+            y0, y1 = ybins[j], ybins[j + 1]
+            coords = [[[x0, y0],
+                       [x0, y1],
+                       [x1, y1],
+                       [x1, y0]]]
+
+            feat_id = f"y{j}_x{i}"
+
+            feat_values.append((feat_id, counts[j, i], j,i))
+
+            feat = Feature(id=feat_id, geometry=Polygon(coordinates=coords))
+            features.append(feat)
+
+    geo_grid = FeatureCollection(features=features)
+    feat_df = DataFrame(feat_values, columns=['id', 'value', 'y', 'x'])
+    return geo_grid, feat_df
