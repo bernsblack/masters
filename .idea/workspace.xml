@@ -26,7 +26,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Minor formatting updates and MI calculations are saved to disk to speed up interactive plots.">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Feature Selection with Mutual Information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Feature Selection with Mutual Information.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/interactive_mutual_information_t1t2mod7.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information_t1t2mod7.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/mutual_information.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -98,7 +103,7 @@
       <recent name="$PROJECT_DIR$/datasets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation">
+  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -113,28 +118,6 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/generate_mock_data.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="interactive_mutual_information" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/interactive_mutual_information.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -210,21 +193,37 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
+    <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_normalized_mutual_information" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestSparseDiscreteTable.test_normalized_mutual_information&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python.interactive_mutual_information" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_normalized_mutual_information" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_normalized_mutual_information" />
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional_mutual_information" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable.test_conditional" />
-        <item itemvalue="Python.interactive_mutual_information" />
       </list>
     </recent_temporary>
   </component>
@@ -447,47 +446,56 @@
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
     <state x="502" y="-811" key="#com.jetbrains.python.refactoring.move.PyMoveModuleMembersDialog/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592941882110" />
-    <state x="200" y="158" width="1592" height="792" key="DiffContextDialog" timestamp="1597219241299">
-      <screen x="72" y="27" width="1848" height="1053" />
+    <state x="479" y="1574" width="1655" height="813" key="DiffContextDialog" timestamp="1599455547527">
+      <screen x="346" y="1440" width="1920" height="1080" />
     </state>
     <state x="100" y="123" width="1240" height="604" key="DiffContextDialog/0.23.1440.804@0.23.1440.804" timestamp="1592338232736" />
+    <state x="479" y="1574" width="1655" height="813" key="DiffContextDialog/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599455547527" />
     <state x="200" y="158" width="1592" height="792" key="DiffContextDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597219241299" />
     <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl" timestamp="1599033056077">
       <screen x="418" y="0" width="2142" height="2520" />
     </state>
     <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl/418.0.2142.2520@418.0.2142.2520" timestamp="1599033056077" />
     <state x="774" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1598469140656" />
-    <state width="1825" height="275" key="GridCell.Tab.0.bottom" timestamp="1598873895769">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="275" key="GridCell.Tab.0.bottom" timestamp="1599475019658">
+      <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970421" />
     <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
     <state width="1183" height="378" key="GridCell.Tab.0.bottom/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528634" />
     <state width="2518" height="381" key="GridCell.Tab.0.bottom/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265818" />
+    <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392723" />
+    <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895769" />
-    <state width="1825" height="275" key="GridCell.Tab.0.center" timestamp="1598873895768">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="275" key="GridCell.Tab.0.center" timestamp="1599475019658">
+      <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970399" />
     <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
     <state width="1183" height="378" key="GridCell.Tab.0.center/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528633" />
     <state width="2518" height="381" key="GridCell.Tab.0.center/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265816" />
+    <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
+    <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895768" />
-    <state width="1825" height="275" key="GridCell.Tab.0.left" timestamp="1598873895767">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="275" key="GridCell.Tab.0.left" timestamp="1599475019658">
+      <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970396" />
     <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1592977063856" />
     <state width="1183" height="378" key="GridCell.Tab.0.left/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528633" />
     <state width="2518" height="381" key="GridCell.Tab.0.left/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265814" />
+    <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
+    <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895766" />
-    <state width="1825" height="275" key="GridCell.Tab.0.right" timestamp="1598873895768">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="275" key="GridCell.Tab.0.right" timestamp="1599475019658">
+      <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970400" />
     <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
     <state width="1183" height="378" key="GridCell.Tab.0.right/0.23.1440.805/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1591252528634" />
     <state width="2518" height="381" key="GridCell.Tab.0.right/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592813265817" />
+    <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
+    <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895768" />
     <state width="1398" height="173" key="GridCell.Tab.1.bottom" timestamp="1593002969025">
       <screen x="-583" y="-1417" width="2560" height="1417" />
@@ -522,9 +530,10 @@
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="743" height="446" key="SwitcherDM/72.27.1848.1053@72.27.1848.1053" timestamp="1598377029315" />
-    <state x="792" y="232" width="398" height="650" key="VCS.ChangeListViewerDialog" timestamp="1597217710718">
-      <screen x="72" y="27" width="1848" height="1053" />
+    <state x="1094" y="1650" width="398" height="650" key="VCS.ChangeListViewerDialog" timestamp="1599224994311">
+      <screen x="346" y="1440" width="1920" height="1080" />
     </state>
+    <state x="1094" y="1650" key="VCS.ChangeListViewerDialog/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599224994311" />
     <state x="792" y="232" width="398" height="650" key="VCS.ChangeListViewerDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597217710718" />
     <state x="591" y="289" width="800" height="535" key="Vcs.Push.Dialog.v2" timestamp="1596458911923">
       <screen x="72" y="27" width="1848" height="1053" />
@@ -541,21 +550,24 @@
     </state>
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="901" y="354" width="1012" height="773" key="find.popup" timestamp="1599216108483">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state x="779" y="1592" width="909" height="783" key="find.popup" timestamp="1599467335464">
+      <screen x="346" y="1440" width="1920" height="1080" />
     </state>
     <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592745271900" />
     <state x="529" y="288" width="680" height="486" key="find.popup/0.23.1440.804@0.23.1440.804" timestamp="1592660279382" />
     <state x="357" y="-974" width="1209" height="807" key="find.popup/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015744488" />
+    <state x="779" y="1592" width="909" height="783" key="find.popup/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599467335464" />
     <state x="901" y="202" width="1012" height="522" key="find.popup/346.1440.1920.1080/418.0.2142.1440@418.0.2142.1440" timestamp="1596796873577" />
+    <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599383873928" />
     <state x="901" y="354" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1599216108483" />
     <state x="489" y="175" width="874" height="548" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606847298" />
-    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup" timestamp="1598606166645">
+    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup" timestamp="1599474953845">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592804759273" />
     <state x="385" y="151" width="670" height="676" key="search.everywhere.popup/0.23.1440.804@0.23.1440.804" timestamp="1592665157034" />
     <state x="101" y="-1203" width="1192" height="1131" key="search.everywhere.popup/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592812208274" />
+    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599474953845" />
     <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606166645" />
   </component>
 </project>

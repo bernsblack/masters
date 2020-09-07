@@ -86,7 +86,7 @@ def entropy(p_dist, axis=None):
     """
     p_dist: array of all probabilities
 
-    entropy should always be nonnegative, .i.e. > 0
+    entropy should always be non-negative, .i.e. > 0
 
     entropy = -sum(p_i*log(p_i))
     """

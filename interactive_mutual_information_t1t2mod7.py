@@ -395,12 +395,12 @@ def generate_grids_for_all(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01
         _info(f"END => Generating MI grids for crime type: {crime_type}")
 
 def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL'):
-    '''
+    """
 
     :param data_sub_path: location of the data
     :param max_offset: maximum days offset to compare mutual info to
     :param crime_type: string of crime type
-    '''
+    """
     sparse_crimes, mi_arr, cmi_arr, shaper = generate_mi_maps(data_sub_path, max_offset, crime_type)
     global normalize
     normalize = False

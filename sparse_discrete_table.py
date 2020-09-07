@@ -260,20 +260,41 @@ class SparseDiscreteTable:
         p_c = p_1c.marginal(rv_names_condition)
         return p_0c.entropy() + p_1c.entropy() - p_01c.entropy() - p_c.entropy()  # more summing might lead to greater floating point errors
 
-    def mutual_information(self, rv_names_0: List[str], rv_names_1: List[str]):
+    def mutual_information(self, rv_names_0: List[str], rv_names_1: List[str], normalize=False):
         """
         Mutual information: the reduction in uncertainty about one random variable given knowledge of another
         Measures how much rv_0 tells us about rv_1 or vice-versa
+        :param normalize: if the mutual information should be scaled to [0,1]
         :param rv_names_0:
         :param rv_names_1:
         :return: mutual information in bits (log2 is used in calculating the entropy)
         """
         union_names = sorted(union_lists(rv_names_0, rv_names_1))
         p_01 = self.marginal(union_names)
-        p_0 = p_01.marginal(rv_names=rv_names_0)
-        p_1 = p_01.marginal(rv_names=rv_names_1)
+        h_01 = p_01.entropy()
+        h_0 = p_01.marginal(rv_names=rv_names_0).entropy()
+        h_1 = p_01.marginal(rv_names=rv_names_1).entropy()
 
-        return p_0.entropy() + p_1.entropy() - p_01.entropy()
+        mi_01 = h_0 + h_1 - h_01
+
+        return mi_01 if not normalize else 2 * mi_01 / (h_0 + h_1)
+
+    def normalized_mutual_information(self, rv_names_0: List[str], rv_names_1: List[str]):
+        """
+        Mutual information: the reduction in uncertainty about one random variable given knowledge of another
+        Measures how much rv_0 tells us about rv_1 or vice-versa. By normalizing it we scale the min and max mutual
+        information to be 1 and 0 respectively using: NI(X,I) = 2*I(X,Y)/[H(X) + H(Y)]
+        :param rv_names_0:
+        :param rv_names_1:
+        :return: normalized mutual information value between 0 and 1
+        """
+        union_names = sorted(union_lists(rv_names_0, rv_names_1))
+        p_01 = self.marginal(union_names)
+        h_01 = p_01.entropy()
+        h_0 = p_01.marginal(rv_names=rv_names_0).entropy()
+        h_1 = p_01.marginal(rv_names=rv_names_1).entropy()
+
+        return 2 * (h_0 + h_1 - h_01) / (h_0 + h_1)
 
     def self_information(self, rv_names_0: List[str]):
         """

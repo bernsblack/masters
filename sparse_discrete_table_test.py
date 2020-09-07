@@ -173,6 +173,60 @@ class TestSparseDiscreteTable(unittest.TestCase):
         print("p_xy['x','y']", p_xy['x', 'y'])
         self.assertEqual(p_xy['x', 'y'], p_xy.marginal(['x', 'y']))
 
+    def test_mutual_information_normalized(self):
+        decimal_place = 5
+
+        obs_0 = np.array([[0, 0, 0, 0], [0, 1, 2, 3]]).T
+        obs_1 = np.array([[0, 0, 1, 1], [0, 0, 0, 1]]).T
+        obs_2 = np.array([[0, 0, 1, 1, 2], [1, 1, 0, 0, 2]]).T
+
+        dt_0 = build_discrete_table(obs_0, ['x', 'y'])
+        dt_1 = build_discrete_table(obs_1, ['x', 'y'])
+        dt_2 = build_discrete_table(obs_2, ['x', 'y'])
+
+        mi_0 = dt_0.mutual_information(['x'], ['y'])
+        mi_1 = dt_1.mutual_information(['x'], ['y'])
+        mi_2 = dt_2.mutual_information(['x'], ['y'])
+
+        nmi_0 = dt_0.mutual_information(['x'], ['y'], normalize=True)
+        nmi_1 = dt_1.mutual_information(['x'], ['y'], normalize=True)
+        nmi_2 = dt_2.mutual_information(['x'], ['y'], normalize=True)
+
+        self.assertAlmostEqual(0.0,mi_0,decimal_place)
+        self.assertAlmostEqual(0.31127812445913294,mi_1,decimal_place)
+        self.assertAlmostEqual(1.5219280948873621,mi_2,decimal_place)
+        self.assertAlmostEqual(0.0,nmi_0,decimal_place)
+        self.assertAlmostEqual(0.3437110184854509,nmi_1,decimal_place)
+        self.assertAlmostEqual(1.0,nmi_2,decimal_place)
+
+    def test_normalized_mutual_information(self):
+        decimal_place = 5
+
+        obs_0 = np.array([[0, 0, 0, 0], [0, 1, 2, 3]]).T
+        obs_1 = np.array([[0, 0, 1, 1], [0, 0, 0, 1]]).T
+        obs_2 = np.array([[0, 0, 1, 1, 2], [1, 1, 0, 0, 2]]).T
+
+        dt_0 = build_discrete_table(obs_0, ['x', 'y'])
+        dt_1 = build_discrete_table(obs_1, ['x', 'y'])
+        dt_2 = build_discrete_table(obs_2, ['x', 'y'])
+
+        mi_0 = dt_0.mutual_information(['x'], ['y'])
+        mi_1 = dt_1.mutual_information(['x'], ['y'])
+        mi_2 = dt_2.mutual_information(['x'], ['y'])
+
+        nmi_0 = dt_0.normalized_mutual_information(['x'], ['y'])
+        nmi_1 = dt_1.normalized_mutual_information(['x'], ['y'])
+        nmi_2 = dt_2.normalized_mutual_information(['x'], ['y'])
+
+        self.assertAlmostEqual(0.0,mi_0,decimal_place)
+        self.assertAlmostEqual(0.31127812445913294,mi_1,decimal_place)
+        self.assertAlmostEqual(1.5219280948873621,mi_2,decimal_place)
+        self.assertAlmostEqual(0.0,nmi_0,decimal_place)
+        self.assertAlmostEqual(0.3437110184854509,nmi_1,decimal_place)
+        self.assertAlmostEqual(1.0,nmi_2,decimal_place)
+
+
+
 class TestConditionalMutualInformation(unittest.TestCase):
 
     def test_conditional_references(self):
