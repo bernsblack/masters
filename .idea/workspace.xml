@@ -31,7 +31,6 @@
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Minor formatting updates and MI calculations are saved to disk to speed up interactive plots.">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Feature Selection with Mutual Information.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Feature Selection with Mutual Information.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -550,15 +549,15 @@
     </state>
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="779" y="1592" width="909" height="783" key="find.popup" timestamp="1599467335464">
-      <screen x="346" y="1440" width="1920" height="1080" />
+    <state x="489" y="175" width="874" height="522" key="find.popup" timestamp="1599578024344">
+      <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592745271900" />
     <state x="529" y="288" width="680" height="486" key="find.popup/0.23.1440.804@0.23.1440.804" timestamp="1592660279382" />
     <state x="357" y="-974" width="1209" height="807" key="find.popup/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1591015744488" />
     <state x="779" y="1592" width="909" height="783" key="find.popup/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599467335464" />
     <state x="901" y="202" width="1012" height="522" key="find.popup/346.1440.1920.1080/418.0.2142.1440@418.0.2142.1440" timestamp="1596796873577" />
-    <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599383873928" />
+    <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599578024344" />
     <state x="901" y="354" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1599216108483" />
     <state x="489" y="175" width="874" height="548" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606847298" />
     <state x="566" y="195" width="861" height="887" key="search.everywhere.popup" timestamp="1599474953845">
