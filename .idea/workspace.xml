@@ -560,13 +560,15 @@
     <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599578024344" />
     <state x="901" y="354" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1599216108483" />
     <state x="489" y="175" width="874" height="548" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606847298" />
-    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup" timestamp="1599474953845">
-      <screen x="72" y="27" width="1848" height="1053" />
+    <state x="991" y="403" width="998" height="2125" key="search.everywhere.popup" timestamp="1599660046547">
+      <screen x="418" y="0" width="2142" height="2520" />
     </state>
     <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592804759273" />
     <state x="385" y="151" width="670" height="676" key="search.everywhere.popup/0.23.1440.804@0.23.1440.804" timestamp="1592665157034" />
     <state x="101" y="-1203" width="1192" height="1131" key="search.everywhere.popup/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592812208274" />
     <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599474953845" />
+    <state x="991" y="403" width="998" height="2125" key="search.everywhere.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1599660046547" />
     <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606166645" />
+    <state x="566" y="197" width="861" height="886" key="search.everywhere.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1599635936582" />
   </component>
 </project>
