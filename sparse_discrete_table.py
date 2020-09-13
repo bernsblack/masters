@@ -358,3 +358,36 @@ def build_discrete_table(obs_arr: np.ndarray, rv_names: List[str]) -> SparseDisc
         table[k] = v
     dt = SparseDiscreteTable(rv_names=rv_names, table=table)
     return dt
+
+
+# quick functions for mutual info and conditional mutual info
+def quick_mutual_info(x, y, norm=False):
+    """
+    Determine the mutual information between x and y conditioned on z
+
+    x: np.ndarray (N,d_x) with N observations of d_x dimensional vector
+    y: np.ndarray (N,d_y) with N observations of d_y dimensional vector
+    z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
+    norm: bool, if symmetric normalisation should be done using 0.5*(h(x)+h(y)) as normalising constant
+    """
+    xy = np.stack([x, y], axis=1)
+    dt = build_discrete_table(xy, ['x', 'y'])
+    mi = dt.mutual_information(['x'], ['y'], norm)
+    return mi
+
+
+def quick_cond_mutual_info(x, y, z, norm=False):
+    """
+    Determine the mutual information between x and y conditioned on z
+
+    x: np.ndarray (N,d_x) with N observations of d_x dimensional vector
+    y: np.ndarray (N,d_y) with N observations of d_y dimensional vector
+    z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
+    norm: bool, if asymmetric normalisation should be done using cmi(x,x,z) as normalising constant
+    """
+    xyz = np.stack([x, y, z], axis=1)
+    dt = build_discrete_table(xyz, ['x', 'y', 'z'])
+    cmi = dt.conditional_mutual_information(['x'], ['y'], ['z'])
+    if norm:
+        return cmi / dt.conditional_mutual_information(['x'], ['x'], ['z'])
+    return cmi

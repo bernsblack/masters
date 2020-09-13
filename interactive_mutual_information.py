@@ -7,7 +7,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from sparse_discrete_table import SparseDiscreteTable
-from utils.mutual_information import construct_mi_grid
+from utils.mutual_information_old import construct_mi_grid
 from utils.preprocessing import Shaper
 from utils.setup import setup
 

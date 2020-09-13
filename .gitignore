@@ -6,7 +6,6 @@
 venv
 data
 __pycache__
-.vscode
 utils/__pycache__
 ./.ideavscode/*
 ./data/*
@@ -19,7 +18,7 @@ utils/__pycache__
 *.npy
 *.pkl
 *.npz
-*.npy
 *.pth
 *.txt
 *.log
+/data/

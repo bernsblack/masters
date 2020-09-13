@@ -259,9 +259,51 @@ class TestConditionalMutualInformation(unittest.TestCase):
 
         # mi_xyz1 = dt_xyz1.mutual_information(rv_names_0=['x'], rv_names_1=['y'])
         # hy_xyz1 = dt_xyz1.marginal(['y']).entropy()
-        # mic_z = dt_xyz.conditional_mutual_information(rv_names_0=['x'], rv_names_1=['y'], rv_names_condition=['z'])
+        mic_z = dt_xyz.conditional_mutual_information(rv_names_0=['x'], rv_names_1=['y'], rv_names_condition=['z'])
+
+        self.assertAlmostEqual(0.00074935913348, mic_z, places=decimal_place)
 
         self.assertAlmostEqual(0.133086, mi, places=decimal_place)
         self.assertAlmostEqual(0.000852316, mi_xyz0, places=decimal_place)
         self.assertAlmostEqual(1.48242, hy, places=decimal_place)
         self.assertAlmostEqual(1.15378, hy_xyz0, places=decimal_place)
+
+class TestQuickMutualInformation(unittest.TestCase):
+    def test_quick_mutual_info(self):
+        """
+        MI(X,Y) = 0.133086
+        MI(X,Y|Z=0) = 0.000852316
+
+        H(Y) = 1.48242
+        H(Y|Z=0) = 1.15378
+        """
+        decimal_place = 5
+
+        arr_zxy = np.loadtxt('zxy.txt')
+        arr_x, arr_y, arr_z = arr_zxy[:, 1], arr_zxy[:, 2], arr_zxy[:, 0]
+
+        from sparse_discrete_table import quick_mutual_info
+
+        mi = quick_mutual_info(arr_x, arr_y,)
+
+        self.assertAlmostEqual(0.133086, mi, places=decimal_place)
+
+    def test_quick_cond_mutual_info(self):
+        """
+        MI(X,Y) = 0.133086
+        MI(X,Y|Z=0) = 0.000852316
+
+        H(Y) = 1.48242
+        H(Y|Z=0) = 1.15378
+        """
+        decimal_place = 5
+
+        arr_zxy = np.loadtxt('zxy.txt')
+        arr_x, arr_y, arr_z = arr_zxy[:, 1], arr_zxy[:, 2], arr_zxy[:, 0]
+
+        from sparse_discrete_table import quick_cond_mutual_info
+
+        cmi = quick_cond_mutual_info(arr_x, arr_y, arr_z)
+
+        self.assertAlmostEqual(0.00074935913348, cmi, places=decimal_place)
+
