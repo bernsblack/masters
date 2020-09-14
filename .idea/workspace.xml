@@ -30,8 +30,10 @@
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="squash! Removed high data plots from notebooks to enable git requirements">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mutual information and correlation over spatial domain.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual information and correlation over spatial domain.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocessing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -137,19 +139,35 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for sparse_discrete_table_test.TestConditionalMutualInformation" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for preprocessing.TestShaperIndexConversion" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestConditionalMutualInformation&quot;" />
+      <option name="_new_target" value="&quot;preprocessing.TestShaperIndexConversion&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for preprocessing.TestShaperIndexConversion.test_shaper_index_conversion" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;preprocessing.TestShaperIndexConversion.test_shaper_index_conversion&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -201,38 +219,21 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for sparse_discrete_table_test.TestSparseDiscreteTable" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestSparseDiscreteTable&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation.test_conditional_references" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
+      <item itemvalue="Python tests.pytest for preprocessing.TestShaperIndexConversion.test_shaper_index_conversion" />
+      <item itemvalue="Python tests.pytest for preprocessing.TestShaperIndexConversion" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
+        <item itemvalue="Python tests.pytest for preprocessing.TestShaperIndexConversion" />
+        <item itemvalue="Python tests.pytest for preprocessing.TestShaperIndexConversion.test_shaper_index_conversion" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation.test_conditional_references" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
       </list>
     </recent_temporary>
   </component>
@@ -483,7 +484,7 @@
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600068151226" />
-    <state width="1825" height="274" key="GridCell.Tab.0.bottom" timestamp="1600078320569">
+    <state width="1825" height="366" key="GridCell.Tab.0.bottom" timestamp="1600102430095">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970421" />
@@ -492,8 +493,8 @@
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392723" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895769" />
-    <state width="1825" height="274" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320569" />
-    <state width="1825" height="274" key="GridCell.Tab.0.center" timestamp="1600078320568">
+    <state width="1825" height="366" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1600102430095" />
+    <state width="1825" height="366" key="GridCell.Tab.0.center" timestamp="1600102430095">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970399" />
@@ -502,8 +503,8 @@
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895768" />
-    <state width="1825" height="274" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320568" />
-    <state width="1825" height="274" key="GridCell.Tab.0.left" timestamp="1600078320567">
+    <state width="1825" height="366" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1600102430095" />
+    <state width="1825" height="366" key="GridCell.Tab.0.left" timestamp="1600102430094">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970396" />
@@ -512,8 +513,8 @@
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895766" />
-    <state width="1825" height="274" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320567" />
-    <state width="1825" height="274" key="GridCell.Tab.0.right" timestamp="1600078320568">
+    <state width="1825" height="366" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1600102430094" />
+    <state width="1825" height="366" key="GridCell.Tab.0.right" timestamp="1600102430095">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970400" />
@@ -522,7 +523,7 @@
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895768" />
-    <state width="1825" height="274" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320568" />
+    <state width="1825" height="366" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1600102430095" />
     <state width="1825" height="339" key="GridCell.Tab.1.bottom" timestamp="1600067924328">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>

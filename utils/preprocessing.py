@@ -1,3 +1,5 @@
+import unittest
+
 import numpy as np
 
 from utils import deprecated
@@ -91,6 +93,7 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
     trans_mat = np.array(trans_mat).T
     return trans_mat
 
+
 # todo make use of ellipsis to generalise the shaper to N,H,W and N,C,L
 class Shaper:
     def __init__(self, data, conf: BaseConf):
@@ -99,8 +102,8 @@ class Shaper:
         :param data: array shaped (N, C, H, W)
         :param conf: contains: shaper_threshold and shaper_top_k used to determine cells to keep in dense representation
         """
-        threshold = conf.shaper_threshold # sum over all time should be above this threshold
-        top_k = conf.shaper_top_k # if larger than 0 we filter out only the top k most active cells of the data grid
+        threshold = conf.shaper_threshold  # sum over all time should be above this threshold
+        top_k = conf.shaper_top_k  # if larger than 0 we filter out only the top k most active cells of the data grid
 
         shape = list(np.shape(data))
 
@@ -124,9 +127,9 @@ class Shaper:
         :param i: index of the cell in the squeezed format - (N,C, L) with i ∈ L
         :return: tuple of coordinate y,x in unsqueezed format - (N, C, H, W) with y ∈ H, x ∈ W
 
-        will raise KeyError if i >= L
+        will return None if i not in mapping
         """
-        return self._i2yx_map[i]
+        return self._i2yx_map.get(i)
 
     def yx_to_i(self, y, x):
         """
@@ -134,8 +137,10 @@ class Shaper:
         :param y: y index in unsqueezed format - (N, C, H, W) with y ∈ H
         :param x: x index in unsqueezed format - (N, C, H, W) with x ∈ W
         :return: index of the cell in the squeezed format - (N,C, L) with index ∈ L
+
+        will return None if (y,x) not in mapping
         """
-        return self._yx2i_map[(y,x)]
+        return self._yx2i_map.get((y, x))
 
     def squeeze(self, sparse_data):
         """
@@ -168,6 +173,20 @@ class Shaper:
 
         reshaped_data = np.reshape(sparse_data, shape_old)
         return reshaped_data
+
+
+class TestShaperIndexConversion(unittest.TestCase):
+    def test_shaper_index_conversion(self):
+        test_sparse = np.arange(40 * 50).reshape(1, 1, 40, 50)
+        conf = BaseConf({"shaper_threshold": 0, "shaper_top_k": -1})
+        shaper = Shaper(test_sparse, conf)
+
+        test_dense = shaper.squeeze(test_sparse)
+
+        i = 34
+        y, x = shaper.i_to_yx(i)
+        self.assertTrue(i == shaper.yx_to_i(y, x)) # test inversion
+        self.assertTrue((test_dense[:, :, i] == test_sparse[:, :, y, x]).all()) # test values mapping
 
 
 @deprecated

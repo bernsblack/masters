@@ -277,7 +277,10 @@ class SparseDiscreteTable:
 
         mi_01 = h_0 + h_1 - h_01
 
-        return mi_01 if not normalize else 2 * mi_01 / (h_0 + h_1)
+        if normalize:
+            return 2 * mi_01 / (h_0 + h_1)
+        else:
+            return mi_01
 
     def normalized_mutual_information(self, rv_names_0: List[str], rv_names_1: List[str]):
         """
@@ -383,6 +386,7 @@ def new_discrete_table(**kwargs):
 
     return SparseDiscreteTable(rv_names=rv_names, table=table)
 
+
 # quick functions for mutual info and conditional mutual info
 def quick_mutual_info(x, y, norm=False):
     """
@@ -393,7 +397,7 @@ def quick_mutual_info(x, y, norm=False):
     z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
     norm: bool, if symmetric normalisation should be done using 0.5*(h(x)+h(y)) as normalising constant
     """
-    dt = new_discrete_table(x=x,y=y)
+    dt = new_discrete_table(x=x, y=y)
     mi = dt.mutual_information(['x'], ['y'], norm)
     return mi
 
@@ -407,8 +411,17 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
     norm: bool, if asymmetric normalisation should be done using cmi(x,x,z) as normalising constant
     """
-    dt = new_discrete_table(x=x,y=y,z=z)
-    cmi = dt.conditional_mutual_information(['x'], ['y'], ['z'])
+    p_xyz = new_discrete_table(x=x, y=y, z=z)
+    p_xz = p_xyz['x', 'z']
+    p_yz = p_xyz['y', 'z']
+    p_z = p_yz['z']
+
+    h_xyz = p_xyz.entropy()
+    h_xz = p_xz.entropy()
+    h_yz = p_yz.entropy()
+    h_z = p_z.entropy()
+
     if norm:
-        return cmi / dt.conditional_mutual_information(['x'], ['x'], ['z'])
-    return cmi
+        return (h_xz + h_yz - h_xyz - h_z) / (h_xz - h_z)
+    else:
+        return h_xz + h_yz - h_xyz - h_z

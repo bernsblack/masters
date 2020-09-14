@@ -284,9 +284,11 @@ class TestQuickMutualInformation(unittest.TestCase):
 
         from sparse_discrete_table import quick_mutual_info
 
-        mi = quick_mutual_info(arr_x, arr_y,)
+        mi = quick_mutual_info(arr_x, arr_y)
+        nmi = quick_mutual_info(arr_x, arr_x, True)
 
         self.assertAlmostEqual(0.133086, mi, places=decimal_place)
+        self.assertAlmostEqual(1.0, nmi, places=decimal_place)
 
     def test_quick_cond_mutual_info(self):
         """
@@ -304,6 +306,11 @@ class TestQuickMutualInformation(unittest.TestCase):
         from sparse_discrete_table import quick_cond_mutual_info
 
         cmi = quick_cond_mutual_info(arr_x, arr_y, arr_z)
+        cmi_normed = quick_cond_mutual_info(arr_x, arr_y, arr_z, norm=True)
+        cmi_normed_self = quick_cond_mutual_info(arr_x, arr_x, arr_z, norm=True)
 
         self.assertAlmostEqual(0.00074935913348, cmi, places=decimal_place)
+        self.assertAlmostEqual(0.00065854846636, cmi_normed, places=decimal_place)
+        self.assertAlmostEqual(1.0, cmi_normed_self, places=decimal_place)
+
 
