@@ -102,7 +102,6 @@ class Shaper:
         threshold = conf.shaper_threshold # sum over all time should be above this threshold
         top_k = conf.shaper_top_k # if larger than 0 we filter out only the top k most active cells of the data grid
 
-
         shape = list(np.shape(data))
 
         self.h, self.w = shape[-2:]
@@ -110,6 +109,33 @@ class Shaper:
         self.index_mask = get_index_mask(data=data, threshold=threshold, top_k=top_k)
 
         self.l = len(self.index_mask)
+
+        coords = []
+        for y in range(self.h):
+            for x in range(self.w):
+                coords.append((y, x))
+        coords = np.array(coords)[self.index_mask]
+        self._yx2i_map = {tuple(yx): i for i, yx in enumerate(coords)}
+        self._i2yx_map = {i: yx for yx, i in self._yx2i_map.items()}
+
+    def i_to_yx(self, i):
+        """
+        maps squeezed coordinates to unsqueezed indices
+        :param i: index of the cell in the squeezed format - (N,C, L) with i ∈ L
+        :return: tuple of coordinate y,x in unsqueezed format - (N, C, H, W) with y ∈ H, x ∈ W
+
+        will raise KeyError if i >= L
+        """
+        return self._i2yx_map[i]
+
+    def yx_to_i(self, y, x):
+        """
+        maps unsqueezed coordinates to squeezed indices
+        :param y: y index in unsqueezed format - (N, C, H, W) with y ∈ H
+        :param x: x index in unsqueezed format - (N, C, H, W) with x ∈ W
+        :return: index of the cell in the squeezed format - (N,C, L) with index ∈ L
+        """
+        return self._yx2i_map[(y,x)]
 
     def squeeze(self, sparse_data):
         """
@@ -144,6 +170,7 @@ class Shaper:
         return reshaped_data
 
 
+@deprecated
 class ShaperDeprecated:  # was to slow has been replaced
     @deprecated
     def __init__(self, data, threshold=0, top_k=-1):

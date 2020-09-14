@@ -28,11 +28,11 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
+    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="squash! Removed high data plots from notebooks to enable git requirements">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mutual information and correlation over spatial domain.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual information and correlation over spatial domain.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocessing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -70,6 +70,16 @@
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
     <option name="SIGN_OFF_COMMIT" value="true" />
   </component>
+  <component name="GitRewordedCommitMessages">
+    <option name="commitMessagesMapping">
+      <RewordedCommitMessageMapping>
+        <option name="originalMessage" value="Removed high data plots from notebooks to enable git requirements&#10;&#10;Removed high data plots from notebooks to enable git requirements&#10;&#10;Added data folder to gitignore&#10;&#10;Signed-off-by: mielieboom &lt;bernardaswart@gmail.com&gt;&#10;&#10;Renamed and restructured mutual information notebooks&#10;&#10;Quick mutual information reference functions created" />
+        <option name="rewordedMessage" value="Added unit test for functional mutual information&#10;&#10;Removed high data plots from notebooks to enable git requirements&#10;&#10;Removed high data plots from notebooks to enable git requirements&#10;&#10;Added data folder to gitignore&#10;&#10;Signed-off-by: mielieboom &lt;bernardaswart@gmail.com&gt;&#10;&#10;Renamed and restructured mutual information notebooks&#10;&#10;Quick mutual information reference functions created" />
+      </RewordedCommitMessageMapping>
+    </option>
+    <option name="currentCommit" value="1" />
+    <option name="onto" value="10e5074b765862154fbc1e6f8f924d0f6b60dddc" />
+  </component>
   <component name="JupyterTrust" id="0566c3a9-1fd9-4711-ab3c-bccd7ba9a845" />
   <component name="MacroExpansionManager">
     <option name="directoryName" value="cSlNCDXk" />
@@ -104,7 +114,7 @@
       <recent name="$PROJECT_DIR$/datasets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info">
+  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -218,11 +228,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation.test_conditional_references" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestSparseDiscreteTable" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
       </list>
     </recent_temporary>
   </component>
@@ -453,6 +463,10 @@
       <screen x="-583" y="-1417" width="2560" height="1417" />
     </state>
     <state x="502" y="-811" key="#com.jetbrains.python.refactoring.move.PyMoveModuleMembersDialog/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592941882110" />
+    <state x="586" y="131" width="809" height="853" key="CommitChangelistDialog2" timestamp="1600068113364">
+      <screen x="72" y="29" width="1848" height="1051" />
+    </state>
+    <state x="586" y="131" width="809" height="853" key="CommitChangelistDialog2/72.29.1848.1051@72.29.1848.1051" timestamp="1600068113364" />
     <state x="200" y="159" width="1593" height="792" key="DiffContextDialog" timestamp="1600067931064">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
@@ -465,7 +479,11 @@
     </state>
     <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl/418.0.2142.2520@418.0.2142.2520" timestamp="1599033056077" />
     <state x="774" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1598469140656" />
-    <state width="1825" height="339" key="GridCell.Tab.0.bottom" timestamp="1600067924328">
+    <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog" timestamp="1600068151226">
+      <screen x="72" y="29" width="1848" height="1051" />
+    </state>
+    <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600068151226" />
+    <state width="1825" height="274" key="GridCell.Tab.0.bottom" timestamp="1600078320569">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970421" />
@@ -474,8 +492,8 @@
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392723" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895769" />
-    <state width="1825" height="339" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1600067924328" />
-    <state width="1825" height="339" key="GridCell.Tab.0.center" timestamp="1600067924327">
+    <state width="1825" height="274" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320569" />
+    <state width="1825" height="274" key="GridCell.Tab.0.center" timestamp="1600078320568">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970399" />
@@ -484,8 +502,8 @@
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895768" />
-    <state width="1825" height="339" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1600067924327" />
-    <state width="1825" height="339" key="GridCell.Tab.0.left" timestamp="1600067924327">
+    <state width="1825" height="274" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320568" />
+    <state width="1825" height="274" key="GridCell.Tab.0.left" timestamp="1600078320567">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970396" />
@@ -494,8 +512,8 @@
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895766" />
-    <state width="1825" height="339" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1600067924327" />
-    <state width="1825" height="339" key="GridCell.Tab.0.right" timestamp="1600067924327">
+    <state width="1825" height="274" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320567" />
+    <state width="1825" height="274" key="GridCell.Tab.0.right" timestamp="1600078320568">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970400" />
@@ -504,7 +522,7 @@
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/418.0.2142.2520@418.0.2142.2520" timestamp="1598873895768" />
-    <state width="1825" height="339" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1600067924327" />
+    <state width="1825" height="274" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1600078320568" />
     <state width="1825" height="339" key="GridCell.Tab.1.bottom" timestamp="1600067924328">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
@@ -562,7 +580,7 @@
     </state>
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="489" y="177" width="874" height="522" key="find.popup" timestamp="1599978827120">
+    <state x="489" y="177" width="874" height="522" key="find.popup" timestamp="1600078566297">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592745271900" />
@@ -572,7 +590,7 @@
     <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599578024344" />
     <state x="901" y="354" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1599216108483" />
     <state x="489" y="175" width="874" height="548" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606847298" />
-    <state x="489" y="177" width="874" height="522" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1599978827120" />
+    <state x="489" y="177" width="874" height="522" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1600078566297" />
     <state x="566" y="197" width="861" height="886" key="search.everywhere.popup" timestamp="1600001297675">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>

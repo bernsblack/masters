@@ -356,9 +356,32 @@ def build_discrete_table(obs_arr: np.ndarray, rv_names: List[str]) -> SparseDisc
     table = {}
     for k, v in zip(list(map(tuple, val)), list(prb)):
         table[k] = v
-    dt = SparseDiscreteTable(rv_names=rv_names, table=table)
-    return dt
 
+    return SparseDiscreteTable(rv_names=rv_names, table=table)
+
+
+def new_discrete_table(**kwargs):
+    """
+    new_discrete_table will sort the kwargs by key
+
+    kwargs names arrays where
+    - keys are array name
+    - value is the np.ndarray observations of the variabels
+    """
+
+    rv_names = sorted(kwargs.keys())
+    stack = []
+    for k in rv_names:
+        stack.append(kwargs[k])
+
+    obs_arr = np.stack(stack, axis=1)
+    val, cnt = np.unique(obs_arr, return_counts=True, axis=0)
+    prb = cnt / np.sum(cnt)
+    table = {}
+    for k, v in zip(list(map(tuple, val)), list(prb)):
+        table[k] = v
+
+    return SparseDiscreteTable(rv_names=rv_names, table=table)
 
 # quick functions for mutual info and conditional mutual info
 def quick_mutual_info(x, y, norm=False):
@@ -370,8 +393,7 @@ def quick_mutual_info(x, y, norm=False):
     z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
     norm: bool, if symmetric normalisation should be done using 0.5*(h(x)+h(y)) as normalising constant
     """
-    xy = np.stack([x, y], axis=1)
-    dt = build_discrete_table(xy, ['x', 'y'])
+    dt = new_discrete_table(x=x,y=y)
     mi = dt.mutual_information(['x'], ['y'], norm)
     return mi
 
@@ -385,8 +407,7 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
     norm: bool, if asymmetric normalisation should be done using cmi(x,x,z) as normalising constant
     """
-    xyz = np.stack([x, y, z], axis=1)
-    dt = build_discrete_table(xyz, ['x', 'y', 'z'])
+    dt = new_discrete_table(x=x,y=y,z=z)
     cmi = dt.conditional_mutual_information(['x'], ['y'], ['z'])
     if norm:
         return cmi / dt.conditional_mutual_information(['x'], ['x'], ['z'])
