@@ -369,7 +369,7 @@ def new_discrete_table(**kwargs):
 
     kwargs names arrays where
     - keys are array name
-    - value is the np.ndarray observations of the variabels
+    - value is the np.ndarray observations of the variables
     """
 
     rv_names = sorted(kwargs.keys())
@@ -411,10 +411,41 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
     norm: bool, if asymmetric normalisation should be done using cmi(x,x,z) as normalising constant
     """
-    p_xyz = new_discrete_table(x=x, y=y, z=z)
-    p_xz = p_xyz['x', 'z']
-    p_yz = p_xyz['y', 'z']
-    p_z = p_yz['z']
+    if len(x.shape) == 1:
+        x = x.reshape(-1,1)
+    if len(y.shape) == 1:
+        y = y.reshape(-1,1)
+    if len(z.shape) == 1:
+        z = z.reshape(-1, 1)
+
+    _, d_x = x.shape
+    _, d_y = y.shape
+    _, d_z = z.shape
+
+    x_names = []
+    y_names = []
+    z_names = []
+
+    kwargs = dict()
+    for i in range(d_x):
+        k = f"x{i}"
+        x_names.append(k)
+        kwargs[k] = x[:,i]
+
+    for i in range(d_y):
+        k = f"y{i}"
+        y_names.append(k)
+        kwargs[k] = y[:,i]
+
+    for i in range(d_z):
+        k = f"z{i}"
+        z_names.append(k)
+        kwargs[k] = z[:,i]
+
+    p_xyz = new_discrete_table(**kwargs)
+    p_xz = p_xyz[[*x_names, *z_names]]
+    p_yz = p_xyz[[*y_names, *z_names]]
+    p_z = p_yz[z_names]
 
     h_xyz = p_xyz.entropy()
     h_xz = p_xz.entropy()
