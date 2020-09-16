@@ -31,7 +31,7 @@
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="squash! Removed high data plots from notebooks to enable git requirements">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table_test.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table_test.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -113,7 +113,7 @@
       <recent name="$PROJECT_DIR$/datasets" />
     </key>
   </component>
-  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info">
+  <component name="RunManager" selected="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -226,8 +226,8 @@
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
         <item itemvalue="Python tests.pytest for preprocessing.TestShaperIndexConversion" />
         <item itemvalue="Python tests.pytest for preprocessing.TestShaperIndexConversion.test_shaper_index_conversion" />
         <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation.test_conditional_references" />
@@ -481,8 +481,8 @@
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600068151226" />
-    <state width="1825" height="366" key="GridCell.Tab.0.bottom" timestamp="1600202883584">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="366" key="GridCell.Tab.0.bottom" timestamp="1600206396776">
+      <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970421" />
     <state width="1398" height="204" key="GridCell.Tab.0.bottom/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
@@ -490,9 +490,9 @@
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392723" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="366" key="GridCell.Tab.0.bottom/418.0.2142.2520@418.0.2142.2520" timestamp="1600202883584" />
-    <state width="1825" height="366" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1600119045142" />
-    <state width="1825" height="366" key="GridCell.Tab.0.center" timestamp="1600202883584">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="366" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1600206396776" />
+    <state width="1825" height="366" key="GridCell.Tab.0.center" timestamp="1600206396774">
+      <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970399" />
     <state width="1398" height="204" key="GridCell.Tab.0.center/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
@@ -500,9 +500,9 @@
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="366" key="GridCell.Tab.0.center/418.0.2142.2520@418.0.2142.2520" timestamp="1600202883584" />
-    <state width="1825" height="366" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1600119045141" />
-    <state width="1825" height="366" key="GridCell.Tab.0.left" timestamp="1600202883584">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="366" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1600206396774" />
+    <state width="1825" height="366" key="GridCell.Tab.0.left" timestamp="1600206396773">
+      <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970396" />
     <state width="1398" height="204" key="GridCell.Tab.0.left/0.23.1440.804@0.23.1440.804" timestamp="1592977063856" />
@@ -510,9 +510,9 @@
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="366" key="GridCell.Tab.0.left/418.0.2142.2520@418.0.2142.2520" timestamp="1600202883584" />
-    <state width="1825" height="366" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1600119045140" />
-    <state width="1825" height="366" key="GridCell.Tab.0.right" timestamp="1600202883584">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state width="1825" height="366" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1600206396773" />
+    <state width="1825" height="366" key="GridCell.Tab.0.right" timestamp="1600206396775">
+      <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1593002970400" />
     <state width="1398" height="204" key="GridCell.Tab.0.right/0.23.1440.804@0.23.1440.804" timestamp="1592977063857" />
@@ -520,7 +520,7 @@
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="366" key="GridCell.Tab.0.right/418.0.2142.2520@418.0.2142.2520" timestamp="1600202883584" />
-    <state width="1825" height="366" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1600119045141" />
+    <state width="1825" height="366" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1600206396775" />
     <state width="1825" height="339" key="GridCell.Tab.1.bottom" timestamp="1600067924328">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>

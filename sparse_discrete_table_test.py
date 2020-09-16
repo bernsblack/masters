@@ -228,7 +228,6 @@ class TestSparseDiscreteTable(unittest.TestCase):
 
 
 class TestConditionalMutualInformation(unittest.TestCase):
-
     def test_conditional_references(self):
         """
         MI(X,Y) = 0.133086
