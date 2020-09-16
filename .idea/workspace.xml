@@ -29,7 +29,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="squash! Removed high data plots from notebooks to enable git requirements">
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
