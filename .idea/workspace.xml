@@ -29,6 +29,7 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="squash! Removed high data plots from notebooks to enable git requirements">
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Mutual Information Feature Selection.ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -463,13 +464,13 @@
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="586" y="131" width="809" height="853" key="CommitChangelistDialog2/72.29.1848.1051@72.29.1848.1051" timestamp="1600068113364" />
-    <state x="200" y="159" width="1593" height="792" key="DiffContextDialog" timestamp="1600067931064">
+    <state x="200" y="159" width="1593" height="792" key="DiffContextDialog" timestamp="1600251947945">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="100" y="123" width="1240" height="604" key="DiffContextDialog/0.23.1440.804@0.23.1440.804" timestamp="1592338232736" />
     <state x="479" y="1574" width="1655" height="813" key="DiffContextDialog/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599455547527" />
     <state x="200" y="158" width="1592" height="792" key="DiffContextDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597219241299" />
-    <state x="200" y="159" width="1593" height="792" key="DiffContextDialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600067931064" />
+    <state x="200" y="159" width="1593" height="792" key="DiffContextDialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600251947945" />
     <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl" timestamp="1599033056077">
       <screen x="418" y="0" width="2142" height="2520" />
     </state>
