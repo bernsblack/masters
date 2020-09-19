@@ -28,6 +28,46 @@ import logging as log
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve, \
     mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, mean_squared_error
 
+import unittest
+
+
+def predictive_accuracy_index(y_true, y_pred):
+    """
+    y_true: true crime counts of the grid
+    y_pred: predicted hotspot areas in the grid -> 1 for hot 0 for not
+
+    Warning: if no crime is predicted a/A will be zero and will lead to ZeroDivisionError
+    """
+    n = np.sum(y_true[y_pred == 1])  # crimes in predicted area
+    N = np.sum(y_true)  # crimes in total area
+
+    a = np.sum(y_pred)  # area of hotspots
+    A = np.product(y_pred.shape)
+
+    return (n * A) / (N * a)
+
+
+class TestPredictiveAccuracyIndex(unittest.TestCase):
+
+    def test_predictive_accuracy_index(self):
+        y_true = np.array([
+            [1, 0, 0, 1],
+            [0, 0, 0, 0],
+            [0, 2, 0, 0],
+            [3, 0, 5, 0],
+        ])
+
+        y_pred = np.array([
+            [1, 0, 0, 0],
+            [0, 0, 0, 0],
+            [0, 1, 1, 1],
+            [0, 0, 1, 0],
+        ])
+
+        pai = predictive_accuracy_index(y_true=y_true, y_pred=y_pred)
+
+        self.assertAlmostEqual(pai, 2.1333333333333333)
+
 
 def safe_f1_score(pr):
     p, r = pr

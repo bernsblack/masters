@@ -1,6 +1,7 @@
 import numpy as np
 from utils import ffloor, fceil
 from pprint import pformat
+from pandas import Timedelta
 
 class State:
     """
@@ -51,6 +52,22 @@ class State:
                 fn(self)
         self.__recursion_guard = 0
 
+
+def state_to_conf(state):
+    conf = dict(
+        start_date=state.date_min.strftime("%Y-%m-%d"),
+        end_date=(state.date_max + Timedelta(state.freq)).strftime("%Y-%m-%d"),
+        dT=state.freq,
+        x_scale=int(state.dlon / 0.001),
+        y_scale=int(state.dlat / 0.001),
+        lat_max=np.round(state.lat_max, decimals=3),
+        lat_min=np.round(state.lat_min, decimals=3),
+        lon_max=np.round(state.lon_max, decimals=3),
+        lon_min=np.round(state.lon_min, decimals=3),
+        root="./"
+    )
+
+    return conf
 
 # rename and move to utils
 def new_int_bins(int_min, int_max):

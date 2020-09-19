@@ -139,6 +139,12 @@ def read_json(file_name):
 
 
 def write_json(data, file_name):
+    """
+    Saves dictionary data as json file
+    :param data: dictionary
+    :param file_name: file name or path to e saved
+    :return:
+    """
     with open(file_name, "w") as fp:
         json.dump(data, fp)
 
