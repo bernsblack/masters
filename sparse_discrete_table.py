@@ -278,7 +278,8 @@ class SparseDiscreteTable:
         mi_01 = h_0 + h_1 - h_01
 
         if normalize:
-            return 2 * mi_01 / (h_0 + h_1)
+            # return 2 * mi_01 / (h_0 + h_1)
+            return mi_01 / h_0
         else:
             return mi_01
 
@@ -297,7 +298,8 @@ class SparseDiscreteTable:
         h_0 = p_01.marginal(rv_names=rv_names_0).entropy()
         h_1 = p_01.marginal(rv_names=rv_names_1).entropy()
 
-        return 2 * (h_0 + h_1 - h_01) / (h_0 + h_1)
+        # return 2 * (h_0 + h_1 - h_01) / (h_0 + h_1)
+        return (h_0 + h_1 - h_01) / h_0
 
     def self_information(self, rv_names_0: List[str]):
         """
@@ -392,11 +394,12 @@ def quick_mutual_info(x, y, norm=False):
     """
     Determine the mutual information between x and y conditioned on z
 
-    x: np.ndarray (N,d_x) with N observations of d_x dimensional vector
-    y: np.ndarray (N,d_y) with N observations of d_y dimensional vector
-    z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
-    norm: bool, if symmetric normalisation should be done using 0.5*(h(x)+h(y)) as normalising constant
+    :param x: np.ndarray (N,d_x) with N observations of d_x dimensional vector
+    :param y: np.ndarray (N,d_y) with N observations of d_y dimensional vector
+    :param norm: bool, if symmetric normalisation should be done using 0.5*(h(x)+h(y)) as normalising constant
+    :return: float indicating the mutual information: I(X;Y)
     """
+
     dt = new_discrete_table(x=x, y=y)
     mi = dt.mutual_information(['x'], ['y'], norm)
     return mi
@@ -406,15 +409,17 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     """
     Determine the mutual information between x and y conditioned on z
 
-    x: np.ndarray (N,d_x) with N observations of d_x dimensional vector
-    y: np.ndarray (N,d_y) with N observations of d_y dimensional vector
-    z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
-    norm: bool, if asymmetric normalisation should be done using cmi(x,x,z) as normalising constant
+    :param x: np.ndarray (N,d_x) with N observations of d_x dimensional vector
+    :param y: np.ndarray (N,d_y) with N observations of d_y dimensional vector
+    :param z: np.ndarray (N,d_z) with N observations of d_z dimensional vector
+    :param norm: bool, if asymmetric normalisation should be done using cmi(x,x,z) as normalising constant
+    :return: float indicating the conditional mutual information: I(X;Y|Z)
     """
+
     if len(x.shape) == 1:
-        x = x.reshape(-1,1)
+        x = x.reshape(-1, 1)
     if len(y.shape) == 1:
-        y = y.reshape(-1,1)
+        y = y.reshape(-1, 1)
     if len(z.shape) == 1:
         z = z.reshape(-1, 1)
 
@@ -430,17 +435,17 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     for i in range(d_x):
         k = f"x{i}"
         x_names.append(k)
-        kwargs[k] = x[:,i]
+        kwargs[k] = x[:, i]
 
     for i in range(d_y):
         k = f"y{i}"
         y_names.append(k)
-        kwargs[k] = y[:,i]
+        kwargs[k] = y[:, i]
 
     for i in range(d_z):
         k = f"z{i}"
         z_names.append(k)
-        kwargs[k] = z[:,i]
+        kwargs[k] = z[:, i]
 
     p_xyz = new_discrete_table(**kwargs)
     p_xz = p_xyz[[*x_names, *z_names]]
@@ -456,3 +461,75 @@ def quick_cond_mutual_info(x, y, z, norm=False):
         return (h_xz + h_yz - h_xyz - h_z) / (h_xz - h_z)
     else:
         return h_xz + h_yz - h_xyz - h_z
+
+
+def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_self=False):
+    """
+    Calculates the mutual information between 'a' and time lag of 'a' up until 'max_offset' time steps
+
+    :param a: np.ndarray (N,1) with the counts over time
+    :param max_offset: furthest we compare to the signal in time
+    :param norm: if the mutual information should be normalised between 0 and 1
+    :param log_norm: if the array 'a' should be normalised: round(log2(1 + a))
+    :param include_self: if we should include the mutual info of the variable with itself given no time lag
+    :return: return tuple (mis, offsets) where mis is np.ndarray (max_offset, 1) of mutual information and corresponding offsets for the matching index
+    """
+
+    if log_norm:
+        a = np.round(np.log2(1 + a))
+    mis = []
+    if include_self:
+        mi = quick_mutual_info(a, a, norm)
+        mis.append(mi)
+    for t in range(1, max_offset + 1):
+        mi = quick_mutual_info(a[t:], a[:-t], norm)
+        mis.append(mi)
+
+    if include_self:
+        offsets = np.arange(0, len(mis))
+    else:
+        offsets = np.arange(1, len(mis) + 1)
+    return mis, offsets
+
+
+def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
+                                      log_norm=True, include_self=False,
+                                      cycles=(7,), conds=None):
+    """
+    Calculate the conditional mutual information over various time lags conditioned on a time series the repeats every
+    cycle steps.
+
+    :param a: np.ndarray (N,1) with the counts over time
+    :param max_offset: furthest we compare to the signal in time
+    :param norm: if the mutual information should be normalised between 0 and 1
+    :param log_norm: if the array 'a' should be normalised: round(log2(1 + a))
+    :param include_self: if we should include the mutual info of the variable with itself given no time lag
+    :param cycles: tuple cycle of the data we condition on if we believe there is a strong weekly trend -> 7 or 24 for daily trends
+    :param conds: conditions np.ndarray (N,n_conditions) same length as the input array, can be left out but then the cycles need to be set
+    :return: return tuple (cmis, offsets) where cmis is np.ndarray (max_offset, 1) of conditional mutual information and corresponding offset for the matching index
+    """
+    if log_norm:
+        a = np.round(np.log2(1 + a)).reshape(-1, 1)
+
+    if conds is None:  # no explicit conditions use the cycles to construct a conditional series
+        conds = []
+        for cycle in cycles:
+            conds.append(np.arange(len(a)) % cycle)
+        conds = np.stack(conds, axis=1)  # stack adds a axis
+
+    cmis = []
+    if include_self:
+        cond = np.concatenate([conds, conds], axis=1)  # concatenate uses existing axis
+        cmi = quick_cond_mutual_info(a, a, cond, norm)
+        cmis.append(cmi)
+    for t in range(1, max_offset + 1):
+        cond = np.concatenate([conds[t:], conds[:-t]], axis=1)
+        cmi = quick_cond_mutual_info(a[t:], a[:-t], cond, norm)
+        cmis.append(cmi)
+
+    if include_self:
+        offsets = np.arange(0, len(cmis))
+    else:
+        offsets = np.arange(1, len(cmis) + 1)
+
+    return cmis, offsets
