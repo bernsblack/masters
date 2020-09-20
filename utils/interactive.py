@@ -64,7 +64,8 @@ def state_to_conf(state):
         lat_min=np.round(state.lat_min, decimals=3),
         lon_max=np.round(state.lon_max, decimals=3),
         lon_min=np.round(state.lon_min, decimals=3),
-        root="./"
+        root="./",
+        crime_types=state.crime_types,
     )
 
     return conf

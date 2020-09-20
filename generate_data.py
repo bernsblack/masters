@@ -9,8 +9,15 @@ from utils.data_processing import *
 import logging as log
 from logger.logger import setup_logging
 from utils.preprocessing import Shaper
+from sys import argv
 
 if __name__ == "__main__":
+    if len(argv) < 2:
+        raise FileNotFoundError("Please specify config hex reference as argument")
+    else:
+        ref = argv[1]
+        config_file_name = f"./config/generate_data_{ref}.json"
+
     setup_logging(save_dir="./logs/", file_name="generate_data.log")
     log.info("=====================================BEGIN=====================================")
     # set the plotting format
@@ -18,7 +25,7 @@ if __name__ == "__main__":
     rcParams['font.family'] = 'STIXGeneral'
 
     # set all values from the config
-    config = read_json("./config/generate_data.json")
+    config = read_json(config_file_name)
     dT = config["dT"]
 
     x_scale = config["x_scale"]
@@ -69,6 +76,8 @@ if __name__ == "__main__":
     meta_info["dT"] = dT
     # Spatial dimensions
 
+    meta_info["ref"] = ref
+
     # [20,16] - [10,8] - [5,4] - [3,2] - [1,1]
     xy_scale = np.array([x_scale, y_scale])  # must be integer so that we can easily sample demographic data
     dx, dy = xy_scale * np.array([0.001, 0.001])
@@ -85,16 +94,18 @@ if __name__ == "__main__":
     crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018_new.pkl")
 
     # CHOOSE CRIME TYPES
-    valid_crime_types = [
-        "THEFT",
-        "BATTERY",
-        "CRIMINAL DAMAGE",
-        "NARCOTICS",
-        "ASSAULT",
-        "BURGLARY",
-        "MOTOR VEHICLE THEFT",
-        "ROBBERY",
-    ]
+    valid_crime_types = config["crime_types"]
+    # valid_crime_types = [
+    #     "THEFT",
+    #     "BATTERY",
+    #     "CRIMINAL DAMAGE",
+    #     "NARCOTICS",
+    #     "ASSAULT",
+    #     "BURGLARY",
+    #     "MOTOR VEHICLE THEFT",
+    #     "ROBBERY",
+    # ]
+
     # filter useless crime types
     crimes = crimes[crimes["Primary Type"].isin(valid_crime_types)]
 
@@ -122,6 +133,17 @@ if __name__ == "__main__":
 
     x_max_valid, y_max_valid = valid_points.max(0)
     x_min_valid, y_min_valid = valid_points.min(0)
+
+    lat_max = np.round(config["lat_max"]/ dy) * dy
+    lat_min = np.round(config["lat_min"]/ dy) * dy
+    lon_max = np.round(config["lon_max"]/ dx) * dx
+    lon_min = np.round(config["lon_min"]/ dx) * dx
+
+    x_min_valid = max(x_min_valid, lon_min)
+    y_min_valid = max(y_min_valid, lat_min)
+
+    x_max_valid = min(x_max_valid, lon_max)
+    y_max_valid = min(y_max_valid, lat_max)
 
     # we know all crimes have defined demographics
     # spatial discritization with step
@@ -414,6 +436,7 @@ if __name__ == "__main__":
     #########################################################################
     #                            SAVE DATA                                  #
     #########################################################################
+    # TODO: add the x and y limits to the folder id as well
     save_folder = f"./data/processed/T{dT}-X{int(meta_info['x in metres'])}M-Y{int(meta_info['y in metres'])}M_{meta_info['start_date']}_{meta_info['end_date']}/"
 
     os.makedirs(save_folder, exist_ok=True)
