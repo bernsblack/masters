@@ -176,7 +176,7 @@ class TestSparseDiscreteTable(unittest.TestCase):
     def test_mutual_information_normalized(self):
         decimal_place = 5
 
-        obs_0 = np.array([[0, 0, 0, 0], [0, 1, 2, 3]]).T
+        obs_0 = np.array([[0, 1, 2, 3], [0, 0, 0, 0]]).T
         obs_1 = np.array([[0, 0, 1, 1], [0, 0, 0, 1]]).T
         obs_2 = np.array([[0, 0, 1, 1, 2], [1, 1, 0, 0, 2]]).T
 
@@ -196,13 +196,13 @@ class TestSparseDiscreteTable(unittest.TestCase):
         self.assertAlmostEqual(0.31127812445913294,mi_1,decimal_place)
         self.assertAlmostEqual(1.5219280948873621,mi_2,decimal_place)
         self.assertAlmostEqual(0.0,nmi_0,decimal_place)
-        self.assertAlmostEqual(0.3437110184854509,nmi_1,decimal_place)
+        self.assertAlmostEqual(0.31127812445913294,nmi_1,decimal_place)
         self.assertAlmostEqual(1.0,nmi_2,decimal_place)
 
     def test_normalized_mutual_information(self):
         decimal_place = 5
 
-        obs_0 = np.array([[0, 0, 0, 0], [0, 1, 2, 3]]).T
+        obs_0 = np.array([[0, 1, 2, 3], [0, 0, 0, 0]]).T
         obs_1 = np.array([[0, 0, 1, 1], [0, 0, 0, 1]]).T
         obs_2 = np.array([[0, 0, 1, 1, 2], [1, 1, 0, 0, 2]]).T
 
@@ -222,7 +222,7 @@ class TestSparseDiscreteTable(unittest.TestCase):
         self.assertAlmostEqual(0.31127812445913294,mi_1,decimal_place)
         self.assertAlmostEqual(1.5219280948873621,mi_2,decimal_place)
         self.assertAlmostEqual(0.0,nmi_0,decimal_place)
-        self.assertAlmostEqual(0.3437110184854509,nmi_1,decimal_place)
+        self.assertAlmostEqual(0.31127812445913294,nmi_1,decimal_place)
         self.assertAlmostEqual(1.0,nmi_2,decimal_place)
 
 

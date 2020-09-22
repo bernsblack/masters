@@ -154,6 +154,9 @@ def bin_data_frame(data_frame, state):
     """
     bins = new_bins(data_frame, state)
 
+    from utils.data_processing import encode_category
+    data_frame['c'] = encode_category(series=data_frame['Primary Type'], categories=state.crime_types)
+
     binned_data, bins = np.histogramdd(
         sample=data_frame[['t', 'c', 'Latitude', 'Longitude']].values,
         bins=bins,
@@ -166,32 +169,8 @@ def get_mean_map(data_frame, state):
     """
     will be a heat map of the means with the min-max lat and lon min and remaining constant
     """
-    xbins = np.arange(
-        start=ffloor(state.total_lon_min, state.dlon),
-        stop=fceil(state.total_lon_max, state.dlon),
-        step=state.dlon,
-    )
-    nx = len(xbins)
-
-    ybins = np.arange(
-        start=ffloor(state.total_lat_min, state.dlat),
-        stop=fceil(state.total_lat_max, state.dlat),
-        step=state.dlat,
-    )
-    ny = len(ybins)
-
-    nt = int(np.ceil(data_frame.t.max()))
-    tbins = new_int_bins(data_frame.t.min(), data_frame.t.max())
-
-    nc = len(state.crime_types)
-    cbins = np.arange(0, nc + 1, 1)
-
-    bins = tbins, cbins, ybins, xbins
-
-    binned_data, bins = np.histogramdd(
-        sample=data_frame[['t', 'c', 'Latitude', 'Longitude']].values,
-        bins=bins,
-    )
+    binned_data, bins = bin_data_frame(data_frame, state)
+    _, _, ybins, xbins = bins
 
     mean_map = binned_data.sum(1).mean(0)
     return mean_map, xbins, ybins

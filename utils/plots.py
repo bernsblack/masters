@@ -15,6 +15,7 @@ import logging as log
 """
 from matplotlib import rcParams
 
+
 class BasePlotter:
     """
     Class is used to setup and add plots to a figure and then save or show this figure
@@ -519,12 +520,27 @@ def plot3D(a):
 # helper functions for heatmaps on plotly mapbox plots
 from geojson import Feature, FeatureCollection, Polygon
 from pandas import DataFrame
+
+
 def hist2d_to_geo(counts: np.ndarray, xbins: np.ndarray, ybins: np.ndarray, filter_zero=True):
+    """
+
+    :param counts: 2D-array (H,W) with counts [0,inf)
+    :param xbins: 1D-array (W+1,)
+    :param ybins: 1D-array (H+1,)
+    :param filter_zero: counts indices with a zero score gets lef out
+    :return:
+    """
+
+    H, W = counts.shape
+    assert xbins.shape[0] == W + 1
+    assert ybins.shape[0] == H + 1
+
     feat_values = []
 
     features = []
-    for i in range(len(xbins) - 1):
-        for j in range(len(ybins) - 1):
+    for i in range(W):
+        for j in range(H):
             if filter_zero and counts[j, i] == 0:
                 continue
             # coord (x,y)
@@ -537,7 +553,7 @@ def hist2d_to_geo(counts: np.ndarray, xbins: np.ndarray, ybins: np.ndarray, filt
 
             feat_id = f"y{j}_x{i}"
 
-            feat_values.append((feat_id, counts[j, i], j,i))
+            feat_values.append((feat_id, counts[j, i], j, i))
 
             feat = Feature(id=feat_id, geometry=Polygon(coordinates=coords))
             features.append(feat)

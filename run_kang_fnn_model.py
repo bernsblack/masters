@@ -16,7 +16,6 @@ from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter
 from utils.utils import write_json, Timer
 
 if __name__ == "__main__":
-
     data_dim_str = "T24H-X850M-Y880M"  # needs to exist
     model_name = "FNN-CRIME-MODEL"  # needs to be created
 
@@ -102,6 +101,8 @@ if __name__ == "__main__":
         val_loss_best = float(losses_zip["val_loss_best"])
         # todo only load loss since last best_checkpoint
 
+    steps_from_prev_improvement = 0
+    patience = 10 # number of epochs to continue with no decrease in validation step
     # TRAINING LOOP
     for epoch in range(conf.max_epochs):
         log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
@@ -156,12 +157,15 @@ if __name__ == "__main__":
 
         # save best model
         if min(val_loss) < val_loss_best:
+            steps_from_prev_improvement = 0
             val_loss_best = min(val_loss)
             torch.save(model.state_dict(), model_path + "model_best.pth")
             torch.save(optimiser.state_dict(), model_path + "optimiser_best.pth")
+        else:
+            steps_from_prev_improvement +=1
 
         # model has been over-fitting stop maybe? # average of val_loss has increase - starting to over-fit
-        if conf.early_stopping and epoch != 0 and val_loss[-1] > val_loss[-2]:
+        if conf.early_stopping and epoch != 0 and steps_from_prev_improvement > patience:
             log.warning("Over-fitting has taken place - stopping early")
             break
 

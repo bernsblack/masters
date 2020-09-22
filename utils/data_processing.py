@@ -11,6 +11,20 @@ from torch.autograd import Variable
 from utils import deprecated
 
 
+def encode_category(series, categories):
+    """
+    encode_category maps categories to the index of the category in the list of categories for a series of values
+
+    :param series: pandas.core.series.Series
+    :param categories: list possible values category can take on
+    :return: mapped series with category values going from 0 to len(categories) - 1
+
+    If value is in series but not the 'category' index will be '-1'
+    """
+    index_map = {k: i for i, k in enumerate(categories)}
+
+    return series.apply(lambda x: index_map.get(x, -1))
+
 def freq_to_nano(freq: str):
     return pd.to_timedelta(freq).delta
 

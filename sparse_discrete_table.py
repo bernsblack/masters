@@ -278,8 +278,8 @@ class SparseDiscreteTable:
         mi_01 = h_0 + h_1 - h_01
 
         if normalize:
-            # return 2 * mi_01 / (h_0 + h_1)
             return mi_01 / h_0
+            # return 2 * mi_01 / (h_0 + h_1)
         else:
             return mi_01
 
@@ -300,6 +300,7 @@ class SparseDiscreteTable:
 
         # return 2 * (h_0 + h_1 - h_01) / (h_0 + h_1)
         return (h_0 + h_1 - h_01) / h_0
+
 
     def self_information(self, rv_names_0: List[str]):
         """
