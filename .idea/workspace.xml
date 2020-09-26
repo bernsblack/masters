@@ -29,24 +29,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
-      <change afterPath="$PROJECT_DIR$/utils/loss_functions.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/inspectionProfiles/Project_Default.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/base_datagroup.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/base_datagroup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/grid_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/grid_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/hawkes_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/hawkes_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/rnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/rnn_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/kangkang_fnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/kangkang_fnn_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/st_resnet_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/st_resnet_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -479,11 +467,12 @@
     <state x="479" y="1574" width="1655" height="813" key="DiffContextDialog/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599455547527" />
     <state x="200" y="158" width="1592" height="792" key="DiffContextDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597219241299" />
     <state x="200" y="159" width="1593" height="792" key="DiffContextDialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600251947945" />
-    <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl" timestamp="1599033056077">
-      <screen x="418" y="0" width="2142" height="2520" />
+    <state x="774" y="139" width="374" height="205" key="FileChooserDialogImpl" timestamp="1601122671760">
+      <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl/418.0.2142.2520@418.0.2142.2520" timestamp="1599033056077" />
     <state x="774" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1598469140656" />
+    <state x="774" y="139" width="374" height="205" key="FileChooserDialogImpl/72.29.1848.1051@72.29.1848.1051" timestamp="1601122671760" />
     <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog" timestamp="1600068151226">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
@@ -596,7 +585,7 @@
     </state>
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="489" y="177" width="874" height="622" key="find.popup" timestamp="1601111901473">
+    <state x="489" y="177" width="874" height="622" key="find.popup" timestamp="1601122088621">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592745271900" />
@@ -607,7 +596,7 @@
     <state x="489" y="181" width="875" height="759" key="find.popup/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804707334" />
     <state x="882" y="335" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1600194630569" />
     <state x="489" y="175" width="874" height="548" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606847298" />
-    <state x="489" y="177" width="874" height="622" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601111901473" />
+    <state x="489" y="177" width="874" height="622" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601122088621" />
     <state x="645" y="270" width="700" height="530" key="recent.locations.popup" timestamp="1601108013005">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>

@@ -11,6 +11,7 @@ from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
 from pandas.tseries.offsets import Hour as OffsetHour
+
 HOUR_NANOS = OffsetHour().nanos
 
 
@@ -39,7 +40,7 @@ class BaseDataGroup:
             # if freqstr == "H":
             #     freqstr = "1H"
             # time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
-            time_step_hrs =  int(self.t_range.freq.nanos/HOUR_NANOS) # time step in hours
+            time_step_hrs = int(self.t_range.freq.nanos / HOUR_NANOS)  # time step in hours
             time_step_days = int(24 / time_step_hrs)
 
             self.offset_year = int(365 * time_step_days)
@@ -59,15 +60,20 @@ class BaseDataGroup:
             total_offset = self.seq_len + self.offset_year
 
             # target_len = self.total_len - total_offset
-            tst_size = int((conf.tst_ratio / conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)  # int(target_len * conf.tst_ratio)
+            tst_size = int((
+                                   conf.tst_ratio / conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)  # int(target_len * conf.tst_ratio)
             val_size = int((conf.val_ratio / conf.tst_ratio) * tst_size)  # int(target_len * conf.val_ratio)
-            trn_size = int(((1 - conf.val_ratio - conf.tst_ratio) / conf.tst_ratio) * tst_size) # int(target_len - tst_size - val_size)
+            trn_size = int(((
+                                    1 - conf.val_ratio - conf.tst_ratio) / conf.tst_ratio) * tst_size)  # int(target_len - tst_size - val_size)
+            trn_val_size = trn_size + val_size
 
             #  start and stop t_index of each dataset - can be used outside of loader/group
             # runs -> val_set, trn_set, tst_set: trn and tst set are more correlated
             self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
             self.trn_indices = np.array([self.tst_indices[0] - trn_size, self.tst_indices[0]])
             self.val_indices = np.array([self.trn_indices[0] - val_size, self.trn_indices[0]])
+            self.trn_val_indices = np.array([self.tst_indices[0] - trn_val_size,
+                                             self.trn_indices[0]])  # used to train model with validation set included
 
             # used to create the shaper so that all datasets have got values in them
             tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
@@ -113,7 +119,9 @@ class BaseDataGroup:
         self.tst_indices[0] = self.tst_indices[0] - total_offset
         self.val_indices[0] = self.val_indices[0] - total_offset
         self.trn_indices[0] = self.trn_indices[0] - total_offset
+        self.trn_val_indices[0] = self.trn_val_indices[0] - total_offset
 
+        self.trn_val_t_range = self.t_range[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_t_range = self.t_range[self.trn_indices[0]:self.trn_indices[1]]
         self.val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         self.tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
@@ -133,6 +141,7 @@ class BaseDataGroup:
         # should be axis of the channels - only fit scaler on training data
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
+        self.trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
         self.val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1]]
         self.tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
@@ -140,9 +149,11 @@ class BaseDataGroup:
         # targets
         self.target_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
-        self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+        # use train and val sizes to determine the scale - validation set forms part of the training set technically
+        self.target_scaler.fit(self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]], axis=1)
         self.targets = self.target_scaler.transform(self.targets)
 
+        self.trn_val_targets = self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
         self.val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
         self.tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
@@ -153,11 +164,13 @@ class BaseDataGroup:
         # should be axis of the channels - only fit scaler on training data
         self.total_crimes_scaler.fit(self.total_crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.total_crimes = self.total_crimes_scaler.transform(self.total_crimes)
+        self.trn_val_total_crimes = self.total_crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_total_crimes = self.total_crimes[self.trn_indices[0]:self.trn_indices[1]]
         self.val_total_crimes = self.total_crimes[self.val_indices[0]:self.val_indices[1]]
         self.tst_total_crimes = self.total_crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # time_vectors is already scaled between 0 and 1
+        self.trn_val_time_vectors = self.time_vectors[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_time_vectors = self.time_vectors[self.trn_indices[0]:self.trn_indices[1]]
         self.val_time_vectors = self.time_vectors[self.val_indices[0]:self.val_indices[1]]
         self.tst_time_vectors = self.time_vectors[self.tst_indices[0]:self.tst_indices[1]]
@@ -167,17 +180,16 @@ class BaseDataGroup:
         # # self.weather_vector_scaler.fit(self.weather_vectors[self.trn_index[0]:self.trn_index[1]], axis=1)  # norm with trn data
         # self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
         # self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
+        # trn_val_weather_vectors = self.weather_vectors[self.trn_val_indices[0]:self.trn_val_indices[1]]
         # trn_weather_vectors = self.weather_vectors[self.trn_indices[0]:self.trn_indices[1]]
         # val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
         # tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
-        # normalise space dependent data - using minmax_scale - no need to save train data norm values
+        # normalise space dependent data - using min_max_scale - no need to save train data norm values
         self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
         self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
+        self.training_validation_set = None
         self.training_set = None
-
         self.validation_set = None
-
         self.testing_set = None
-

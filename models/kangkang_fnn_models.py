@@ -181,6 +181,17 @@ def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, c
 # evaluation loops
 def evaluate_fnn(model, batch_loader, conf):
     """
+    :param model: any torch model that takes spc_feats, tmp_feats, env_feats as features
+    :param batch_loader: batch loader that is iterable -> returns: indices, spc_feats, tmp_feats, env_feats
+    :param conf: only value used it the device attached to the conf variable
+    :return: y_true, probas_pred, t_range where
+        - y_true:
+        - probas_pred:
+        - t_range:
+
+
+    Notes
+    -----
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
     """

@@ -412,10 +412,21 @@ def train_epoch_for_st_res_net(model, optimiser, batch_loader, loss_fn, total_lo
 # evaluation loops
 def evaluate_st_res_net_extra(model, batch_loader, conf):
     """
+    st_res_net model looks at historic crime data, time vector data as well as demographic and street view data
+
+    :param model: model that takes (seq_c, seq_p, seq_q, seq_e, seq_demog, seq_gsv)
+    :param batch_loader: iterates with outputs: (batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t)
+    :param conf: only used the device attached to conf to use cuda if available
+    :return: y_counts, y_true, probas_pred, t_range
+        - y_counts: normalized target crime counts for regression models
+        - y_true: class labels {0, 1}
+        - probas_pred: float value representing the probability of crime happening
+
+    Notes
+    -----
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
     """
-
     probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
     y_counts = batch_loader.dataset.targets[-len(probas_pred):]
     y_true = np.copy(y_counts)
@@ -456,8 +467,20 @@ def evaluate_st_res_net_extra(model, batch_loader, conf):
     return y_counts, y_true, probas_pred, t_range
 
 
-def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf:BaseConf):
+def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf: BaseConf):
     """
+    st_res_net model only looks at historic crime data as well as time vector data
+
+    :param model: model that takes (seq_c, seq_p, seq_q, seq_e)
+    :param batch_loader: iterates with outputs: (batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t)
+    :param conf: only used the device attached to conf to use cuda if available
+    :return: y_counts, y_true, probas_pred, t_range
+
+
+
+
+    Notes
+    -----
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
     """

@@ -17,7 +17,12 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
         if scheduler is None it will be ignored. Scheduler mode should be set to 'min'
     - patience: number of epochs to continue where the validation loss has not improved before early stopping
 
-    :returns: best validation loss of all the epochs - used to tune the hyper-parameters of the models/optimiser
+    :returns: trn_epoch_losses, val_epoch_losses, stopped_early
+
+    Notes
+    -----
+    best validation loss of all the epochs can be determined by getting min(val_epoch_losses)
+    best validation loss used to tune the hyper-parameters of the models/optimiser
     """
     log.info(f"\n ====================== Training {conf.model_name} ====================== \n")
     log.info(f"\n ====================== Config Values ====================== \n{conf}" +
@@ -103,7 +108,8 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
         log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         if conf.early_stopping and prev_best_val_step > patience:
-            log.warning(f"Early stopping: Over-fitting has taken place. Previous validation improvement is more that {patience} steps ago.")
+            log.warning(
+                f"Early stopping: Over-fitting has taken place. Previous validation improvement is more that {patience} steps ago.")
             stopped_early = True
             break
 
