@@ -141,9 +141,14 @@ if __name__ == "__main__":
 
     x_min_valid = max(x_min_valid, lon_min)
     y_min_valid = max(y_min_valid, lat_min)
-
     x_max_valid = min(x_max_valid, lon_max)
     y_max_valid = min(y_max_valid, lat_max)
+
+    meta_info["x_min_valid"] = x_min_valid
+    meta_info["y_min_valid"] = y_min_valid
+    meta_info["x_max_valid"] = x_max_valid
+    meta_info["y_max_valid"] = y_max_valid
+
 
     # we know all crimes have defined demographics
     # spatial discritization with step
@@ -437,7 +442,7 @@ if __name__ == "__main__":
     #                            SAVE DATA                                  #
     #########################################################################
     # TODO: add the x and y limits to the folder id as well
-    save_folder = f"./data/processed/T{dT}-X{int(meta_info['x in metres'])}M-Y{int(meta_info['y in metres'])}M_{meta_info['start_date']}_{meta_info['end_date']}/"
+    save_folder = f"./data/processed/T{dT}-X{int(meta_info['x in metres'])}M-Y{int(meta_info['y in metres'])}M_{meta_info['start_date']}_{meta_info['end_date']}_#{meta_info['ref']}/"
 
     os.makedirs(save_folder, exist_ok=True)
     os.makedirs(save_folder + "plots", exist_ok=True)
@@ -513,7 +518,13 @@ if __name__ == "__main__":
 
     # save generated data
     # TODO ENSURE ALL SPATIAL DATA IS IN FORM N, C, H, W -> EVEN IF C = 1 SHOULD BE N, 1, H, W
+    for g in [crime_type_grids, crime_grids, demog_grid, street_grid]:
+        assert len(g.shape) == 4
+    
+    
     # note - we only normalise later as some models use different normalisation techniques
+    time_vectors = encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='ohe') # kind='sincos')
+
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,
                         crime_types_grids=crime_type_grids,  # sum crimes, crime types, arrests
@@ -521,7 +532,7 @@ if __name__ == "__main__":
                         tract_count_grids=tract_count_grids,  # sum crimes of tracts
                         demog_grid=demog_grid,
                         street_grid=street_grid,
-                        time_vectors=encode_time_vectors(t_range),
+                        time_vectors=time_vectors,
                         weather_vectors=weather_vectors,  # will not be using weather data
                         x_range=x_range,
                         y_range=y_range)

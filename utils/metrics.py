@@ -26,18 +26,55 @@ import matplotlib.pyplot as plt
 from matplotlib import rcParams
 import logging as log
 from sklearn.metrics import average_precision_score, precision_recall_curve, roc_auc_score, roc_curve, \
-    mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, mean_squared_error
+    mean_absolute_error, accuracy_score, precision_score, recall_score, f1_score, confusion_matrix, mean_squared_error, \
+    matthews_corrcoef
 
 import unittest
 
 
+def predictive_accuracy_index_averaged_over_time(y_true, y_pred):
+    """
+    Calculate PAI metrics averaged of each observation.
+
+    :param y_true: ndarray (N,L)
+    :param y_pred: ndarray (N,L)
+    :return: mean and standard deviation of the PAI averaged over time (axis=0)
+    """
+    result = predictive_accuracy_index_per_time_slot(y_true, y_pred)
+    return np.mean(result), np.std(result)
+
+
+def predictive_accuracy_index_per_time_slot(y_true, y_pred):
+    """
+    Calculate the PAI for each index of time in predict values of format (N,L)
+
+    :param y_true: true crime counts in (N,1,L) format each value [0, max_int]
+    :param y_pred: predicted crime hotspots in (N,1,L) format, each value [0,1]
+    :return: ndarray (N,1) with each index in N indicating the PAI for that index
+    """
+
+    pai_time_slot = []
+    N, C, L = y_true.shape
+    assert C == 1
+    assert y_true.shape == y_pred.shape
+
+    for n in range(N):
+        pai_time_slot.append(
+            predictive_accuracy_index(y_true[n, 0, :], y_pred[n, 0, :])
+        )
+
+    return np.array(pai_time_slot)
+
+
 def predictive_accuracy_index(y_true, y_pred):
     """
-    y_true: true crime counts of the grid
-    y_pred: predicted hotspot areas in the grid -> 1 for hot 0 for not
+    y_true: true crime counts of the grid (L,) with each cell value [0,max_int]
+    y_pred: predicted hotspot areas in the grid -> 1 for hot 0 for not (L,) with each value [0 or 1]
 
     Warning: if no crime is predicted a/A will be zero and will lead to ZeroDivisionError
     """
+    assert y_pred.max() == 1
+
     n = np.sum(y_true[y_pred == 1])  # crimes in predicted area
     N = np.sum(y_true)  # crimes in total area
 
@@ -47,26 +84,47 @@ def predictive_accuracy_index(y_true, y_pred):
     return (n * A) / (N * a)
 
 
+Y_TRUE_PAI = np.array([
+    [1, 0, 0, 1],
+    [0, 0, 0, 0],
+    [0, 2, 0, 0],
+    [3, 0, 5, 0],
+])
+
+Y_PRED_PAI = np.array([
+    [1, 0, 0, 0],
+    [0, 0, 0, 0],
+    [0, 1, 1, 1],
+    [0, 0, 1, 0],
+])
+
+
 class TestPredictiveAccuracyIndex(unittest.TestCase):
 
     def test_predictive_accuracy_index(self):
-        y_true = np.array([
-            [1, 0, 0, 1],
-            [0, 0, 0, 0],
-            [0, 2, 0, 0],
-            [3, 0, 5, 0],
-        ])
+        y_true = Y_TRUE_PAI
 
-        y_pred = np.array([
-            [1, 0, 0, 0],
-            [0, 0, 0, 0],
-            [0, 1, 1, 1],
-            [0, 0, 1, 0],
-        ])
+        y_pred = Y_PRED_PAI
 
         pai = predictive_accuracy_index(y_true=y_true, y_pred=y_pred)
 
         self.assertAlmostEqual(pai, 2.1333333333333333)
+
+    def test_predictive_accuracy_index_per_time(self):
+        y_true = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape(10, 1, -1)
+        y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape(10, 1, -1)
+
+        pai_per_t = predictive_accuracy_index_per_time_slot(y_true=y_true, y_pred=y_pred)
+        target = np.array(10 * [2.1333333333333333])
+        self.assertTrue(np.equal(pai_per_t, target).all())
+
+    def test_predictive_accuracy_index_averaged_over_time(self):
+        y_true = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape(10, -1)
+        y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape(10, -1)
+
+        pai_mu, pai_std = predictive_accuracy_index_averaged_over_time(y_true=y_true, y_pred=y_pred)
+        target_mu, target_std = 2.1333333333333333, 0
+        self.assertTrue((pai_mu, pai_std) == (target_mu, target_std))
 
 
 def safe_f1_score(pr):
@@ -124,6 +182,12 @@ def get_y_pred_by_thresholds(thresholds, probas_pred):
 
 
 def mean_absolute_scaled_error(y_true, y_pred):
+    """
+    Calculated the ratio between MAE of predicted value and the y_true lag by one time step.
+    :param y_true:
+    :param y_pred:
+    :return:
+    """
     y_true_lag = y_true[:-1].copy()
     y_true = y_true[1:]
     y_pred = y_pred[1:]
@@ -576,6 +640,28 @@ def roc_auc_score_per_cell(y_true, probas_pred):
     result = np.expand_dims(result, axis=0)
     result = np.expand_dims(result, axis=0)
 
+    return result
+
+
+def matthews_corrcoef_per_time_slot(y_true, y_pred):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
+
+    return: (N,1,1)
+    """
+
+    N, _, L = y_true.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        result[i] = matthews_corrcoef(
+            y_true=y_true[i, :, :].flatten(),
+            y_pred=y_pred[i, :, :].flatten(),
+        )
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
     return result
 
 

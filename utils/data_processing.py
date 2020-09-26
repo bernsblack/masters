@@ -7,9 +7,75 @@ from scipy.interpolate import interp2d  # used for super resolution of grids
 from scipy.ndimage import gaussian_filter
 from sklearn.preprocessing import OneHotEncoder
 from torch.autograd import Variable
-
+from utils.utils import cut
 from utils import deprecated
 
+
+def sincos_vector(x):
+    """
+    Encode array x in sin cos vector representation
+    x should be ndarray of integers
+    given x is a cyclical series - we return a sin and cos vector of the cyclical series
+    """
+    x = x - x.min()
+    x_max = x.max()
+
+    sin_x = np.sin(2 * np.pi * (x % x_max) / x_max)
+    cos_x = np.cos(2 * np.pi * (x % x_max) / x_max)
+    return np.stack([sin_x, cos_x], axis=1)
+
+
+def encode_sincos(X):
+    n, d = X.shape
+    vectors = []
+    for i in range(d):
+        vectors.append(sincos_vector(X[:, i]))
+
+    return np.concatenate(vectors, axis=1)
+
+
+def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='ohe'):
+    """
+    given t_range (datetime series)
+    return E: H,D,DoW,isWeekend hot-encoded vector and sin(hour/24) cos(hour/24)
+    as the columns features in numpy array
+    kind: {'ohe' or 'sincos'} options - if sincos all vectors are represented and sin cos cycles, if ohe all vectors are
+    one hot encoded and the hour of the day is sin cos vector representation.
+    """
+    time_frame = t_range.freqstr  # used to choose the external factors
+    # External info
+    is_weekend = t_range.dayofweek.to_numpy()
+    is_weekend[is_weekend < 5] = 0
+    is_weekend[is_weekend >= 5] = 1
+
+    is_gte_24hours = "D" in time_frame or time_frame == "24H"
+
+    df = pd.DataFrame({
+        "hour": t_range.hour,
+        "dayofweek": t_range.dayofweek,
+        "is_weekend": is_weekend,
+        "timeofmonth": cut(t_range.day / t_range.days_in_month, month_divisions),
+        "timeofyear": cut(t_range.dayofyear / (366), year_divisions),
+        #         "month": t_range.month,
+    })
+
+    if kind == "ohe":
+        # OneHotEncoder for categorical data
+        time_values = df[["dayofweek", "is_weekend", "timeofmonth", "timeofyear"]].values
+        ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
+        time_value_ohe = ohe.fit_transform(time_values)
+
+        if not is_gte_24hours:  # only if we are working on a hourly time scale
+            # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
+            hour_vec = sincos_vector(df.hour.values) / 2 + 0.5 # ensure all vectors are between 0 and 1
+            time_vectors = np.hstack([time_value_ohe, hour_vec])
+        else:
+            time_vectors = time_value_ohe
+    else: # option to encode all time information in a sin cos vector representation
+        tv_sce = encode_sincos(df[["hour", "dayofweek", "timeofmonth", "timeofyear"]].values)/ 2 + 0.5 # ensure all vectors are between 0 and 1
+        time_vectors = np.concatenate([tv_sce, is_weekend.reshape(-1,1)], axis=1)
+
+    return time_vectors
 
 def encode_category(series, categories):
     """
@@ -83,8 +149,8 @@ def map_to_weights(labels):
     weights = np.matmul(hot_encoded, dist)
     return weights
 
-
-def encode_time_vectors(t_range):
+@deprecated
+def encode_time_vectors_old(t_range):
     """
     given t_range (datetime series)
     return E: H,D,DoW,isWeekend hot-encoded vector and sin(hour/24) cos(hour/24)

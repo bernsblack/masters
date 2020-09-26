@@ -1,3 +1,5 @@
+from abc import ABC
+
 import torch
 from torch import nn
 import logging as log
@@ -180,7 +182,7 @@ class RecurrentFeedForwardNetwork(nn.Module):
         return out_vec
 
 
-class SimpleRecurrentFeedForwardNetwork(nn.Module):
+class SimpleRecurrentFeedForwardNetwork(nn.Module, ABC):
     def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5, model_arch=None):
         super(SimpleRecurrentFeedForwardNetwork, self).__init__()
 

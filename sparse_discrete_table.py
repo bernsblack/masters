@@ -301,7 +301,6 @@ class SparseDiscreteTable:
         # return 2 * (h_0 + h_1 - h_01) / (h_0 + h_1)
         return (h_0 + h_1 - h_01) / h_0
 
-
     def self_information(self, rv_names_0: List[str]):
         """
         H(Y|Y) = 0
@@ -463,8 +462,9 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     else:
         return h_xz + h_yz - h_xyz - h_z
 
+from utils.utils import cut
 
-def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_self=False):
+def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_self=False, bins=0):
     """
     Calculates the mutual information between 'a' and time lag of 'a' up until 'max_offset' time steps
 
@@ -473,8 +473,13 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
     :param norm: if the mutual information should be normalised between 0 and 1
     :param log_norm: if the array 'a' should be normalised: round(log2(1 + a))
     :param include_self: if we should include the mutual info of the variable with itself given no time lag
+    :param bins: int on how many bins the continuous data should be split into. If the value is 0 the data will remain unchanged.
     :return: return tuple (mis, offsets) where mis is np.ndarray (max_offset, 1) of mutual information and corresponding offsets for the matching index
     """
+    n = len(a) - max_offset
+
+    if bins > 0:
+        a = cut(a, bins)
 
     if log_norm:
         a = np.round(np.log2(1 + a))
@@ -483,7 +488,8 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
         mi = quick_mutual_info(a, a, norm)
         mis.append(mi)
     for t in range(1, max_offset + 1):
-        mi = quick_mutual_info(a[t:], a[:-t], norm)
+        # mi = quick_mutual_info(a[t:], a[:-t], norm)
+        mi = quick_mutual_info(a[-n:], a[-n - t:-t], norm)
         mis.append(mi)
 
     if include_self:
@@ -495,7 +501,7 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
 
 def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
                                       log_norm=True, include_self=False,
-                                      cycles=(7,), conds=None):
+                                      cycles=(7,), conds=None, bins=0):
     """
     Calculate the conditional mutual information over various time lags conditioned on a time series the repeats every
     cycle steps.
@@ -507,8 +513,14 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
     :param include_self: if we should include the mutual info of the variable with itself given no time lag
     :param cycles: tuple cycle of the data we condition on if we believe there is a strong weekly trend -> 7 or 24 for daily trends
     :param conds: conditions np.ndarray (N,n_conditions) same length as the input array, can be left out but then the cycles need to be set
+    :param bins: int on how many bins the continuous data should be split into. If the value is 0 the data will remain unchanged.
     :return: return tuple (cmis, offsets) where cmis is np.ndarray (max_offset, 1) of conditional mutual information and corresponding offset for the matching index
     """
+    n = len(a) - max_offset
+
+    if bins > 0:
+        a = cut(a, bins)
+
     if log_norm:
         a = np.round(np.log2(1 + a)).reshape(-1, 1)
 
@@ -520,12 +532,27 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
 
     cmis = []
     if include_self:
-        cond = np.concatenate([conds, conds], axis=1)  # concatenate uses existing axis
+        # cond = np.concatenate([conds, conds], axis=1)  # concatenate uses existing axis # todo uncoment
+        cond = conds[-n:]
+
         cmi = quick_cond_mutual_info(a, a, cond, norm)
         cmis.append(cmi)
     for t in range(1, max_offset + 1):
-        cond = np.concatenate([conds[t:], conds[:-t]], axis=1)
-        cmi = quick_cond_mutual_info(a[t:], a[:-t], cond, norm)
+        # cond = np.concatenate([conds[t:], conds[:-t]], axis=1)
+        # cmi = quick_cond_mutual_info(a[t:], a[:-t], cond, norm)
+
+        # cond = np.concatenate([conds[-n:], conds[-n-t:-t]], axis=1)  # todo uncomment
+        # cond = np.concatenate([conds[-n:], conds[-n:]], axis=1)  # only the current day time information
+        # cond = np.concatenate([conds[-n-t:-t], conds[-n-t:-t]], axis=1)  # only past date
+        cond = conds[-n:]  # only the current day time information
+
+        cmi = quick_cond_mutual_info(
+            x=a[-n:],
+            y=a[-n - t:-t],
+            z=cond,
+            norm=norm,
+        )  # only conditioned on current date information
+
         cmis.append(cmi)
 
     if include_self:

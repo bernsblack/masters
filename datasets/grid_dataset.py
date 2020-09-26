@@ -9,6 +9,9 @@ from utils.constants import TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
+from pandas.tseries.offsets import Hour as OffsetHour
+HOUR_NANOS = OffsetHour().nanos
+
 
 # todo: split train/val/test first then make shaper with prod of the max of each set - ensuring one crime for all cells
 class GridDataGroup:
@@ -37,9 +40,14 @@ class GridDataGroup:
             log.info(f"\tt_range shape {np.shape(t_range)}")
 
             freqstr = t_range.freqstr
+            if freqstr == "D":
+                freqstr = "24H"
             if freqstr == "H":
                 freqstr = "1H"
             time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+            # time_step_hrs = int(
+            #     self.t_range.freq.nanos / HOUR_NANOS)  # int(freqstr[:freqstr.find("H")])  # time step in hours
+
             time_step_days = 24 / time_step_hrs
 
             self.step_c = 1

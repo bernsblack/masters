@@ -8,17 +8,29 @@ import pandas as pd
 from pprint import pformat
 
 
+def cut(x, bins=10):
+    """
+    Shorthand cut function that bins the values of the array and returns the index of the bin the array value falls in.
+    :param x: array
+    :param bins: number of segments the array should be divided in x.min and x.max being the limits of the bins
+    :return:
+    """
+    return pd.cut(x=x, bins=bins, labels=False)
+
+
 def ffloor(value, delta):
     """
     floors value to the nearest multiple of delta where delta can be a float
     """
-    return np.floor(value/delta)*delta
+    return np.floor(value / delta) * delta
+
 
 def fceil(value, delta):
     """
     ceils value to the nearest multiple of delta where delta can be a float
     """
-    return np.ceil(value/delta)*delta
+    return np.ceil(value / delta) * delta
+
 
 def get_data_resolutions():
     def parse_st_resolution(s):
@@ -42,6 +54,15 @@ def get_data_sub_paths():
         data_sub_paths.remove('.DS_Store')
 
     return data_sub_paths
+
+
+def by_ref(ref):
+    """
+    Get the data_sub_paths by the reference code
+    :param ref: reference code: 3 letter code
+    :return: list of subpaths ending in ref
+    """
+    return [c for c in get_data_sub_paths() if c.endswith(ref)]
 
 
 def pmax(*args):

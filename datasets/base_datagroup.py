@@ -10,10 +10,16 @@ from utils.constants import TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
+from pandas.tseries.offsets import Hour as OffsetHour
+HOUR_NANOS = OffsetHour().nanos
+
 
 class BaseDataGroup:
     def __init__(self, data_path: str, conf: BaseConf):
         """
+        BaseDataGroup acts as base class for collections of datasets (training/validation/test)
+        The data group loads data from disk, splits in separate sets and normalises according to train set.
+
         :param data_path: Path to the data folder with all spatial and temporal data.
         :param conf: Config class with pre-set and global values
         """
@@ -27,10 +33,13 @@ class BaseDataGroup:
             self.t_range = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range shape {np.shape(self.t_range)}")
 
-            freqstr = self.t_range.freqstr
-            if freqstr == "H":
-                freqstr = "1H"
-            time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+            # freqstr = self.t_range.freqstr
+            # if freqstr == "D":
+            #     freqstr = "24H"
+            # if freqstr == "H":
+            #     freqstr = "1H"
+            # time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
+            time_step_hrs =  int(self.t_range.freq.nanos/HOUR_NANOS) # time step in hours
             time_step_days = int(24 / time_step_hrs)
 
             self.offset_year = int(365 * time_step_days)
@@ -117,7 +126,7 @@ class BaseDataGroup:
         # get historic average on the log2+1 normed values
         if conf.use_historic_average:
             ha = HistoricAverage(step=time_step_days)
-            historic_average = ha.fit_transform(+ self.crimes[:, 0:1])
+            historic_average = ha.fit_transform(self.crimes[:, 0:1])
             self.crimes = np.concatenate((self.crimes, historic_average), axis=1)
 
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))

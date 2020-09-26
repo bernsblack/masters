@@ -62,13 +62,17 @@ class HawkesModelGeneral:
 
 class IndHawkesModel:
     """
-    Independent Hawkes Models where all cells are independent
+    Independent Hawkes Models where all cells are independent.
+    The training is done using Expectation Maximization Algorithm
 
     Using Tick library from:
     - https://x-datainitiative.github.io/tick/modules/generated/tick.hawkes.HawkesSumExpKern.html
     """
 
     def __init__(self, kernel_size):
+        """
+        :param kernel_size: how many time steps back the model should incorporate
+        """
         self.name = "IndHawkes"
         self.kernel_size = kernel_size
         self.baselines = []
@@ -103,7 +107,12 @@ class IndHawkesModel:
             self.kernels.append(kernel)
 
     def transform(self, data):
-        # todo consider training saving a kernel AND baseline for each cell
+        """
+        Predict Hawkes intensity by taking the baseline for each cell and adding the convolution of the estimated kernel
+        for the cell ->  Y[:,i] = baselines[i] + convolve(X[:,i], kernels[i])
+        :param data: ndarray shape (N, L)
+        :return: ndarray shape (N, L)
+        """
         # kernels -> (N,L,kernel_size)
         # baselines -> (N,L,1)
         N, L = np.shape(data)

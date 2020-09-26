@@ -2,6 +2,8 @@ import numpy as np
 from utils import ffloor, fceil
 from pprint import pformat
 from pandas import Timedelta
+from geopy import distance
+
 
 class State:
     """
@@ -69,6 +71,7 @@ def state_to_conf(state):
     )
 
     return conf
+
 
 # rename and move to utils
 def new_int_bins(int_min, int_max):
@@ -174,3 +177,27 @@ def get_mean_map(data_frame, state):
 
     mean_map = binned_data.sum(1).mean(0)
     return mean_map, xbins, ybins
+
+
+def get_ratio_xy(data_frame):
+    """
+    Given data_frame with fields Latitude and Longitude return the ratio between the min and max points distances
+    returns d(lon_max-lon_min)/d(lat_max-lat_min)
+    this ratio helps with plotting grids in a realistic manner
+    """
+    # get meter per degree estimate
+    coord_series = data_frame[['Latitude', 'Longitude']]
+
+    lat_min, lon_min = coord_series.min()
+    lat_max, lon_max = coord_series.max()
+
+    # lat_mean, lon_mean = coord_series.mean()
+
+    dy = distance.distance((lat_min, lon_min), (lat_max, lon_min)).m
+    dx = distance.distance((lat_min, lon_min), (lat_min, lon_max)).m
+
+    # lat_per_metre = (lat_max - lat_min)/dy
+    # lon_per_metre = (lon_max - lon_min)/dx
+
+    ratio_xy = dx / dy
+    return ratio_xy

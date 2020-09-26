@@ -5,7 +5,7 @@ from utils.metrics import LossPlotter
 
 
 # generic training loop
-def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None):
+def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None, patience=10):
     """
     Generic training loop that handles:
     - early stopping
@@ -14,7 +14,8 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
     - model checkpoints
     - saving epoch and batch losses
     - scheduler: is used to systematically update the learning rate if a plateau is reached
-        if scheduler is None it will be ignored. Sheduler mode should be set to 'min'
+        if scheduler is None it will be ignored. Scheduler mode should be set to 'min'
+    - patience: number of epochs to continue where the validation loss has not improved before early stopping
 
     :returns: best validation loss of all the epochs - used to tune the hyper-parameters of the models/optimiser
     """
@@ -47,6 +48,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
     log.info(f"Start Training {conf.model_name}")
     log.info(f"Using optimiser: \n{optimiser}\n\n")
 
+    prev_best_val_step = 0
     for epoch in range(conf.max_epochs):
         log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
         conf.timer.reset()
@@ -82,6 +84,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
 
         # save best model
         if val_epoch_losses[-1] < val_epoch_losses_best:
+            prev_best_val_step = 0
             val_epoch_losses_best = val_epoch_losses[-1]
             torch.save(model.state_dict(), f"{conf.model_path}model_best.pth")
             torch.save(optimiser.state_dict(), f"{conf.model_path}optimiser_best.pth")
@@ -91,23 +94,30 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
                                 trn_epoch_losses=trn_epoch_losses,
                                 trn_batch_losses=trn_batch_losses,
                                 val_epoch_losses_best=val_epoch_losses_best)
+        else:
+            prev_best_val_step += 1
 
         log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Val Best): \t{val_epoch_losses_best:.8f}")
         log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
-        # increasing moving average of val_epoch_losses
-        if conf.early_stopping and epoch > 10 and np.sum(np.diff(val_epoch_losses[-5:])) >= 0:
-            log.warning("Early stopping: Over-fitting has taken place")
+        if conf.early_stopping and prev_best_val_step > patience:
+            log.warning(f"Early stopping: Over-fitting has taken place. Previous validation improvement is more that {patience} steps ago.")
             stopped_early = True
             break
 
-        if conf.early_stopping and epoch > 10 and np.abs(val_epoch_losses[-1] - val_epoch_losses[-2]) < conf.tolerance:
-            log.warning(f"Converged: Difference between the past two"
-                        + f" validation losses is within tolerance of {conf.tolerance}")
-            stopped_early = True
-            break
+        # # increasing moving average of val_epoch_losses
+        # if conf.early_stopping and epoch > 10 and np.sum(np.diff(val_epoch_losses[-5:])) >= 0:
+        #     log.warning("Early stopping: Over-fitting has taken place - sum-differences between last 5 steps are greate than 0")
+        #     stopped_early = True
+        #     break
+        #
+        # if conf.early_stopping and epoch > 10 and np.abs(val_epoch_losses[-1] - val_epoch_losses[-2]) < conf.tolerance:
+        #     log.warning(f"Converged: Difference between the past two"
+        #                 + f" validation losses is within tolerance of {conf.tolerance}")
+        #     stopped_early = True
+        #     break
 
         if epoch > 5 and val_epoch_losses[-1] == val_epoch_losses[-2] and val_epoch_losses[-3] == val_epoch_losses[-2]:
             log.warning(f"Converged: Past 3 validation losses are all the same,"
