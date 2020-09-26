@@ -201,3 +201,109 @@ def get_ratio_xy(data_frame):
 
     ratio_xy = dx / dy
     return ratio_xy
+
+
+# widget setup
+from ipywidgets import Layout, widgets
+import plotly.graph_objects as go
+
+def new_interactive_heatmap(z, name=None):
+    # h, w = z.shape
+    height = 400
+    width = 300
+
+    return go.FigureWidget(
+        go.Heatmap(z=z),
+        layout=dict(
+            height=height,
+            width=width,
+            title_x=0.5,
+            title=name,
+            margin=dict(l=20, r=20, t=50, b=20),
+            #             paper_bgcolor="LightSteelBlue",
+            #             colorscale='Viridis', # one of plotly colorscales
+            #             showscale=True,
+        ),
+    )
+
+
+class InteractiveHeatmaps:
+    """
+    InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
+    """
+
+    def __init__(self, date_range, col_wrap=3, **kwargs):
+
+        def get_widget_value(change):
+            self.change = change
+            if isinstance(change, dict) and change.get('name') == 'value':
+                self.valid_change = change
+                return change.get('new')
+            return None
+
+        self.heatmaps = dict()
+        self.figures = []
+        self.grids = dict()
+
+        for name, grid in kwargs.items():
+            self.grids[name] = grid
+            hm_fig = new_interactive_heatmap(z=grid[0], name=name)
+            self.figures.append(hm_fig)
+            self.heatmaps[name] = hm_fig.data[0]
+
+        self.date_range = date_range
+
+        # time index date display label
+        self.current_date_label = widgets.Label(f'Date: {self.date_range[0].strftime("%c")}')
+
+        # time index selector
+        self.time_index_slider = widgets.IntSlider(
+            value=0,
+            min=0,
+            max=len(self.date_range) - 1,
+            step=1,
+            description='Time Index:',
+            continuous_update=False,
+            layout=Layout(width='80%'),
+        )
+
+        def on_change_time_index(change):
+            time_index = get_widget_value(change)
+            if time_index is not None:
+                self.time_index = time_index
+                self.current_date_label.value = f'Date: {self.date_range[self.time_index].strftime("%c")}'
+
+                for name_, heatmap in self.heatmaps.items():
+                    heatmap.z = self.grids[name_][self.time_index]
+
+        self.time_index_slider.observe(on_change_time_index)
+
+        self.play_button = widgets.Play(
+            value=0,
+            min=self.time_index_slider.min,
+            max=self.time_index_slider.max,
+            step=1,
+            interval=1000,
+            description="Press play",
+            disabled=False
+        )
+        widgets.jslink((self.play_button, 'value'), (self.time_index_slider, 'value'))
+
+        wrapped_figs = []
+        row_figs = []
+        for i, fig in enumerate(self.figures):
+            if i % col_wrap == 0:
+                wrapped_figs.append(widgets.HBox(row_figs))
+                row_figs = []
+
+            row_figs.append(fig)
+        wrapped_figs.append(widgets.HBox(row_figs))
+
+        self.app = widgets.VBox([
+            self.current_date_label,
+            widgets.HBox([
+                self.play_button,
+                self.time_index_slider,
+            ]),
+            widgets.VBox(wrapped_figs),
+        ])

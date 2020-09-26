@@ -30,11 +30,7 @@
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/base_datagroup.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/base_datagroup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/kangkang_fnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/kangkang_fnn_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/st_resnet_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/st_resnet_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -442,13 +438,14 @@
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="454" y="211" width="1084" height="710" key="#com.intellij.execution.impl.EditConfigurationsDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1596449123256" />
-    <state x="790" y="415" width="668" height="300" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1600764920110">
-      <screen x="72" y="34" width="1848" height="1046" />
+    <state x="790" y="412" width="668" height="300" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1601130700943">
+      <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="411" y="-900" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592644093027" />
     <state x="411" y="-927" key="#com.intellij.fileTypes.FileTypeChooser/0.23.1440.877/-583.-1417.2560.1344@-583.-1417.2560.1344" timestamp="1592683955310" />
     <state x="1250" y="525" width="757" height="403" key="#com.intellij.fileTypes.FileTypeChooser/346.1440.1920.1080/418.0.2142.1440@418.0.2142.1440" timestamp="1596708359556" />
     <state x="790" y="415" width="668" height="300" key="#com.intellij.fileTypes.FileTypeChooser/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600764920110" />
+    <state x="790" y="412" key="#com.intellij.fileTypes.FileTypeChooser/72.29.1848.1051@72.29.1848.1051" timestamp="1601130700943" />
     <state x="288" y="107" key="#com.intellij.openapi.keymap.impl.ui.EditKeymapsDialog" timestamp="1592660636416">
       <screen x="0" y="23" width="1440" height="804" />
     </state>
@@ -585,7 +582,7 @@
     </state>
     <state x="500" y="-788" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592643180500" />
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="489" y="177" width="874" height="622" key="find.popup" timestamp="1601122088621">
+    <state x="489" y="177" width="874" height="622" key="find.popup" timestamp="1601130477682">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="357" y="-950" width="1209" height="850" key="find.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592745271900" />
@@ -596,12 +593,12 @@
     <state x="489" y="181" width="875" height="759" key="find.popup/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804707334" />
     <state x="882" y="335" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1600194630569" />
     <state x="489" y="175" width="874" height="548" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606847298" />
-    <state x="489" y="177" width="874" height="622" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601122088621" />
+    <state x="489" y="177" width="874" height="622" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601130477682" />
     <state x="645" y="270" width="700" height="530" key="recent.locations.popup" timestamp="1601108013005">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="645" y="270" width="700" height="530" key="recent.locations.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601108013005" />
-    <state x="566" y="197" width="861" height="886" key="search.everywhere.popup" timestamp="1601043276686">
+    <state x="566" y="197" width="861" height="886" key="search.everywhere.popup" timestamp="1601130480223">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="101" y="-1191" width="1192" height="1192" key="search.everywhere.popup/0.23.1440.804/-583.-1417.2560.1417@-583.-1417.2560.1417" timestamp="1592804759273" />
@@ -612,6 +609,6 @@
     <state x="566" y="201" width="862" height="883" key="search.everywhere.popup/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804419065" />
     <state x="991" y="403" width="998" height="2125" key="search.everywhere.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1600186141410" />
     <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1598606166645" />
-    <state x="566" y="197" width="861" height="886" key="search.everywhere.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601043276686" />
+    <state x="566" y="197" width="861" height="886" key="search.everywhere.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601130480223" />
   </component>
 </project>
