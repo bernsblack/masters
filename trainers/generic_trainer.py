@@ -8,7 +8,8 @@ def save_checkpoint(tag, model, optimiser, conf,
                     val_batch_losses,
                     val_epoch_losses,
                     trn_epoch_losses,
-                    trn_batch_losses):
+                    trn_batch_losses,
+                    trn_val_epoch_losses):
     torch.save(model.state_dict(), f"{conf.model_path}model_{tag}.pth")
     torch.save(optimiser.state_dict(), f"{conf.model_path}optimiser_{tag}.pth")
     np.savez_compressed(file=f"{conf.model_path}losses_{tag}.npz",
@@ -113,15 +114,11 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
 
         trn_val_epoch_losses.append(trn_epoch_losses[-1] + val_epoch_losses[-1])
 
-        log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Val Best): \t{val_epoch_losses_best:.8f}")
-        log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
-
         # save best validation model
         prev_best_val_step += 1
         if val_epoch_losses[-1] < val_epoch_losses_best:
             prev_best_val_step = 0
+            val_epoch_losses_best = val_epoch_losses[-1]
             save_checkpoint('best_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
                             trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
 
@@ -134,6 +131,13 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
             trn_val_epoch_losses_best = trn_val_epoch_losses[-1]
             save_checkpoint('best_trn_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
                             trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+
+        log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
+        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
+        log.info(f"\tLoss (Best Trn): \t{trn_epoch_losses_best:.8f}")
+        log.info(f"\tLoss (Best Val): \t{val_epoch_losses_best:.8f}")
+        log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
+        log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         if conf.early_stopping and prev_best_val_step > conf.patience:
             log.warning(
@@ -149,8 +153,8 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
             break
 
         # checkpoint - save latest models and loss values
-        save_checkpoint('latest', model, optimiser, conf, val_batch_losses, val_epoch_losses, trn_epoch_losses,
-                        trn_batch_losses)
+        save_checkpoint('latest', model, optimiser, conf, val_batch_losses, val_epoch_losses,
+                        trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
 
     # Save training and validation plots - add flag to actually save or display
     skip = 0
