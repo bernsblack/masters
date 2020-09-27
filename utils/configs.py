@@ -70,6 +70,8 @@ class BaseConf:  # args from arg-parser to over write values
 
         self.pad_width = 0
 
+        self.patience = 10
+
         if conf_dict:
             for k, v in conf_dict.items():
                 if self.__dict__.get(k, None) is not None:

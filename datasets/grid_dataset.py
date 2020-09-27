@@ -65,6 +65,7 @@ class GridDataGroup:
             tst_size = int((conf.tst_ratio/conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)  # int(target_len * conf.tst_ratio)
             val_size = int((conf.val_ratio/conf.tst_ratio) * tst_size)    # int(target_len * conf.val_ratio)
             trn_size = int(((1 - conf.val_ratio - conf.tst_ratio)/conf.tst_ratio) * tst_size)  #int(target_len - tst_size - val_size)
+            trn_val_size = trn_size + val_size
 
 
             #  start and stop t_index of each dataset - can be used outside of loader/group
@@ -72,6 +73,7 @@ class GridDataGroup:
             self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
             self.trn_indices = np.array([self.tst_indices[0] - trn_size, self.tst_indices[0]])
             self.val_indices = np.array([self.trn_indices[0] - val_size, self.trn_indices[0]])
+            self.trn_val_indices = np.array([self.tst_indices[0] - trn_val_size, self.tst_indices[0]])
 
             # used to create the shaper so that all datasets have got values in them
             tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
@@ -110,7 +112,9 @@ class GridDataGroup:
         self.tst_indices[0] = self.tst_indices[0] - total_offset
         self.val_indices[0] = self.val_indices[0] - total_offset
         self.trn_indices[0] = self.trn_indices[0] - total_offset
+        self.trn_val_indices[0] = self.trn_val_indices[0] - total_offset
 
+        trn_val_t_range = self.t_range[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_t_range = self.t_range[self.trn_indices[0]:self.trn_indices[1]]
         val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
@@ -122,6 +126,7 @@ class GridDataGroup:
 
         self.crimes = self.crimes[:, 0]  # only select totals after scaling channel wise
 
+        trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
         val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1]]
         tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
@@ -131,11 +136,13 @@ class GridDataGroup:
         self.targets = self.crime_scaler.transform(self.targets)
         self.targets = self.targets[:, 0]
 
+        trn_val_targets = self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
         val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
         tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
 
         # time_vectors is already scaled between 0 and 1
+        trn_val_time_vectors = self.time_vectors[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_time_vectors = self.time_vectors[self.trn_indices[0]:self.trn_indices[1]]
         val_time_vectors = self.time_vectors[self.val_indices[0]:self.val_indices[1]]
         tst_time_vectors = self.time_vectors[self.tst_indices[0]:self.tst_indices[1]]
@@ -145,6 +152,7 @@ class GridDataGroup:
         # # self.weather_vector_scaler.fit(self.weather_vectors[self.trn_index[0]:self.trn_index[1]], axis=1)  # norm with trn data
         # self.weather_vector_scaler.fit(self.weather_vectors, axis=1)  # norm with all data
         # self.weather_vectors = self.weather_vector_scaler.transform(self.weather_vectors)
+        # trn_val_weather_vectors = self.weather_val_vectors[self.trn_val_indices[0]:self.trn_val_indices[1]]
         # trn_weather_vectors = self.weather_vectors[self.trn_indices[0]:self.trn_indices[1]]
         # val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
         # tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
@@ -155,6 +163,26 @@ class GridDataGroup:
 
         # target index - also the index given to the
         # todo dependency injection of the different types of datasets
+        self.training_validation_set = GridDataset(
+            crimes=trn_val_crimes,
+            targets=trn_val_targets,
+            t_range=trn_val_t_range,  # t_range is matched to the target index
+            time_vectors=trn_val_time_vectors,
+            # weather_vectors=trn_val_weather_vectors,
+            demog_grid=self.demog_grid,
+            street_grid=self.street_grid,
+
+            step_c=self.step_c,
+            step_p=self.step_p,
+            step_q=self.step_q,
+
+            n_steps_c=self.n_steps_c,
+            n_steps_p=self.n_steps_p,
+            n_steps_q=self.n_steps_q,
+
+            shaper=self.shaper,
+        )
+
         self.training_set = GridDataset(
             crimes=trn_crimes,
             targets=trn_targets,

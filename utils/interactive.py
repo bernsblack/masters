@@ -307,3 +307,20 @@ class InteractiveHeatmaps:
             ]),
             widgets.VBox(wrapped_figs),
         ])
+
+
+def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
+    return go.Figure(
+        [
+            go.Scatter(y=trn_epoch_losses,name="Train Losses",mode='lines+markers'),
+            go.Scatter(y=val_epoch_losses,name="Validation Losses",mode='lines+markers'),
+            go.Scatter(y=[np.min(val_epoch_losses)],
+                       x=[np.argmin(val_epoch_losses)],name="Best Validation Loss",mode='markers',
+                       marker_symbol='x', marker_size=10,marker_color='green'),
+
+        ],
+        layout=dict(
+            title="Train and Validation Losses per epoch",
+            title_x=0.5,
+        )
+    )

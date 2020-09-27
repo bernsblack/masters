@@ -19,6 +19,9 @@ class TestDataGroup(unittest.TestCase):
         self.assertTrue(np.equal(data_group.training_set.targets[:-1], data_group.training_set.crimes[1:]).all())
         self.assertTrue(np.equal(data_group.validation_set.targets[:-1], data_group.validation_set.crimes[1:]).all())
         self.assertTrue(np.equal(data_group.testing_set.targets[:-1], data_group.testing_set.crimes[1:]).all())
+        self.assertTrue(np.equal(data_group.training_validation_set.targets[:-1],
+                                 data_group.training_validation_set.crimes[1:]).all())
+
 
 if __name__ == "__main__":
     unittest.main()
