@@ -26,8 +26,8 @@ class BaseConf:  # args from arg-parser to over write values
         # self.use_cuda = False
 
         # data related hyper-params
-        self.val_ratio = 0.1
-        self.tst_ratio = 0.3
+        self.val_ratio = 0.25
+        self.tst_ratio = 0.25
         self.sub_sample_train_set = 1  # will sample class 0 and 1 with 1:1 ratio
         self.sub_sample_validation_set = 1  # will sample class 0 and 1 with 1:1 ratio
         self.sub_sample_test_set = 0  # will not sub sample class 0 and 1
@@ -46,7 +46,7 @@ class BaseConf:  # args from arg-parser to over write values
         self.max_epochs = 1
         self.batch_size = 64
         self.dropout = 0
-        self.shuffle = False
+        self.shuffle = True
         self.num_workers = 6
 
         # attached global variables

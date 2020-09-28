@@ -2,16 +2,27 @@ import unittest
 
 import numpy as np
 
-from dataloaders.cell_loader import CellDataLoaders
-from dataloaders.flat_loader import FlatDataLoaders
+from dataloaders.cell_loader import CellDataLoaders, reconstruct_from_cell_loader
 from datasets.cell_dataset import CellDataGroup
-from datasets.flat_dataset import FlatDataset, FlatDataGroup
 from utils.configs import BaseConf
 from utils.data_processing import crop4d
-from utils.preprocessing import Shaper
 
 
 class TestCellDataLoaderIndexing(unittest.TestCase):
+
+    def test_cell_loader_reconstruction(self):
+        conf = BaseConf()
+        data_path = './data/processed/T24H-X850M-Y880M_2013-01-01_2017-01-01/'
+        conf.sub_sample_test_set = 0
+        conf.sub_sample_train_set = 0
+        conf.sub_sample_validation_set = 0
+        conf.seq_len = 1
+        data_group = CellDataGroup(data_path=data_path, conf=conf)
+        loaders = CellDataLoaders(data_group=data_group, conf=conf)
+
+        y_true, reconstructed_targets, t_range = reconstruct_from_cell_loader(loaders.test_loader)
+
+        self.assertTrue((y_true == reconstructed_targets).all())
 
     def test_test_loader_indices(self):
         # CRIME DATA

@@ -111,7 +111,7 @@ class FlatDataset(Dataset):
         #  [min_index, max_index) are limits of flattened targets
         self.max_index = self.t_size * self.l_size
         self.min_index = (self.offset_year + self.seq_len) * self.l_size
-        self.len = self.min_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
+        self.len = self.max_index - self.min_index  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
 
         self.shape = self.t_size, self.l_size  # used when saving the model results
 

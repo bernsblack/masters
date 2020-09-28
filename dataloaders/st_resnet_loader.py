@@ -1,6 +1,7 @@
 # DEFINE THE DATASET AND THE DATALOADER
 import torch
 import numpy as np
+from utils.utils import deprecated
 
 """
 Note: when rewriting this code - keep everything in numpy array - only convert to torch or transfer to torch gpu 
@@ -10,6 +11,7 @@ in the actually training loop, only batches should be moved to GPU to save memor
 
 # TODO Convert this into a dataset and let the pytorch loader to the magic
 # TODO INHERIT FROM DATASET INSTEAD AND DEFINE LEN AND GET ITEM FUNCTIONS
+@deprecated
 class STResNetDataLoader:  # add test and train data and validation set
     def __init__(self, S, E, lc=3, lp=3, lq=3, c=1, p=24, q=168, shuffle=False, trn_tst_split=0.8, trn_val_split=0.8,
                  overlap_in_out=True, norm='none'):

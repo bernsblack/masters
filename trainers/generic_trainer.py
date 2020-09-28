@@ -133,11 +133,12 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
                             trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
 
         log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Trn): \t{trn_epoch_losses_best:.8f}")
+        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Val): \t{val_epoch_losses_best:.8f}")
+        log.info(f"\tLoss (Trn Val): \t{trn_val_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
-        log.info(f"\tLoss (Dif): \t\t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
+        log.info(f"\tLoss (Trn Val Dif): \t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         if conf.early_stopping and prev_best_val_step > conf.patience:
             log.warning(
@@ -145,8 +146,8 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
             stopped_early = True
             break
 
-        if conf.early_stopping and val_epoch_losses[-1] == val_epoch_losses[-2] and val_epoch_losses[-3] == \
-                val_epoch_losses[-2]:
+        if conf.early_stopping and epoch > 5 and val_epoch_losses[-1] == val_epoch_losses[-2] and \
+                val_epoch_losses[-3] == val_epoch_losses[-2]:
             log.warning(f"Converged: Past 3 validation losses are all the same,"
                         + f" local optima has been reached")
             stopped_early = True

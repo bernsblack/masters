@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
-from utils.constants import TEST_SET_SIZE_DAYS
+from utils.constants import TEST_SET_SIZE_DAYS, HOURS_IN_YEAR
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
@@ -59,13 +59,34 @@ class BaseDataGroup:
             #  split the data into ratios - size represent the targets sizes not the number of time steps
             total_offset = self.seq_len + self.offset_year
 
-            # target_len = self.total_len - total_offset
-            tst_size = int((
-                                   conf.tst_ratio / conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)  # int(target_len * conf.tst_ratio)
-            val_size = int((conf.val_ratio / conf.tst_ratio) * tst_size)  # int(target_len * conf.val_ratio)
-            trn_size = int(((
-                                    1 - conf.val_ratio - conf.tst_ratio) / conf.tst_ratio) * tst_size)  # int(target_len - tst_size - val_size)
-            trn_val_size = trn_size + val_size
+            target_len = self.total_len - total_offset
+
+            # OPTION 1:
+            # train/test split sizes is dependent on total_offset - means we can't compare models easily
+            # tst_size = int(target_len * conf.tst_ratio)
+            # val_size = int(target_len * conf.val_ratio)
+            # trn_size = int(target_len - tst_size - val_size)
+            # trn_val_size = trn_size + val_size
+
+            # OPTION 2:
+            # # train/test split sizes is dependent on TEST_SET_SIZE_DAYS - sizes will be same for all models: makes it comparable
+            # tst_size = int((conf.tst_ratio/conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)
+            # val_size = int((conf.val_ratio/conf.tst_ratio) * tst_size)
+            # trn_size = int(((1 - conf.val_ratio - conf.tst_ratio)/conf.tst_ratio) * tst_size)
+            # trn_val_size = trn_size + val_size
+
+            # OPTION 3:
+            # constant test set size and varying train and validation sizes
+            tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
+            trn_val_size = target_len - tst_size
+            val_size = int(conf.val_ratio * trn_val_size)
+            trn_size = trn_val_size - val_size
+
+            log.info(f"\ttarget_len:\t{target_len}\t({(100 * target_len / target_len):.3f}%)")
+            log.info(f"\ttrn_val_size:\t{trn_val_size}\t({(100 * trn_val_size / target_len):.3f}%)")
+            log.info(f"\ttrn_size:\t{trn_size}\t({(100 * trn_size / target_len):.3f}%)")
+            log.info(f"\tval_size:\t{val_size}\t({(100 * val_size / target_len):.3f}%)")
+            log.info(f"\ttst_size:\t{tst_size} \t({(100 * tst_size / target_len):.3f}%)")
 
             #  start and stop t_index of each dataset - can be used outside of loader/group
             # runs -> val_set, trn_set, tst_set: trn and tst set are more correlated
@@ -128,8 +149,10 @@ class BaseDataGroup:
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
-        self.crimes = np.floor(np.log2(1 + self.crimes))
-        self.targets = np.floor(np.log2(1 + self.targets))
+        # self.crimes = np.floor(np.log2(1 + self.crimes)) # by flooring the values we cannot inverse to get the original counts
+        # self.targets = np.floor(np.log2(1 + self.targets)) # by flooring the values we cannot inverse to get the original counts
+        self.crimes = np.log2(1 + self.crimes)
+        self.targets = np.log2(1 + self.targets)
 
         # get historic average on the log2+1 normed values
         if conf.use_historic_average:
@@ -159,7 +182,8 @@ class BaseDataGroup:
         self.tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
-        self.total_crimes = np.floor(np.log2(1 + self.total_crimes))
+        # self.total_crimes = np.floor(np.log2(1 + self.total_crimes)) # by flooring the values we cannot inverse to get the original counts
+        self.total_crimes = np.log2(1 + self.total_crimes)
         self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         self.total_crimes_scaler.fit(self.total_crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)

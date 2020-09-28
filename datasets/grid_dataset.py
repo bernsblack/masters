@@ -5,11 +5,12 @@ import pandas as pd
 from torch.utils.data import Dataset
 
 from utils.configs import BaseConf
-from utils.constants import TEST_SET_SIZE_DAYS
+from utils.constants import TEST_SET_SIZE_DAYS, HOURS_IN_YEAR
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 
 from pandas.tseries.offsets import Hour as OffsetHour
+
 HOUR_NANOS = OffsetHour().nanos
 
 
@@ -51,8 +52,8 @@ class GridDataGroup:
             time_step_days = 24 / time_step_hrs
 
             self.step_c = 1
-            self.step_p = int(24 / time_step_hrs)
-            self.step_q = int(168 / time_step_hrs)  # maximum offset
+            self.step_p = int(24 / time_step_hrs)  # jumps in days
+            self.step_q = int(168 / time_step_hrs)  # jumps in weeks -  maximum offset
 
             self.n_steps_c = conf.n_steps_c  # 3
             self.n_steps_p = conf.n_steps_p  # 3
@@ -61,12 +62,34 @@ class GridDataGroup:
             #  split the data into ratios - size represent the targets sizes not the number of time steps
             total_offset = self.step_q * self.n_steps_q
 
-            # target_len = self.total_len - total_offset
-            tst_size = int((conf.tst_ratio/conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)  # int(target_len * conf.tst_ratio)
-            val_size = int((conf.val_ratio/conf.tst_ratio) * tst_size)    # int(target_len * conf.val_ratio)
-            trn_size = int(((1 - conf.val_ratio - conf.tst_ratio)/conf.tst_ratio) * tst_size)  #int(target_len - tst_size - val_size)
-            trn_val_size = trn_size + val_size
+            target_len = self.total_len - total_offset
 
+            # OPTION 1:
+            # train/test split sizes is dependent on total_offset - means we can't compare models easily
+            # tst_size = int(target_len * conf.tst_ratio)
+            # val_size = int(target_len * conf.val_ratio)
+            # trn_size = int(target_len - tst_size - val_size)
+            # trn_val_size = trn_size + val_size
+
+            # OPTION 2:
+            # # train/test split sizes is dependent on TEST_SET_SIZE_DAYS - sizes will be same for all models: makes it comparable
+            # tst_size = int((conf.tst_ratio/conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)
+            # val_size = int((conf.val_ratio/conf.tst_ratio) * tst_size)
+            # trn_size = int(((1 - conf.val_ratio - conf.tst_ratio)/conf.tst_ratio) * tst_size)
+            # trn_val_size = trn_size + val_size
+
+            # OPTION 3:
+            # constant test set size and varying train and validation sizes
+            tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
+            trn_val_size = target_len - tst_size
+            val_size = int(conf.val_ratio * trn_val_size)
+            trn_size = trn_val_size - val_size
+
+            log.info(f"\ttarget_len:\t{target_len}\t({(100 * target_len / target_len):.3f}%)")
+            log.info(f"\ttrn_val_size:\t{trn_val_size}\t({(100 * trn_val_size / target_len):.3f}%)")
+            log.info(f"\ttrn_size:\t{trn_size}\t({(100 * trn_size / target_len):.3f}%)")
+            log.info(f"\tval_size:\t{val_size}\t({(100 * val_size / target_len):.3f}%)")
+            log.info(f"\ttst_size:\t{tst_size} \t({(100 * tst_size / target_len):.3f}%)")
 
             #  start and stop t_index of each dataset - can be used outside of loader/group
             # runs -> val_set, trn_set, tst_set: trn and tst set are more correlated
@@ -119,7 +142,8 @@ class GridDataGroup:
         val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
 
-        self.crimes = np.floor(np.log2(1 + self.crimes))
+        # self.crimes = np.floor(np.log2(1 + self.crimes)) # by flooring we cannot retrieve original count
+        self.crimes = np.log2(1 + self.crimes)
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
@@ -132,7 +156,8 @@ class GridDataGroup:
         tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # targets
-        self.targets = np.floor(np.log2(1 + self.targets))
+        # self.targets = np.floor(np.log2(1 + self.targets)) # by flooring we cannot retrieve original count
+        self.targets = np.log2(1 + self.targets)
         self.targets = self.crime_scaler.transform(self.targets)
         self.targets = self.targets[:, 0]
 
@@ -293,7 +318,7 @@ class GridDataset(Dataset):
         #  [min_index, max_index) are limits of flattened targets
         self.max_index = self.t_size
         self.min_index = self.step_q * self.n_steps_q
-        self.len = self.min_index - self.min_index
+        self.len = self.max_index - self.min_index
 
         # used to map the predictions to the actual targets
         self.target_shape = list(self.targets.shape)

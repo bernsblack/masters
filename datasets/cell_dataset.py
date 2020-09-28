@@ -106,7 +106,7 @@ class CellDataset(Dataset):
         #  [min_index, max_index) are limits of flattened targets
         self.max_index = self.t_size * self.h_size * self.w_size
         self.min_index = (self.offset_year + self.seq_len) * self.h_size * self.w_size
-        self.len = self.min_index - self.min_index
+        self.len = self.max_index - self.min_index
 
         self.shape = self.t_size, self.h_size * self.w_size  # used when saving the model results
 

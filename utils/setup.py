@@ -12,17 +12,18 @@ from utils.configs import BaseConf
 from utils.preprocessing import Shaper
 
 
-def setup(data_sub_path: str) -> Tuple[BaseConf, Shaper, Any, List[str]]:
+def setup(data_sub_path: str, model_name: str = "Mutual Info") -> Tuple[BaseConf, Shaper, Any, List[str]]:
     """
     gets data conf and sets up logging
 
     :param data_sub_path: string describing path to data
+    :param model_name: model_name
     :return: tuple of  conf, shaper, sparse_crimes
     """
 
     conf = BaseConf()
 
-    conf.model_name = f"Mutual Info"
+    conf.model_name = model_name
 
     conf.data_path = f"./data/processed/{data_sub_path}/"
 
@@ -40,7 +41,6 @@ def setup(data_sub_path: str) -> Tuple[BaseConf, Shaper, Any, List[str]]:
     with np.load(conf.data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
         sparse_crimes = zip_file["crime_types_grids"]
         crime_feature_indices = zip_file["crime_feature_indices"]
-
 
     shaper = Shaper(data=sparse_crimes,
                     conf=conf)

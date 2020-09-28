@@ -73,13 +73,16 @@ def predictive_accuracy_index(y_true, y_pred):
 
     Warning: if no crime is predicted a/A will be zero and will lead to ZeroDivisionError
     """
-    assert y_pred.max() == 1
+    assert y_pred.max() == 1 or y_pred.max() == 0 # make sure if prediction is made at least the value is one
 
     n = np.sum(y_true[y_pred == 1])  # crimes in predicted area
     N = np.sum(y_true)  # crimes in total area
 
     a = np.sum(y_pred)  # area of hotspots
     A = np.product(y_pred.shape)
+
+    if N == 0 or a == 0:  # fail safe in-case now crime occurred on the day or model predicted zero crimes
+        return 0
 
     return (n * A) / (N * a)
 

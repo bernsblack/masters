@@ -97,6 +97,24 @@ def get_models_results(data_path):
     return model_results
 
 
+def get_model_result(model_path):
+    """
+    Reads all model results give the path to a certain data-source/discretisation
+    :param model_path: path to a certain data-source/discretisation
+    :return: model metric for the data discretisation
+    """
+    file_path = f"{model_path}/model_result.pkl"
+
+    if not os.path.exists(file_path):
+        raise Exception(f"File '{file_path}' does not exist.")
+
+    model_result = None
+    with open(file_path, 'rb') as file_pointer:
+        model_result = pickle.load(file_pointer)
+
+    return model_result
+
+
 def get_models_metrics(data_path):
     """
     Reads all model metrics give the path to a certain data-source/discretisation

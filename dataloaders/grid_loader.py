@@ -28,7 +28,9 @@ class GridBatchLoader:
         self.max_index = dataset.max_index
 
         self.indices = np.arange(self.min_index, self.max_index, dtype=int)
-        if shuffle:
+
+        self.shuffle = shuffle
+        if self.shuffle:
             np.random.shuffle(self.indices)
 
         self.batch_size = batch_size
@@ -49,6 +51,8 @@ class GridBatchLoader:
 
     def __next__(self):
         if self.current_batch >= self.num_batches:
+            if self.shuffle:  # ensure reshuffling after each epoch
+                np.random.shuffle(self.indices)
             raise StopIteration
         else:
             self.current_batch += 1
@@ -75,3 +79,16 @@ class GridBatchLoader:
             return self.dataset[batch_indices]
         else:
             raise IndexError(f"index {index} must be in range(0{self.num_batches})")
+
+
+def reconstruct_from_grid_loader(batch_loader: GridBatchLoader):
+    reconstructed_targets = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_counts = batch_loader.dataset.targets[-len(reconstructed_targets):]
+    t_range = batch_loader.dataset.t_range[-len(reconstructed_targets):]
+
+    for batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t in batch_loader:
+
+        for i, v in zip(batch_indices, batch_seq_t):
+            reconstructed_targets[i] = v
+
+    return y_counts, reconstructed_targets, t_range

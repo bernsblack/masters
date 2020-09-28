@@ -55,7 +55,7 @@ class CellBatchLoader:
         self.max_index = dataset.max_index
 
         # SET SAMPLE INDICES
-        flat_targets = crop4d(self.dataset.targets,size=self.dataset.pad_width).flatten() # remove padding
+        flat_targets = crop4d(self.dataset.targets, size=self.dataset.pad_width).flatten()  # remove padding
         class0_args = np.argwhere(flat_targets == 0)
         class0_args = class0_args[class0_args >= self.min_index]
 
@@ -92,6 +92,7 @@ class CellBatchLoader:
 
     def __next__(self):
         if self.current_batch >= self.num_batches:
+            np.random.shuffle(self.indices)  # reshuffle indices after each epoch
             raise StopIteration
         else:
             self.current_batch += 1
@@ -118,3 +119,26 @@ class CellBatchLoader:
             return self.dataset[batch_indices]
         else:
             raise IndexError(f"index {index} must be in range(0{self.num_batches})")
+
+    # def get_Xy(self):
+    #     """
+    #     returns the data in a X, y format similar to to sklearn data
+    #     X ndarray (N,d)
+    #     y ndarray (N,)
+    #     :return: X, y
+    #     """
+
+
+def reconstruct_from_cell_loader(batch_loader: CellBatchLoader):
+    reconstructed_targets = np.zeros(batch_loader.dataset.target_shape)
+    y_true = batch_loader.dataset.targets[-len(reconstructed_targets):]
+    t_range = batch_loader.dataset.t_range[-len(reconstructed_targets):]
+    y_class = np.zeros(y_true.shape)  # classes {0, 1}
+
+    for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+        for i in range(len(indices)):
+            n, c, h, w = indices[i]
+            reconstructed_targets[n, c, h, w] = targets[-1, i]
+            y_class[n, c, h, w] = 1
+
+    return y_true, reconstructed_targets, t_range
