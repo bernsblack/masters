@@ -2,13 +2,13 @@ import logging as log
 
 import numpy as np
 import pandas as pd
-from torch.utils.data import Dataset
+
 
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
-from utils.constants import TEST_SET_SIZE_DAYS, HOURS_IN_YEAR
+from utils.constants import HOURS_IN_YEAR, TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
-from utils.utils import if_none
+
 
 from pandas.tseries.offsets import Hour as OffsetHour
 
@@ -27,12 +27,14 @@ class BaseDataGroup:
 
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             if conf.use_crime_types:
+                log.info(f"loading crimes grids WITH crime types")
                 self.crimes = zip_file["crime_types_grids"]
             else:
+                log.info(f"loading crimes grids WITHOUT crime types")
                 self.crimes = zip_file["crime_grids"]
 
             self.t_range = pd.read_pickle(data_path + "t_range.pkl")
-            log.info(f"\tt_range shape {np.shape(self.t_range)}")
+            log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
             # freqstr = self.t_range.freqstr
             # if freqstr == "D":
@@ -77,7 +79,8 @@ class BaseDataGroup:
 
             # OPTION 3:
             # constant test set size and varying train and validation sizes
-            tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
+            tst_size = int(24 * TEST_SET_SIZE_DAYS / time_step_hrs)  # test set can be set to be specific # days instead of just a year
+            # tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
             trn_val_size = target_len - tst_size
             val_size = int(conf.val_ratio * trn_val_size)
             trn_size = trn_val_size - val_size

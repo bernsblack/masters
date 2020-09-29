@@ -207,10 +207,11 @@ def get_ratio_xy(data_frame):
 from ipywidgets import Layout, widgets
 import plotly.graph_objects as go
 
+
 def new_interactive_heatmap(z, name=None):
-    # h, w = z.shape
-    height = 400
-    width = 300
+    h, w = z.shape
+    height = int(30*h)
+    width = height * w / h # 300
 
     return go.FigureWidget(
         go.Heatmap(z=z),
@@ -312,11 +313,11 @@ class InteractiveHeatmaps:
 def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
     return go.Figure(
         [
-            go.Scatter(y=trn_epoch_losses,name="Train Losses",mode='lines+markers'),
-            go.Scatter(y=val_epoch_losses,name="Validation Losses",mode='lines+markers'),
+            go.Scatter(y=trn_epoch_losses, name="Train Losses", mode='lines+markers'),
+            go.Scatter(y=val_epoch_losses, name="Validation Losses", mode='lines+markers'),
             go.Scatter(y=[np.min(val_epoch_losses)],
-                       x=[np.argmin(val_epoch_losses)],name="Best Validation Loss",mode='markers',
-                       marker_symbol='x', marker_size=10,marker_color='green'),
+                       x=[np.argmin(val_epoch_losses)], name="Best Validation Loss", mode='markers',
+                       marker_symbol='x', marker_size=10, marker_color='green'),
 
         ],
         layout=dict(

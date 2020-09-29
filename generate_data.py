@@ -10,6 +10,7 @@ import logging as log
 from logger.logger import setup_logging
 from utils.preprocessing import Shaper
 from sys import argv
+from utils.data_processing import encode_category
 
 if __name__ == "__main__":
     if len(argv) < 2:
@@ -134,10 +135,10 @@ if __name__ == "__main__":
     x_max_valid, y_max_valid = valid_points.max(0)
     x_min_valid, y_min_valid = valid_points.min(0)
 
-    lat_max = np.round(config["lat_max"]/ dy) * dy
-    lat_min = np.round(config["lat_min"]/ dy) * dy
-    lon_max = np.round(config["lon_max"]/ dx) * dx
-    lon_min = np.round(config["lon_min"]/ dx) * dx
+    lat_max = np.round(config["lat_max"] / dy) * dy
+    lat_min = np.round(config["lat_min"] / dy) * dy
+    lon_max = np.round(config["lon_max"] / dx) * dx
+    lon_min = np.round(config["lon_min"] / dx) * dx
 
     x_min_valid = max(x_min_valid, lon_min)
     y_min_valid = max(y_min_valid, lat_min)
@@ -148,7 +149,6 @@ if __name__ == "__main__":
     meta_info["y_min_valid"] = y_min_valid
     meta_info["x_max_valid"] = x_max_valid
     meta_info["y_max_valid"] = y_max_valid
-
 
     # we know all crimes have defined demographics
     # spatial discritization with step
@@ -346,17 +346,19 @@ if __name__ == "__main__":
     #                           CRIME TYPES GRID                            #
     #########################################################################
 
-    c2i = {
-        "THEFT": 0,
-        "BATTERY": 1,
-        "CRIMINAL DAMAGE": 2,
-        "NARCOTICS": 3,
-        "ASSAULT": 4,
-        "BURGLARY": 5,
-        "MOTOR VEHICLE THEFT": 6,
-        "ROBBERY": 7,
-    }  # can also change the values to group certain crimes into a class
+    c2i = {name: i for i, name in enumerate(valid_crime_types)}
 
+
+    # c2i = {
+    #     "THEFT": 0,
+    #     "BATTERY": 1,
+    #     "CRIMINAL DAMAGE": 2,
+    #     "NARCOTICS": 3,
+    #     "ASSAULT": 4,
+    #     "BURGLARY": 5,
+    #     "MOTOR VEHICLE THEFT": 6,
+    #     "ROBBERY": 7,
+    # }  # can also change the values to group certain crimes into a class
 
     #                       - like battery and assault into a type and theft and robbery and
     #                       motor vehicle theft into a type and narcotics into another type.
@@ -377,21 +379,16 @@ if __name__ == "__main__":
     # "NARCOTICS":2}
 
     def type2index(crime_type):
-        try:
-            r = c2i[crime_type]
-        except KeyError:
-            r = 8  # all other types are translated to 8
-
-        return r
-
+        return c2i.get(crime_type, -1) # all other types are translated to -1
 
     crimes["c"] = crimes["Primary Type"].apply(type2index)
+    # crimes["c"] = encode_category(series=df['Primary Type'],categories=valid_crime_types)
 
-    # FILTER BY CRIME TYPE
-    crimes = crimes[crimes.c < 8]
+    # FILTER OUT INVALID CRIME TYPES
+    crimes = crimes[crimes.c > -1]
 
     # ONE HOT ENCODING FOR THE CRIME TYPES
-    ohe = np.zeros((len(crimes), 8), dtype=int)
+    ohe = np.zeros((len(crimes), len(valid_crime_types)), dtype=int)
     for i, c in enumerate(crimes.c):
         ohe[i, c] = 1
 
@@ -401,7 +398,7 @@ if __name__ == "__main__":
     crimes["TOTAL"] = np.ones(len(crimes), dtype=int)
 
     # INCLUDE ARRESTS
-    crimes["Arrest"] = crimes["Arrest"] * 1
+    crimes["Arrest"] = crimes["Arrest"] * 1  # casting bool to int
 
     # crime_feature_indices = {
     #     0: "TOTAL",
@@ -416,21 +413,9 @@ if __name__ == "__main__":
     #     9: "Arrest"
     # }
 
-    crime_feature_indices = [
-        "TOTAL",
-        "THEFT",
-        "BATTERY",
-        "CRIMINAL DAMAGE",
-        "NARCOTICS",
-        "ASSAULT",
-        "BURGLARY",
-        "MOTOR VEHICLE THEFT",
-        "ROBBERY",
-        "Arrest",
-    ]
+    crime_feature_indices = ["TOTAL", *valid_crime_types, "Arrest"]
 
-    A = crimes[["t", "x", "y", "TOTAL", "THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY",
-                "MOTOR VEHICLE THEFT", "ROBBERY", "Arrest"]].values
+    A = crimes[["t", "x", "y", "TOTAL", *valid_crime_types, "Arrest"]].values
     # A = crimes[["t","b","TOTAL","THEFT", "BATTERY", "NARCOTICS","Arrest"]].values # is used when x and y are flattened
 
     crime_type_grids = np.zeros((t_size, A.shape[-1] - 3, y_size, x_size))
@@ -520,10 +505,9 @@ if __name__ == "__main__":
     # TODO ENSURE ALL SPATIAL DATA IS IN FORM N, C, H, W -> EVEN IF C = 1 SHOULD BE N, 1, H, W
     for g in [crime_type_grids, crime_grids, demog_grid, street_grid]:
         assert len(g.shape) == 4
-    
-    
+
     # note - we only normalise later as some models use different normalisation techniques
-    time_vectors = encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='ohe') # kind='sincos')
+    time_vectors = encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='ohe')  # kind='sincos')
 
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,

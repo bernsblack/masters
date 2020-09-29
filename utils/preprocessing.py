@@ -308,7 +308,24 @@ class MinMaxScaler:
         self.fit(data, axis)
         return self.transform(data)
 
+import unittest
 
+class TestMinMaxScaler(unittest.TestCase):
+
+    def test_min_max_inverse(self):
+        scaler = MinMaxScaler(feature_range=(0, 1))
+        mock = np.arange(7 * 5 * 3).reshape(7, 5, 3) % 13
+        mock_scaled = scaler.fit_transform(mock, axis=1)
+
+        mock_scaled.max(1)
+
+        mock_unscaled = scaler.inverse_transform(mock_scaled)
+        self.assertTrue((mock_unscaled == mock).all())
+
+
+
+
+@deprecated
 class MeanStdScaler:
     """
     Used to scale and inverse scale features of data
@@ -335,3 +352,13 @@ class MeanStdScaler:
     def fit_transform(self, data, axis):
         self.fit(data, axis)
         return self.transform(data)
+
+
+class TestMeanStdScaler(unittest.TestCase):
+
+    def test_mean_std_inverse(self):
+        scaler = MeanStdScaler()
+        mock = np.arange(7 * 5 * 3).reshape(7, 5, 3) % 13
+        mock_scaled = scaler.fit_transform(mock, axis=1)
+        mock_unscaled = scaler.inverse_transform(mock_scaled)
+        self.assertTrue((mock_unscaled == mock).all())

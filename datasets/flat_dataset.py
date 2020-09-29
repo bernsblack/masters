@@ -1,13 +1,6 @@
-import logging as log
-
 import numpy as np
-import pandas as pd
 from torch.utils.data import Dataset
-
-from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
-from utils.constants import TEST_SET_SIZE_DAYS
-from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
 

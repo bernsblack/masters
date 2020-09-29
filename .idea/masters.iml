@@ -4,7 +4,9 @@
     <content url="file://$MODULE_DIR$">
       <excludeFolder url="file://$MODULE_DIR$/.pytest_cache" />
       <excludeFolder url="file://$MODULE_DIR$/.vscode" />
+      <excludeFolder url="file://$MODULE_DIR$/data/MNIST" />
       <excludeFolder url="file://$MODULE_DIR$/data/processed" />
+      <excludeFolder url="file://$MODULE_DIR$/dataloaders/.pytest_cache" />
       <excludeFolder url="file://$MODULE_DIR$/datasets/.pytest_cache" />
       <excludeFolder url="file://$MODULE_DIR$/examples/saved" />
       <excludeFolder url="file://$MODULE_DIR$/logs" />

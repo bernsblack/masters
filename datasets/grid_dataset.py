@@ -1,14 +1,11 @@
 import logging as log
-
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
-
 from utils.configs import BaseConf
-from utils.constants import TEST_SET_SIZE_DAYS, HOURS_IN_YEAR
+from utils.constants import HOURS_IN_YEAR, TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
-
 from pandas.tseries.offsets import Hour as OffsetHour
 
 HOUR_NANOS = OffsetHour().nanos
@@ -37,10 +34,10 @@ class GridDataGroup:
 
             self.total_len = len(self.crimes)  # length of the whole time series
 
-            t_range = pd.read_pickle(data_path + "t_range.pkl")
-            log.info(f"\tt_range shape {np.shape(t_range)}")
+            self.t_range = pd.read_pickle(data_path + "t_range.pkl")
+            log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
-            freqstr = t_range.freqstr
+            freqstr = self.t_range.freqstr
             if freqstr == "D":
                 freqstr = "24H"
             if freqstr == "H":
@@ -49,11 +46,14 @@ class GridDataGroup:
             # time_step_hrs = int(
             #     self.t_range.freq.nanos / HOUR_NANOS)  # int(freqstr[:freqstr.find("H")])  # time step in hours
 
-            time_step_days = 24 / time_step_hrs
-
-            self.step_c = 1
-            self.step_p = int(24 / time_step_hrs)  # jumps in days
-            self.step_q = int(168 / time_step_hrs)  # jumps in weeks -  maximum offset
+            if freqstr == "24H":
+                self.step_c = 1
+                self.step_p = 7  # jumps in days
+                self.step_q = 14
+            else:
+                self.step_c = 1
+                self.step_p = int(24 / time_step_hrs)  # jumps in days
+                self.step_q = int(168 / time_step_hrs)  # jumps in weeks -  maximum offset
 
             self.n_steps_c = conf.n_steps_c  # 3
             self.n_steps_p = conf.n_steps_p  # 3
@@ -80,7 +80,9 @@ class GridDataGroup:
 
             # OPTION 3:
             # constant test set size and varying train and validation sizes
-            tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
+            tst_size = int(
+                24 * TEST_SET_SIZE_DAYS / time_step_hrs)  # test set can be set to be specific # days instead of just a year
+            # tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
             trn_val_size = target_len - tst_size
             val_size = int(conf.val_ratio * trn_val_size)
             trn_size = trn_val_size - val_size
@@ -115,13 +117,13 @@ class GridDataGroup:
             # self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)
 
             # (reminder) ensure that the self.crimes are not scaled to -1,1 before
-            self.targets = np.copy(self.crimes[1:])  # only check for totals > 0
+            self.targets = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0 # N,1,H,W
 
             self.crimes = self.crimes[:-1]
 
             self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
 
-            self.t_range = t_range[1:]
+            self.t_range = self.t_range[1:]
 
             self.demog_grid = zip_file["demog_grid"]
             self.street_grid = zip_file["street_grid"]
@@ -147,8 +149,7 @@ class GridDataGroup:
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
         self.crimes = self.crime_scaler.transform(self.crimes)
-
-        self.crimes = self.crimes[:, 0]  # only select totals after scaling channel wise
+        # self.crimes = self.crimes[:, 0]  # todo reevaluate and delete # only select totals after scaling channel wise # N,H,W
 
         trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
@@ -158,8 +159,10 @@ class GridDataGroup:
         # targets
         # self.targets = np.floor(np.log2(1 + self.targets)) # by flooring we cannot retrieve original count
         self.targets = np.log2(1 + self.targets)
-        self.targets = self.crime_scaler.transform(self.targets)
-        self.targets = self.targets[:, 0]
+        self.target_scaler = MinMaxScaler(feature_range=(0, 1))
+        self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+        self.targets = self.target_scaler.transform(self.targets)
+        # self.targets = self.targets[:, 0]  # todo reevaluate and delete  # N,H,W
 
         trn_val_targets = self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
@@ -302,9 +305,9 @@ class GridDataset(Dataset):
         self.step_p = step_p
         self.step_q = step_q
 
-        self.crimes = crimes
-        self.targets = targets
-        self.shape = self.t_size, self.h_size, self.w_size = np.shape(self.crimes)  # N,H,W
+        self.crimes = crimes  # N,C,H,W
+        self.targets = targets # N,1,H,W
+        self.shape = self.t_size, self.c_size, self.h_size, self.w_size = np.shape(self.crimes)  # N,C,H,W
 
         self.demog_grid = demog_grid
         self.street_grid = street_grid
@@ -347,14 +350,17 @@ class GridDataset(Dataset):
 
         for i in indices:
             # i + 1 has a plus one because the index shift between crimes and targets happens in data group
-            seq_c = self.crimes[i + 1 - self.step_c * self.n_steps_c:i + 1:self.step_c]
-            seq_p = self.crimes[i + 1 - self.step_p * self.n_steps_p:i + 1:self.step_p]
-            seq_q = self.crimes[i + 1 - self.step_q * self.n_steps_q:i + 1:self.step_q]
+            seq_c = self.crimes[i + 1 - self.step_c * self.n_steps_c:i + 1:self.step_c] \
+                .reshape(self.n_steps_c * self.c_size, self.h_size, self.w_size)
+            seq_p = self.crimes[i + 1 - self.step_p * self.n_steps_p:i + 1:self.step_p] \
+                .reshape(self.n_steps_p * self.c_size, self.h_size, self.w_size)
+            seq_q = self.crimes[i + 1 - self.step_q * self.n_steps_q:i + 1:self.step_q] \
+                .reshape(self.n_steps_q * self.c_size, self.h_size, self.w_size)
             batch_seq_c.append(seq_c)
             batch_seq_p.append(seq_p)
             batch_seq_q.append(seq_q)
 
-            seq_t = self.targets[i:i + 1]  # targets
+            seq_t = self.targets[i:i + 1, 0]  # targets
             batch_seq_t.append(seq_t)
 
             seq_e = self.time_vectors[i:i + 1]  # external vectors
