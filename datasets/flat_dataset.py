@@ -24,6 +24,7 @@ class FlatDataGroup(BaseDataGroup):
         self.training_set = FlatDataset(
             crimes=self.trn_crimes,
             targets=self.trn_targets,
+            labels=self.trn_labels,
             total_crimes=self.trn_total_crimes,
             t_range=self.trn_t_range,  # t_range is matched to the target index
             time_vectors=self.trn_time_vectors,
@@ -38,6 +39,7 @@ class FlatDataGroup(BaseDataGroup):
         self.validation_set = FlatDataset(
             crimes=self.val_crimes,
             targets=self.val_targets,
+            labels=self.val_labels,
             total_crimes=self.val_total_crimes,
             t_range=self.val_t_range,  # t_range is matched to the target index
             time_vectors=self.val_time_vectors,
@@ -52,10 +54,26 @@ class FlatDataGroup(BaseDataGroup):
         self.testing_set = FlatDataset(
             crimes=self.tst_crimes,
             targets=self.tst_targets,
+            labels=self.tst_labels,
             total_crimes=self.tst_total_crimes,
             t_range=self.tst_t_range,  # t_range is matched to the target index
             time_vectors=self.tst_time_vectors,
             # weather_vectors=tst_weather_vectors,
+            demog_grid=self.demog_grid,
+            street_grid=self.street_grid,
+            seq_len=self.seq_len,
+            offset_year=self.offset_year,
+            shaper=self.shaper,
+        )
+
+        self.training_validation_set = FlatDataset(
+            crimes=self.trn_val_crimes,
+            targets=self.trn_val_targets,
+            labels=self.trn_val_labels,
+            total_crimes=self.trn_val_total_crimes,
+            t_range=self.trn_val_t_range,  # t_range is matched to the target index
+            time_vectors=self.trn_val_time_vectors,
+            # weather_vectors=trn_val_weather_vectors,
             demog_grid=self.demog_grid,
             street_grid=self.street_grid,
             seq_len=self.seq_len,
@@ -87,6 +105,7 @@ class FlatDataset(Dataset):
             self,
             crimes,  # time and space dependent
             targets,  # time and space dependent
+            labels,  # time and space dependent
             total_crimes,  # time dependent
             t_range,  # time dependent
             time_vectors,  # time dependent
@@ -102,6 +121,7 @@ class FlatDataset(Dataset):
 
         self.crimes = crimes
         self.targets = targets
+        self.labels = labels
         self.t_size, _, self.l_size = np.shape(self.crimes)
         self.total_crimes = total_crimes
 

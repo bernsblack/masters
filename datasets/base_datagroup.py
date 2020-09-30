@@ -29,7 +29,7 @@ class BaseDataGroup:
                 self.crimes = zip_file["crime_types_grids"]
             else:
                 log.info(f"loading crimes grids WITHOUT crime types")
-                self.crimes = zip_file["crime_grids"]
+                self.crimes = zip_file["crime_grids"]  # original crime counts
 
             self.t_range = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
@@ -124,8 +124,11 @@ class BaseDataGroup:
 
             # (reminder) ensure that the self.crimes are not scaled to -1,1 before
             self.targets = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
-            if conf.use_classification:
-                self.targets[self.targets > 0] = 1
+            self.labels = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
+            self.labels[self.labels > 0] = 1
+
+            # if conf.use_classification:
+            #     self.targets[self.targets > 0] = 1
 
             self.crimes = self.crimes[:-1]
             self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
@@ -164,7 +167,9 @@ class BaseDataGroup:
 
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
-        self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+        # self.crime_scaler.fit(self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]], axis=1) # scale only on training and validation data
+        self.crime_scaler.fit(self.crimes,
+                              axis=1)  # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
         self.crimes = self.crime_scaler.transform(self.crimes)
         self.trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
@@ -175,13 +180,20 @@ class BaseDataGroup:
         self.target_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         # use train and val sizes to determine the scale - validation set forms part of the training set technically
-        self.target_scaler.fit(self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]], axis=1)
+        # self.target_scaler.fit(self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]], axis=1) # scale only on training and validation data
+        self.target_scaler.fit(self.targets,
+                               axis=1)  # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
         self.targets = self.target_scaler.transform(self.targets)
 
         self.trn_val_targets = self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
         self.val_targets = self.targets[self.val_indices[0]:self.val_indices[1]]
         self.tst_targets = self.targets[self.tst_indices[0]:self.tst_indices[1]]
+
+        self.trn_val_labels = self.labels[self.trn_val_indices[0]:self.trn_val_indices[1]]
+        self.trn_labels = self.labels[self.trn_indices[0]:self.trn_indices[1]]
+        self.val_labels = self.labels[self.val_indices[0]:self.val_indices[1]]
+        self.tst_labels = self.labels[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
         # self.total_crimes = np.floor(np.log2(1 + self.total_crimes)) # by flooring the values we cannot inverse to get the original counts

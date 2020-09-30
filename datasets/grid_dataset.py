@@ -118,6 +118,8 @@ class GridDataGroup:
 
             # (reminder) ensure that the self.crimes are not scaled to -1,1 before
             self.targets = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0 # N,1,H,W
+            self.labels = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
+            self.labels[self.labels > 0] = 1
 
             self.crimes = self.crimes[:-1]
 
@@ -147,10 +149,10 @@ class GridDataGroup:
         # self.crimes = np.floor(np.log2(1 + self.crimes)) # by flooring we cannot retrieve original count
         self.crimes = np.log2(1 + self.crimes)
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
-        self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+        # self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data
+        self.crime_scaler.fit(self.crimes,
+                              axis=1)  # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
         self.crimes = self.crime_scaler.transform(self.crimes)
-        # self.crimes = self.crimes[:, 0]  # todo reevaluate and delete # only select totals after scaling channel wise # N,H,W
-
         trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
         val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1]]
@@ -160,9 +162,10 @@ class GridDataGroup:
         # self.targets = np.floor(np.log2(1 + self.targets)) # by flooring we cannot retrieve original count
         self.targets = np.log2(1 + self.targets)
         self.target_scaler = MinMaxScaler(feature_range=(0, 1))
-        self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1)
+        # self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data
+        self.target_scaler.fit(self.targets,
+                               axis=1)  # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
         self.targets = self.target_scaler.transform(self.targets)  # N,1,H,W
-        # self.targets = self.targets[:, 0]  # todo reevaluate and delete  # N,H,W
 
         trn_val_targets = self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_targets = self.targets[self.trn_indices[0]:self.trn_indices[1]]
@@ -174,6 +177,11 @@ class GridDataGroup:
         trn_time_vectors = self.time_vectors[self.trn_indices[0]:self.trn_indices[1]]
         val_time_vectors = self.time_vectors[self.val_indices[0]:self.val_indices[1]]
         tst_time_vectors = self.time_vectors[self.tst_indices[0]:self.tst_indices[1]]
+
+        trn_val_labels = self.labels[self.trn_val_indices[0]:self.trn_val_indices[1]]
+        trn_labels = self.labels[self.trn_indices[0]:self.trn_indices[1]]
+        val_labels = self.labels[self.val_indices[0]:self.val_indices[1]]
+        tst_labels = self.labels[self.tst_indices[0]:self.tst_indices[1]]
 
         # # splitting and normalisation of weather data
         # self.weather_vector_scaler = MinMaxScaler(feature_range=(0, 1))
@@ -194,6 +202,7 @@ class GridDataGroup:
         self.training_validation_set = GridDataset(
             crimes=trn_val_crimes,
             targets=trn_val_targets,
+            labels=trn_val_labels,
             t_range=trn_val_t_range,  # t_range is matched to the target index
             time_vectors=trn_val_time_vectors,
             # weather_vectors=trn_val_weather_vectors,
@@ -214,6 +223,7 @@ class GridDataGroup:
         self.training_set = GridDataset(
             crimes=trn_crimes,
             targets=trn_targets,
+            labels=trn_labels,
             t_range=trn_t_range,  # t_range is matched to the target index
             time_vectors=trn_time_vectors,
             # weather_vectors=trn_weather_vectors,
@@ -234,6 +244,7 @@ class GridDataGroup:
         self.validation_set = GridDataset(
             crimes=val_crimes,
             targets=val_targets,
+            labels=val_labels,
             t_range=val_t_range,  # t_range is matched to the target index
             time_vectors=val_time_vectors,
             # weather_vectors=val_weather_vectors,
@@ -253,6 +264,7 @@ class GridDataGroup:
         self.testing_set = GridDataset(
             crimes=tst_crimes,
             targets=tst_targets,
+            labels=tst_labels,
             t_range=tst_t_range,  # t_range is matched to the target index
             time_vectors=tst_time_vectors,
             # weather_vectors=tst_weather_vectors,
@@ -292,6 +304,7 @@ class GridDataset(Dataset):
             self,
             crimes,  # time and space dependent
             targets,  # time and space dependent
+            labels,  # time and space dependent
             t_range,  # time dependent
             time_vectors,  # time dependent (optional)
             # weather_vectors,  # time dependent (optional)
@@ -319,6 +332,7 @@ class GridDataset(Dataset):
 
         self.crimes = crimes  # N,C,H,W
         self.targets = targets  # N,1,H,W
+        self.labels = labels  # N,1,H,W
         self.shape = self.t_size, self.c_size, self.h_size, self.w_size = np.shape(self.crimes)  # N,C,H,W
 
         self.demog_grid = demog_grid
