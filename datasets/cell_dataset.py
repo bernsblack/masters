@@ -60,6 +60,20 @@ class CellDataGroup(BaseDataGroup):
             shaper=self.shaper,
         )
 
+    def to_counts(self, sparse_data):
+        """
+        convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
+        :param sparse_data: ndarray (N,1,H,W)
+        :return: count_data
+        """
+
+        dense = self.shaper.squeeze(sparse_data)
+        dense_descaled = self.target_scaler.inverse_transform(dense)[:, 0:1]
+        sparse_descaled = self.shaper.unsqueeze(dense_descaled)
+        sparse_count = np.round(2 ** sparse_descaled - 1)
+
+        return sparse_count  # (N,1,H,W)
+
 
 class CellDataset(Dataset):
     def __init__(
@@ -159,10 +173,10 @@ class CellDataset(Dataset):
             crime_vec = self.crimes[t_start:t_stop, :,
                         h_index - self.pad_width: h_index + 1 + self.pad_width,
                         w_index - self.pad_width: w_index + 1 + self.pad_width]
-            crime_vec = np.reshape(crime_vec, (crime_vec.shape[0], -1)) # (seq_len,crime_channels*(1+2*pad_with)**2))
+            crime_vec = np.reshape(crime_vec, (crime_vec.shape[0], -1))  # (seq_len,crime_channels*(1+2*pad_with)**2))
 
             demog_vec = self.demog_grid[:, :, h_index, w_index]  # (1,demog_channels)
-            street_vec = self.street_grid[:, :, h_index, w_index] # (1,street_view_channels)
+            street_vec = self.street_grid[:, :, h_index, w_index]  # (1,street_view_channels)
 
             crimes_last_year = self.crimes[t_start - self.offset_year:t_stop - self.offset_year, :, h_index, w_index]
 

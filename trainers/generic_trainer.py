@@ -21,24 +21,23 @@ def save_checkpoint(tag, model, optimiser, conf,
 
 
 # generic training loop
-def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None):
+def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None, split_train_set=True):
     """
-    Generic training loop that handles:
-    - early stopping
-    - timing
-    - logging
-    - model checkpoints
-    - saving epoch and batch losses
-    - scheduler: is used to systematically update the learning rate if a plateau is reached
-        if scheduler is None it will be ignored. Scheduler mode should be set to 'min'
-    - conf.patience: number of epochs to continue where the validation loss has not improved before early stopping
+    train_model is a generic function used to train a variety of models
 
-    :returns: trn_epoch_losses, val_epoch_losses, stopped_early
+    :param model: torch model
+    :param optimiser: torch optimizer
+    :param loaders: batch loader class containing train, validation and test batch loaders
+    :param train_epoch_fn: function used to train model for epoch
+    :param loss_fn: loss function used in training process, can be CrossEntropy, MSE or MAE depending on model
+    :param conf: configure object containing all preferences for model, optimisations and training loops
+    :param scheduler: learning rate scheduler used during training loop
+    :param split_train_set: boolean value specifying if validation and training set should be split during training
+    :return: trn_epoch_losses, val_epoch_losses, stopped_early
 
     Notes
     -----
-    best validation loss of all the epochs can be determined by getting min(val_epoch_losses)
-    best validation loss used to tune the hyper-parameters of the models/optimiser
+    train_model will log all information to model folder as well as produce training and validation loss curve plots
     """
     log.info(f"\n ====================== Training {conf.model_name} ====================== \n")
     log.info(f"\n ====================== Config Values ====================== \n{conf}" +

@@ -161,7 +161,7 @@ class GridDataGroup:
         self.targets = np.log2(1 + self.targets)
         self.target_scaler = MinMaxScaler(feature_range=(0, 1))
         self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1)
-        self.targets = self.target_scaler.transform(self.targets)
+        self.targets = self.target_scaler.transform(self.targets)  # N,1,H,W
         # self.targets = self.targets[:, 0]  # todo reevaluate and delete  # N,H,W
 
         trn_val_targets = self.targets[self.trn_val_indices[0]:self.trn_val_indices[1]]
@@ -270,6 +270,18 @@ class GridDataGroup:
             shaper=self.shaper,
         )
 
+    def to_counts(self, sparse_data):
+        """
+        convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
+        :param sparse_data: ndarray (N,1,H,W)
+        :return: count_data (N,1,H,W)
+        """
+
+        sparse_descaled = self.target_scaler.inverse_transform(sparse_data)[:, 0:1]
+        sparse_count = np.round(2 ** sparse_descaled - 1)
+
+        return sparse_count  # (N,1,H,W)
+
 
 class GridDataset(Dataset):
     """
@@ -306,7 +318,7 @@ class GridDataset(Dataset):
         self.step_q = step_q
 
         self.crimes = crimes  # N,C,H,W
-        self.targets = targets # N,1,H,W
+        self.targets = targets  # N,1,H,W
         self.shape = self.t_size, self.c_size, self.h_size, self.w_size = np.shape(self.crimes)  # N,C,H,W
 
         self.demog_grid = demog_grid

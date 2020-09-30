@@ -9,7 +9,7 @@ from utils import get_data_sub_paths
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
     recall_score_per_time_slot, safe_f1_score, mae_per_time_slot, rmse_per_time_slot, \
-    predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot
+    predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot, predictive_accuracy_index
 from utils.preprocessing import Shaper
 import os
 import numpy as np
@@ -155,10 +155,10 @@ def get_metrics_table(models_metrics):
     names = []
     for m in models_metrics:
         names.append(m.model_name)
-        f1 = safe_f1_score((m.precision_score[0], m.recall_score[0]))
-        row = [m.root_mean_squared_error[0], m.mean_absolute_error[0], m.roc_auc_score[0],
-               m.average_precision_score[0], m.precision_score[0], m.recall_score[0],
-               f1, m.accuracy_score[0], m.matthews_corrcoef[0], m.predictive_accuracy_index[0]]
+        f1 = safe_f1_score((m.precision_score, m.recall_score))
+        row = [m.root_mean_squared_error, m.mean_absolute_error, m.roc_auc_score,
+               m.average_precision_score, m.precision_score, m.recall_score,
+               f1, m.accuracy_score, m.matthews_corrcoef, m.predictive_accuracy_index]
         data.append(row)
 
     df = pd.DataFrame(columns=col, data=data, index=names)
@@ -256,13 +256,14 @@ def mean_std_str(m, s):
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
-    def __init__(self, model_name, y_true, y_pred, probas_pred):
+    def __init__(self, model_name, y_true, y_pred, probas_pred, averaged_over_time=False):
         """
 
         :param model_name: name of model used in plots
         :param y_true: actual crime counts (N,1,L) [0,inf)
         :param y_pred: predicted hot or not spot {0,1}
         :param probas_pred: probability of hot or not [0,...,1]
+        :param averaged_over_time: if the metrics should be calculated per time step and then averaged of them or calculated globally
 
         Note
         ----
@@ -279,6 +280,8 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
         if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
             raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
+
+        self.averaged_over_time = averaged_over_time
 
         mae_per_time = mae_per_time_slot(y_true=y_true, y_pred=probas_pred)
         self.mae_per_time = np.nan_to_num(mae_per_time)
@@ -306,26 +309,41 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         self.r_per_time = np.nan_to_num(r_per_time)
 
         pai_per_time = predictive_accuracy_index_per_time_slot(y_true=y_true, y_pred=y_pred)
-        self.pai_per_time = pai_per_time
+        self.pai_per_time = np.nan_to_num(pai_per_time)
 
         mcc_per_time = matthews_corrcoef_per_time_slot(y_true=y_class, y_pred=y_pred)
-        self.mcc_per_time = mcc_per_time
+        self.mcc_per_time = np.nan_to_num(mcc_per_time)
 
         # flatten array for the next functions
         y_class = y_class.flatten()
         y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
 
         self.model_name = model_name
-        self.accuracy_score = mean_std(self.acc_per_time)  # accuracy_score(y_class, y_pred)
-        self.roc_auc_score = mean_std(self.roc_per_time)  # roc_auc_score(y_class, probas_pred)
+        if self.averaged_over_time:  # false by default
+            self.accuracy_score = mean_std(self.acc_per_time)
+            self.roc_auc_score = mean_std(self.roc_per_time)
+            self.recall_score = mean_std(r_per_time)
+            self.precision_score = mean_std(p_per_time)
+            self.average_precision_score = mean_std(ap_per_time)
+            self.matthews_corrcoef = mean_std(mcc_per_time)
+            self.predictive_accuracy_index = mean_std(pai_per_time)
+            # treats all errors linearly
+            self.mean_absolute_error = mean_std(mae_per_time)
+            # penalises large variations in error - high weight to large errors - great for training, not intuitive, when comparing models especially when the number of test samples can become large.
+            self.root_mean_squared_error = mean_std(np.sqrt(mae_per_time))
 
-        self.recall_score = mean_std(r_per_time)  # recall_score(y_class, y_pred)
-        self.precision_score = mean_std(p_per_time)  # precision_score(y_class, y_pred)
-
-        self.average_precision_score = mean_std(ap_per_time)  # average_precision_score(y_class, probas_pred)
-        self.matthews_corrcoef = mean_std(mcc_per_time)
-
-        self.predictive_accuracy_index = mean_std(pai_per_time)
+        else:
+            self.accuracy_score = accuracy_score(y_true=y_class, y_pred=y_pred)
+            self.roc_auc_score = roc_auc_score(y_true=y_class, y_score=probas_pred)
+            self.recall_score = recall_score(y_true=y_class, y_pred=y_pred)
+            self.precision_score = precision_score(y_true=y_class, y_pred=y_pred)
+            self.average_precision_score = average_precision_score(y_true=y_class, y_score=probas_pred)
+            self.matthews_corrcoef = matthews_corrcoef(y_true=y_class, y_pred=y_pred)
+            self.predictive_accuracy_index = predictive_accuracy_index(y_true=y_true, y_pred=y_pred)
+            # treats all errors linearly
+            self.mean_absolute_error = mean_absolute_error(y_true=y_true, y_pred=probas_pred)
+            # penalises large variations in error - high weight to large errors - great for training, not intuitive, when comparing models especially when the number of test samples can become large.
+            self.root_mean_squared_error = np.sqrt(mean_squared_error(y_true=y_true, y_pred=probas_pred))
 
         """
         Extra info on MAE vs RMSE:
@@ -333,31 +351,38 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         RMSE <= (MAE * sqrt(n_samples)):  usually occurs when the n_samples is small.   
         """
 
-        # treats all errors linearly
-        self.mean_absolute_error = mean_std(mae_per_time)  # mean_absolute_error(y_true=y_true, y_pred=probas_pred)
-
-        # penalises large variations in error - high weight to large errors - great for training, not intuitive, when
-        # comparing models especially when the number of test samples can become large.
-        self.root_mean_squared_error = mean_std(
-            np.sqrt(mae_per_time))  # np.sqrt(mean_squared_error(y_true=y_true, y_pred=probas_pred))
-
         self.pr_curve = PRCurve(y_class=y_class, probas_pred=probas_pred)
         self.roc_curve = ROCCurve(y_class=y_class, probas_pred=probas_pred)
 
     def __repr__(self):
-        r = rf"""
-        MODEL METRICS (Averaged over Time Steps)
-            Model Name: {self.model_name}
-                MAE:                {mean_std_str(*self.mean_absolute_error)}
-                RMSE:               {mean_std_str(*self.root_mean_squared_error)}
-                ROC AUC:            {mean_std_str(*self.roc_auc_score)}                
-                Average Precision:  {mean_std_str(*self.average_precision_score)}
-                Precision:          {mean_std_str(*self.precision_score)}
-                Recall:             {mean_std_str(*self.recall_score)}
-                Accuracy:           {mean_std_str(*self.accuracy_score)}
-                PAI:                {mean_std_str(*self.predictive_accuracy_index)}
-                MCC:                {mean_std_str(*self.matthews_corrcoef)}          
-        """
+        if self.averaged_over_time:
+            r = rf"""
+            MODEL METRICS (Averaged over Time Steps)
+                Model Name: {self.model_name}
+                    MAE:                {mean_std_str(*self.mean_absolute_error)}
+                    RMSE:               {mean_std_str(*self.root_mean_squared_error)}
+                    ROC AUC:            {mean_std_str(*self.roc_auc_score)}                
+                    Average Precision:  {mean_std_str(*self.average_precision_score)}
+                    Precision:          {mean_std_str(*self.precision_score)}
+                    Recall:             {mean_std_str(*self.recall_score)}
+                    Accuracy:           {mean_std_str(*self.accuracy_score)}
+                    PAI:                {mean_std_str(*self.predictive_accuracy_index)}
+                    MCC:                {mean_std_str(*self.matthews_corrcoef)}          
+            """
+        else:
+            r = rf"""
+            MODEL METRICS (Over All Samples)
+                Model Name: {self.model_name}
+                    MAE:                {self.mean_absolute_error:.5f}
+                    RMSE:               {self.root_mean_squared_error:.5f}
+                    ROC AUC:            {self.roc_auc_score:.5f}                
+                    Average Precision:  {self.average_precision_score:.5f}
+                    Precision:          {self.precision_score:.5f}
+                    Recall:             {self.recall_score:.5f}
+                    Accuracy:           {self.accuracy_score:.5f}
+                    PAI:                {self.predictive_accuracy_index:.5f}
+                    MCC:                {self.matthews_corrcoef:.5f}          
+            """
 
         return r
 
@@ -367,9 +392,9 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
 class ModelResult:
     def __init__(self, model_name: str, y_true: ndarray, y_pred: ndarray,
-                 probas_pred: ndarray, t_range: DatetimeIndex, shaper: Shaper):
+                 probas_pred: ndarray, t_range: DatetimeIndex, shaper: Shaper, averaged_over_time=False):
         """
-        ModelResult: save the data in the actual format we need it (N,C,L)
+        ModelResult: save the data the model predicted in format (N,C,L)
         Data is saved in a sparse representation - no extra zero values data saved.
         Shaper allows us to re-shape the data to create a map view of the city
 
@@ -388,6 +413,8 @@ class ModelResult:
         if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
             raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
 
+        self.averaged_over_time = averaged_over_time
+
         y_class = np.copy(y_true)
         y_class[y_class > 0] = 1
 
@@ -399,35 +426,26 @@ class ModelResult:
         self.t_range = t_range
         self.shaper = shaper
 
+        self.metrics = ModelMetrics(model_name=self.model_name,
+                                    y_true=self.y_true,
+                                    y_pred=self.y_class,
+                                    probas_pred=self.y_pred,
+                                    averaged_over_time=averaged_over_time)
+
     def accuracy(self):
-        # return accuracy_score(self.y_class.flatten(), self.y_pred.flatten()) # previous result
-        acc_per_time = accuracy_score_per_time_slot(y_true=self.y_class, y_pred=self.y_pred)
-        acc_per_time = np.nan_to_num(acc_per_time)
-        return mean_std(acc_per_time)
+        return self.metrics.accuracy_score
 
     def recall_score(self):
-        # return recall_score(self.y_class.flatten(), self.y_pred.flatten()) # previous result
-        r_per_time = recall_score_per_time_slot(y_true=self.y_class, y_pred=self.y_pred)
-        r_per_time = np.nan_to_num(r_per_time)
-        return mean_std(r_per_time)
+        return self.metrics.recall_score
 
     def precision_score(self):
-        # return precision_score(self.y_class.flatten(), self.y_pred.flatten()) # previous result
-        p_per_time = precision_score_per_time_slot(y_true=self.y_class, y_pred=self.y_pred)
-        p_per_time = np.nan_to_num(p_per_time)
-        return mean_std(p_per_time)
+        return self.metrics.precision_score
 
     def roc_auc(self):
-        # return roc_auc_score(self.y_true.flatten(), self.probas_pred.flatten()) # previous result
-        roc_per_time = roc_auc_score_per_time_slot(y_true=self.y_class, probas_pred=self.probas_pred)
-        roc_per_time = np.nan_to_num(roc_per_time)
-        return mean_std(roc_per_time)
+        return self.metrics.roc_auc_score
 
     def average_precision(self):
-        # return average_precision_score(self.y_true.flatten(), self.probas_pred.flatten()) # previous result
-        ap_per_time = average_precision_score_per_time_slot(y_true=self.y_class, probas_pred=self.probas_pred)
-        ap_per_time = np.nan_to_num(ap_per_time)
-        return mean_std(ap_per_time)
+        return self.metrics.average_precision_score
 
     def matthews_corrcoef(self):
         """
@@ -435,28 +453,13 @@ class ModelResult:
          prediction. - https://scikit-learn.org/stable/modules/generated/sklearn.metrics.matthews_corrcoef.html
 
         """
-        # return matthews_corrcoef(self.y_true.flatten(), self.y_pred.flatten())
-        mcc_per_time = matthews_corrcoef_per_time_slot(y_true=self.y_class, y_pred=self.y_pred)
-        return mean_std(mcc_per_time)
+        return self.metrics.matthews_corrcoef
 
     def predictive_accuracy_index(self):
-        pai_per_time = predictive_accuracy_index_per_time_slot(y_true=self.y_true, y_pred=self.y_pred)
-        return mean_std(pai_per_time)
+        return self.metrics.predictive_accuracy_index
 
     def __repr__(self):
-        r = rf"""
-        MODEL RESULT
-            Model Name: {self.model_name}
-                ROC AUC:            {mean_std_str(*self.roc_auc())}
-                Average Precision:  {mean_std_str(*self.average_precision())}                
-                Precision:          {mean_std_str(*self.precision_score())}
-                Recall:             {mean_std_str(*self.recall_score())}
-                Accuracy:           {mean_std_str(*self.accuracy())}
-                PAI:                {mean_std_str(*self.predictive_accuracy_index())}
-                MCC:                {mean_std_str(*self.matthews_corrcoef())}          
-        """
-
-        return r
+        return repr(self.metrics)
 
     def __str__(self):
         return self.__repr__()

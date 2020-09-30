@@ -1,8 +1,12 @@
 import numpy as np
+
+from models.model_result import get_models_metrics
 from utils import ffloor, fceil
 from pprint import pformat
 from pandas import Timedelta
 from geopy import distance
+
+from utils.metrics import safe_f1_score
 
 
 class State:
@@ -311,13 +315,22 @@ class InteractiveHeatmaps:
 
 
 def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
+    trn_val_epoch_losses = np.array(trn_epoch_losses) + np.array(val_epoch_losses)
+
     return go.Figure(
         [
+            go.Scatter(y=trn_val_epoch_losses, name="Train Valid Losses", mode='lines+markers'),
             go.Scatter(y=trn_epoch_losses, name="Train Losses", mode='lines+markers'),
             go.Scatter(y=val_epoch_losses, name="Validation Losses", mode='lines+markers'),
             go.Scatter(y=[np.min(val_epoch_losses)],
                        x=[np.argmin(val_epoch_losses)], name="Best Validation Loss", mode='markers',
-                       marker_symbol='x', marker_size=10, marker_color='green'),
+                       marker_symbol='x', marker_size=10),
+            go.Scatter(y=[np.min(trn_epoch_losses)],
+                       x=[np.argmin(trn_epoch_losses)], name="Best Train Loss", mode='markers',
+                       marker_symbol='x', marker_size=10),
+            go.Scatter(y=[np.min(trn_val_epoch_losses)],
+                       x=[np.argmin(trn_val_epoch_losses)], name="Best Train Valid Loss", mode='markers',
+                       marker_symbol='x', marker_size=10),
 
         ],
         layout=dict(
@@ -325,3 +338,81 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
             title_x=0.5,
         )
     )
+
+def plot_interactive_roc(data_path):
+    metrics = get_models_metrics(data_path)
+    fig = go.Figure(
+        layout=dict(
+            title_text="Receiver Operating Characteristic Curve",
+            title_x=0.5,
+            height=650,
+    #         width=650,
+    #         yaxis=dict(scaleanchor="x", scaleratio=1),
+            yaxis_title='True Positive Rate',
+            xaxis_title='False Positive Rate',
+            yaxis=dict(range=[-0.01, 1.01]),
+            xaxis=dict(range=[-0.01, 1.01]),
+        ),
+    )
+
+    for metric in metrics:
+        fig.add_trace(
+            go.Scatter(
+                y=metric.roc_curve.tpr,
+                x=metric.roc_curve.fpr,
+                name=f"{metric.model_name} (AUC={metric.roc_curve.auc:.3f})"
+            )
+        )
+
+    return fig
+
+
+def plot_interactive_pr(data_path, beta=1):
+    metrics = get_models_metrics(data_path)
+    fig = go.Figure(
+        layout=dict(
+            title_text="Precision-Recall Curve",
+            title_x=0.5,
+            height=650,
+            #         width=650,
+            #         yaxis=dict(scaleanchor="x", scaleratio=1),
+            yaxis_title='Precision',
+            xaxis_title='Recall',
+            yaxis=dict(range=[-0.01, 1.01]),
+            xaxis=dict(range=[-0.01, 1.01]),
+        ),
+
+    )
+
+    f_scores = [.3, .4, .5, .6, .7, .8, .9]
+    for i, f_score in enumerate(f_scores):
+        x = np.linspace(0.001, 1.1, 1000)
+        y = f_score * x / ((1 + (beta ** 2)) * x - f_score * (beta ** 2))
+
+        f_mask = (y >= 0) & (y <= 1.3) & (x >= 0) & (x <= 1.1)
+        fig.add_trace(
+            go.Scatter(
+                y=y[f_mask],
+                x=x[f_mask],
+                name=f'F{beta}={f_score:0.1f}',
+                marker=dict(color='black'),
+                opacity=0.1,
+                mode='lines',
+            )
+        )
+
+    for metric in metrics:
+        text = list(
+            map(lambda x: f"F{beta}={x:.4f}",
+                map(safe_f1_score, zip(metric.pr_curve.precision, metric.pr_curve.recall))))
+
+        fig.add_trace(
+            go.Scatter(
+                y=metric.pr_curve.precision,
+                x=metric.pr_curve.recall,
+                text=text,
+                name=f"{metric.model_name} (AP={metric.pr_curve.ap:.3f})"
+            )
+        )
+
+    return fig

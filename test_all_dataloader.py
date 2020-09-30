@@ -123,6 +123,19 @@ class TestAllDataLoaderIndexing(unittest.TestCase):
         grid_trg, grid_trg_rcn, grid_t_range = reconstruct_from_grid_loader(grid_loaders.test_loader)
         cell_trg, cell_trg_rcn, cell_t_range = reconstruct_from_cell_loader(cell_loaders.test_loader)
 
+        g_count = grid_data_group.to_counts(grid_trg_rcn)
+        f_count = flat_data_group.to_counts(flat_trg_rcn)
+        c_count = cell_data_group.to_counts(cell_trg_rcn)
+
+        g_cd = shaper.squeeze(g_count)
+        c_cd = shaper.squeeze(c_count)
+        f_cd = f_count
+        o_cd = shaper.squeeze(sparse_crimes[-len(f_count):, 0:1])
+
+        self.assertTrue((o_cd == g_cd).all())
+        self.assertTrue((o_cd == f_cd).all())
+        self.assertTrue((o_cd == c_cd).all())
+
         og_trg = sparse_crimes[-len(flat_t_range):, 0:1]
         og_trg = shaper.squeeze(og_trg)[:, 0]
 

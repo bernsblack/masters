@@ -103,7 +103,7 @@ class SimpleKangFNN(nn.Module):
     def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5, model_arch=None):
         super(SimpleKangFNN, self).__init__()
 
-        self.name = "Simple KangFNN"
+        self.name = "SimpleKangFNN"
 
         self.dropout_p = dropout_p
         self.dropout = nn.Dropout(p=self.dropout_p)

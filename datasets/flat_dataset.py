@@ -4,6 +4,7 @@ from utils.configs import BaseConf
 from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
 
+
 class FlatDataGroup(BaseDataGroup):
     """
     FlatDataGroup class acts as a collection of datasets (training/validation/test)
@@ -61,6 +62,18 @@ class FlatDataGroup(BaseDataGroup):
             offset_year=self.offset_year,
             shaper=self.shaper,
         )
+
+    def to_counts(self, dense_data):
+        """
+        convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
+        :param dense_data: ndarray (N,1,L)
+        :return: count_data (N,1,L)
+        """
+
+        dense_descaled = self.target_scaler.inverse_transform(dense_data)[:, 0:1]
+        dense_count = np.round(2 ** dense_descaled - 1)
+
+        return dense_count  # (N,1,L)
 
 
 class FlatDataset(Dataset):
