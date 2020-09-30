@@ -119,6 +119,16 @@ class TestAllDataLoaderIndexing(unittest.TestCase):
 
         shaper = flat_data_group.shaper
 
+        self.assertTrue((grid_loaders.data_group.targets == shaper.unsqueeze(cell_loaders.data_group.targets)).all())
+        self.assertTrue(
+            (grid_loaders.data_group.crimes[:, 0] == shaper.unsqueeze(cell_loaders.data_group.crimes)[:, 0]).all())
+        self.assertTrue((grid_loaders.data_group.labels == shaper.unsqueeze(cell_loaders.data_group.labels)).all())
+
+        self.assertTrue((grid_loaders.data_group.targets == shaper.unsqueeze(flat_loaders.data_group.targets)).all())
+        self.assertTrue(
+            (grid_loaders.data_group.crimes[:, 0] == shaper.unsqueeze(flat_loaders.data_group.crimes)[:, 0]).all())
+        self.assertTrue((grid_loaders.data_group.labels == shaper.unsqueeze(flat_loaders.data_group.labels)).all())
+
         flat_trg, flat_trg_rcn, flat_t_range = reconstruct_from_flat_loader(flat_loaders.test_loader)
         grid_trg, grid_trg_rcn, grid_t_range = reconstruct_from_grid_loader(grid_loaders.test_loader)
         cell_trg, cell_trg_rcn, cell_t_range = reconstruct_from_cell_loader(cell_loaders.test_loader)

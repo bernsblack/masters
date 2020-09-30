@@ -102,9 +102,8 @@ class BaseDataGroup:
             tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
             tmp_val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1], 0:1]
             tmp_tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1], 0:1]
-            shaper_crimes = np.max(tmp_trn_crimes, axis=0, keepdims=True) * \
-                            np.max(tmp_val_crimes, axis=0, keepdims=True) * \
-                            np.max(tmp_tst_crimes, axis=0, keepdims=True)
+            shaper_crimes = np.max(tmp_tst_crimes, axis=0,  # only using shaper on test crimes - ensures loaders line up
+                                   keepdims=True)  # * np.max(tmp_val_crimes, axis=0, keepdims=True) * np.max(tmp_trn_crimes, axis=0, keepdims=True)
 
             # fit crime data to shaper
             self.shaper = Shaper(data=shaper_crimes,
