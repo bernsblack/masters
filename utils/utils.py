@@ -190,3 +190,7 @@ def describe_array(a):
     }
     return d
     # return f"____________________________________________________________\n{pformat(d)}\n" + "____________________________________________________________"
+
+
+def is_all_integer(a):
+    return np.sum(a - np.round(a)) == 0

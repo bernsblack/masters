@@ -44,23 +44,23 @@ def predictive_accuracy_index_averaged_over_time(y_true, y_pred):
     return np.mean(result), np.std(result)
 
 
-def predictive_accuracy_index_per_time_slot(y_true, y_pred):
+def predictive_accuracy_index_per_time_slot(y_count, y_pred):
     """
     Calculate the PAI for each index of time in predict values of format (N,L)
 
-    :param y_true: true crime counts in (N,1,L) format each value [0, max_int]
+    :param y_count: true crime counts in (N,1,L) format each value [0, max_int]
     :param y_pred: predicted crime hotspots in (N,1,L) format, each value [0,1]
     :return: ndarray (N,1) with each index in N indicating the PAI for that index
     """
 
     pai_time_slot = []
-    N, C, L = y_true.shape
+    N, C, L = y_count.shape
     assert C == 1
-    assert y_true.shape == y_pred.shape
+    assert y_count.shape == y_pred.shape
 
     for n in range(N):
         pai_time_slot.append(
-            predictive_accuracy_index(y_true[n, 0, :], y_pred[n, 0, :])
+            predictive_accuracy_index(y_count[n, 0, :], y_pred[n, 0, :])
         )
 
     return np.array(pai_time_slot)
@@ -73,7 +73,7 @@ def predictive_accuracy_index(y_true, y_pred):
 
     Warning: if no crime is predicted a/A will be zero and will lead to ZeroDivisionError
     """
-    assert y_pred.max() == 1 or y_pred.max() == 0 # make sure if prediction is made at least the value is one
+    assert y_pred.max() == 1 or y_pred.max() == 0  # make sure if prediction is made at least the value is one
 
     n = np.sum(y_true[y_pred == 1])  # crimes in predicted area
     N = np.sum(y_true)  # crimes in total area
@@ -117,7 +117,7 @@ class TestPredictiveAccuracyIndex(unittest.TestCase):
         y_true = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape(10, 1, -1)
         y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape(10, 1, -1)
 
-        pai_per_t = predictive_accuracy_index_per_time_slot(y_true=y_true, y_pred=y_pred)
+        pai_per_t = predictive_accuracy_index_per_time_slot(y_count=y_true, y_pred=y_pred)
         target = np.array(10 * [2.1333333333333333])
         self.assertTrue(np.equal(pai_per_t, target).all())
 
@@ -138,48 +138,84 @@ def safe_f1_score(pr):
         return 2 * (p * r) / (p + r)
 
 
-def best_threshold(y_true, probas_pred, verbose=True):
-    precision, recall, thresholds = precision_recall_curve(y_true.flatten(), probas_pred.flatten())
-    scores = np.array(list(map(safe_f1_score, zip(precision, recall))))
-    index_array = np.argmax(scores)  # almost always a singular int, and not an array
+def best_threshold(y_class, y_score, verbose=True):
+    """
+
+    :param y_class: ndarray the true values for hot or not spots {0,1}
+    :param y_score: (probas_pred or y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
+    :param verbose: prints out logs if true
+    :return: float threshold value where the best f1 score is for the given y_class and y_score
+    """
+    precision, recall, thresholds = precision_recall_curve(y_class.flatten(), y_score.flatten())
+    f1_scores = np.array(list(map(safe_f1_score, zip(precision, recall))))
+    index_array = np.argmax(f1_scores)  # almost always a singular int, and not an array
     if verbose:
-        log.info(f"f1_score: {scores[index_array]} at index {index_array}, new threshold {thresholds[index_array]}")
+        log.info(f"f1_score: {f1_scores[index_array]} at index {index_array}, new threshold {thresholds[index_array]}")
     return thresholds[index_array]
 
 
-def get_y_pred(thresh, probas_pred):
+def get_y_pred(thresh, y_score):
     """
     Note: thresh should be determined using the training data only
     :param thresh: Used best_threshold to get the optimal threshold for the maximum F1 score
-    :param probas_pred:  [0,inf) and float values
+    :param y_score: (probas_pred or y_score) [0,1] or [0,inf) depending if a regression or classification model
     :return y_pred: thresholds float values of probas_pred to get hard classifications
     """
     if thresh < 0:
         raise Exception("threshold must be greater than 0")
-    y_pred = np.copy(probas_pred)
-    # todo unit test - this might fail when threshold is greater than 1
+    y_pred = np.copy(y_score)
+
     y_pred[y_pred < thresh] = 0
     y_pred[y_pred >= thresh] = 1
 
     return y_pred
 
 
-def best_thresholds(y_true, probas_pred):
-    N, C, L = y_true.shape
+class TestPredictiveThresholds(unittest.TestCase):
+
+    def test_predictive_thresholds(self):
+        """
+        unit test to ensure the thresholding is applied correctly for arrays with [0,1] and [0, inf) values
+        """
+        y_class = np.random.binomial(1, 0.4, (20, 1, 4)).flatten()
+        y_score = np.random.rand(20, 1, 4).flatten()
+        y_score_gt_1 = 100 * y_score / np.max(y_score)
+
+        thresh = best_threshold(y_class=y_class, y_score=y_score)
+        thresh_gt_1 = best_threshold(y_class=y_class, y_score=y_score_gt_1)
+
+        y_pred = get_y_pred(thresh, y_score)
+        y_pred_gt_1 = get_y_pred(thresh_gt_1, y_score_gt_1)
+
+        self.assertTrue((y_pred == y_pred_gt_1).all())
+
+
+def best_thresholds(y_class, y_score):
+    """
+    :param y_class: ndarray (N,C,L) the true values for hot or not spots {0,1}
+    :param y_score: ndarray (N,C,L) (probas_pred or y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
+    :return list of best thresholds per cell
+    """
+    N, C, L = y_class.shape
     thresholds = np.empty(L)
     for l in range(L):
-        # IMPORTANT NOT THIS SHOULD BE CALCULATED ON THE TRAINING SET
-        thresholds[l] = best_threshold(y_true=y_true[:, :, l], probas_pred=probas_pred[:, :, l])
+        # IMPORTANT NOTE: THIS SHOULD BE CALCULATED ON THE TRAINING SET
+        thresholds[l] = best_threshold(y_class=y_class[:, :, l], y_score=y_score[:, :, l])
 
     return thresholds
 
 
-def get_y_pred_by_thresholds(thresholds, probas_pred):
-    N, C, L = probas_pred.shape
-    y_pred = np.empty(probas_pred.shape)  # (N,C,L)
+def get_y_pred_by_thresholds(thresholds, y_score):
+    """
+    :param thresholds: ndarray (N,C,L) threshold per cell (every l in L)
+    :param y_score: ndarray (N,C,L) (probas_pred or y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
+    :return list of best thresholds per cell
+    """
+    N, C, L = y_score.shape
+    y_pred = np.empty(y_score.shape)  # (N,C,L)
     for l in range(L):
         y_pred[:, :, l] = get_y_pred(thresh=thresholds[l],
-                                     probas_pred=probas_pred[:, :, l])
+                                     y_score=y_score[:, :, l])
 
     return y_pred
 
@@ -646,20 +682,18 @@ def roc_auc_score_per_cell(y_true, probas_pred):
     return result
 
 
-def matthews_corrcoef_per_time_slot(y_true, y_pred):
+def matthews_corrcoef_per_time_slot(y_class, y_pred):
     """
-    y_true: shape (N,1,L)
-    probas_pred: (N,1,L)
-
-    return: (N,1,1)
+    :param y_class: ndarray (N,1,1)
+    :param y_pred: ndarray (N,1,1)
+    :return: ndarray (N,1,1)
     """
-
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(N)
 
     for i in range(N):
         result[i] = matthews_corrcoef(
-            y_true=y_true[i, :, :].flatten(),
+            y_true=y_class[i, :, :].flatten(),
             y_pred=y_pred[i, :, :].flatten(),
         )
 
@@ -668,56 +702,56 @@ def matthews_corrcoef_per_time_slot(y_true, y_pred):
     return result
 
 
-def average_precision_score_per_time_slot(y_true, probas_pred):
+def average_precision_score_per_time_slot(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = average_precision_score(y_true=y_true[i, :, :].flatten(),
-                                            y_score=probas_pred[i, :, :].flatten())
+        result[i] = average_precision_score(y_true=y_class[i, :, :].flatten(),
+                                            y_score=y_score[i, :, :].flatten())
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
     return result
 
 
-def roc_auc_score_per_time_slot(y_true, probas_pred):
+def roc_auc_score_per_time_slot(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = roc_auc_score(y_true=y_true[i, :, :].flatten(),
-                                  y_score=probas_pred[i, :, :].flatten())
+        result[i] = roc_auc_score(y_true=y_class[i, :, :].flatten(),
+                                  y_score=y_score[i, :, :].flatten())
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
     return result
 
 
-def accuracy_score_per_time_slot(y_true, y_pred):
+def accuracy_score_per_time_slot(y_class, y_pred):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = accuracy_score(y_true=y_true[i, :, :].flatten(),
+        result[i] = accuracy_score(y_true=y_class[i, :, :].flatten(),
                                    y_pred=y_pred[i, :, :].flatten())
 
     result = np.expand_dims(result, axis=1)
@@ -726,18 +760,18 @@ def accuracy_score_per_time_slot(y_true, y_pred):
     return result
 
 
-def precision_score_per_time_slot(y_true, y_pred):
+def precision_score_per_time_slot(y_class, y_pred):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = precision_score(y_true=y_true[i, :, :].flatten(),
+        result[i] = precision_score(y_true=y_class[i, :, :].flatten(),
                                     y_pred=y_pred[i, :, :].flatten())
 
     result = np.expand_dims(result, axis=1)
@@ -746,18 +780,18 @@ def precision_score_per_time_slot(y_true, y_pred):
     return result
 
 
-def recall_score_per_time_slot(y_true, y_pred):
+def recall_score_per_time_slot(y_class, y_pred):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = recall_score(y_true=y_true[i, :, :].flatten(),
+        result[i] = recall_score(y_true=y_class[i, :, :].flatten(),
                                  y_pred=y_pred[i, :, :].flatten())
 
     result = np.expand_dims(result, axis=1)

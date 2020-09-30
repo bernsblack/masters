@@ -210,9 +210,9 @@ if __name__ == "__main__":
             probas_pred.extend(out_proba.tolist())
 
     model_result = ModelResult(model_name="FNN (Kang and Kang)",
-                               y_true=y_true,
+                               y_count=y_true,
                                y_pred=y_pred,
-                               probas_pred=probas_pred,
+                               y_score=probas_pred,
                                shape=None)  # todo add shape
 
     log.info(model_result)

@@ -3,12 +3,10 @@ import logging as log
 import numpy as np
 import pandas as pd
 
-
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.constants import HOURS_IN_YEAR, TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
-
 
 from pandas.tseries.offsets import Hour as OffsetHour
 
@@ -79,7 +77,8 @@ class BaseDataGroup:
 
             # OPTION 3:
             # constant test set size and varying train and validation sizes
-            tst_size = int(24 * TEST_SET_SIZE_DAYS / time_step_hrs)  # test set can be set to be specific # days instead of just a year
+            tst_size = int(
+                24 * TEST_SET_SIZE_DAYS / time_step_hrs)  # test set can be set to be specific # days instead of just a year
             # tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
             trn_val_size = target_len - tst_size
             val_size = int(conf.val_ratio * trn_val_size)

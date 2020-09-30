@@ -1,5 +1,5 @@
 import pickle
-
+from utils.utils import is_all_integer
 from numpy import ndarray
 from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
@@ -256,13 +256,13 @@ def mean_std_str(m, s):
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
-    def __init__(self, model_name, y_true, y_pred, probas_pred, averaged_over_time=False):
+    def __init__(self, model_name, y_count, y_pred, y_score, averaged_over_time=False):
         """
 
         :param model_name: name of model used in plots
-        :param y_true: actual crime counts (N,1,L) [0,inf)
+        :param y_count: true crime counts (N,1,L) [0,inf) # should be scaled before
         :param y_pred: predicted hot or not spot {0,1}
-        :param probas_pred: probability of hot or not [0,...,1]
+        :param y_score: (probas_pred or y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
         :param averaged_over_time: if the metrics should be calculated per time step and then averaged of them or calculated globally
 
         Note
@@ -272,51 +272,54 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         """
 
         # y_true must be in format N,1,L to be able to correctly compare all the models
-        if len(y_true.shape) != 3 or y_true.shape[1] != 1:
-            raise Exception(f"y_true must be in (N,1,L) not {y_true.shape}.")
+        if len(y_count.shape) != 3 or y_count.shape[1] != 1:
+            raise Exception(f"y_count must be in (N,1,L) not {y_count.shape}.")
 
         if len(y_pred.shape) != 3 or y_pred.shape[1] != 1:
             raise Exception(f"y_pred must be in (N,1,L) not {y_pred.shape}.")
 
-        if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
-            raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
+        if len(y_score.shape) != 3 or y_score.shape[1] != 1:
+            raise Exception(f"y_score must be in (N,1,L) not {y_score.shape}.")
+
+        if not is_all_integer(y_count):
+            raise Exception(f"y_count must be all integers: representing the true counts")
 
         self.averaged_over_time = averaged_over_time
 
-        mae_per_time = mae_per_time_slot(y_true=y_true, y_pred=probas_pred)
+        mae_per_time = mae_per_time_slot(y_true=y_count, y_pred=y_score)
         self.mae_per_time = np.nan_to_num(mae_per_time)
 
         # rmse is not intuitive and skews the scores when test samples are few
-        rmse_per_time = rmse_per_time_slot(y_true=y_true, y_pred=probas_pred)
+        rmse_per_time = rmse_per_time_slot(y_true=y_count, y_pred=y_score)
         self.rmse_per_time = np.nan_to_num(rmse_per_time)
 
-        y_class = np.copy(y_true)
+        y_class = np.copy(y_count)
         y_class[y_class > 0] = 1
 
-        ap_per_time = average_precision_score_per_time_slot(y_true=y_class, probas_pred=probas_pred)
+        ap_per_time = average_precision_score_per_time_slot(y_class=y_class, y_score=y_score)
         self.ap_per_time = np.nan_to_num(ap_per_time)
 
-        roc_per_time = roc_auc_score_per_time_slot(y_true=y_class, probas_pred=probas_pred)
+        roc_per_time = roc_auc_score_per_time_slot(y_class=y_class, y_score=y_score)
         self.roc_per_time = np.nan_to_num(roc_per_time)
 
-        acc_per_time = accuracy_score_per_time_slot(y_true=y_class, y_pred=y_pred)
+        acc_per_time = accuracy_score_per_time_slot(y_class=y_class, y_pred=y_pred)
         self.acc_per_time = np.nan_to_num(acc_per_time)
 
-        p_per_time = precision_score_per_time_slot(y_true=y_class, y_pred=y_pred)
+        p_per_time = precision_score_per_time_slot(y_class=y_class, y_pred=y_pred)
         self.p_per_time = np.nan_to_num(p_per_time)
 
-        r_per_time = recall_score_per_time_slot(y_true=y_class, y_pred=y_pred)
+        r_per_time = recall_score_per_time_slot(y_class=y_class, y_pred=y_pred)
         self.r_per_time = np.nan_to_num(r_per_time)
 
-        pai_per_time = predictive_accuracy_index_per_time_slot(y_true=y_true, y_pred=y_pred)
+        pai_per_time = predictive_accuracy_index_per_time_slot(y_count=y_count, y_pred=y_pred)
         self.pai_per_time = np.nan_to_num(pai_per_time)
 
-        mcc_per_time = matthews_corrcoef_per_time_slot(y_true=y_class, y_pred=y_pred)
+        mcc_per_time = matthews_corrcoef_per_time_slot(y_class=y_class, y_pred=y_pred)
         self.mcc_per_time = np.nan_to_num(mcc_per_time)
 
         # flatten array for the next functions
         y_class = y_class.flatten()
-        y_true, y_pred, probas_pred = y_true.flatten(), y_pred.flatten(), probas_pred.flatten()
+        y_count, y_pred, y_score = y_count.flatten(), y_pred.flatten(), y_score.flatten()
 
         self.model_name = model_name
         if self.averaged_over_time:  # false by default
@@ -331,19 +334,18 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
             self.mean_absolute_error = mean_std(mae_per_time)
             # penalises large variations in error - high weight to large errors - great for training, not intuitive, when comparing models especially when the number of test samples can become large.
             self.root_mean_squared_error = mean_std(np.sqrt(mae_per_time))
-
         else:
             self.accuracy_score = accuracy_score(y_true=y_class, y_pred=y_pred)
-            self.roc_auc_score = roc_auc_score(y_true=y_class, y_score=probas_pred)
+            self.roc_auc_score = roc_auc_score(y_true=y_class, y_score=y_score)
             self.recall_score = recall_score(y_true=y_class, y_pred=y_pred)
             self.precision_score = precision_score(y_true=y_class, y_pred=y_pred)
-            self.average_precision_score = average_precision_score(y_true=y_class, y_score=probas_pred)
+            self.average_precision_score = average_precision_score(y_true=y_class, y_score=y_score)
             self.matthews_corrcoef = matthews_corrcoef(y_true=y_class, y_pred=y_pred)
-            self.predictive_accuracy_index = predictive_accuracy_index(y_true=y_true, y_pred=y_pred)
+            self.predictive_accuracy_index = predictive_accuracy_index(y_true=y_count, y_pred=y_pred)
             # treats all errors linearly
-            self.mean_absolute_error = mean_absolute_error(y_true=y_true, y_pred=probas_pred)
+            self.mean_absolute_error = mean_absolute_error(y_true=y_count, y_pred=y_score)
             # penalises large variations in error - high weight to large errors - great for training, not intuitive, when comparing models especially when the number of test samples can become large.
-            self.root_mean_squared_error = np.sqrt(mean_squared_error(y_true=y_true, y_pred=probas_pred))
+            self.root_mean_squared_error = np.sqrt(mean_squared_error(y_true=y_count, y_pred=y_score))
 
         """
         Extra info on MAE vs RMSE:
@@ -351,8 +353,8 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         RMSE <= (MAE * sqrt(n_samples)):  usually occurs when the n_samples is small.   
         """
 
-        self.pr_curve = PRCurve(y_class=y_class, probas_pred=probas_pred)
-        self.roc_curve = ROCCurve(y_class=y_class, probas_pred=probas_pred)
+        self.pr_curve = PRCurve(y_class=y_class, probas_pred=y_score)
+        self.roc_curve = ROCCurve(y_class=y_class, probas_pred=y_score)
 
     def __repr__(self):
         if self.averaged_over_time:
@@ -391,45 +393,50 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
 
 class ModelResult:
-    def __init__(self, model_name: str, y_true: ndarray, y_pred: ndarray,
-                 probas_pred: ndarray, t_range: DatetimeIndex, shaper: Shaper, averaged_over_time=False):
+    def __init__(self, model_name: str, y_count: ndarray, y_pred: ndarray,
+                 y_score: ndarray, t_range: DatetimeIndex, shaper: Shaper, averaged_over_time: bool = False):
         """
         ModelResult: save the data the model predicted in format (N,C,L)
         Data is saved in a sparse representation - no extra zero values data saved.
         Shaper allows us to re-shape the data to create a map view of the city
 
         :param model_name: text used to refer to the model on plots
-        :param y_true (N,1,L): ground truth the amount of crime occurring on this spot, gets converted into y_class {0,1}
+        :param y_count (N,1,L): ground truth the amount of crime occurring on this spot [0, inf), gets converted into y_class {0,1}
         :param y_pred (N,1,L): the model's hard prediction of the model {0,1}
-        :param probas_pred (N,1,L): model floating point values, can be likelihoods [0,1) or count estimates [0,n)
+        :param y_score (N,1,L): model floating point values, can be likelihoods [0,1) or count estimates [0,n)
         :param t_range (N,1): range of the times of the test set - also used in plots
+        :param shaper: used to convert saved data into a sparse/grid format
+        :param averaged_over_time: if the metrics should be averaged over time or calculated as a global bag of data
         """
-        if len(y_true.shape) != 3 or y_true.shape[1] != 1:
-            raise Exception(f"y_true must be in (N,1,L) not {y_true.shape}.")
+        if len(y_count.shape) != 3 or y_count.shape[1] != 1:
+            raise Exception(f"y_count must be in (N,1,L) not {y_count.shape}.")
 
         if len(y_pred.shape) != 3 or y_pred.shape[1] != 1:
             raise Exception(f"y_pred must be in (N,1,L) not {y_pred.shape}.")
 
-        if len(probas_pred.shape) != 3 or probas_pred.shape[1] != 1:
-            raise Exception(f"probas_pred must be in (N,1,L) not {probas_pred.shape}.")
+        if len(y_score.shape) != 3 or y_score.shape[1] != 1:
+            raise Exception(f"y_score must be in (N,1,L) not {y_score.shape}.")
+
+        if not is_all_integer(y_count):
+            raise Exception(f"y_count must be all integers: representing the true counts")
 
         self.averaged_over_time = averaged_over_time
 
-        y_class = np.copy(y_true)
+        y_class = np.copy(y_count)
         y_class[y_class > 0] = 1
 
         self.model_name = model_name
-        self.y_true = y_true
+        self.y_true = y_count
         self.y_class = y_class
         self.y_pred = y_pred  # remove we're getting y_true from y_pred -> get-best_threshold
-        self.probas_pred = probas_pred
+        self.y_score = y_score
         self.t_range = t_range
         self.shaper = shaper
 
         self.metrics = ModelMetrics(model_name=self.model_name,
-                                    y_true=self.y_true,
-                                    y_pred=self.y_class,
-                                    probas_pred=self.y_pred,
+                                    y_count=self.y_true,
+                                    y_pred=self.y_pred,
+                                    y_score=self.y_score,
                                     averaged_over_time=averaged_over_time)
 
     def accuracy(self):
@@ -465,25 +472,47 @@ class ModelResult:
         return self.__repr__()
 
 
-def save_metrics(y_true, y_pred, probas_pred, t_range, shaper, conf):
+def save_metrics(y_count, y_pred, y_score, t_range, shaper, conf):
+    """
+    Only save the data in a metric object which is lighter than results that save all results to disk
+
+    :param y_count: true crime counts scaled to original values
+    :param y_pred: hot or not hard predictions
+    :param y_score: floating point value predictions (probas_pred or y_score)
+    :param t_range: date time range of metrics
+    :param shaper: shaper used to unsqueeze results
+    :param conf: configuration object
+    :return:
+    """
     # save result
     # only saves the result of the metrics not the predicted values
     model_metrics = ModelMetrics(model_name=conf.model_name,
-                                 y_true=y_true,
+                                 y_count=y_count,
                                  y_pred=y_pred,
-                                 probas_pred=probas_pred)
+                                 y_score=y_score)
     log.info(model_metrics)
 
     with open(f"{conf.model_path}model_metric.pkl", "wb") as file:
         pickle.dump(model_metrics, file)
 
 
-def save_results(y_true, y_pred, probas_pred, t_range, shaper, conf):
+def save_results(y_count, y_pred, y_score, t_range, shaper, conf):
+    """
+    Save all predicted results to disk with metrics embedded in result type
+
+    :param y_count: true crime counts scaled to original values
+    :param y_pred: hot or not hard predictions
+    :param y_score: floating point value predictions (probas_pred or y_score)
+    :param t_range: date time range of metrics
+    :param shaper: shaper used to unsqueeze results
+    :param conf: configuration object
+    :return:
+    """
     # saves the actual target and predicted values to be visualised later on - the one we're actually going to be using
     model_result = ModelResult(model_name=conf.model_name,
-                               y_true=y_true,
+                               y_count=y_count,
                                y_pred=y_pred,
-                               probas_pred=probas_pred,
+                               y_score=y_score,
                                t_range=t_range,
                                shaper=shaper)
     log.info(model_result)
