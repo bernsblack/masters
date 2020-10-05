@@ -57,9 +57,9 @@ class BaseDataGroup:
                     f"len(self.t_range) - 1 {len(self.t_range) - 1} != len(self.crimes) {len(self.crimes)} ")
 
             #  split the data into ratios - size represent the targets sizes not the number of time steps
-            total_offset = self.seq_len + self.offset_year
+            self.total_offset = self.seq_len + self.offset_year
 
-            target_len = self.total_len - total_offset
+            target_len = self.total_len - self.total_offset
 
             # OPTION 1:
             # train/test split sizes is dependent on total_offset - means we can't compare models easily
@@ -93,10 +93,16 @@ class BaseDataGroup:
             #  start and stop t_index of each dataset - can be used outside of loader/group
             # runs -> val_set, trn_set, tst_set: trn and tst set are more correlated
             self.tst_indices = np.array([self.total_len - tst_size, self.total_len])
-            self.trn_indices = np.array([self.tst_indices[0] - trn_size, self.tst_indices[0]])
-            self.val_indices = np.array([self.trn_indices[0] - val_size, self.trn_indices[0]])
             self.trn_val_indices = np.array([self.tst_indices[0] - trn_val_size,
-                                             self.trn_indices[0]])  # used to train model with validation set included
+                                             self.tst_indices[0]])  # used to train model with validation set included
+            if conf.train_set_first:
+                # train first option
+                self.val_indices = np.array([self.tst_indices[0] - val_size, self.tst_indices[0]])
+                self.trn_indices = np.array([self.val_indices[0] - trn_size, self.val_indices[0]])
+            else:
+                # val first option
+                self.trn_indices = np.array([self.tst_indices[0] - trn_size, self.tst_indices[0]])
+                self.val_indices = np.array([self.trn_indices[0] - val_size, self.trn_indices[0]])
 
             # used to create the shaper so that all datasets have got values in them
             tmp_trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1], 0:1]
@@ -141,10 +147,10 @@ class BaseDataGroup:
             self.demog_grid = self.shaper.squeeze(zip_file["demog_grid"])
             self.street_grid = self.shaper.squeeze(zip_file["street_grid"])
 
-        self.tst_indices[0] = self.tst_indices[0] - total_offset
-        self.val_indices[0] = self.val_indices[0] - total_offset
-        self.trn_indices[0] = self.trn_indices[0] - total_offset
-        self.trn_val_indices[0] = self.trn_val_indices[0] - total_offset
+        self.tst_indices[0] = self.tst_indices[0] - self.total_offset
+        self.val_indices[0] = self.val_indices[0] - self.total_offset
+        self.trn_indices[0] = self.trn_indices[0] - self.total_offset
+        self.trn_val_indices[0] = self.trn_val_indices[0] - self.total_offset
 
         self.trn_val_t_range = self.t_range[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_t_range = self.t_range[self.trn_indices[0]:self.trn_indices[1]]

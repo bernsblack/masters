@@ -72,6 +72,9 @@ class BaseConf:  # args from arg-parser to over write values
 
         self.patience = 10
 
+        # when train and valid sets are split in time: if the train set should be earlier in time than the validation set
+        self.train_set_first = False
+
         if conf_dict:
             for k, v in conf_dict.items():
                 if self.__dict__.get(k, None) is not None:

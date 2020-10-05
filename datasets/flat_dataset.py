@@ -3,7 +3,7 @@ from torch.utils.data import Dataset
 from utils.configs import BaseConf
 from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
-
+import logging as log
 
 class FlatDataGroup(BaseDataGroup):
     """
@@ -19,7 +19,9 @@ class FlatDataGroup(BaseDataGroup):
         :param data_path: Path to the data folder with all spatial and temporal data.
         :param conf: Config class with pre-set and global values
         """
+        log.info('Initialising Flat Data Group')
         super(FlatDataGroup, self).__init__(data_path, conf)
+
 
         self.training_set = FlatDataset(
             crimes=self.trn_crimes,

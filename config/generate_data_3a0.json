@@ -1,0 +1,19 @@
+{
+  "start_date": "2014-01-01",
+  "end_date": "2019-01-01",
+  "dT": "24H",
+  "x_scale": 10,
+  "y_scale": 8,
+  "lat_max": 41.913,
+  "lat_min": 41.843,
+  "lon_max": -87.608,
+  "lon_min": -87.783,
+  "root": "./",
+  "crime_types": [
+    "THEFT",
+    "BATTERY",
+    "NARCOTICS",
+    "BURGLARY",
+    "ROBBERY"
+  ]
+}

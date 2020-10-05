@@ -10,15 +10,17 @@ from dataloaders.flat_loader import reconstruct_from_flat_loader
 from dataloaders.cell_loader import reconstruct_from_cell_loader
 from utils.setup import setup
 import numpy as np
+import logging as log
 
 
 class TestAllDataLoaderIndexing(unittest.TestCase):
 
     def test_all_loaders_reconstruction_without_crime_types(self):
-        data_sub_path = by_ref("c97")[0]
+        data_sub_path = by_ref("7cd")[0]
         print(f"using: {data_sub_path}")
 
         conf, shaper, sparse_crimes, crime_feature_indices = setup(data_sub_path, 'test')
+        conf.seq_len = 100
 
         conf.use_classification = False
 
@@ -38,6 +40,10 @@ class TestAllDataLoaderIndexing(unittest.TestCase):
         flat_trg, flat_trg_rcn, flat_t_range = reconstruct_from_flat_loader(flat_loaders.test_loader)
         grid_trg, grid_trg_rcn, grid_t_range = reconstruct_from_grid_loader(grid_loaders.test_loader)
         cell_trg, cell_trg_rcn, cell_t_range = reconstruct_from_cell_loader(cell_loaders.test_loader)
+
+        log.info(f"grid reconstructed size: {grid_trg_rcn.shape}")
+        log.info(f"flat reconstructed size: {flat_trg_rcn.shape}")
+        log.info(f"cell reconstructed size: {cell_trg_rcn.shape}")
 
         og_trg = sparse_crimes[-len(flat_t_range):, 0:1]
         og_trg = shaper.squeeze(og_trg)[:, 0]

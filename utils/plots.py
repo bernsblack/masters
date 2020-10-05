@@ -1,13 +1,11 @@
 import base64
 import io
-from pprint import pformat
-
+import plotly.graph_objects as go
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
 from IPython.display import HTML
 from mpl_toolkits.axes_grid1 import make_axes_locatable
-import logging as log
 
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
@@ -136,14 +134,17 @@ def visualize_weights(model):
     plt.show()
 
 
-def plot(*args):
-    """
-    simple quick plot
-    """
-    plt.figure(figsize=(15, 5))
-    for x in args:
-        plt.plot(x)
-    plt.show()
+# def plot(*args):
+#     """
+#     simple quick plot
+#     """
+#     plt.figure(figsize=(15, 5))
+#     for x in args:
+#         plt.plot(x)
+#     plt.show()
+
+def plot(**kwargs):
+    return go.Figure([go.Scatter(y=arg) for kw, arg in kwargs.items()])
 
 
 def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):

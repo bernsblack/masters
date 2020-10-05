@@ -417,25 +417,25 @@ def evaluate_st_res_net_extra(model, batch_loader, conf):
     :param model: model that takes (seq_c, seq_p, seq_q, seq_e, seq_demog, seq_gsv)
     :param batch_loader: iterates with outputs: (batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t)
     :param conf: only used the device attached to conf to use cuda if available
-    :return: y_counts, y_true, probas_pred, t_range
-        - y_counts: normalized target crime counts for regression models
-        - y_true: class labels {0, 1}
-        - probas_pred: float value representing the probability of crime happening
+    :return: y_count, y_class, y_score, t_range
+        - y_count: normalized target crime counts for regression models
+        - y_class: class labels {0, 1}
+        - y_score: float value representing the probability of crime happening
 
     Notes
     -----
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
     """
-    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
-    y_counts = batch_loader.dataset.targets[-len(probas_pred):]
-    y_true = np.copy(y_counts)
-    if y_true.min() < 0:
-        raise ValueError(f"Data must be normalised between (0,1), min value is {y_true.min()}")
+    y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_count = batch_loader.dataset.targets[-len(y_score):]
+    y_class = np.copy(y_count) # batch_loader.dataset.labels[-len(y_score):]
+    if y_class.min() < 0:
+        raise ValueError(f"Data must be normalised between (0,1), min value is {y_class.min()}")
 
-    y_true[y_true > 0] = 1  # ensure normalisation between 0 and 1 not -1 and 1
+    y_class[y_class > 0] = 1  # ensure normalisation between 0 and 1 not -1 and 1
 
-    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+    t_range = batch_loader.dataset.t_range[-len(y_score):]
 
     with torch.set_grad_enabled(False):
         model.eval()
@@ -462,9 +462,9 @@ def evaluate_st_res_net_extra(model, batch_loader, conf):
                                       seq_gsv=street_grid)
 
             for i, p in zip(batch_indices, batch_probas_pred.cpu().numpy()):
-                probas_pred[i] = p
+                y_score[i] = p
 
-    return y_counts, y_true, probas_pred, t_range
+    return y_count, y_class, y_score, t_range
 
 
 def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf: BaseConf):
@@ -474,7 +474,7 @@ def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf: BaseConf):
     :param model: model that takes (seq_c, seq_p, seq_q, seq_e)
     :param batch_loader: iterates with outputs: (batch_indices, batch_seq_c, batch_seq_p, batch_seq_q, batch_seq_e, batch_seq_t)
     :param conf: only used the device attached to conf to use cuda if available
-    :return: y_counts, y_true, probas_pred, t_range
+    :return: y_count, y_class, y_score, t_range
 
 
 
@@ -485,14 +485,14 @@ def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf: BaseConf):
     this function where the threshold is determined using only the training data
     """
 
-    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
-    y_counts = batch_loader.dataset.targets[-len(probas_pred):]
-    y_true = np.copy(y_counts)
-    if y_true.min() < 0:
-        raise ValueError(f"Data must be normalised between (0,1), min value is {y_true.min()}")
-    y_true[y_true > 0] = 1
+    y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_count = batch_loader.dataset.targets[-len(y_score):]
+    y_class = np.copy(y_count)
+    if y_class.min() < 0:
+        raise ValueError(f"Data must be normalised between (0,1), min value is {y_class.min()}")
+    y_class[y_class > 0] = 1
 
-    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+    t_range = batch_loader.dataset.t_range[-len(y_score):]
 
     with torch.set_grad_enabled(False):
         model.eval()
@@ -517,6 +517,6 @@ def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf: BaseConf):
                                       seq_e=batch_seq_e)
 
             for i, p in zip(batch_indices, batch_probas_pred.cpu().numpy()):
-                probas_pred[i] = p
+                y_score[i] = p
 
-    return y_counts, y_true, probas_pred, t_range
+    return y_count, y_class, y_score, t_range

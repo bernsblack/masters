@@ -1,0 +1,15 @@
+{
+  "start_date": "2012-01-01",
+  "end_date": "2019-01-01",
+  "dT": "24H",
+  "x_scale": 3,
+  "y_scale": 2,
+  "lat_max": 41.906,
+  "lat_min": 41.862,
+  "lon_max": -87.614,
+  "lon_min": -87.644,
+  "root": "./",
+  "crime_types": [
+    "THEFT"
+  ]
+}

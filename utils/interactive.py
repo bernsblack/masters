@@ -214,7 +214,7 @@ import plotly.graph_objects as go
 
 def new_interactive_heatmap(z, name=None):
     h, w = z.shape
-    height = int(30*h)
+    height = 600 # int(30*h)
     width = height * w / h # 300
 
     return go.FigureWidget(

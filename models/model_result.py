@@ -284,6 +284,9 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         if not is_all_integer(y_count):
             raise Exception(f"y_count must be all integers: representing the true counts")
 
+        if np.max(y_count) <= 1:
+            raise Exception(f"y_count is the true count of crimes: max value ({np.max(y_count)}) should be above 1")
+
         self.averaged_over_time = averaged_over_time
 
         mae_per_time = mae_per_time_slot(y_true=y_count, y_pred=y_score)

@@ -4,16 +4,21 @@ from utils.configs import BaseConf
 from utils.data_processing import pad4d
 from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
-
+import logging as log
 
 class CellDataGroup(BaseDataGroup):
     def __init__(self, data_path: str, conf: BaseConf):
         """
+        crimes: log2(1 + x) and scaled crime counts
+        targets: log2(1 + x) and scaled crime counts offset by one time ste[
+        label: [0,1] binary classification label for crime hotspots or not hotspot
 
         :param data_path: Path to the data folder with all spatial and temporal data.
         :param conf: Config class with pre-set and global values
         """
+        log.info('Initialising Cell Data Group')
         super(CellDataGroup, self).__init__(data_path, conf)
+
 
         self.training_set = CellDataset(
             crimes=self.trn_crimes,
