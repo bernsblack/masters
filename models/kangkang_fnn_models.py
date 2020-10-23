@@ -4,6 +4,8 @@ import logging as log
 import numpy as np
 import torch.nn.functional as F
 
+from utils.configs import BaseConf
+
 """
 ### Feed Forward Network (Kang and Kang)
 
@@ -49,7 +51,7 @@ class KangFeedForwardNetwork(nn.Module):
 
             final_net_h0 = scp_net_h1 + tmp_net_h1 + env_net_h1
             final_net_h1 = model_arch.get("final_net_h1")
-        else:  # default architechture
+        else:  # default architecture
             scp_net_h0 = 256
             scp_net_h1 = 128
             tmp_net_h0 = 256
@@ -106,7 +108,7 @@ class SimpleKangFNN(nn.Module):
         self.name = "SimpleKangFNN"
 
         self.dropout_p = dropout_p
-        self.dropout = nn.Dropout(p=self.dropout_p)
+        self.dropout = nn.Dropout(p=self.dropout_p) # not used when model is in eval mode
 
         if model_arch:
             h_size0 = model_arch.get("h_size0")
@@ -149,23 +151,29 @@ class SimpleKangFNN(nn.Module):
 
 
 # training loops
-def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, conf):
+def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, conf: BaseConf):
     """
     Training the FNN model for a single epoch
     """
     epoch_losses = []
     num_batches = batch_loader.num_batches
-    for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+    for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
         current_batch = batch_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
         spc_feats = torch.Tensor(spc_feats[-1]).to(conf.device)  # only taking [-1] for fnn
         tmp_feats = torch.Tensor(tmp_feats[-1]).to(conf.device)  # only taking [-1] for fnn
         env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [-1] for fnn
-        targets = torch.LongTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
 
         out = model(spc_feats, tmp_feats, env_feats)
-        loss = loss_fn(input=out, target=targets)
+
+        if conf.use_classification:
+            labels = torch.LongTensor(labels[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            loss = loss_fn(input=out, target=labels)
+        else:
+            targets = torch.FloatTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            loss = loss_fn(input=out, target=targets)
+
         epoch_losses.append(loss.item())
         total_losses.append(epoch_losses[-1])
 
@@ -184,26 +192,27 @@ def evaluate_fnn(model, batch_loader, conf):
     :param model: any torch model that takes spc_feats, tmp_feats, env_feats as features
     :param batch_loader: batch loader that is iterable -> returns: indices, spc_feats, tmp_feats, env_feats
     :param conf: only value used it the device attached to the conf variable
-    :return: y_true, probas_pred, t_range where
-        - y_true:
-        - probas_pred:
-        - t_range:
-
+    :return: y_count, y_class, y_score, t_range
+        - y_count: scaled target counts
+        - y_class: class label (crime/not-crime)
+        - y_score: model output (probability of crime [classification] or scaled crime count [regression])
+        - t_range: time range
 
     Notes
     -----
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
     """
-    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
-    y_true = batch_loader.dataset.targets[-len(probas_pred):]
-    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+    y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)  # probas_pred
+    y_count = batch_loader.dataset.targets[-len(y_score):]
+    y_class = batch_loader.dataset.labels[-len(y_score):]
+    t_range = batch_loader.dataset.t_range[-len(y_score):]
 
     with torch.set_grad_enabled(False):
         model.eval()
 
         num_batches = batch_loader.num_batches
-        for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+        for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
             current_batch = batch_loader.current_batch
 
             # Transfer to PyTorch Tensor and GPU
@@ -217,6 +226,6 @@ def evaluate_fnn(model, batch_loader, conf):
 
             for i, p in zip(indices, batch_probas_pred):
                 n, c, l = i
-                probas_pred[n, c, l] = p
+                y_score[n, c, l] = p
 
-    return y_true, probas_pred, t_range
+    return y_count, y_class, y_score, t_range

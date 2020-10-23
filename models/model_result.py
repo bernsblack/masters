@@ -9,7 +9,8 @@ from utils import get_data_sub_paths
 from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
     recall_score_per_time_slot, safe_f1_score, mae_per_time_slot, rmse_per_time_slot, \
-    predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot, predictive_accuracy_index
+    predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot, predictive_accuracy_index, det_curve, \
+    DETCurvePlotter
 from utils.preprocessing import Shaper
 import os
 import numpy as np
@@ -149,16 +150,16 @@ def get_models_metrics(data_path):
 
 # remember pandas df.to_latex for the columns
 def get_metrics_table(models_metrics):
-    col = ['RMSE', 'MAE', 'ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score', 'Accuracy',
-           'MCC', 'PAI']
+    col = ['ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score', 'Accuracy',
+           'MCC', 'PAI', 'RMSE', 'MAE']
     data = []
     names = []
     for m in models_metrics:
         names.append(m.model_name)
         f1 = safe_f1_score((m.precision_score, m.recall_score))
-        row = [m.root_mean_squared_error, m.mean_absolute_error, m.roc_auc_score,
-               m.average_precision_score, m.precision_score, m.recall_score,
-               f1, m.accuracy_score, m.matthews_corrcoef, m.predictive_accuracy_index]
+        row = [m.roc_auc_score, m.average_precision_score, m.precision_score, m.recall_score,
+               f1, m.accuracy_score, m.matthews_corrcoef, m.predictive_accuracy_index,
+               m.root_mean_squared_error, m.mean_absolute_error]
         data.append(row)
 
     df = pd.DataFrame(columns=col, data=data, index=names)
@@ -199,6 +200,15 @@ def compare_models(models_metrics):
     roc_plot.show()  # todo - save somewhere?
     # todd add per cel and time plots per metric - should be saved on the metric class
 
+    # det-curve
+    det_plot = DETCurvePlotter()
+    for metric in models_metrics:
+        det_plot.add_curve_(fpr=metric.det_curve.fpr,
+                            fnr=metric.det_curve.fnr,
+                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
+                            label_name=metric.model_name)
+    det_plot.show()  # todo - save somewhere?
+
     return metrics_table  # by returning the table - makes visualisation in notebooks easier
 
 
@@ -229,22 +239,39 @@ def compare_all_models(data_path: str):
                             auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
                             label_name=metric.model_name)
     roc_plot.show()  # save somewhere?
-    # todd add per cel and time plots per metric - should be saved on the metric class
+    # todo add per cel and time plots per metric - should be saved on the metric class
+
+    # det-curve
+    det_plot = DETCurvePlotter()
+    for metric in models_metrics:
+        det_plot.add_curve_(fpr=metric.det_curve.fpr,
+                            fnr=metric.det_curve.fnr,
+                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
+                            label_name=metric.model_name)
+    det_plot.show()  # somewhere?
 
     return metrics_table  # by returning the table - makes visualisation in notebooks easier
 
 
 class PRCurve:
-    def __init__(self, y_class, probas_pred):
-        self.precision, self.recall, self.thresholds = precision_recall_curve(y_true=y_class, probas_pred=probas_pred)
-        self.ap = average_precision_score(y_true=y_class, y_score=probas_pred)
+    def __init__(self, y_class, y_score):
+        self.precision, self.recall, self.thresholds = precision_recall_curve(y_true=y_class, probas_pred=y_score)
+        self.ap = average_precision_score(y_true=y_class, y_score=y_score)
 
 
 class ROCCurve:
-    def __init__(self, y_class, probas_pred):
-        y_class, probas_pred
-        self.fpr, self.tpr, self.thresholds = roc_curve(y_true=y_class, y_score=probas_pred, drop_intermediate=False)
-        self.auc = roc_auc_score(y_true=y_class, y_score=probas_pred)
+    def __init__(self, y_class, y_score):
+        self.fpr, self.tpr, self.thresholds = roc_curve(y_true=y_class, y_score=y_score, drop_intermediate=False)
+        self.auc = roc_auc_score(y_true=y_class, y_score=y_score)
+
+
+from utils.metrics import compute_eer
+
+
+class DETCurve:
+    def __init__(self, y_class, y_score):
+        self.fpr, self.fnr, self.thresholds = det_curve(y_true=y_class, y_score=y_score)
+        self.eer, self.eer_thresh = compute_eer(fpr=self.fpr, fnr=self.fnr, thresholds=self.thresholds)
 
 
 def mean_std(a):
@@ -256,11 +283,11 @@ def mean_std_str(m, s):
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
-    def __init__(self, model_name, y_count, y_pred, y_score, averaged_over_time=False):
+    def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
         """
 
         :param model_name: name of model used in plots
-        :param y_count: true crime counts (N,1,L) [0,inf) # should be scaled before
+        :param y_count: true crime counts (N,1,L) [0,inf) # should be scaled before - use data_group.to_counts()s
         :param y_pred: predicted hot or not spot {0,1}
         :param y_score: (probas_pred or y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
         :param averaged_over_time: if the metrics should be calculated per time step and then averaged of them or calculated globally
@@ -286,6 +313,8 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
         if np.max(y_count) <= 1:
             raise Exception(f"y_count is the true count of crimes: max value ({np.max(y_count)}) should be above 1")
+
+        self.t_range = t_range
 
         self.averaged_over_time = averaged_over_time
 
@@ -356,37 +385,43 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
         RMSE <= (MAE * sqrt(n_samples)):  usually occurs when the n_samples is small.   
         """
 
-        self.pr_curve = PRCurve(y_class=y_class, probas_pred=y_score)
-        self.roc_curve = ROCCurve(y_class=y_class, probas_pred=y_score)
+        self.pr_curve = PRCurve(y_class=y_class, y_score=y_score)
+        self.roc_curve = ROCCurve(y_class=y_class, y_score=y_score)
+        self.det_curve = DETCurve(y_class=y_class, y_score=y_score)
+
+        self.class_count_0 = len(y_class[y_class == 0].flatten())
+        self.class_count_1 = len(y_class[y_class == 1].flatten())
 
     def __repr__(self):
         if self.averaged_over_time:
             r = rf"""
             MODEL METRICS (Averaged over Time Steps)
+                Class Balance (Crime:No-Crime) - 1:{self.class_count_0 / self.class_count_1:.3f}
                 Model Name: {self.model_name}
-                    MAE:                {mean_std_str(*self.mean_absolute_error)}
-                    RMSE:               {mean_std_str(*self.root_mean_squared_error)}
                     ROC AUC:            {mean_std_str(*self.roc_auc_score)}                
                     Average Precision:  {mean_std_str(*self.average_precision_score)}
                     Precision:          {mean_std_str(*self.precision_score)}
                     Recall:             {mean_std_str(*self.recall_score)}
                     Accuracy:           {mean_std_str(*self.accuracy_score)}
                     PAI:                {mean_std_str(*self.predictive_accuracy_index)}
-                    MCC:                {mean_std_str(*self.matthews_corrcoef)}          
+                    MCC:                {mean_std_str(*self.matthews_corrcoef)}
+                    MAE:                {mean_std_str(*self.mean_absolute_error)}
+                    RMSE:               {mean_std_str(*self.root_mean_squared_error)}         
             """
         else:
             r = rf"""
             MODEL METRICS (Over All Samples)
+            Class Balance (Crime:No-Crime) - 1:{self.class_count_0 / self.class_count_1:.3f}
                 Model Name: {self.model_name}
-                    MAE:                {self.mean_absolute_error:.5f}
-                    RMSE:               {self.root_mean_squared_error:.5f}
                     ROC AUC:            {self.roc_auc_score:.5f}                
                     Average Precision:  {self.average_precision_score:.5f}
                     Precision:          {self.precision_score:.5f}
                     Recall:             {self.recall_score:.5f}
                     Accuracy:           {self.accuracy_score:.5f}
+                    MCC:                {self.matthews_corrcoef:.5f}
                     PAI:                {self.predictive_accuracy_index:.5f}
-                    MCC:                {self.matthews_corrcoef:.5f}          
+                    MAE:                {self.mean_absolute_error:.5f}
+                    RMSE:               {self.root_mean_squared_error:.5f}      
             """
 
         return r

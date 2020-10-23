@@ -8,7 +8,7 @@ from utils.utils import *
 from utils.data_processing import *
 import logging as log
 from logger.logger import setup_logging
-from utils.preprocessing import Shaper
+from utils.preprocessing import Shaper, save_shaper
 from sys import argv
 from utils.data_processing import encode_category
 
@@ -379,7 +379,8 @@ if __name__ == "__main__":
     # "NARCOTICS":2}
 
     def type2index(crime_type):
-        return c2i.get(crime_type, -1) # all other types are translated to -1
+        return c2i.get(crime_type, -1)  # all other types are translated to -1
+
 
     crimes["c"] = crimes["Primary Type"].apply(type2index)
     # crimes["c"] = encode_category(series=df['Primary Type'],categories=valid_crime_types)
@@ -440,9 +441,9 @@ if __name__ == "__main__":
     plt.figure(figsize=figsize)
     plt.bar(v, c)
     plt.yticks(np.arange(21) * 5)
-    plt.title("Maximum Crimes per Time Step")
+    plt.title("Crime Count Distribution per Time Step per Cell")
     plt.ylabel("Frequency (%)")
-    plt.xlabel("Total Crimes per Time Step per Cell")
+    plt.xlabel("Crime Count per Time Step per Cell")
     plt.grid(True)
     plt.savefig(save_folder + "plots/" + "crime_distribution.png")
 
@@ -491,9 +492,11 @@ if __name__ == "__main__":
     street_grid = np.expand_dims(street_grid, axis=0)
 
     # #  compress using shaper
-    # shaper = Shaper(crime_grids)
+    shaper = Shaper(crime_grids)
+    assert crime_grids.shape[1] == 1
+    save_shaper(shaper, save_folder)
+    squeezed_crime_grids = shaper.squeeze(crime_grids)
     # crime_type_grids = shaper.squeeze(crime_type_grids)
-    # crime_grids = shaper.squeeze(crime_grids)
     # last_year_crime_grids = shaper.squeeze(last_year_crime_grids)
     # tract_count_grids = shaper.squeeze(tract_count_grids)
     # demog_grid = shaper.squeeze(demog_grid)
@@ -502,7 +505,6 @@ if __name__ == "__main__":
     #     pickle.dump(shaper, shaper_file)
 
     # save generated data
-    # TODO ENSURE ALL SPATIAL DATA IS IN FORM N, C, H, W -> EVEN IF C = 1 SHOULD BE N, 1, H, W
     for g in [crime_type_grids, crime_grids, demog_grid, street_grid]:
         assert len(g.shape) == 4
 
@@ -528,5 +530,15 @@ if __name__ == "__main__":
 
     write_json(meta_info, f"{save_folder}info.json")
     write_json(config, f"{save_folder}generate_data_config.json")
+
+    from utils.plots import new_crime_distribution_plot
+
+    fig = new_crime_distribution_plot(squeezed_crime_grids)
+    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed.png")
+    fig = new_crime_distribution_plot(np.log2(1 + squeezed_crime_grids))
+    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2.png")
+    fig = new_crime_distribution_plot(np.floor(np.log2(1 + squeezed_crime_grids)))
+    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2_floored.png")
+    # fig.write_html(f"{config.data_path}plots/crime_distribution_squeezed.html")  # files can become too big
 
     log.info("=====================================END=====================================")

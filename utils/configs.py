@@ -32,6 +32,7 @@ class BaseConf:  # args from arg-parser to over write values
         self.sub_sample_validation_set = 1  # will sample class 0 and 1 with 1:1 ratio
         self.sub_sample_test_set = 0  # will not sub sample class 0 and 1
         self.flatten_grid = True  # if the shaper should be used to squeeze the data
+        self.test_set_size_days = 360 # should be changed to 64 if freq is less than one day
 
         self.seq_len = 1
         self.shaper_top_k = -1  # if less then 0, top_k will not be applied
@@ -44,10 +45,11 @@ class BaseConf:  # args from arg-parser to over write values
         self.lr = 1e-3
         self.weight_decay = 1e-8
         self.max_epochs = 1
+        self.min_epochs = 1
         self.batch_size = 64
         self.dropout = 0
         self.shuffle = True
-        self.num_workers = 6
+        self.num_workers = 8
 
         # attached global variables
         self.device = None  # pytorch device object [CPU|GPU]

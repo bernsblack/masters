@@ -3,7 +3,6 @@ import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
 from utils.configs import BaseConf
-from utils.constants import HOURS_IN_YEAR, TEST_SET_SIZE_DAYS
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
 from pandas.tseries.offsets import Hour as OffsetHour
@@ -82,8 +81,8 @@ class GridDataGroup:
 
             # OPTION 3:
             # constant test set size and varying train and validation sizes
-            tst_size = int(
-                24 * TEST_SET_SIZE_DAYS / time_step_hrs)  # test set can be set to be specific # days instead of just a year
+            # test set can be set to be specific # days instead of just a year
+            tst_size = int(24 * conf.test_set_size_days / time_step_hrs)
             # tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
             trn_val_size = target_len - tst_size
             val_size = int(conf.val_ratio * trn_val_size)
@@ -113,8 +112,12 @@ class GridDataGroup:
             tmp_val_crimes = self.crimes[self.val_indices[0]:self.val_indices[1], 0:1]
             tmp_tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1], 0:1]
 
-            shaper_crimes = np.max(tmp_tst_crimes, axis=0,  # only using shaper on test crimes - ensures loaders line up
-                                   keepdims=True)  # * np.max(tmp_val_crimes, axis=0, keepdims=True) * np.max(tmp_trn_crimes, axis=0, keepdims=True)
+            # only using shaper on test crimes - ensures loaders line up
+            shaper_crimes = np.max(tmp_tst_crimes, axis=0, keepdims=True)
+            # shaper_crimes = self.crimes
+            # shaper_crimes = np.max(tmp_tst_crimes, axis=0, keepdims=True) * np.max(tmp_val_crimes, axis=0,
+            #                                                                        keepdims=True) * np.max(
+            #     tmp_trn_crimes, axis=0, keepdims=True)
 
             # fit crime data to shaper - only used to squeeze results when calculating the results
             self.shaper = Shaper(data=shaper_crimes,
@@ -292,12 +295,15 @@ class GridDataGroup:
             shaper=self.shaper,
         )
 
-    def to_counts(self, sparse_data):
+    def to_counts(self, sparse_data: np.ndarray):
         """
         convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
         :param sparse_data: ndarray (N,1,H,W)
         :return: count_data (N,1,H,W)
         """
+        assert len(sparse_data.shape) == 4
+        _, _c, _, _ = sparse_data.shape
+        assert _c == 1
 
         sparse_descaled = self.target_scaler.inverse_transform(sparse_data)[:, 0:1]
         sparse_count = np.round(2 ** sparse_descaled - 1)

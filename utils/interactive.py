@@ -1,12 +1,16 @@
 import numpy as np
 
+from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time
+from utils.data_processing import encode_category
 from models.model_result import get_models_metrics
 from utils import ffloor, fceil
 from pprint import pformat
 from pandas import Timedelta
 from geopy import distance
-
+from ipywidgets import Layout, widgets
+import plotly.graph_objects as go
 from utils.metrics import safe_f1_score
+from pandas.core.indexes.datetimes import DatetimeIndex
 
 
 class State:
@@ -161,7 +165,6 @@ def bin_data_frame(data_frame, state):
     """
     bins = new_bins(data_frame, state)
 
-    from utils.data_processing import encode_category
     data_frame['c'] = encode_category(series=data_frame['Primary Type'], categories=state.crime_types)
 
     binned_data, bins = np.histogramdd(
@@ -207,15 +210,10 @@ def get_ratio_xy(data_frame):
     return ratio_xy
 
 
-# widget setup
-from ipywidgets import Layout, widgets
-import plotly.graph_objects as go
-
-
-def new_interactive_heatmap(z, name=None):
+def new_interactive_heatmap(z, name=None, height=500):
     h, w = z.shape
-    height = 600 # int(30*h)
-    width = height * w / h # 300
+    # height = 600  # int(30*h)
+    width = height * w / h  # 300
 
     return go.FigureWidget(
         go.Heatmap(z=z),
@@ -233,11 +231,16 @@ def new_interactive_heatmap(z, name=None):
 
 
 class InteractiveHeatmaps:
-    """
-    InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
-    """
 
-    def __init__(self, date_range, col_wrap=3, **kwargs):
+    def __init__(self, date_range, col_wrap=3, height=500, **kwargs):
+        """
+        InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
+
+        :param date_range: pandas date range array
+        :param col_wrap: plots per row before wrapping
+        :param height: height in pixels of a single images
+        :param kwargs: key word arguments for name of plot as key and data (N,H,W format) as value
+        """
 
         def get_widget_value(change):
             self.change = change
@@ -252,7 +255,7 @@ class InteractiveHeatmaps:
 
         for name, grid in kwargs.items():
             self.grids[name] = grid
-            hm_fig = new_interactive_heatmap(z=grid[0], name=name)
+            hm_fig = new_interactive_heatmap(z=grid[0], name=name, height=height)
             self.figures.append(hm_fig)
             self.heatmaps[name] = hm_fig.data[0]
 
@@ -315,11 +318,11 @@ class InteractiveHeatmaps:
 
 
 def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
-    trn_val_epoch_losses = np.array(trn_epoch_losses) + np.array(val_epoch_losses)
+    # trn_val_epoch_losses = np.array(trn_epoch_losses) + np.array(val_epoch_losses)
 
     return go.Figure(
         [
-            go.Scatter(y=trn_val_epoch_losses, name="Train Valid Losses", mode='lines+markers'),
+            # go.Scatter(y=trn_val_epoch_losses, name="Train Valid Losses", mode='lines+markers'),
             go.Scatter(y=trn_epoch_losses, name="Train Losses", mode='lines+markers'),
             go.Scatter(y=val_epoch_losses, name="Validation Losses", mode='lines+markers'),
             go.Scatter(y=[np.min(val_epoch_losses)],
@@ -328,9 +331,9 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
             go.Scatter(y=[np.min(trn_epoch_losses)],
                        x=[np.argmin(trn_epoch_losses)], name="Best Train Loss", mode='markers',
                        marker_symbol='x', marker_size=10),
-            go.Scatter(y=[np.min(trn_val_epoch_losses)],
-                       x=[np.argmin(trn_val_epoch_losses)], name="Best Train Valid Loss", mode='markers',
-                       marker_symbol='x', marker_size=10),
+            # go.Scatter(y=[np.min(trn_val_epoch_losses)],
+            #            x=[np.argmin(trn_val_epoch_losses)], name="Best Train Valid Loss", mode='markers',
+            #            marker_symbol='x', marker_size=10),
 
         ],
         layout=dict(
@@ -339,6 +342,7 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
         )
     )
 
+
 def plot_interactive_roc(data_path):
     metrics = get_models_metrics(data_path)
     fig = go.Figure(
@@ -346,8 +350,8 @@ def plot_interactive_roc(data_path):
             title_text="Receiver Operating Characteristic Curve",
             title_x=0.5,
             height=650,
-    #         width=650,
-    #         yaxis=dict(scaleanchor="x", scaleratio=1),
+            #         width=650,
+            #         yaxis=dict(scaleanchor="x", scaleratio=1),
             yaxis_title='True Positive Rate',
             xaxis_title='False Positive Rate',
             yaxis=dict(range=[-0.01, 1.01]),
@@ -361,6 +365,37 @@ def plot_interactive_roc(data_path):
                 y=metric.roc_curve.tpr,
                 x=metric.roc_curve.fpr,
                 name=f"{metric.model_name} (AUC={metric.roc_curve.auc:.3f})"
+            )
+        )
+
+    return fig
+
+
+def plot_interactive_det(data_path):
+    metrics = get_models_metrics(data_path)
+    fig = go.Figure(
+        layout=dict(
+            title_text="Detection Error Tradeoff (DET) Curve",
+            title_x=0.5,
+            height=650,
+            #         width=650,
+            #         yaxis=dict(scaleanchor="x", scaleratio=1),
+            yaxis_title='False Negative Rate',
+            xaxis_title='False Positive Rate',
+            yaxis=dict(range=[0, 100], type="log"),
+            xaxis=dict(range=[0, 100], type="log"),
+        ),
+    )
+
+    for metric in metrics:
+        fnr_scaled = metric.det_curve.fnr
+        fpr_scaled = metric.det_curve.fpr
+
+        fig.add_trace(
+            go.Scatter(
+                y=fnr_scaled,
+                x=fpr_scaled,
+                name=f"{metric.model_name} (EER={metric.det_curve.eer:.3f})"
             )
         )
 
@@ -416,3 +451,186 @@ def plot_interactive_pr(data_path, beta=1):
         )
 
     return fig
+
+
+def interactive_crime_prediction_comparison(y_class: np.ndarray,
+                                            y_score: np.ndarray,
+                                            t_range: DatetimeIndex,
+                                            height: int = 500,
+                                            y_count=None):
+    """
+    Plots interactive widget with a grid of the mean over time that can be used to select cells and view their scores
+    over time. The crime occurrences are also overlain on the curve.
+
+
+    :param y_class: crime/no-crime grids (N,H,W)
+    :param y_score: crime score grids (N,H,W)
+    :param height: height of grid images
+    :param t_range:
+    :param y_count: actual crime counts to be able to compare with the predicted values - is an optional value.
+    :return:
+    """
+    assert y_class.shape == y_score.shape
+    assert len(y_class.shape) == 3
+
+    y_score_mean = y_score.mean(0)
+    h, w = y_score_mean.shape
+
+    width = height * w / h  # 300
+
+    fw_grid = go.FigureWidget(
+        go.Heatmap(z=y_score_mean),
+        layout=dict(
+            height=height,
+            width=width,
+            title_x=0.5,
+            title='Mean over Time',
+            margin=dict(l=20, r=20, t=50, b=20),
+        ),
+    )
+
+    fw_lines = go.FigureWidget(
+        data=[go.Scatter(name='Predicted Score'),
+              go.Scatter(name='Occurrence', mode='markers', )],
+        layout=dict(
+            width=900,
+        )
+    )
+
+    y_score_line = fw_lines.data[0]
+    y_class_line = fw_lines.data[1]
+
+    if y_count:
+        fw_lines.add_trace(go.Scatter(name='Crime Counts'))
+        y_count_line = fw_lines.data[-1]
+
+    state = State()
+
+    def draw():
+        x = state['x']
+        y = state['y']
+
+        occ = y_class[:, y, x]
+        args = np.argwhere(occ > 0)[:, 0]
+
+        with fw_lines.batch_update():
+            fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5)
+            y_score_line.y = y_score[:, y, x]
+            y_score_line.x = t_range
+
+            y_class_line.y = y_score[args, y, x]
+            y_class_line.x = t_range[args]
+
+    def set_state(_trace, points, _selector):
+        y = points.ys[0]
+        x = points.xs[0]
+
+        state["x"] = x
+        state["y"] = y
+        draw()
+
+    fw_grid.data[0].on_click(set_state)
+
+    box_layout = Layout(display='flex',
+                        flex_flow='column',
+                        align_items='center',
+                        width='100%')
+
+    return widgets.Box(
+        children=[fw_grid, fw_lines],
+        layout=box_layout,
+    )
+
+
+def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, height: int = 500, **kwargs):
+    """
+
+    :param grids: (N: time dimension,H: vertical/height,W: horizontal/width dimension) format of ndarray
+    :param t_range:
+    :param height: height of grid images
+    
+    kwargs: 
+        - 'mutual_info'=True adds a mutual information plot
+        - 'max_offset' sets the conditional
+    :return:
+    """
+    assert len(grids.shape) == 3
+
+    grids_mean = grids.mean(0)
+    h, w = grids_mean.shape
+
+    width = height * w / h  # 300
+
+    fw_grid = go.FigureWidget(
+        go.Heatmap(z=grids_mean),
+        layout=dict(
+            height=height,
+            width=width,
+            title_x=0.5,
+            title='Mean over Time',
+            margin=dict(l=20, r=20, t=50, b=20),
+        ),
+    )
+
+    fw_lines = go.FigureWidget(
+        data=[go.Scatter(name='Cell Value Over Time')],
+        layout=dict(
+            width=900,
+        )
+    )
+    grid_line = fw_lines.data[0]
+    figs = [fw_grid, fw_lines]
+
+    if kwargs.get("mutual_info"):
+        fw_mi = go.FigureWidget(
+            data=[
+                go.Scatter(name='MI'),
+                go.Scatter(name='CMI'),
+            ],
+            layout=dict(
+                title='MI and CMI with Time Lagged Signal',
+                title_x=0.5,
+                width=900,
+            )
+        )
+        mi_line, cmi_line = fw_mi.data
+        figs.append(fw_mi)
+
+        state = State()
+
+    def draw():
+        x = state['x']
+        y = state['y']
+
+        with fw_lines.batch_update():
+            z = grids[:, y, x]
+
+            fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5)
+            grid_line.y = z
+            grid_line.x = t_range
+
+            if kwargs.get("mutual_info"):
+                my, mx = mutual_info_over_time(a=z, max_offset=kwargs.get('max_offset', 30))
+                cy, cx = conditional_mutual_info_over_time(a=z, max_offset=kwargs.get('max_offset', 30))
+                mi_line.y, mi_line.x = my, mx
+                cmi_line.y, cmi_line.x = cy, cx
+
+    def set_state(_trace, points, _selector):
+        y = points.ys[0]
+        x = points.xs[0]
+
+        state["x"] = x
+        state["y"] = y
+        draw()
+
+    fw_grid.data[0].on_click(set_state)
+
+    box_layout = Layout(display='flex',
+                        flex_flow='column',
+                        align_items='center',
+                        width='100%')
+
+    return widgets.Box(
+        children=figs,
+        layout=box_layout,
+    )

@@ -200,6 +200,7 @@ class STResNet(nn.Module):
         """
 
         super(STResNet, self).__init__()
+        self.name = "ST-RESNET"
 
         self.res_net_c = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
         self.res_net_p = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
@@ -275,6 +276,8 @@ class STResNetExtra(nn.Module):
         """
 
         super(STResNetExtra, self).__init__()
+        self.name = "ST-RESNET-Extra"
+
         self.res_net_c = ResNet(n_layers, in_channels=lc, n_channels=n_channels)
         self.res_net_p = ResNet(n_layers, in_channels=lp, n_channels=n_channels)
         self.res_net_q = ResNet(n_layers, in_channels=lq, n_channels=n_channels)
@@ -334,6 +337,7 @@ class STResNetExtra(nn.Module):
 def train_epoch_for_st_res_net_extra(model, optimiser, batch_loader, loss_fn, total_losses, conf):
     """
     Training the STResNetExtra model for a single epoch
+    Grid based loaders will always be regression models
     """
     epoch_losses = []
     num_batches = batch_loader.num_batches
@@ -429,11 +433,11 @@ def evaluate_st_res_net_extra(model, batch_loader, conf):
     """
     y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
     y_count = batch_loader.dataset.targets[-len(y_score):]
-    y_class = np.copy(y_count) # batch_loader.dataset.labels[-len(y_score):]
-    if y_class.min() < 0:
-        raise ValueError(f"Data must be normalised between (0,1), min value is {y_class.min()}")
-
-    y_class[y_class > 0] = 1  # ensure normalisation between 0 and 1 not -1 and 1
+    y_class = batch_loader.dataset.labels[-len(y_score):]
+    # y_class = np.copy(y_count) # batch_loader.dataset.labels[-len(y_score):]
+    # if y_class.min() < 0:
+    #     raise ValueError(f"Data must be normalised between (0,1), min value is {y_class.min()}")
+    # y_class[y_class > 0] = 1  # ensure normalisation between 0 and 1 not -1 and 1
 
     t_range = batch_loader.dataset.t_range[-len(y_score):]
 
@@ -487,10 +491,11 @@ def evaluate_st_res_net(model, batch_loader: GridBatchLoader, conf: BaseConf):
 
     y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
     y_count = batch_loader.dataset.targets[-len(y_score):]
-    y_class = np.copy(y_count)
-    if y_class.min() < 0:
-        raise ValueError(f"Data must be normalised between (0,1), min value is {y_class.min()}")
-    y_class[y_class > 0] = 1
+    y_class = batch_loader.dataset.labels[-len(y_score):]
+    # y_class = np.copy(y_count)
+    # if y_class.min() < 0:
+    #     raise ValueError(f"Data must be normalised between (0,1), min value is {y_class.min()}")
+    # y_class[y_class > 0] = 1
 
     t_range = batch_loader.dataset.t_range[-len(y_score):]
 

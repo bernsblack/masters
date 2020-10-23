@@ -1,3 +1,4 @@
+import pickle
 import unittest
 
 import numpy as np
@@ -6,7 +7,7 @@ from utils import deprecated
 from utils.configs import BaseConf
 
 
-def get_index_mask(data, threshold=0, top_k=-1):
+def get_index_mask(data: np.ndarray, threshold: float = 0, top_k: int = -1) -> np.ndarray:
     """
     :param data: array shaped (N, C, H, W)
     :param threshold: sum over all time should be above this threshold
@@ -94,9 +95,8 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
     return trans_mat
 
 
-# todo make use of ellipsis to generalise the shaper to N,H,W and N,C,L
 class Shaper:
-    def __init__(self, data, conf: BaseConf):
+    def __init__(self, data: np.ndarray, conf: BaseConf = BaseConf()):
         """
 
         :param data: array shaped (N, C, H, W)
@@ -120,6 +120,13 @@ class Shaper:
         coords = np.array(coords)[self.index_mask]
         self._yx2i_map = {tuple(yx): i for i, yx in enumerate(coords)}
         self._i2yx_map = {i: yx for yx, i in self._yx2i_map.items()}
+
+    def __eq__(self, other):
+        size_match = (self.h, self.w, self.l) == (other.h, other.w, other.l)
+        if not size_match:
+            return False
+        mask_match = (self.index_mask == other.index_mask).all()
+        return size_match and mask_match
 
     def i_to_yx(self, i):
         """
@@ -174,6 +181,34 @@ class Shaper:
         reshaped_data = np.reshape(sparse_data, shape_old)
         return reshaped_data
 
+    def save(self, save_folder: str):
+        save_shaper(self, save_folder)
+
+
+def save_shaper(shaper: Shaper, save_folder: str):
+    save_folder = save_folder.rstrip('/')
+    with open(f"{save_folder}/shaper.pkl", "wb") as f:
+        pickle.dump(shaper, f)
+
+
+def load_shaper(load_folder: str):
+    load_folder = load_folder.rstrip('/')
+    with open(f"{load_folder}/shaper.pkl", "rb") as f:
+        shaper_loaded = pickle.load(f)
+    return shaper_loaded
+
+
+class TestShaperEquals(unittest.TestCase):
+    def test_shaper_equals(self):
+        conf = BaseConf()
+        data0 = np.random.binomial(1, 0.1, (10, 1, 100, 100))
+        shaper0 = Shaper(data0, conf)
+        shaper2 = Shaper(data0, conf)
+        data1 = np.random.binomial(1, 0.1, (10, 1, 100, 100))
+        shaper1 = Shaper(data1, conf)
+        self.assertEqual(shaper0, shaper2)
+        self.assertNotEqual(shaper0, shaper1)
+
 
 class TestShaperIndexConversion(unittest.TestCase):
     def test_shaper_index_conversion(self):
@@ -185,8 +220,8 @@ class TestShaperIndexConversion(unittest.TestCase):
 
         i = 34
         y, x = shaper.i_to_yx(i)
-        self.assertTrue(i == shaper.yx_to_i(y, x)) # test inversion
-        self.assertTrue((test_dense[:, :, i] == test_sparse[:, :, y, x]).all()) # test values mapping
+        self.assertTrue(i == shaper.yx_to_i(y, x))  # test inversion
+        self.assertTrue((test_dense[:, :, i] == test_sparse[:, :, y, x]).all())  # test values mapping
 
 
 @deprecated
@@ -308,7 +343,9 @@ class MinMaxScaler:
         self.fit(data, axis)
         return self.transform(data)
 
+
 import unittest
+
 
 class TestMinMaxScaler(unittest.TestCase):
 
@@ -321,8 +358,6 @@ class TestMinMaxScaler(unittest.TestCase):
 
         mock_unscaled = scaler.inverse_transform(mock_scaled)
         self.assertTrue((mock_unscaled == mock).all())
-
-
 
 
 @deprecated

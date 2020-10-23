@@ -7,6 +7,8 @@ import numpy as np
 import torch.nn.functional as F
 from torch.nn.utils import clip_grad_norm_
 
+from utils.configs import BaseConf
+
 """
 ### GRU (Multi-input single output)
 Like a grid of 5 by 5 as input trying to predict the center cell for the next time step
@@ -84,7 +86,7 @@ class GRUFNN2(nn.Module):
     GRU then an FNN
     """
 
-    def __init__(self, input_size, hidden_size0,hidden_size1, output_size, num_layers=1):
+    def __init__(self, input_size, hidden_size0, hidden_size1, output_size, num_layers=1):
         super(GRUFNN2, self).__init__()
 
         self.name = "GRUFNN"
@@ -232,23 +234,28 @@ class SimpleRecurrentFeedForwardNetwork(nn.Module, ABC):
 
 
 # training loops
-def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, conf):
+def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, conf: BaseConf):
     """
     Training the FNN model for a single epoch
     """
     epoch_losses = []
     num_batches = batch_loader.num_batches
-    for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+    for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
         current_batch = batch_loader.current_batch
 
         # Transfer to PyTorch Tensor and GPU
         spc_feats = torch.Tensor(spc_feats[-1]).to(conf.device)  # only taking [-1] for fnn
         tmp_feats = torch.Tensor(tmp_feats).to(conf.device)  # only taking [-1] for fnn
         env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [-1] for fnn
-        targets = torch.LongTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
-
         out = model(spc_feats, tmp_feats, env_feats)
-        loss = loss_fn(input=out, target=targets)
+
+        if conf.use_classification: # using classification labels
+            labels = torch.LongTensor(labels[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            loss = loss_fn(input=out, target=labels)
+        else: # using regression targets
+            targets = torch.FloatTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            loss = loss_fn(input=out, target=targets)
+
         epoch_losses.append(loss.item())
         total_losses.append(epoch_losses[-1])
 
@@ -258,6 +265,7 @@ def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, 
             clip_grad_norm_(model.parameters(), 0.5)  # used as regularisation
             optimiser.step()
             log.debug(f"Batch: {current_batch:04d}/{num_batches:04d} \t Loss: {epoch_losses[-1]:.4f}")
+
     mean_epoch_loss = np.mean(epoch_losses)
     return mean_epoch_loss
 
@@ -267,16 +275,22 @@ def evaluate_rfnn(model, batch_loader, conf):
     """
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
+
+    :param model: pytorch model to be trained
+    :param batch_loader: loads batches when looping over data
+    :param conf: config object containing global settings for the training
+    :return: y_count, y_class, y_score, t_range
     """
-    probas_pred = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
-    y_true = batch_loader.dataset.targets[-len(probas_pred):]
-    t_range = batch_loader.dataset.t_range[-len(probas_pred):]
+    y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_count = batch_loader.dataset.targets[-len(y_score):]
+    y_class = batch_loader.dataset.labels[-len(y_score):]
+    t_range = batch_loader.dataset.t_range[-len(y_score):]
 
     with torch.set_grad_enabled(False):
         model.eval()
 
         num_batches = batch_loader.num_batches
-        for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+        for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
             current_batch = batch_loader.current_batch
 
             # Transfer to PyTorch Tensor and GPU
@@ -290,6 +304,6 @@ def evaluate_rfnn(model, batch_loader, conf):
 
             for i, p in zip(indices, batch_probas_pred):
                 n, c, l = i
-                probas_pred[n, c, l] = p
+                y_score[n, c, l] = p
 
-    return y_true, probas_pred, t_range
+    return y_count, y_class, y_score, t_range

@@ -6,6 +6,7 @@ from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
 import logging as log
 
+
 class CellDataGroup(BaseDataGroup):
     def __init__(self, data_path: str, conf: BaseConf):
         """
@@ -18,7 +19,6 @@ class CellDataGroup(BaseDataGroup):
         """
         log.info('Initialising Cell Data Group')
         super(CellDataGroup, self).__init__(data_path, conf)
-
 
         self.training_set = CellDataset(
             crimes=self.trn_crimes,
@@ -84,12 +84,15 @@ class CellDataGroup(BaseDataGroup):
             shaper=self.shaper,
         )
 
-    def to_counts(self, sparse_data):
+    def to_counts(self, sparse_data: np.ndarray):
         """
         convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
         :param sparse_data: ndarray (N,1,H,W)
         :return: count_data
         """
+        assert len(sparse_data.shape) == 4
+        _, _c, _, _ = sparse_data.shape
+        assert _c == 1
 
         dense = self.shaper.squeeze(sparse_data)
         dense_descaled = self.target_scaler.inverse_transform(dense)[:, 0:1]
@@ -176,6 +179,7 @@ class CellDataset(Dataset):
         stack_tmp_feats = []
         stack_env_feats = []
         stack_targets = []
+        stack_labels = []
 
         result_indices = []
 
@@ -207,6 +211,7 @@ class CellDataset(Dataset):
             crimes_last_year = self.crimes[t_start - self.offset_year:t_stop - self.offset_year, :, h_index, w_index]
 
             target_vec = self.targets[t_start:t_stop, :, h_index, w_index]
+            label_vec = self.labels[t_start:t_stop, :, h_index, w_index]
 
             crimes_total = self.total_crimes[t_start:t_stop]
 
@@ -222,6 +227,7 @@ class CellDataset(Dataset):
 
             stack_tmp_feats.append(tmp_vec)
             stack_targets.append(target_vec)
+            stack_labels.append(label_vec)
 
         # spc_feats: [demog_vec]
         # env_feats: [street_vec]
@@ -231,11 +237,13 @@ class CellDataset(Dataset):
         tmp_feats = np.stack(stack_tmp_feats)
         env_feats = np.stack(stack_env_feats)
         targets = np.stack(stack_targets)
+        labels = np.stack(stack_labels)
 
         spc_feats = np.swapaxes(spc_feats, 0, 1)
         tmp_feats = np.swapaxes(tmp_feats, 0, 1)  # (seq_len, batch_size, n_feats=37)
         env_feats = np.swapaxes(env_feats, 0, 1)  # (seq_len, batch_size, n_feats=512)
         targets = np.swapaxes(targets, 0, 1)
+        labels = np.swapaxes(targets, 0, 1)
 
         # output shapes should be - (seq_len, batch_size, n_feats)
-        return result_indices, spc_feats, tmp_feats, env_feats, targets
+        return result_indices, spc_feats, tmp_feats, env_feats, targets, labels

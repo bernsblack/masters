@@ -511,6 +511,124 @@ class ROCCurvePlotter(BaseMetricPlotter):
         plt.plot(fpr, tpr, **self.plot_kwargs)
 
 
+def compute_eer(fpr, fnr, thresholds):
+    """
+    Returns equal error rate (EER) and the corresponding threshold.
+    Adapted from: https://stackoverflow.com/questions/28339746/equal-error-rate-in-python
+    """
+    abs_diffs = np.abs(fpr - fnr)
+    min_index = np.argmin(abs_diffs)
+    eer = np.mean((fpr[min_index], fnr[min_index]))
+    return eer, thresholds[min_index]
+
+
+import scipy as sp
+
+
+def plot_det_curve(y_class, y_score):
+    fpr, fnr, thresholds = det_curve(y_class, y_score)
+
+    return plot_det_curve_(fpr=fpr,
+                          fnr=fnr,
+                          thresholds=thresholds)
+
+
+def plot_det_curve_(fpr, fnr, thresholds):
+    rcParams["mathtext.fontset"] = "stix"
+    rcParams["font.family"] = "STIXGeneral"
+    rcParams["font.size"] = "18"
+
+    fig, ax = plt.subplots(figsize=(10, 10))
+
+    ax.plot(
+        sp.stats.norm.ppf(fpr),
+        sp.stats.norm.ppf(fnr),
+    )
+
+    ticks = [0.001, 0.01, 0.05, 0.20, 0.5, 0.80, 0.95, 0.99, 0.999]
+    tick_locations = sp.stats.norm.ppf(ticks)
+    tick_labels = [
+        '{:.0%}'.format(s) if (100 * s).is_integer() else '{:.1%}'.format(s)
+        for s in ticks
+    ]
+
+    ax.set_title("Detection Error Tradeoff (DET) Curve")
+
+    ax.set_ylabel('False Negative Rate (Miss Probability)')
+    ax.set_xlabel('False Positive Rate (False Alarm Probability)')
+
+    ax.set_xticks(tick_locations)
+    ax.set_xticklabels(tick_labels)
+    ax.set_xlim(-3, 3)
+    ax.set_yticks(tick_locations)
+    ax.set_yticklabels(tick_labels)
+    ax.set_ylim(-3, 3)
+
+    ax.grid()
+
+    return fig, ax
+
+
+class DETCurvePlotter(BaseMetricPlotter):
+    """
+    Setup and add plots to a figure and then save or show this figure for DET Curves
+    """
+
+    # setup maybe add the size of the figure
+    def __init__(self, title="Detection Error Tradeoff (DET) Curve"):
+        super(DETCurvePlotter, self).__init__(title)
+
+        plt.figure(figsize=(10, 10))
+
+        # todo determine if percentage or not - if so add to title "(%)"
+        plt.ylabel("False Negative Rate")  # Miss Probability
+        plt.xlabel("False Positive Rate")  # False Alarm Probability
+
+        ticks = [0.001, 0.01, 0.05, 0.20, 0.5, 0.80, 0.95, 0.99, 0.999]
+        tick_locations = sp.stats.norm.ppf(ticks)
+        tick_labels = [
+            '{:.0%}'.format(s) if (100 * s).is_integer() else '{:.1%}'.format(s)
+            for s in ticks
+        ]
+
+        plt.xticks(ticks=tick_locations, labels=tick_labels)
+        # plt.xlim(-0.01, 1.1)  #
+        plt.xlim(-3, 3)
+        plt.yticks(ticks=tick_locations, labels=tick_labels)
+        # plt.ylim(-0.01, 1.1)
+        plt.ylim(-3, 3)
+
+    def add_curve(self, y_class, y_scores, label_name):
+        """
+        :param y_class: array, shape = [n_samples] or [n_samples, n_classes]
+        True binary labels or binary label indicators.
+        :param y_scores: array, shape = [n_samples] or [n_samples, n_classes]
+        Target scores, can either be probability estimates of the positive
+        class, confidence values, or non-thresholded measure of decisions
+        (as returned by "decision_function" on some classifiers). For binary
+        y_true, y_score is supposed to be the score of the class with greater
+        label.
+        :param label_name: name of the line shown on the legend
+        :return: none
+        """
+        fpr, fnr, thresholds = det_curve(y_class, y_scores)
+
+        fpr_scaled = sp.stats.norm.ppf(fpr)
+        fnr_scaled = sp.stats.norm.ppf(fnr)
+
+        eer, eer_thresh = compute_eer(fpr, fnr, thresholds)
+        self.plot_kwargs["label"] = label_name + f" (EER={eer:.3f})"
+
+        plt.plot(fpr_scaled, fnr_scaled, **self.plot_kwargs)  # scale should be log re-evaluate
+
+    def add_curve_(self, fpr, fnr, eer, label_name):
+        fpr_scaled = sp.stats.norm.ppf(fpr)
+        fnr_scaled = sp.stats.norm.ppf(fnr)
+
+        self.plot_kwargs["label"] = label_name + f" (EER={eer:.3f})"
+        plt.plot(fpr_scaled, fnr_scaled, **self.plot_kwargs)
+
+
 class CellPlotter(BaseMetricPlotter):
     """
     Class is used to plot predictions vs ground truth per cell
@@ -838,3 +956,81 @@ def mae_per_time_slot(y_true, y_pred):
     result = np.expand_dims(result, axis=1)
 
     return result
+
+
+from sklearn.metrics._ranking import _binary_clf_curve
+
+
+def det_curve(y_true, y_score, pos_label=None, sample_weight=None):
+    """
+    TAKEN FROM sklearn github
+    - https://github.com/scikit-learn/scikit-learn/blob/6d6d08b990d343d9f461d8e03ea7ae2af741ab2b/sklearn/metrics/_ranking.py#L228
+
+    Compute error rates for different probability thresholds.
+    .. note::
+       This metric is used for evaluation of ranking and error tradeoffs of
+       a binary classification task.
+    Read more in the :ref:`User Guide <det_curve>`.
+    .. versionadded:: 0.24
+    Parameters
+    ----------
+    y_true : ndarray of shape (n_samples,)
+        True binary labels. If labels are not either {-1, 1} or {0, 1}, then
+        pos_label should be explicitly given.
+    y_score : ndarray of shape of (n_samples,)
+        Target scores, can either be probability estimates of the positive
+        class, confidence values, or non-thresholded measure of decisions
+        (as returned by "decision_function" on some classifiers).
+    pos_label : int or str, default=None
+        The label of the positive class.
+        When ``pos_label=None``, if `y_true` is in {-1, 1} or {0, 1},
+        ``pos_label`` is set to 1, otherwise an error will be raised.
+    sample_weight : array-like of shape (n_samples,), default=None
+        Sample weights.
+    Returns
+    -------
+    fpr : ndarray of shape (n_thresholds,)
+        False positive rate (FPR) such that element i is the false positive
+        rate of predictions with score >= thresholds[i]. This is occasionally
+        referred to as false acceptance propability or fall-out.
+    fnr : ndarray of shape (n_thresholds,)
+        False negative rate (FNR) such that element i is the false negative
+        rate of predictions with score >= thresholds[i]. This is occasionally
+        referred to as false rejection or miss rate.
+    thresholds : ndarray of shape (n_thresholds,)
+        Decreasing score values.
+    See Also
+    --------
+    plot_det_curve : Plot detection error tradeoff (DET) curve.
+    DetCurveDisplay : DET curve visualization.
+    roc_curve : Compute Receiver operating characteristic (ROC) curve.
+    precision_recall_curve : Compute precision-recall curve.
+    """
+    if len(np.unique(y_true)) != 2:
+        raise ValueError("Only one class present in y_true. Detection error "
+                         "tradeoff curve is not defined in that case.")
+
+    fps, tps, thresholds = _binary_clf_curve(
+        y_true, y_score, pos_label=pos_label, sample_weight=sample_weight
+    )
+
+    fns = tps[-1] - tps
+    p_count = tps[-1]
+    n_count = fps[-1]
+
+    # start with false positives zero
+    first_ind = (
+        fps.searchsorted(fps[0], side='right') - 1
+        if fps.searchsorted(fps[0], side='right') > 0
+        else None
+    )
+    # stop with false negatives zero
+    last_ind = tps.searchsorted(tps[-1]) + 1
+    sl = slice(first_ind, last_ind)
+
+    # reverse the output such that list of false positives is decreasing
+    return (
+        fps[sl][::-1] / n_count,
+        fns[sl][::-1] / p_count,
+        thresholds[sl][::-1]
+    )

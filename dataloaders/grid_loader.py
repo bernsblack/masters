@@ -3,7 +3,19 @@ from utils.configs import BaseConf
 import numpy as np
 
 
-class GridDataLoaders:
+class BaseDataLoaders:
+    """
+    Abstract Class for type hinting
+    """
+
+    def __init__(self):
+        self.data_group = None
+        self.train_loader = None
+        self.validation_loader = None
+        self.test_loader = None
+
+
+class GridDataLoaders(BaseDataLoaders):
     def __init__(self, data_group: GridDataGroup, conf: BaseConf):
         self.data_group = data_group
 

@@ -1,3 +1,4 @@
+from dataloaders.grid_loader import BaseDataLoaders
 from datasets.cell_dataset import CellDataGroup, CellDataset
 from datasets.flat_dataset import FlatDataGroup
 from utils.configs import BaseConf
@@ -8,7 +9,7 @@ from utils.data_processing import crop4d
 from utils.mock_data import mock_fnn_data_classification
 
 
-class CellDataLoaders:
+class CellDataLoaders(BaseDataLoaders):
     """
     Container for the data group and the TRAIN/TEST/VALIDATION batch loaders
     The data group loads data from disk, splits in separate sets and normalises according to train set.
@@ -135,7 +136,7 @@ def reconstruct_from_cell_loader(batch_loader: CellBatchLoader):
     t_range = batch_loader.dataset.t_range[-len(reconstructed_targets):]
     y_class = np.zeros(y_true.shape)  # classes {0, 1}
 
-    for indices, spc_feats, tmp_feats, env_feats, targets in batch_loader:
+    for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
         for i in range(len(indices)):
             n, c, h, w = indices[i]
             reconstructed_targets[n, c, h, w] = targets[-1, i]

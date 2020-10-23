@@ -5,6 +5,7 @@ from utils.utils import if_none
 from datasets.base_datagroup import BaseDataGroup
 import logging as log
 
+
 class FlatDataGroup(BaseDataGroup):
     """
     FlatDataGroup class acts as a collection of datasets (training/validation/test)
@@ -21,7 +22,6 @@ class FlatDataGroup(BaseDataGroup):
         """
         log.info('Initialising Flat Data Group')
         super(FlatDataGroup, self).__init__(data_path, conf)
-
 
         self.training_set = FlatDataset(
             crimes=self.trn_crimes,
@@ -83,12 +83,16 @@ class FlatDataGroup(BaseDataGroup):
             shaper=self.shaper,
         )
 
-    def to_counts(self, dense_data):
+    def to_counts(self, dense_data: np.ndarray):
         """
         convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
         :param dense_data: ndarray (N,1,L)
         :return: count_data (N,1,L)
         """
+
+        assert len(dense_data.shape) == 3
+        _, _c, _ = dense_data.shape
+        assert _c == 1
 
         dense_descaled = self.target_scaler.inverse_transform(dense_data)[:, 0:1]
         dense_count = np.round(2 ** dense_descaled - 1)
@@ -106,8 +110,8 @@ class FlatDataset(Dataset):
     def __init__(
             self,
             crimes,  # time and space dependent
-            targets,  # time and space dependent
-            labels,  # time and space dependent
+            targets,  # time and space dependent - scales transformed crime count - floats between 0 and 1
+            labels,  # time and space dependent - class labels - crime/no-crime [0,1]
             total_crimes,  # time dependent
             t_range,  # time dependent
             time_vectors,  # time dependent
@@ -172,6 +176,7 @@ class FlatDataset(Dataset):
         stack_tmp_feats = []
         stack_env_feats = []
         stack_targets = []
+        stack_labels = []
 
         result_indices = []
 
@@ -199,12 +204,14 @@ class FlatDataset(Dataset):
 
             # todo teacher forcing - if we are using this then we need to return sequence of targets
             target_vec = self.targets[t_start:t_stop, :, l_index]
+            label_vec = self.labels[t_start:t_stop, :, l_index]
 
             stack_spc_feats.append(demog_vec)  # todo stacking the same grid might cause memory issues
             stack_env_feats.append(street_vec)  # todo stacking the same grid might cause memory issues
 
             stack_tmp_feats.append(tmp_vec)
             stack_targets.append(target_vec)
+            stack_labels.append(label_vec)
 
             result_indices.append((t_index - self.offset_year - self.seq_len, 0,
                                    l_index))  # extra dimension C, makes it easier for the shaper
@@ -217,11 +224,13 @@ class FlatDataset(Dataset):
         tmp_feats = np.stack(stack_tmp_feats)
         env_feats = np.stack(stack_env_feats)
         targets = np.stack(stack_targets)
+        labels = np.stack(stack_labels)
 
         spc_feats = np.swapaxes(spc_feats, 0, 1)
         tmp_feats = np.swapaxes(tmp_feats, 0, 1)
         env_feats = np.swapaxes(env_feats, 0, 1)
         targets = np.swapaxes(targets, 0, 1)
+        labels = np.swapaxes(labels, 0, 1)
 
         # output shapes should be - (seq_len, batch_size,, n_feats)
-        return result_indices, spc_feats, tmp_feats, env_feats, targets
+        return result_indices, spc_feats, tmp_feats, env_feats, targets, labels

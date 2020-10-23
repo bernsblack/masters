@@ -7,6 +7,8 @@ import numpy as np
 from IPython.display import HTML
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from utils.configs import BaseConf
+
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
     CAN BE FOUND IN THE utils.metrics MODULE 
@@ -562,3 +564,33 @@ def hist2d_to_geo(counts: np.ndarray, xbins: np.ndarray, ybins: np.ndarray, filt
     geo_grid = FeatureCollection(features=features)
     feat_df = DataFrame(feat_values, columns=['id', 'value', 'y', 'x'])
     return geo_grid, feat_df
+
+
+import plotly.express as px
+import pandas as pd
+
+from typing import Optional
+
+
+def new_crime_distribution_plot(crimes: np.ndarray) -> go.Figure:
+    crimes_flat = crimes.flatten()
+    df = pd.DataFrame({
+        "x": crimes_flat,
+        "crimes": np.ones_like(crimes_flat),
+    })
+    fig = px.histogram(df, x="x", y="crimes",
+                       marginal="box",  # or violin, rug
+                       hover_data=df.columns,
+                       histnorm='probability density',
+                       opacity=.4,
+                       )
+
+    fig.update_layout(
+        height=900,
+        title="Probability Distribution of Crime Counts per Cell",
+        title_x=0.5,
+        xaxis_title="Crime Count per Cell",
+        yaxis_title="Probability",
+    )
+
+    return fig
