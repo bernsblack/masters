@@ -123,8 +123,17 @@ class GridDataGroup:
             self.shaper = Shaper(data=shaper_crimes,
                                  conf=conf)
 
-            self.crimes = self.shaper.unsqueeze(self.shaper.squeeze(
-                self.crimes))  # ensures we ignore areas that do not have crime through out and ensures crime data in different data loaders are exactly the same
+            squeezed_crimes = self.shaper.squeeze(self.crimes)
+
+            # cap any values above conf.cap_crime_percentile percentile as outliers
+            if conf.cap_crime_percentile:
+                cap = np.percentile(squeezed_crimes.flatten(), conf.cap_crime_percentile)
+                squeezed_crimes[squeezed_crimes > cap] = cap
+
+                log.info(f"capping max crime values to {cap} which is percentile {conf.cap_crime_percentile}")
+
+            self.crimes = self.shaper.unsqueeze(
+                squeezed_crimes)  # ensures we ignore areas that do not have crime through out and ensures crime data in different data loaders are exactly the same
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
             # tract_count_grids = zip_file["tract_count_grids"]
             # self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)

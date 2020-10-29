@@ -11,16 +11,16 @@ def save_checkpoint(tag, model, optimiser, conf,
                     val_batch_losses,
                     val_epoch_losses,
                     trn_epoch_losses,
-                    trn_batch_losses,
-                    trn_val_epoch_losses):
+                    trn_batch_losses):
+    # trn_val_epoch_losses):
     torch.save(model.state_dict(), f"{conf.model_path}model_{tag}.pth")
     torch.save(optimiser.state_dict(), f"{conf.model_path}optimiser_{tag}.pth")
     np.savez_compressed(file=f"{conf.model_path}losses_{tag}.npz",
                         trn_batch_losses=trn_batch_losses,
                         val_batch_losses=val_batch_losses,
                         trn_epoch_losses=trn_epoch_losses,
-                        val_epoch_losses=val_epoch_losses,
-                        trn_val_epoch_losses=trn_val_epoch_losses)
+                        val_epoch_losses=val_epoch_losses)
+    # trn_val_epoch_losses=trn_val_epoch_losses)
 
 
 # generic training loop
@@ -52,11 +52,11 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
     val_batch_losses = []
 
     trn_epoch_losses = []
-    val_epoch_losses = []
-    trn_val_epoch_losses = []
-    val_epoch_losses_best = float("inf")
     trn_epoch_losses_best = float("inf")
-    trn_val_epoch_losses_best = float("inf")
+    val_epoch_losses = []
+    val_epoch_losses_best = float("inf")
+    # trn_val_epoch_losses = []
+    # trn_val_epoch_losses_best = float("inf")
 
     if conf.resume:
         try:
@@ -67,12 +67,11 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
             trn_batch_losses = losses_zip["trn_batch_losses"].tolist()
 
             trn_epoch_losses = losses_zip["trn_epoch_losses"].tolist()
-            val_epoch_losses = losses_zip["val_epoch_losses"].tolist()
-            trn_val_epoch_losses = losses_zip["trn_val_epoch_losses"].tolist()
-
-            val_epoch_losses_best = np.min(val_epoch_losses)
             trn_epoch_losses_best = np.min(trn_epoch_losses)
-            trn_val_epoch_losses_best = np.min(trn_val_epoch_losses)
+            val_epoch_losses = losses_zip["val_epoch_losses"].tolist()
+            val_epoch_losses_best = np.min(val_epoch_losses)
+            # trn_val_epoch_losses = losses_zip["trn_val_epoch_losses"].tolist()
+            # trn_val_epoch_losses_best = np.min(trn_val_epoch_losses)
         except Exception as e:
             log.error(f"Nothing to resume from, training from scratch \n\t-> {e}")
 
@@ -115,7 +114,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
                 # scheduler.step(epoch)  # alternative option
                 # scheduler.step(epoch_loss)  # alternative option
 
-        trn_val_epoch_losses.append(trn_epoch_losses[-1] + val_epoch_losses[-1])
+        # trn_val_epoch_losses.append(trn_epoch_losses[-1] + val_epoch_losses[-1])
 
         # save best validation model
         prev_best_val_step += 1
@@ -123,24 +122,24 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
             prev_best_val_step = 0
             val_epoch_losses_best = val_epoch_losses[-1]
             save_checkpoint('best_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                            trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+                            trn_epoch_losses, trn_batch_losses)  # , trn_val_epoch_losses)
 
         if trn_epoch_losses[-1] < trn_epoch_losses_best:
             trn_epoch_losses_best = trn_epoch_losses[-1]
             save_checkpoint('best_trn', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                            trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+                            trn_epoch_losses, trn_batch_losses)  # , trn_val_epoch_losses)
 
-        if trn_val_epoch_losses[-1] < trn_val_epoch_losses_best:
-            trn_val_epoch_losses_best = trn_val_epoch_losses[-1]
-            save_checkpoint('best_trn_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                            trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+        # if trn_val_epoch_losses[-1] < trn_val_epoch_losses_best:
+        #     trn_val_epoch_losses_best = trn_val_epoch_losses[-1]
+        #     save_checkpoint('best_trn_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
+        #                     trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
 
         log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Trn): \t{trn_epoch_losses_best:.8f}")
         log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Val): \t{val_epoch_losses_best:.8f}")
-        log.info(f"\tLoss (Trn Val): \t{trn_val_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
+        # log.info(f"\tLoss (Trn Val): \t{trn_val_epoch_losses[-1]:.8f}")
+        # log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
         log.info(f"\tLoss (Trn Val Dif): \t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         if conf.early_stopping and prev_best_val_step > conf.patience and epoch >= conf.min_epochs:
@@ -158,7 +157,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
 
         # checkpoint - save latest models and loss values
         save_checkpoint('latest', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                        trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+                        trn_epoch_losses, trn_batch_losses)  # , trn_val_epoch_losses)
 
     # Save training and validation plots - add flag to actually save or display
     skip = 0
@@ -177,9 +176,10 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
 
     return trn_epoch_losses, val_epoch_losses, stopped_early
 
+
 # generic training loop
 def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None,
-                split_train_set=True):
+                        split_train_set=True):
     """
     Will
     """
@@ -192,11 +192,11 @@ def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf
     val_batch_losses = []
 
     trn_epoch_losses = []
-    val_epoch_losses = []
-    trn_val_epoch_losses = []
-    val_epoch_losses_best = float("inf")
     trn_epoch_losses_best = float("inf")
-    trn_val_epoch_losses_best = float("inf")
+    val_epoch_losses = []
+    val_epoch_losses_best = float("inf")
+    # trn_val_epoch_losses = []
+    # trn_val_epoch_losses_best = float("inf")
 
     if conf.resume:
         try:
@@ -207,12 +207,12 @@ def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf
             trn_batch_losses = losses_zip["trn_batch_losses"].tolist()
 
             trn_epoch_losses = losses_zip["trn_epoch_losses"].tolist()
-            val_epoch_losses = losses_zip["val_epoch_losses"].tolist()
-            trn_val_epoch_losses = losses_zip["trn_val_epoch_losses"].tolist()
-
-            val_epoch_losses_best = np.min(val_epoch_losses)
             trn_epoch_losses_best = np.min(trn_epoch_losses)
-            trn_val_epoch_losses_best = np.min(trn_val_epoch_losses)
+            val_epoch_losses = losses_zip["val_epoch_losses"].tolist()
+            val_epoch_losses_best = np.min(val_epoch_losses)
+
+            # trn_val_epoch_losses = losses_zip["trn_val_epoch_losses"].tolist()
+            # trn_val_epoch_losses_best = np.min(trn_val_epoch_losses)
         except Exception as e:
             log.error(f"Nothing to resume from, training from scratch \n\t-> {e}")
 
@@ -255,7 +255,7 @@ def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf
                 # scheduler.step(epoch)  # alternative option
                 # scheduler.step(epoch_loss)  # alternative option
 
-        trn_val_epoch_losses.append(trn_epoch_losses[-1] + val_epoch_losses[-1])
+        # trn_val_epoch_losses.append(trn_epoch_losses[-1] + val_epoch_losses[-1])
 
         # save best validation model
         prev_best_val_step += 1
@@ -263,24 +263,24 @@ def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf
             prev_best_val_step = 0
             val_epoch_losses_best = val_epoch_losses[-1]
             save_checkpoint('best_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                            trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+                            trn_epoch_losses, trn_batch_losses)  # , trn_val_epoch_losses)
 
         if trn_epoch_losses[-1] < trn_epoch_losses_best:
             trn_epoch_losses_best = trn_epoch_losses[-1]
             save_checkpoint('best_trn', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                            trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+                            trn_epoch_losses, trn_batch_losses)  # , trn_val_epoch_losses)
 
-        if trn_val_epoch_losses[-1] < trn_val_epoch_losses_best:
-            trn_val_epoch_losses_best = trn_val_epoch_losses[-1]
-            save_checkpoint('best_trn_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                            trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+        # if trn_val_epoch_losses[-1] < trn_val_epoch_losses_best:
+        #     trn_val_epoch_losses_best = trn_val_epoch_losses[-1]
+        #     save_checkpoint('best_trn_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
+        #                     trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
 
         log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Trn): \t{trn_epoch_losses_best:.8f}")
         log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
         log.info(f"\tLoss (Best Val): \t{val_epoch_losses_best:.8f}")
-        log.info(f"\tLoss (Trn Val): \t{trn_val_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
+        # log.info(f"\tLoss (Trn Val): \t{trn_val_epoch_losses[-1]:.8f}")
+        # log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
         log.info(f"\tLoss (Trn Val Dif): \t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         if conf.early_stopping and prev_best_val_step > conf.patience and epoch >= conf.min_epochs:
@@ -298,7 +298,7 @@ def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf
 
         # checkpoint - save latest models and loss values
         save_checkpoint('latest', model, optimiser, conf, val_batch_losses, val_epoch_losses,
-                        trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
+                        trn_epoch_losses, trn_batch_losses)  # , trn_val_epoch_losses)
 
     # Save training and validation plots - add flag to actually save or display
     skip = 0

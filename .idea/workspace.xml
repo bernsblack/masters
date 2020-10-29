@@ -29,53 +29,23 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
-      <change afterPath="$PROJECT_DIR$/models/lin_reg.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/models/log_reg.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Crime Types.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Crime Types.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Mutual Information and Correlation over Spatial Domain.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Mutual Information and Correlation over Spatial Domain.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Development - Learning Rate Scheduler.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hyper Parameter Optimization.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Hyper Parameter Optimization.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_155.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_1a0.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_2a4.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_3a0.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_3fd.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_775.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_7cd.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_826.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_826.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_827.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_827.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_944.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_b29.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_c52.json" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/config/generate_data_d97.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_c98.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/cell_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/cell_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/flat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/flat_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/grid_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/grid_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Seasonal Decomposition.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Seasonal Decomposition.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data_828.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_828.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data_c98.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/base_datagroup.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/base_datagroup.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/cell_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/cell_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/grid_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/grid_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/model_comparisons.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/model_comparisons.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/kangkang_fnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/kangkang_fnn_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/rnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/rnn_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/st_resnet_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/st_resnet_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_resnet_model.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_resnet_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model_local.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_rnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_rnn_model_local.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/constants.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocessing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -606,7 +576,7 @@
       <screen x="418" y="0" width="2142" height="2520" />
     </state>
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="527" y="458" width="874" height="622" key="find.popup" timestamp="1603449581538">
+    <state x="527" y="458" width="874" height="622" key="find.popup" timestamp="1604007511655">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="779" y="1592" width="909" height="783" key="find.popup/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1600514169888" />
@@ -614,7 +584,7 @@
     <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599578024344" />
     <state x="489" y="181" width="875" height="759" key="find.popup/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804707334" />
     <state x="882" y="335" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1601277194688" />
-    <state x="527" y="458" width="874" height="622" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1603449581538" />
+    <state x="527" y="458" width="874" height="622" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604007511655" />
     <state x="489" y="177" width="874" height="622" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1602492122318" />
     <state x="645" y="270" width="700" height="530" key="recent.locations.popup" timestamp="1601108013005">
       <screen x="72" y="29" width="1848" height="1051" />

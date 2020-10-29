@@ -1,6 +1,7 @@
 import numpy as np
 
-from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time
+from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time, \
+    construct_temporal_information
 from utils.data_processing import encode_category
 from models.model_result import get_models_metrics
 from utils import ffloor, fceil
@@ -317,6 +318,138 @@ class InteractiveHeatmaps:
         ])
 
 
+class InteractiveHeatmapsWithLines:
+
+    def __init__(self, date_range, col_wrap=3, height=500, thresh=0, **kwargs):
+        """
+        InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
+
+        :param date_range: pandas date range array
+        :param col_wrap: plots per row before wrapping
+        :param height: height in pixels of a single images
+        :param kwargs: key word arguments for name of plot as key and data (N,H,W format) as value
+        """
+
+        def get_widget_value(change):
+            self.change = change
+            if isinstance(change, dict) and change.get('name') == 'value':
+                self.valid_change = change
+                return change.get('new')
+            return None
+
+        self.heatmaps = dict()
+        self.figures = list()
+        self.grids = dict()
+        self.lines = dict()
+
+        lines_data = []
+        for name, grid in kwargs.items():
+            self.grids[name] = grid
+            hm_fig = new_interactive_heatmap(z=grid[0], name=name, height=height)
+            self.figures.append(hm_fig)
+            self.heatmaps[name] = hm_fig.data[0]
+
+            lines_data.append(go.Scatter(name=name, opacity=.5))
+
+        if thresh > 0:
+            thresh_line = go.Scatter(x=date_range, y=thresh * np.ones(len(grid)), name="Threshold", opacity=.3)
+            lines_data = [thresh_line, *lines_data]
+
+        fw_lines = go.FigureWidget(data=lines_data)  # links the pointer to the dict
+        for line in fw_lines.data:
+            self.lines[line.name] = line
+
+        state = State()
+
+        def draw():
+            x = state['x']
+            y = state['y']
+
+            with fw_lines.batch_update():
+                fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5)
+                for name, grid in self.grids.items():
+                    z = grid[:, y, x]
+
+                    self.lines[name].y = z
+                    self.lines[name].x = date_range
+
+        def set_state(_trace, points, _selector):
+            y = points.ys[0]
+            x = points.xs[0]
+
+            state["x"] = x
+            state["y"] = y
+            draw()
+
+        for fw_grid in self.figures:
+            fw_grid.data[0].on_click(set_state)
+
+        self.date_range = date_range
+
+        # time index date display label
+        self.current_date_label = widgets.Label(f'Date: {self.date_range[0].strftime("%c")}')
+
+        # time index selector
+        self.time_index_slider = widgets.IntSlider(
+            value=0,
+            min=0,
+            max=len(self.date_range) - 1,
+            step=1,
+            description='Time Index:',
+            continuous_update=False,
+            layout=Layout(width='80%'),
+        )
+
+        def on_change_time_index(change):
+            time_index = get_widget_value(change)
+            if time_index is not None:
+                self.time_index = time_index
+                self.current_date_label.value = f'Date: {self.date_range[self.time_index].strftime("%c")}'
+
+                for name_, heatmap in self.heatmaps.items():
+                    heatmap.z = self.grids[name_][self.time_index]
+
+        self.time_index_slider.observe(on_change_time_index)
+
+        self.play_button = widgets.Play(
+            value=0,
+            min=self.time_index_slider.min,
+            max=self.time_index_slider.max,
+            step=1,
+            interval=1000,
+            description="Press play",
+            disabled=False
+        )
+        widgets.jslink((self.play_button, 'value'), (self.time_index_slider, 'value'))
+
+        wrapped_figs = []
+        row_figs = []
+        for i, fig in enumerate(self.figures):
+            if i % col_wrap == 0:
+                wrapped_figs.append(widgets.HBox(row_figs))
+                row_figs = []
+
+            row_figs.append(fig)
+
+        # box_layout = Layout(display='flex',
+        #                     flex_flow='column',
+        #                     align_items='center',
+        #                     width='100%')
+        # wrapped_figs.append(widgets.Box(children=row_figs, layout=box_layout))
+
+        wrapped_figs.append(widgets.HBox(row_figs))
+
+        self.app = widgets.VBox([
+            self.current_date_label,
+            widgets.HBox([
+                self.play_button,
+                self.time_index_slider,
+            ]),
+            widgets.VBox(wrapped_figs),
+            widgets.VBox([fw_lines]),
+        ])
+
+
 def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
     # trn_val_epoch_losses = np.array(trn_epoch_losses) + np.array(val_epoch_losses)
 
@@ -542,6 +675,17 @@ def interactive_crime_prediction_comparison(y_class: np.ndarray,
     )
 
 
+def cmi_name(temporal_variables):
+    cond_var_map = {
+        'Hour': 'H_t',
+        'Day of Week': 'DoW_t',
+        'Time of Month': 'ToM_t',
+        'Time of Year': 'ToY_t',
+    }
+
+    return ",".join([cond_var_map[k] for k in temporal_variables])
+
+
 def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, height: int = 500, **kwargs):
     """
 
@@ -581,14 +725,23 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
     grid_line = fw_lines.data[0]
     figs = [fw_grid, fw_lines]
 
+    temporal_variables = kwargs.get('temporal_variables', ["Day of Week", "Time of Month", "Time of Year"])
+
     if kwargs.get("mutual_info"):
+        conds = construct_temporal_information(
+            date_range=t_range,
+            temporal_variables=temporal_variables,
+            month_divisions=kwargs.get('month_divisions', 10),
+            year_divisions=kwargs.get('year_divisions', 10),
+        ).values
+
         fw_mi = go.FigureWidget(
             data=[
-                go.Scatter(name='MI'),
-                go.Scatter(name='CMI'),
+                go.Scatter(name='$I(C_{t},C_{t-k})$'),
+                go.Scatter(name=f'$I(C_{{t}},C_{{t-k}}|{cmi_name(temporal_variables)})$'),
             ],
             layout=dict(
-                title='MI and CMI with Time Lagged Signal',
+                title='Mutual Information and Conditional Mutual Information with Time Lagged Signal',
                 title_x=0.5,
                 width=900,
             )
@@ -611,7 +764,9 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
 
             if kwargs.get("mutual_info"):
                 my, mx = mutual_info_over_time(a=z, max_offset=kwargs.get('max_offset', 30))
-                cy, cx = conditional_mutual_info_over_time(a=z, max_offset=kwargs.get('max_offset', 30))
+                cy, cx = conditional_mutual_info_over_time(a=z,
+                                                           max_offset=kwargs.get('max_offset', 30),
+                                                           conds=conds)
                 mi_line.y, mi_line.x = my, mx
                 cmi_line.y, cmi_line.x = cy, cx
 

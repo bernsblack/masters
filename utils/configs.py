@@ -7,6 +7,7 @@ from pprint import pformat
 from typing import Dict
 
 from utils import Timer
+from os import cpu_count
 
 
 class BaseConf:  # args from arg-parser to over write values
@@ -32,7 +33,7 @@ class BaseConf:  # args from arg-parser to over write values
         self.sub_sample_validation_set = 1  # will sample class 0 and 1 with 1:1 ratio
         self.sub_sample_test_set = 0  # will not sub sample class 0 and 1
         self.flatten_grid = True  # if the shaper should be used to squeeze the data
-        self.test_set_size_days = 360 # should be changed to 64 if freq is less than one day
+        self.test_set_size_days = 360  # should be changed to 64 if freq is less than one day
 
         self.seq_len = 1
         self.shaper_top_k = -1  # if less then 0, top_k will not be applied
@@ -49,7 +50,7 @@ class BaseConf:  # args from arg-parser to over write values
         self.batch_size = 64
         self.dropout = 0
         self.shuffle = True
-        self.num_workers = 8
+        self.num_workers = cpu_count()
 
         # attached global variables
         self.device = None  # pytorch device object [CPU|GPU]
@@ -75,7 +76,10 @@ class BaseConf:  # args from arg-parser to over write values
         self.patience = 10
 
         # when train and valid sets are split in time: if the train set should be earlier in time than the validation set
-        self.train_set_first = False
+        self.train_set_first = True
+
+        # Will cap the maximum value to be equal to the 99.9 percentile - to limit the outliers and remove unnecessary scaling
+        self.cap_crime_percentile = 0  # 99.95 # if zero then no cap takes place
 
         if conf_dict:
             for k, v in conf_dict.items():

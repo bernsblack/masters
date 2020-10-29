@@ -146,7 +146,8 @@ def visualize_weights(model):
 #     plt.show()
 
 def plot(**kwargs):
-    return go.Figure([go.Scatter(y=arg) for kw, arg in kwargs.items()])
+    return go.Figure([go.Scatter(y=arg, name=kw) for kw, arg in kwargs.items()])
+
 
 
 def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):

@@ -71,7 +71,7 @@ class HistoricAverage:
         """
         determines the optimal
         """
-        self.max_steps = -1#get_max_steps(data, self.step)
+        self.max_steps = -1  # get_max_steps(data, self.step)
         self.fitted = True
         print(f"fitted historic average: step ({self.step}) and max_steps ({self.max_steps})")
 
@@ -103,6 +103,10 @@ class BaseMovingAverage:
         w = self.window_len
         r = np.empty(data.shape)
         r.fill(np.nan)
+        # uncomment if we want to replace the nan values with smaller windowed averages
+        # for i in range(w - 1):
+        #     r[i] = np.average(data[:i + 1], axis=0, weights=self.weights[:i + 1])
+
         for i in range(w - 1, len(r)):
             x = data[(i - w + 1):i + 1]
             r[i] = self.fn(x)
@@ -137,11 +141,11 @@ class LinearRegressor(nn.Module):
         super(LinearRegressor, self).__init__()
 
         self.linear = nn.Linear(in_features, out_features)
-        self.activation = nn.ReLU()
+        # self.activation = nn.ReLU()
 
     def forward(self, x):
-        out = self.activation(self.linear(x))
-
+        # out = self.activation(self.linear(x)) # linear regressor has no activation
+        out = self.linear(x)
         return out
 
 

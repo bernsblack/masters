@@ -3,7 +3,7 @@ from __future__ import annotations
 
 from typing import Callable, List, Dict, Union, Tuple
 import numpy as np
-
+import logging
 from utils import deprecated
 
 FLOAT_TOLERANCE_VALUE = 1e-8
@@ -462,7 +462,9 @@ def quick_cond_mutual_info(x, y, z, norm=False):
     else:
         return h_xz + h_yz - h_xyz - h_z
 
+
 from utils.utils import cut
+
 
 def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_self=False, bins=0):
     """
@@ -478,18 +480,21 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
     """
     n = len(a) - max_offset
 
+    if log_norm:
+        a = np.round(np.log2(1 + a))
+
     if bins > 0:
         a = cut(a, bins)
 
-    if log_norm:
-        a = np.round(np.log2(1 + a))
     mis = []
     if include_self:
         mi = quick_mutual_info(a, a, norm)
         mis.append(mi)
     for t in range(1, max_offset + 1):
         # mi = quick_mutual_info(a[t:], a[:-t], norm)
-        mi = quick_mutual_info(a[-n:], a[-n - t:-t], norm)
+        mi = quick_mutual_info(x=a[-n:],
+                               y=a[-n - t:-t],
+                               norm=norm)
         mis.append(mi)
 
     if include_self:
@@ -503,8 +508,9 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
                                       log_norm=True, include_self=False,
                                       cycles=(7,), conds=None, bins=0):
     """
-    Calculate the conditional mutual information over various time lags conditioned on a time series the repeats every
-    cycle steps.
+    Calculate the conditional mutual information over various time lags conditioned either:
+        - on a time series that repeats every cycle steps
+        - on the given conds (N,n_conditions) array
 
     :param a: np.ndarray (N,1) with the counts over time
     :param max_offset: furthest we compare to the signal in time
@@ -518,11 +524,11 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
     """
     n = len(a) - max_offset
 
-    if bins > 0:
-        a = cut(a, bins)
-
     if log_norm:
         a = np.round(np.log2(1 + a)).reshape(-1, 1)
+
+    if bins > 0:
+        a = cut(a, bins)
 
     if conds is None:  # no explicit conditions use the cycles to construct a conditional series
         conds = []
@@ -532,23 +538,24 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
 
     cmis = []
     if include_self:
-        # cond = np.concatenate([conds, conds], axis=1)  # concatenate uses existing axis # todo uncoment
+        # cond = np.concatenate([conds, conds], axis=1)  # concatenate uses existing axis
         cond = conds[-n:]
 
         cmi = quick_cond_mutual_info(a, a, cond, norm)
         cmis.append(cmi)
+
     for t in range(1, max_offset + 1):
         # cond = np.concatenate([conds[t:], conds[:-t]], axis=1)
         # cmi = quick_cond_mutual_info(a[t:], a[:-t], cond, norm)
 
-        # cond = np.concatenate([conds[-n:], conds[-n-t:-t]], axis=1)  # todo uncomment
+        # cond = np.concatenate([conds[-n:], conds[-n-t:-t]], axis=1)
         # cond = np.concatenate([conds[-n:], conds[-n:]], axis=1)  # only the current day time information
         # cond = np.concatenate([conds[-n-t:-t], conds[-n-t:-t]], axis=1)  # only past date
         cond = conds[-n:]  # only the current day time information
 
         cmi = quick_cond_mutual_info(
-            x=a[-n:],
-            y=a[-n - t:-t],
+            x=a[-n:],  # current date
+            y=a[-n - t:-t],  # offset date
             z=cond,
             norm=norm,
         )  # only conditioned on current date information
@@ -561,3 +568,129 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
         offsets = np.arange(1, len(cmis) + 1)
 
     return cmis, offsets
+
+
+from pandas import DataFrame
+
+
+def construct_temporal_information(
+        date_range,
+        temporal_variables=["Hour", "Day of Week", "Time of Month", "Time of Year"],
+        month_divisions=4,
+        year_divisions=4,
+):
+    df_dict = dict(Date=date_range)
+
+    if "Hour" in temporal_variables:
+        df_dict["Hour"] = date_range.hour
+
+    if "Day of Week" in temporal_variables:
+        df_dict["Day of Week"] = date_range.dayofweek
+
+    if "Time of Month" in temporal_variables:
+        df_dict["Time of Month"] = cut(date_range.day / date_range.days_in_month, month_divisions)
+
+    if "Time of Year" in temporal_variables:
+        df_dict["Time of Year"] = cut(date_range.dayofyear / 366, year_divisions)
+
+    temp_info = DataFrame(df_dict).set_index('Date')
+
+    return temp_info
+
+
+def conditional_mutual_information_over_grid(
+        dense_grid,
+        t_range,
+        max_offset=35,
+        norm=True,
+        log_norm=False,
+        include_self=False,
+        bins=10,  # mutual info bins
+        temporal_variables=["Day of Week", "Time of Month", "Time of Year"],
+        month_divisions=10,
+        year_divisions=10,
+):
+    """
+
+    :param dense_grid: ndarray (N,L)
+    :param t_range: pandas datetime range
+    :param max_offset: maximum time lag
+    :param norm: if mutual information is normalised between 0 and 1
+    :param log_norm: if the input values should be scaled using log2(1 + x)
+    :param include_self: if the mutual information with time lag 0 should be included
+    :param bins: number of bins the input values should be digitised to
+    :param temporal_variables: string list of conditional temporal variables: {"Hour", "Day of Week", "Time of Month", "Time of Year"}
+    :param month_divisions: number of bins the month should be divided into for conditional variable
+    :param year_divisions: number of bins the year should be divided into for conditional variable
+    :return: ndarray (L,max_offset) of the conditional variables
+    """
+    assert len(dense_grid.shape) == 2, "dense_grid should be shape (N,L)"
+
+    n, l = dense_grid.shape
+
+    conds = construct_temporal_information(
+        date_range=t_range,
+        temporal_variables=temporal_variables,
+        month_divisions=month_divisions,
+        year_divisions=year_divisions,
+    ).values
+
+    cmis = []
+    for i in range(l):
+        if i % 10 == 0:
+            logging.info(f"=> {i:04d}/{l:04d} => {i / l * 100:.3f}")
+        cmi_y, cmi_x = conditional_mutual_info_over_time(
+            a=dense_grid[:, i],
+            max_offset=max_offset,
+            norm=norm,
+            log_norm=log_norm,
+            include_self=include_self,
+            conds=conds,
+            bins=bins,
+        )
+
+        cmis.append(cmi_y)
+    logging.info("done")
+    cmis = np.array(cmis)
+    return cmis
+
+
+def mutual_information_over_grid(
+        dense_grid,
+        max_offset=35,
+        norm=True,
+        log_norm=False,
+        include_self=False,
+        bins=10,  # mutual info bins
+):
+    """
+
+    :param dense_grid: ndarray (N,L)
+    :param max_offset: maximum time lag
+    :param norm: if mutual information is normalised between 0 and 1
+    :param log_norm: if the input values should be scaled using log2(1 + x)
+    :param include_self: if the mutual information with time lag 0 should be included
+    :param bins: number of bins the input values should be digitised to
+    :return: ndarray (L,max_offset) of the conditional variables
+    """
+    assert len(dense_grid.shape) == 2, "dense_grid should be shape (N,L)"
+
+    n, l = dense_grid.shape
+
+    mis = []
+    for i in range(l):
+        if i % 10 == 0:
+            logging.info(f"=> {i:04d}/{l:04d} => {i / l * 100:.3f}")
+        mi_y, mi_x = mutual_info_over_time(
+            a=dense_grid[:, i],
+            max_offset=max_offset,
+            norm=norm,
+            log_norm=log_norm,
+            include_self=include_self,
+            bins=bins,
+        )
+
+        mis.append(mi_y)
+    logging.info("done")
+    mis = np.array(mis)
+    return mis

@@ -122,6 +122,12 @@ class BaseDataGroup:
             # squeeze all spatially related data
             # reshaped (N, C, H, W) -> (N, C, L)
             self.crimes = self.shaper.squeeze(self.crimes)
+
+            # cap any values above conf.cap_crime_percentile percentile as outliers
+            if conf.cap_crime_percentile > 0:
+                cap = np.percentile(self.crimes.flatten(), conf.cap_crime_percentile)
+                self.crimes[self.crimes > cap] = cap
+
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
             tract_count_grids = zip_file["tract_count_grids"]
             tract_count_grids = self.shaper.squeeze(tract_count_grids)
