@@ -169,8 +169,8 @@ class BaseDataGroup:
 
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
-        # self.crimes = np.floor(np.log2(1 + self.crimes)) # by flooring the values we cannot inverse to get the original counts
-        # self.targets = np.floor(np.log2(1 + self.targets)) # by flooring the values we cannot inverse to get the original counts
+        # self.crimes = np.round(np.log2(1 + self.crimes)) # by round the values we cannot inverse to get the original counts
+        # self.targets = np.round(np.log2(1 + self.targets)) # by round the values we cannot inverse to get the original counts
         self.crimes = np.log2(1 + self.crimes)
         self.targets = np.log2(1 + self.targets)
 
@@ -211,7 +211,7 @@ class BaseDataGroup:
         self.tst_labels = self.labels[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
-        # self.total_crimes = np.floor(np.log2(1 + self.total_crimes)) # by flooring the values we cannot inverse to get the original counts
+        # self.total_crimes = np.round(np.log2(1 + self.total_crimes)) # by rounding the values we cannot inverse to get the original counts
         self.total_crimes = np.log2(1 + self.total_crimes)
         self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data

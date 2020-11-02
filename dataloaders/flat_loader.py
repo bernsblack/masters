@@ -186,6 +186,11 @@ class MockLoader:
 
 
 def reconstruct_from_flat_loader(batch_loader: FlatBatchLoader):
+    """
+    reconstruct_from_flat_loader used to unit test the batch_loaders
+    :param batch_loader: Flat batch loader
+    :return: tuple of y_true, reconstructed_targets, t_range
+    """
     reconstructed_targets = np.zeros(batch_loader.dataset.target_shape)
     y_true = batch_loader.dataset.targets[-len(reconstructed_targets):]
     t_range = batch_loader.dataset.t_range[-len(reconstructed_targets):]

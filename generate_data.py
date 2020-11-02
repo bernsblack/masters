@@ -537,8 +537,8 @@ if __name__ == "__main__":
     fig.write_image(f"{save_folder}plots/crime_distribution_squeezed.png")
     fig = new_crime_distribution_plot(np.log2(1 + squeezed_crime_grids))
     fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2.png")
-    fig = new_crime_distribution_plot(np.floor(np.log2(1 + squeezed_crime_grids)))
-    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2_floored.png")
+    fig = new_crime_distribution_plot(np.round(np.log2(1 + squeezed_crime_grids)))
+    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2_round.png")
     # fig.write_html(f"{config.data_path}plots/crime_distribution_squeezed.html")  # files can become too big
 
     log.info("=====================================END=====================================")

@@ -62,10 +62,7 @@ class GRUFNN1(nn.Module):
 
     def forward(self, x, h0=None):
         # Forward propagate RNN
-        if h0 is not None:
-            out, hn = self.gru(x, h0)
-        else:
-            out, hn = self.gru(x)  # hidden state start is zero
+        out, hn = self.gru(x, h0)  # hidden state start is zero
         out = self.relu(out)
         out = self.lin1(out)
         out = self.relu(out)
@@ -98,10 +95,7 @@ class GRUFNN2(nn.Module):
 
     def forward(self, x, h0=None):
         # Forward propagate RNN
-        if h0 is not None:
-            out, hn = self.gru(x, h0)
-        else:
-            out, hn = self.gru(x)  # hidden state start is zero
+        out, hn = self.gru(x, h0)  # hidden state start is zero if none
         out = self.relu(out)
         out = self.lin1(out)
         out = self.relu(out)
@@ -249,10 +243,10 @@ def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, 
         env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [-1] for fnn
         out = model(spc_feats, tmp_feats, env_feats)
 
-        if conf.use_classification: # using classification labels
+        if conf.use_classification:  # using classification labels
             labels = torch.LongTensor(labels[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
             loss = loss_fn(input=out, target=labels)
-        else: # using regression targets
+        else:  # using regression targets
             targets = torch.FloatTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
             loss = loss_fn(input=out, target=targets)
 

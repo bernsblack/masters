@@ -168,7 +168,7 @@ class GridDataGroup:
         val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
 
-        # self.crimes = np.floor(np.log2(1 + self.crimes)) # by flooring we cannot retrieve original count
+        # self.crimes = np.round(np.log2(1 + self.crimes)) # by rounding we cannot retrieve original count
         self.crimes = np.log2(1 + self.crimes)
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data
@@ -181,7 +181,7 @@ class GridDataGroup:
         tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # targets
-        # self.targets = np.floor(np.log2(1 + self.targets)) # by flooring we cannot retrieve original count
+        # self.targets = np.round(np.log2(1 + self.targets)) # by rounding we cannot retrieve original count
         self.targets = np.log2(1 + self.targets)
         self.target_scaler = MinMaxScaler(feature_range=(0, 1))
         # self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data

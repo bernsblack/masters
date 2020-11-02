@@ -1,4 +1,6 @@
 #!python3
+import logging
+
 import numpy as np
 import torch
 from utils.data_processing import get_times
@@ -529,8 +531,8 @@ def plot_det_curve(y_class, y_score):
     fpr, fnr, thresholds = det_curve(y_class, y_score)
 
     return plot_det_curve_(fpr=fpr,
-                          fnr=fnr,
-                          thresholds=thresholds)
+                           fnr=fnr,
+                           thresholds=thresholds)
 
 
 def plot_det_curve_(fpr, fnr, thresholds):
@@ -810,10 +812,14 @@ def matthews_corrcoef_per_time_slot(y_class, y_pred):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = matthews_corrcoef(
-            y_true=y_class[i, :, :].flatten(),
-            y_pred=y_pred[i, :, :].flatten(),
-        )
+        try:
+            result[i] = matthews_corrcoef(
+                y_true=y_class[i, :, :].flatten(),
+                y_pred=y_pred[i, :, :].flatten(),
+            )
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -831,8 +837,12 @@ def average_precision_score_per_time_slot(y_class, y_score):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = average_precision_score(y_true=y_class[i, :, :].flatten(),
-                                            y_score=y_score[i, :, :].flatten())
+        try:
+            result[i] = average_precision_score(y_true=y_class[i, :, :].flatten(),
+                                                y_score=y_score[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -850,8 +860,12 @@ def roc_auc_score_per_time_slot(y_class, y_score):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = roc_auc_score(y_true=y_class[i, :, :].flatten(),
-                                  y_score=y_score[i, :, :].flatten())
+        try:
+            result[i] = roc_auc_score(y_true=y_class[i, :, :].flatten(),
+                                      y_score=y_score[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -869,8 +883,12 @@ def accuracy_score_per_time_slot(y_class, y_pred):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = accuracy_score(y_true=y_class[i, :, :].flatten(),
-                                   y_pred=y_pred[i, :, :].flatten())
+        try:
+            result[i] = accuracy_score(y_true=y_class[i, :, :].flatten(),
+                                       y_pred=y_pred[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -889,8 +907,12 @@ def precision_score_per_time_slot(y_class, y_pred):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = precision_score(y_true=y_class[i, :, :].flatten(),
-                                    y_pred=y_pred[i, :, :].flatten())
+        try:
+            result[i] = precision_score(y_true=y_class[i, :, :].flatten(),
+                                        y_pred=y_pred[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -909,8 +931,12 @@ def recall_score_per_time_slot(y_class, y_pred):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = recall_score(y_true=y_class[i, :, :].flatten(),
-                                 y_pred=y_pred[i, :, :].flatten())
+        try:
+            result[i] = recall_score(y_true=y_class[i, :, :].flatten(),
+                                     y_pred=y_pred[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -929,8 +955,12 @@ def rmse_per_time_slot(y_true, y_pred):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = np.sqrt(mean_squared_error(y_true=y_true[i, :, :].flatten(),
-                                               y_pred=y_pred[i, :, :].flatten()))
+        try:
+            result[i] = np.sqrt(mean_squared_error(y_true=y_true[i, :, :].flatten(),
+                                                   y_pred=y_pred[i, :, :].flatten()))
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
@@ -949,8 +979,12 @@ def mae_per_time_slot(y_true, y_pred):
     result = np.zeros(N)
 
     for i in range(N):
-        result[i] = mean_absolute_error(y_true=y_true[i, :, :].flatten(),
-                                        y_pred=y_pred[i, :, :].flatten())
+        try:
+            result[i] = mean_absolute_error(y_true=y_true[i, :, :].flatten(),
+                                            y_pred=y_pred[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
 
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)

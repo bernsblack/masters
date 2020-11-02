@@ -387,7 +387,12 @@ class InteractiveHeatmapsWithLines:
         self.date_range = date_range
 
         # time index date display label
-        self.current_date_label = widgets.Label(f'Date: {self.date_range[0].strftime("%c")}')
+        if isinstance(date_range, DatetimeIndex):
+            label = f'Date: {self.date_range[0].strftime("%c")}'
+        else:
+            label = f'Offset: {self.date_range[0]}'
+
+        self.current_date_label = widgets.Label(label)
 
         # time index selector
         self.time_index_slider = widgets.IntSlider(
@@ -404,7 +409,14 @@ class InteractiveHeatmapsWithLines:
             time_index = get_widget_value(change)
             if time_index is not None:
                 self.time_index = time_index
-                self.current_date_label.value = f'Date: {self.date_range[self.time_index].strftime("%c")}'
+
+                # time index date display label
+                if isinstance(date_range, DatetimeIndex):
+                    label_ = f'Date: {self.date_range[self.time_index].strftime("%c")}'
+                else:
+                    label_ = f'Offset: {self.date_range[self.time_index]}'
+
+                self.current_date_label.value = label_
 
                 for name_, heatmap in self.heatmaps.items():
                     heatmap.z = self.grids[name_][self.time_index]
@@ -725,9 +737,14 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
     grid_line = fw_lines.data[0]
     figs = [fw_grid, fw_lines]
 
-    temporal_variables = kwargs.get('temporal_variables', ["Day of Week", "Time of Month", "Time of Year"])
-
     if kwargs.get("mutual_info"):
+        temporal_variables = kwargs.get('temporal_variables')
+        if temporal_variables is None:
+            if t_range.freqstr == 'H':
+                temporal_variables = ["Hour", "Day of Week"]
+            else:
+                temporal_variables = ["Day of Week", "Time of Month", "Time of Year"]
+
         conds = construct_temporal_information(
             date_range=t_range,
             temporal_variables=temporal_variables,
@@ -749,7 +766,7 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
         mi_line, cmi_line = fw_mi.data
         figs.append(fw_mi)
 
-        state = State()
+    state = State()
 
     def draw():
         x = state['x']
@@ -763,9 +780,13 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
             grid_line.x = t_range
 
             if kwargs.get("mutual_info"):
-                my, mx = mutual_info_over_time(a=z, max_offset=kwargs.get('max_offset', 30))
+                my, mx = mutual_info_over_time(a=z,
+                                               max_offset=kwargs.get('max_offset', 30),
+                                               bins=kwargs.get('bins', 0))
+
                 cy, cx = conditional_mutual_info_over_time(a=z,
                                                            max_offset=kwargs.get('max_offset', 30),
+                                                           bins=kwargs.get('bins', 0),
                                                            conds=conds)
                 mi_line.y, mi_line.x = my, mx
                 cmi_line.y, cmi_line.x = cy, cx

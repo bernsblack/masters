@@ -484,6 +484,8 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
         a = np.round(np.log2(1 + a))
 
     if bins > 0:
+        logging.warning(f"cutting data into {bins} bins: dangerous when data is exponentially distributed")
+        # assert 1 == 0, "bins are being used"
         a = cut(a, bins)
 
     mis = []
@@ -525,9 +527,11 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
     n = len(a) - max_offset
 
     if log_norm:
-        a = np.round(np.log2(1 + a)).reshape(-1, 1)
+        a = np.round(np.log2(1 + a))
 
     if bins > 0:
+        logging.warning(f"cutting data into {bins} bins: dangerous when data is exponentially distributed")
+        # assert 1 == 0, "bins are being used"
         a = cut(a, bins)
 
     if conds is None:  # no explicit conditions use the cycles to construct a conditional series
@@ -603,9 +607,9 @@ def conditional_mutual_information_over_grid(
         t_range,
         max_offset=35,
         norm=True,
-        log_norm=False,
+        log_norm=True,
         include_self=False,
-        bins=10,  # mutual info bins
+        bins=0,  # mutual info bins
         temporal_variables=["Day of Week", "Time of Month", "Time of Year"],
         month_divisions=10,
         year_divisions=10,
@@ -637,7 +641,7 @@ def conditional_mutual_information_over_grid(
 
     cmis = []
     for i in range(l):
-        if i % 10 == 0:
+        if i % 5 == 0:
             logging.info(f"=> {i:04d}/{l:04d} => {i / l * 100:.3f}")
         cmi_y, cmi_x = conditional_mutual_info_over_time(
             a=dense_grid[:, i],
@@ -659,9 +663,9 @@ def mutual_information_over_grid(
         dense_grid,
         max_offset=35,
         norm=True,
-        log_norm=False,
+        log_norm=True,
         include_self=False,
-        bins=10,  # mutual info bins
+        bins=0,  # mutual info bins
 ):
     """
 
@@ -679,7 +683,7 @@ def mutual_information_over_grid(
 
     mis = []
     for i in range(l):
-        if i % 10 == 0:
+        if i % 5 == 0:
             logging.info(f"=> {i:04d}/{l:04d} => {i / l * 100:.3f}")
         mi_y, mi_x = mutual_info_over_time(
             a=dense_grid[:, i],
