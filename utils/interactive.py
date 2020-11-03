@@ -1,4 +1,5 @@
 import numpy as np
+from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, average_precision_score
 
 from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time, \
     construct_temporal_information
@@ -594,6 +595,64 @@ def plot_interactive_pr(data_path, beta=1):
                 name=f"{metric.model_name} (AP={metric.pr_curve.ap:.3f})"
             )
         )
+
+    return fig
+
+
+def plot_interactive_roc_(y_true, y_score, model_name='model'):
+    fig = go.Figure(
+        layout=dict(
+            title_text="Receiver Operating Characteristic Curve",
+            title_x=0.5,
+            height=650,
+            #         width=650,
+            #         yaxis=dict(scaleanchor="x", scaleratio=1),
+            yaxis_title='True Positive Rate',
+            xaxis_title='False Positive Rate',
+            yaxis=dict(range=[-0.01, 1.01]),
+            xaxis=dict(range=[-0.01, 1.01]),
+        ),
+    )
+
+    fpr, tpr, thresh = roc_curve(y_true, y_score)
+    auc = roc_auc_score(y_true, y_score)
+
+    fig.add_trace(
+        go.Scatter(
+            y=tpr,
+            x=fpr,
+            name=f"{model_name} (AUC={auc:.3f})"
+        )
+    )
+
+    return fig
+
+
+def plot_interactive_pr_(y_true, y_score, model_name='model'):
+    fig = go.Figure(
+        layout=dict(
+            title_text="Precision Recall Curve",
+            title_x=0.5,
+            height=650,
+            #         width=650,
+            #         yaxis=dict(scaleanchor="x", scaleratio=1),
+            yaxis_title='Precision',
+            xaxis_title='Recall',
+            yaxis=dict(range=[-0.01, 1.01]),
+            xaxis=dict(range=[-0.01, 1.01]),
+        ),
+    )
+
+    precision, recall, thresh = precision_recall_curve(y_true, y_score)
+    ap = average_precision_score(y_true, y_score)
+
+    fig.add_trace(
+        go.Scatter(
+            y=precision,
+            x=recall,
+            name=f"{model_name} (AP={ap:.3f})"
+        )
+    )
 
     return fig
 

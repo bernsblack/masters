@@ -579,7 +579,7 @@ from pandas import DataFrame
 
 def construct_temporal_information(
         date_range,
-        temporal_variables=["Hour", "Day of Week", "Time of Month", "Time of Year"],
+        temporal_variables=("Hour", "Day of Week", "Time of Month", "Time of Year"),
         month_divisions=4,
         year_divisions=4,
 ):

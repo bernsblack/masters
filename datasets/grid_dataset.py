@@ -2,6 +2,8 @@ import logging as log
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
+
+from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
 from utils.utils import if_none
@@ -32,6 +34,7 @@ class GridDataGroup:
                 self.crimes = zip_file["crime_types_grids"]
             else:
                 self.crimes = zip_file["crime_grids"]
+            self.crime_feature_indices = list(zip_file["crime_feature_indices"])
 
             self.total_len = len(self.crimes)  # length of the whole time series
 
@@ -43,9 +46,11 @@ class GridDataGroup:
                 freqstr = "24H"
             if freqstr == "H":
                 freqstr = "1H"
-            time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
-            # time_step_hrs = int(
+            # hours_per_time_step = int(freqstr[:freqstr.find("H")])  # time step in hours
+            # hours_per_time_step = int(
             #     self.t_range.freq.nanos / HOUR_NANOS)  # int(freqstr[:freqstr.find("H")])  # time step in hours
+            hours_per_time_step = self.t_range.freq.nanos / HOUR_NANOS  # time step in hours
+            time_steps_per_day = 24 / hours_per_time_step
 
             if freqstr == "24H":
                 self.step_c = 1
@@ -53,8 +58,8 @@ class GridDataGroup:
                 self.step_q = 14
             else:
                 self.step_c = 1
-                self.step_p = int(24 / time_step_hrs)  # jumps in days
-                self.step_q = int(168 / time_step_hrs)  # jumps in weeks -  maximum offset
+                self.step_p = int(24 / hours_per_time_step)  # jumps in days
+                self.step_q = int(168 / hours_per_time_step)  # jumps in weeks -  maximum offset
 
             self.n_steps_c = conf.n_steps_c  # 3
             self.n_steps_p = conf.n_steps_p  # 3
@@ -62,6 +67,7 @@ class GridDataGroup:
 
             #  split the data into ratios - size represent the targets sizes not the number of time steps
             self.total_offset = self.step_q * self.n_steps_q
+            # self.total_offset = np.max([self.step_q * self.n_steps_q, 365 * time_steps_per_day])
 
             target_len = self.total_len - self.total_offset
 
@@ -82,8 +88,8 @@ class GridDataGroup:
             # OPTION 3:
             # constant test set size and varying train and validation sizes
             # test set can be set to be specific # days instead of just a year
-            tst_size = int(24 * conf.test_set_size_days / time_step_hrs)
-            # tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
+            tst_size = int(24 * conf.test_set_size_days / hours_per_time_step)
+            # tst_size = int(HOURS_IN_YEAR / hours_per_time_step)  # conf.test_set_size # the last year in the data set
             trn_val_size = target_len - tst_size
             val_size = int(conf.val_ratio * trn_val_size)
             trn_size = trn_val_size - val_size
@@ -132,6 +138,18 @@ class GridDataGroup:
 
                 log.info(f"capping max crime values to {cap} which is percentile {conf.cap_crime_percentile}")
 
+            # get historic average on the log2+1 normed values
+            if conf.use_historic_average:
+                if time_steps_per_day == 1:
+                    ha = HistoricAverage(step=7)
+                elif time_steps_per_day == 24:
+                    ha = HistoricAverage(step=24)
+                else:
+                    ha = HistoricAverage(step=1)
+
+                historic_average = ha.fit_transform(squeezed_crimes[:, 0:1])
+                squeezed_crimes = np.concatenate((squeezed_crimes, historic_average), axis=1)
+
             self.crimes = self.shaper.unsqueeze(
                 squeezed_crimes)  # ensures we ignore areas that do not have crime through out and ensures crime data in different data loaders are exactly the same
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
@@ -170,6 +188,7 @@ class GridDataGroup:
 
         # self.crimes = np.round(np.log2(1 + self.crimes)) # by rounding we cannot retrieve original count
         self.crimes = np.log2(1 + self.crimes)
+
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data
         self.crime_scaler.fit(self.crimes,

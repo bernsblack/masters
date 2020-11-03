@@ -7,7 +7,10 @@ import numpy as np
 from IPython.display import HTML
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
+from sparse_discrete_table import mutual_info_over_time, conditional_mutual_info_over_time, \
+    construct_temporal_information
 from utils.configs import BaseConf
+from utils.interactive import cmi_name
 
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
@@ -128,7 +131,7 @@ def visualize_weights(model):
     state_dict = model.state_dict()
     keys = []
     for i, k in enumerate(state_dict):
-        values = state_dict[k].squeeze().data.numpy()
+        values = state_dict[k].squeeze().input_data.numpy()
         plt.scatter(i * np.ones(values.shape), values, alpha=0.5)
         keys.append(k)
 
@@ -148,6 +151,32 @@ def visualize_weights(model):
 def plot(**kwargs):
     return go.Figure([go.Scatter(y=arg, name=kw) for kw, arg in kwargs.items()])
 
+
+def plot_time_signals(t_range, alpha=0.5, **kwargs):
+    return go.Figure([go.Scatter(y=arg, x=t_range, name=kw, opacity=alpha) for kw, arg in kwargs.items()])
+
+
+# import plotly.figure_factory as ff
+# def displot(**kwargs):
+#     """
+#     plots interactive plotly diostribution of the kwargs values
+#
+#     :param kwargs: keys: names of arrays, values: one dimensional array shape (n,)
+#     :return:
+#     """
+#     fig = ff.create_distplot(list(kwargs.values()), list(kwargs.keys()))
+#     fig.show()
+
+from seaborn import distplot
+
+
+def displot(**kwargs):
+    plt.figure(figsize=(16, 8))
+    for k, v in kwargs.items():
+        distplot(v, label=k, rug=True, hist=True, rug_kws={"alpha": 0.1}, kde_kws={"alpha": 0.5, "lw": 4})
+    plt.grid()
+    plt.legend()
+    plt.show()
 
 
 def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):
@@ -336,7 +365,7 @@ class MySubplots2:
         """
         for i in range(self.data_len):
             self.pred_plots[i].set_data(data[i])
-            self.diff_plots[i].set_data(data[i] - self.target_plots[i].get_array().data)
+            self.diff_plots[i].set_data(data[i] - self.target_plots[i].get_array().input_data)
 
         if title_text:
             self.title.set_text(title_text)
@@ -405,7 +434,7 @@ def plot_convs(a):
     """
     if len(a.shape) < 4:
         plt.figure()
-        plt.imshow(a[0].data)
+        plt.imshow(a[0].input_data)
         plt.show()
     else:
         N, C, H, W = a.shape
@@ -414,7 +443,7 @@ def plot_convs(a):
         for i in range(1, C + 1):
             plt.subplot(c1, c2, i)
             plt.axis("off")
-            plt.imshow(a[0][i - 1].data, )
+            plt.imshow(a[0][i - 1].input_data, )
         plt.show()
 
 
@@ -595,3 +624,50 @@ def new_crime_distribution_plot(crimes: np.ndarray) -> go.Figure:
     )
 
     return fig
+
+
+import plotly.graph_objects as go
+
+
+def plot_mi_curves(
+        a,
+        t_range,
+        max_offset=35,
+        norm=True,
+        log_norm=False,
+        month_divisions=10,
+        year_divisions=10,
+        temporal_variables=("Day of Week", "Time of Month", "Time of Year"),
+):
+    conds = construct_temporal_information(
+        date_range=t_range,
+        temporal_variables=temporal_variables,
+        month_divisions=month_divisions,
+        year_divisions=year_divisions,
+    ).values
+
+    mi_score, offset = mutual_info_over_time(a=a, max_offset=max_offset,
+                                             log_norm=log_norm, norm=norm)
+
+    cmi_score, offset = conditional_mutual_info_over_time(a=a, max_offset=max_offset, conds=conds,
+                                                          log_norm=log_norm, norm=norm)
+
+    cmi_plot_label = cmi_name(temporal_variables=temporal_variables)
+
+    return go.Figure(
+        # data=[
+        #     go.Scatter(y=mi_score, x=offset, name="MI"),
+        #     go.Scatter(y=cmi_score, x=offset, name="CMI (DoW)"),
+        # ],
+        data=[
+            go.Scatter(y=mi_score, x=offset, name='$I(C_{t},C_{t-k})$'),
+            go.Scatter(y=cmi_score, x=offset, name=f'$I(C_{{t}},C_{{t-k}}|{cmi_plot_label})$'),
+        ],
+        layout=dict(
+            title_text="Mutual and Conditional Mutual Information",
+            title_x=0.5,
+            xaxis_title="Offset in days (k)",
+            yaxis_title="Normalised Score [0,1]",
+            legend_title="Curves",
+        ),
+    )

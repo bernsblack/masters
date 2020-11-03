@@ -67,15 +67,17 @@ def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='oh
 
         if not is_gte_24hours:  # only if we are working on a hourly time scale
             # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
-            hour_vec = sincos_vector(df.hour.values) / 2 + 0.5 # ensure all vectors are between 0 and 1
+            hour_vec = sincos_vector(df.hour.values) / 2 + 0.5  # ensure all vectors are between 0 and 1
             time_vectors = np.hstack([time_value_ohe, hour_vec])
         else:
             time_vectors = time_value_ohe
-    else: # option to encode all time information in a sin cos vector representation
-        tv_sce = encode_sincos(df[["hour", "dayofweek", "timeofmonth", "timeofyear"]].values)/ 2 + 0.5 # ensure all vectors are between 0 and 1
-        time_vectors = np.concatenate([tv_sce, is_weekend.reshape(-1,1)], axis=1)
+    else:  # option to encode all time information in a sin cos vector representation
+        tv_sce = encode_sincos(df[["hour", "dayofweek", "timeofmonth",
+                                   "timeofyear"]].values) / 2 + 0.5  # ensure all vectors are between 0 and 1
+        time_vectors = np.concatenate([tv_sce, is_weekend.reshape(-1, 1)], axis=1)
 
     return time_vectors
+
 
 def encode_category(series, categories):
     """
@@ -91,8 +93,10 @@ def encode_category(series, categories):
 
     return series.apply(lambda x: index_map.get(x, -1))
 
+
 def freq_to_nano(freq: str):
     return pd.to_timedelta(freq).delta
+
 
 def time_series_to_time_index(t_series: pd.Series, t_step: str = '1D', floor: bool = True):
     """
@@ -148,6 +152,7 @@ def map_to_weights(labels):
     hot_encoded = pd.get_dummies(pd.DataFrame(labels).loc[:, 0]).values
     weights = np.matmul(hot_encoded, dist)
     return weights
+
 
 @deprecated
 def encode_time_vectors_old(t_range):
@@ -542,7 +547,7 @@ def reverse_cumsum(s, T=24):
     r is torch variable tensor representing inverse cumsum data
     T is cumsum period
     """
-    s = s.data.numpy()
+    s = s.input_data.numpy()
     r = np.zeros(s.shape)
 
     if len(s) % T == 0:
@@ -790,3 +795,40 @@ def concentric_squares(a):
         ret[-1] = sums[-1]
 
         return ret
+
+def safe_divide(a, b):
+    return np.divide(a, b, out=np.zeros_like(a), where=b != 0)
+
+# def safe_divide(a, b):
+#     """
+#     ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0]
+#     from: https://stackoverflow.com/a/35696047/5006843
+#     """
+#     with np.errstate(divide='ignore', invalid='ignore'):
+#         c = np.true_divide( a, b )
+#         c[ ~ np.isfinite( c )] = 0  # -inf inf NaN
+#     return c
+
+
+# n,h,w
+def normalize_grid(data):
+    assert len(data.shape) == 3
+
+    summed_data = np.sum(data, axis=1, keepdims=True)
+    summed_data = np.sum(summed_data, axis=2, keepdims=True)
+    return safe_divide(data, summed_data)
+
+
+# n,l
+def normalize_flat(data):
+    assert len(data.shape) == 2
+
+    summed_data = np.sum(data, axis=1, keepdims=True)
+    return safe_divide(data, summed_data)
+
+
+def normalize(data):
+    """
+    sum of data will now sum to one
+    """
+    return safe_divide(data, np.sum(data))

@@ -10,7 +10,7 @@ class TestFlatDataLoaderIndexing(unittest.TestCase):
 
     def test_flat_loader_reconstruction(self):
         conf = BaseConf()
-        data_path = './data/processed/T24H-X850M-Y880M_2013-01-01_2017-01-01/'
+        data_path = './data/processed/T24H-X850M-Y880M_2012-01-01_2019-01-01_#826/'
         conf.sub_sample_test_set = 0
         conf.sub_sample_train_set = 0
         conf.sub_sample_validation_set = 0
@@ -25,7 +25,7 @@ class TestFlatDataLoaderIndexing(unittest.TestCase):
     def test_test_loader_indices(self):
         # CRIME DATA
         conf = BaseConf()
-        data_path = './data/processed/T24H-X850M-Y880M_2013-01-01_2017-01-01/'
+        data_path = './data/processed/T24H-X850M-Y880M_2012-01-01_2019-01-01_#826/'
         conf.sub_sample_test_set = 0
         conf.sub_sample_train_set = 0
         conf.sub_sample_validation_set = 0
@@ -44,7 +44,7 @@ class TestFlatDataLoaderIndexing(unittest.TestCase):
         loaders = FlatDataLoaders(data_group=data_group, conf=conf)
 
         count = 0
-        for indices, spc_feats, tmp_feats, env_feats, targets in loaders.test_loader:
+        for indices, spc_feats, tmp_feats, env_feats, targets, labels in loaders.test_loader:
             for i in range(len(indices)):
                 n, c, l = indices[i]
                 probas_pred[n, c, l] = targets[-1, i]

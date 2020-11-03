@@ -45,6 +45,9 @@ class TestDatasetIndexing(unittest.TestCase):
 
         crimes = shaper.squeeze(original_crime_data)
         targets = np.copy(crimes)[1:, 0:1]
+        labels = np.copy(targets)
+        labels[labels > 0] = 1
+
         total_crimes = np.ones(total_crimes_shape)
         t_range = np.ones(t_range_shape)  # t_range is matched to the target index
         time_vectors = np.ones(time_vectors_shape)
@@ -55,6 +58,7 @@ class TestDatasetIndexing(unittest.TestCase):
         self.mock_dataset = FlatDataset(
             crimes=crimes,
             targets=targets,
+            labels=labels,
             total_crimes=total_crimes,
             t_range=t_range,
             time_vectors=time_vectors,

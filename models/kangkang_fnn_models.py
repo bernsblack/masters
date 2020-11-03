@@ -29,7 +29,17 @@ Key extraction of the data will be done in the dataset / data loader.
 
 
 class KangFeedForwardNetwork(nn.Module):
-    def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5, model_arch=None):
+    def __init__(self, spc_size=37, tmp_size=15, env_size=512, output_size=1, dropout_p=0.5, model_arch=None):
+        """
+
+        :param spc_size: spatial dimension vector size
+        :param tmp_size: temporal dimension vector size
+        :param env_size: environmental dimension vector size
+        :param output_size: 1 for regression (default) and 2 for classification
+        :param dropout_p: dropout probability
+        :param model_arch: model architecture dictionary
+        """
+
         super(KangFeedForwardNetwork, self).__init__()
 
         self.name = "KangFNN"
@@ -87,7 +97,7 @@ class KangFeedForwardNetwork(nn.Module):
                                       nn.ReLU(),
                                       nn.Linear(final_net_h1, final_net_h1),
                                       nn.ReLU(),
-                                      nn.Linear(final_net_h1, 2))
+                                      nn.Linear(final_net_h1, output_size))
 
     def forward(self, spc_vec, tmp_vec, env_vec):
         if self.dropout_p > 0:
@@ -102,13 +112,23 @@ class KangFeedForwardNetwork(nn.Module):
 
 
 class SimpleKangFNN(nn.Module):
-    def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5, model_arch=None):
+    def __init__(self, spc_size=37, tmp_size=15, env_size=512, output_size=1, dropout_p=0.5, model_arch=None):
+        """
+
+        :param spc_size: spatial dimension vector size
+        :param tmp_size: temporal dimension vector size
+        :param env_size: environmental dimension vector size
+        :param output_size: 1 for regression (default) and 2 for classification
+        :param dropout_p: dropout probability
+        :param model_arch: model architecture dictionary
+        """
+
         super(SimpleKangFNN, self).__init__()
 
         self.name = "SimpleKangFNN"
 
         self.dropout_p = dropout_p
-        self.dropout = nn.Dropout(p=self.dropout_p) # not used when model is in eval mode
+        self.dropout = nn.Dropout(p=self.dropout_p)  # not used when model is in eval mode
 
         if model_arch:
             h_size0 = model_arch.get("h_size0")
@@ -136,7 +156,7 @@ class SimpleKangFNN(nn.Module):
 
         self.finalNet = nn.Sequential(nn.Linear(3 * h_size1, h_size2),
                                       nn.ReLU(),
-                                      nn.Linear(h_size2, 2))
+                                      nn.Linear(h_size2, output_size))
 
     def forward(self, spc_vec, tmp_vec, env_vec):
         if self.dropout_p > 0:
@@ -171,7 +191,7 @@ def train_epoch_for_fnn(model, optimiser, batch_loader, loss_fn, total_losses, c
             labels = torch.LongTensor(labels[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
             loss = loss_fn(input=out, target=labels)
         else:
-            targets = torch.FloatTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            targets = torch.FloatTensor(targets[-1, :]).to(conf.device)  # only taking [-1] for fnn
             loss = loss_fn(input=out, target=targets)
 
         epoch_losses.append(loss.item())
@@ -222,9 +242,12 @@ def evaluate_fnn(model, batch_loader, conf):
             # targets = torch.LongTensor(targets[0, :, 0]).to(conf.device)  # only taking [0] for fnn
             out = model(spc_feats, tmp_feats, env_feats)
 
-            batch_probas_pred = F.softmax(out, dim=-1)[:, 1].cpu().numpy()  # select class1 prediction
+            if conf.use_classification:
+                batch_y_score = F.softmax(out, dim=-1)[:, 1].cpu().numpy()  # select class1 prediction
+            else:
+                batch_y_score = out.cpu().numpy()  # select class1 prediction
 
-            for i, p in zip(indices, batch_probas_pred):
+            for i, p in zip(indices, batch_y_score):
                 n, c, l = i
                 y_score[n, c, l] = p
 

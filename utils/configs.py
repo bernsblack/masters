@@ -20,7 +20,7 @@ class BaseConf:  # args from arg-parser to over write values
         # default values
         # if the regression or classification version of the data loader should be used
         self.use_classification = False
-        self.use_historic_average = True
+        self.use_historic_average = False
         self.use_crime_types = False
 
         self.seed = 3

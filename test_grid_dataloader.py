@@ -14,7 +14,7 @@ import logging as log
 class TestGridDataLoaderIndexing(unittest.TestCase):
 
     def test_grid_loaders_reconstruction(self):
-        data_sub_path = 'T24H-X255M-Y220M_2012-01-01_2019-01-01_#c97'
+        data_sub_path = 'T24H-X850M-Y880M_2012-01-01_2019-01-01_#826'
         conf = BaseConf()
         conf.model_name = "test"
         conf.data_path = f"./data/processed/{data_sub_path}/"

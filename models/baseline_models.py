@@ -38,8 +38,8 @@ def get_max_steps(data, step):
 
 def historic_average(data, step, max_steps):
     """
-    historic_average get's the historic average of the following time step without including that time step.
-    it get's the the historic average of each cell and then moves it one time step forward.
+    historic_average gets the historic average of the following time step without including that time step.
+    it gets the the historic average of each cell and then moves it one time step forward.
     We do not want to use the input cell's historic average because it's less related to the target cell
 
     :param data: (N, ...) shape
@@ -71,7 +71,7 @@ class HistoricAverage:
         """
         determines the optimal
         """
-        self.max_steps = -1  # get_max_steps(data, self.step)
+        self.max_steps = get_max_steps(data, self.step) # -1
         self.fitted = True
         print(f"fitted historic average: step ({self.step}) and max_steps ({self.max_steps})")
 

@@ -318,11 +318,11 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
         self.averaged_over_time = averaged_over_time
 
-        mae_per_time = mae_per_time_slot(y_true=y_count, y_pred=y_score)
+        mae_per_time = mae_per_time_slot(y_count=y_count, y_score=y_score)
         self.mae_per_time = np.nan_to_num(mae_per_time)
 
         # rmse is not intuitive and skews the scores when test samples are few
-        rmse_per_time = rmse_per_time_slot(y_true=y_count, y_pred=y_score)
+        rmse_per_time = rmse_per_time_slot(y_count=y_count, y_score=y_score)
         self.rmse_per_time = np.nan_to_num(rmse_per_time)
 
         y_class = np.copy(y_count)
@@ -373,7 +373,7 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
             self.precision_score = precision_score(y_true=y_class, y_pred=y_pred)
             self.average_precision_score = average_precision_score(y_true=y_class, y_score=y_score)
             self.matthews_corrcoef = matthews_corrcoef(y_true=y_class, y_pred=y_pred)
-            self.predictive_accuracy_index = predictive_accuracy_index(y_true=y_count, y_pred=y_pred)
+            self.predictive_accuracy_index = predictive_accuracy_index(y_count=y_count, y_pred=y_pred)
             # treats all errors linearly
             self.mean_absolute_error = mean_absolute_error(y_true=y_count, y_pred=y_score)
             # penalises large variations in error - high weight to large errors - great for training, not intuitive, when comparing models especially when the number of test samples can become large.

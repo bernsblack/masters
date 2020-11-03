@@ -30,6 +30,8 @@ class BaseDataGroup:
                 log.info(f"loading crimes grids WITHOUT crime types")
                 self.crimes = zip_file["crime_grids"]  # original crime counts
 
+            self.crime_feature_indices = list(zip_file["crime_feature_indices"])
+
             self.t_range = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
@@ -38,11 +40,11 @@ class BaseDataGroup:
             #     freqstr = "24H"
             # if freqstr == "H":
             #     freqstr = "1H"
-            # time_step_hrs = int(freqstr[:freqstr.find("H")])  # time step in hours
-            time_step_hrs = int(self.t_range.freq.nanos / HOUR_NANOS)  # time step in hours
-            time_step_days = int(24 / time_step_hrs)
+            # hours_per_time_step = int(freqstr[:freqstr.find("H")])  # time step in hours
+            hours_per_time_step = self.t_range.freq.nanos / HOUR_NANOS  # time step in hours
+            time_steps_per_day = 24 / hours_per_time_step
 
-            self.offset_year = int(365 * time_step_days)
+            self.offset_year = int(365 * time_steps_per_day)
 
             self.seq_len = conf.seq_len
             self.pad_width = conf.pad_width
@@ -69,7 +71,7 @@ class BaseDataGroup:
 
             # OPTION 2:
             # # train/test split sizes is dependent on TEST_SET_SIZE_DAYS - sizes will be same for all models: makes it comparable
-            # tst_size = int((conf.tst_ratio/conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_step_days)
+            # tst_size = int((conf.tst_ratio/conf.tst_ratio) * TEST_SET_SIZE_DAYS * time_steps_per_day)
             # val_size = int((conf.val_ratio/conf.tst_ratio) * tst_size)
             # trn_size = int(((1 - conf.val_ratio - conf.tst_ratio)/conf.tst_ratio) * tst_size)
             # trn_val_size = trn_size + val_size
@@ -77,8 +79,8 @@ class BaseDataGroup:
             # OPTION 3:
             # constant test set size and varying train and validation sizes
             # test set can be set to be specific # days instead of just a year
-            tst_size = int(24 * conf.test_set_size_days / time_step_hrs)
-            # tst_size = int(HOURS_IN_YEAR / time_step_hrs)  # conf.test_set_size # the last year in the data set
+            tst_size = int(conf.test_set_size_days * time_steps_per_day)
+            # tst_size = int(HOURS_IN_YEAR / hours_per_time_step)  # conf.test_set_size # the last year in the data set
             trn_val_size = target_len - tst_size
             val_size = int(conf.val_ratio * trn_val_size)
             trn_size = trn_val_size - val_size
@@ -133,6 +135,7 @@ class BaseDataGroup:
             tract_count_grids = self.shaper.squeeze(tract_count_grids)
 
             self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)
+            self.crime_feature_indices.append("tract_count")
 
             # used for display purposes - and grouping similarly active cells together.
             self.sorted_indices = np.argsort(self.crimes[:, 0].sum(0))[::-1]
@@ -145,7 +148,6 @@ class BaseDataGroup:
             # if conf.use_classification:  # use this if statement in the training loops to determine if we should use y_class or y_countj
             #     self.targets[self.targets > 0] = 1
 
-            self.crimes = self.crimes[:-1]
             self.total_crimes = np.expand_dims(self.crimes[:, 0].sum(1), axis=1)
 
             self.time_vectors = zip_file["time_vectors"][1:]  # already normalised - time vector of future crime
@@ -176,9 +178,16 @@ class BaseDataGroup:
 
         # get historic average on the log2+1 normed values
         if conf.use_historic_average:
-            ha = HistoricAverage(step=time_step_days)
+            if time_steps_per_day == 1:
+                ha = HistoricAverage(step=7)
+            elif time_steps_per_day == 24:
+                ha = HistoricAverage(step=24)
+            else:
+                ha = HistoricAverage(step=1)
+
             historic_average = ha.fit_transform(self.crimes[:, 0:1])
             self.crimes = np.concatenate((self.crimes, historic_average), axis=1)
+            self.crime_feature_indices.append("historic_average")
 
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
@@ -211,8 +220,7 @@ class BaseDataGroup:
         self.tst_labels = self.labels[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
-        # self.total_crimes = np.round(np.log2(1 + self.total_crimes)) # by rounding the values we cannot inverse to get the original counts
-        self.total_crimes = np.log2(1 + self.total_crimes)
+        # self.total_crimes = np.log2(1 + self.total_crimes)
         self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         self.total_crimes_scaler.fit(self.total_crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)

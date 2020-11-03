@@ -6,7 +6,11 @@ import numpy as np
 import os
 import pandas as pd
 from pprint import pformat
+import pandas as pd
 
+
+def drop_nan(x):
+    return x[~np.isnan(x)]
 
 def cut(x, bins=10):
     """

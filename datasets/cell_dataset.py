@@ -152,6 +152,7 @@ class CellDataset(Dataset):
 
         self.crimes = pad4d(self.crimes, value=0, size=self.pad_width)
         self.targets = pad4d(self.targets, value=0, size=self.pad_width)
+        self.labels = pad4d(self.labels, value=0, size=self.pad_width)
         self.demog_grid = pad4d(self.demog_grid, value=0, size=self.pad_width)
         self.street_grid = pad4d(self.street_grid, value=0, size=self.pad_width)
 

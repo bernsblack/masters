@@ -99,10 +99,10 @@ class ExternalNet(nn.Module):  # need to add
     def init_weights(self):
         # torch.nn.init.xavier_uniform(self.fc1.weight)
         self.fc1.weight.data.uniform_(-0.5, 0.5)
-        self.fc1.bias.data.fill_(0)
+        self.fc1.bias.input_data.fill_(0)
         # torch.nn.init.xavier_uniform(self.fc2.weight)
         self.fc2.weight.data.uniform_(-0.5, 0.5)
-        self.fc2.bias.data.fill_(0)
+        self.fc2.bias.input_data.fill_(0)
 
     def forward(self, a):
         Xext = self.fc2(self.relu(self.fc1(a)))

@@ -24,8 +24,7 @@ def save_checkpoint(tag, model, optimiser, conf,
 
 
 # generic training loop
-def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None,
-                split_train_set=True):
+def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None, split_train_set=True):
     """
     train_model is a generic function used to train a variety of models
 
@@ -175,6 +174,62 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
     loss_plotter.savefig(f"{conf.model_path}plot_train_val_epoch_losses.png")
 
     return trn_epoch_losses, val_epoch_losses, stopped_early
+
+
+# generic training loop
+def train_model_final(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
+    """
+    train model using the train_validation_set up until the specified conf.max_epochs: no early stopping is used
+
+    :param model: torch model
+    :param optimiser: torch optimizer
+    :param loaders: batch loader class containing train, validation and test batch loaders
+    :param train_epoch_fn: function used to train model for epoch
+    :param loss_fn: loss function used in training process, can be CrossEntropy, MSE or MAE depending on model
+    :param conf: configure object containing all preferences for model, optimisations and training loops
+    :return: trn_val_epoch_losses
+
+    Notes
+    -----
+    train_model will log all information to model folder as well as produce training and validation loss curve plots
+    """
+    log.info(f"\n ====================== Final Training {conf.model_name} ====================== \n")
+    log.info(f"\n ====================== Config Values ====================== \n{conf}" +
+             "\n ====================== Config Values ====================== \n")
+
+    trn_val_batch_losses = []
+    trn_val_epoch_losses = []
+
+    log.info(f"Start Training {conf.model_name}")
+    log.info(f"Using optimiser: \n{optimiser}\n\n")
+
+    for epoch in range(conf.max_epochs):
+        log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
+        conf.timer.reset()
+        # Training loop
+        model.train()
+        epoch_loss = train_epoch_fn(model=model,
+                                    optimiser=optimiser,
+                                    batch_loader=loaders.train_validation_loader,
+                                    loss_fn=loss_fn,
+                                    total_losses=trn_val_batch_losses,
+                                    conf=conf)
+
+        trn_val_epoch_losses.append(epoch_loss)
+        log.debug(f"Epoch {epoch} -> Training Loop Duration: {conf.timer.check()}")
+        conf.timer.reset()
+
+        log.info(f"\tLoss (Trn Val): \t\t{trn_val_epoch_losses[-1]:.8f}")
+
+    tag = "final"
+
+    torch.save(model.state_dict(), f"{conf.model_path}model_{tag}.pth")
+    torch.save(optimiser.state_dict(), f"{conf.model_path}optimiser_{tag}.pth")
+    np.savez_compressed(file=f"{conf.model_path}losses_{tag}.npz",
+                        trn_val_batch_losses=trn_val_batch_losses,
+                        trn_val_epoch_losses=trn_val_epoch_losses)
+
+    return trn_val_epoch_losses
 
 
 # generic training loop

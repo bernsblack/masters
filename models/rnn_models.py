@@ -46,59 +46,26 @@ class MultiLayerGRU(nn.Module):
         return o2
 
 
-class GRUFNN1(nn.Module):
-    """
-    GRU then an FNN
-    """
-
-    def __init__(self, input_size, hidden_size, output_size, num_layers=1):
-        super(GRUFNN1, self).__init__()
-
-        self.name = "GRUFNN"
-
-        self.gru = nn.GRU(input_size, hidden_size, num_layers)  # (seq_len, batch_size, n_features) format
-        self.lin1 = nn.Linear(hidden_size, output_size)
-        self.relu = nn.ReLU()
-
-    def forward(self, x, h0=None):
-        # Forward propagate RNN
-        out, hn = self.gru(x, h0)  # hidden state start is zero
-        out = self.relu(out)
-        out = self.lin1(out)
-        out = self.relu(out)
-
-        # softmax - is applied in the loss function - should then explicitly be used when predicting
-
-        #  only if we wrapper our data from (batch_size*seq_len, hidden_size)
-        # Reshape output to (batch_size*seq_len, hidden_size)
-        #         out = out.contiguous().view(out.size(0)*out.size(1), out.size(2))
-
-        # Decode hidden states of all time step
-
-        return out  # if we never send h its never detached
-
-
-class GRUFNN2(nn.Module):
+class GRUFNN(nn.Module):
     """
     GRU then an FNN
     """
 
     def __init__(self, input_size, hidden_size0, hidden_size1, output_size, num_layers=1):
-        super(GRUFNN2, self).__init__()
+        super(GRUFNN, self).__init__()
 
         self.name = "GRUFNN"
 
         self.gru = nn.GRU(input_size, hidden_size0, num_layers, batch_first=True)  # note batch first
         self.lin1 = nn.Linear(hidden_size0, hidden_size1)
         self.lin2 = nn.Linear(hidden_size1, output_size)
-        self.relu = nn.ReLU()
+        self.activation = nn.RReLU(lower=0.01, upper=0.1)  # nn.LeakyReLU(0.01)  #nn.ReLU()
 
     def forward(self, x, h0=None):
         # Forward propagate RNN
         out, hn = self.gru(x, h0)  # hidden state start is zero if none
-        out = self.relu(out)
         out = self.lin1(out)
-        out = self.relu(out)
+        out = self.activation(out)
         out = self.lin2(out)
         # softmax - is applied in the loss function - should then explicitly be used when predicting
 
@@ -112,7 +79,17 @@ class GRUFNN2(nn.Module):
 
 
 class RecurrentFeedForwardNetwork(nn.Module):
-    def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5, model_arch=None):
+    def __init__(self, spc_size=37, tmp_size=15, env_size=512, output_size=1, dropout_p=0.5, model_arch=None):
+        """
+
+        :param spc_size: spatial dimension vector size
+        :param tmp_size: temporal dimension vector size
+        :param env_size: environmental dimension vector size
+        :param output_size: 1 for regression (default) and 2 for classification
+        :param dropout_p: dropout probability
+        :param model_arch: model architecture dictionary
+        """
+
         super(RecurrentFeedForwardNetwork, self).__init__()
 
         # drop out is not saved on the model state_dict - remember to turn off in evaluation
@@ -147,10 +124,10 @@ class RecurrentFeedForwardNetwork(nn.Module):
                                     nn.Linear(scp_net_h0, scp_net_h1),
                                     nn.ReLU())
 
-        self.tmpNet = GRUFNN2(input_size=tmp_size,
-                              hidden_size0=tmp_net_h0,
-                              hidden_size1=tmp_net_h0,
-                              output_size=tmp_net_h1)
+        self.tmpNet = GRUFNN(input_size=tmp_size,
+                             hidden_size0=tmp_net_h0,
+                             hidden_size1=tmp_net_h0,
+                             output_size=tmp_net_h1)
 
         self.envNet = nn.Sequential(nn.Linear(env_size, env_net_h0),
                                     nn.ReLU(),
@@ -163,7 +140,7 @@ class RecurrentFeedForwardNetwork(nn.Module):
                                       nn.ReLU(),
                                       nn.Linear(final_net_h1, final_net_h1),
                                       nn.ReLU(),
-                                      nn.Linear(final_net_h1, 2))
+                                      nn.Linear(final_net_h1, output_size))
 
     def forward(self, spc_vec, tmp_vec, env_vec):
         if self.dropout_p > 0:
@@ -179,7 +156,17 @@ class RecurrentFeedForwardNetwork(nn.Module):
 
 
 class SimpleRecurrentFeedForwardNetwork(nn.Module, ABC):
-    def __init__(self, spc_size=37, tmp_size=15, env_size=512, dropout_p=0.5, model_arch=None):
+    def __init__(self, spc_size=37, tmp_size=15, env_size=512, output_size=1, dropout_p=0.5, model_arch=None):
+        """
+
+        :param spc_size: spatial dimension vector size
+        :param tmp_size: temporal dimension vector size
+        :param env_size: environmental dimension vector size
+        :param output_size: 1 for regression (default) and 2 for classification
+        :param dropout_p: dropout probability
+        :param model_arch: model architecture dictionary
+        """
+
         super(SimpleRecurrentFeedForwardNetwork, self).__init__()
 
         self.name = "Simple RFFN"  # used to setup the model folders
@@ -212,7 +199,7 @@ class SimpleRecurrentFeedForwardNetwork(nn.Module, ABC):
 
         self.finalNet = nn.Sequential(nn.Linear(3 * h_size1, h_size2),
                                       nn.ReLU(),
-                                      nn.Linear(h_size2, 2))
+                                      nn.Linear(h_size2, output_size))
 
     def forward(self, spc_vec, tmp_vec, env_vec):
         if self.dropout_p > 0:
@@ -230,7 +217,7 @@ class SimpleRecurrentFeedForwardNetwork(nn.Module, ABC):
 # training loops
 def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, conf: BaseConf):
     """
-    Training the FNN model for a single epoch
+    Training the RFNN model for a single epoch
     """
     epoch_losses = []
     num_batches = batch_loader.num_batches
@@ -247,7 +234,7 @@ def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, 
             labels = torch.LongTensor(labels[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
             loss = loss_fn(input=out, target=labels)
         else:  # using regression targets
-            targets = torch.FloatTensor(targets[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            targets = torch.FloatTensor(targets[-1, :]).to(conf.device)  # only taking [-1] for fnn
             loss = loss_fn(input=out, target=targets)
 
         epoch_losses.append(loss.item())
@@ -265,7 +252,7 @@ def train_epoch_for_rfnn(model, optimiser, batch_loader, loss_fn, total_losses, 
 
 
 # evaluation loops
-def evaluate_rfnn(model, batch_loader, conf):
+def evaluate_rfnn(model: nn.Module, batch_loader, conf: BaseConf):
     """
     Only used to get probas in a time and location based format. The hard predictions should be done outside
     this function where the threshold is determined using only the training data
@@ -294,9 +281,91 @@ def evaluate_rfnn(model, batch_loader, conf):
             # targets = torch.LongTensor(targets[0, :, 0]).to(conf.device)  # only taking [0] for fnn
             out = model(spc_feats, tmp_feats, env_feats)
 
-            batch_probas_pred = F.softmax(out, dim=-1)[:, 1].cpu().numpy()  # select class1 prediction
+            if conf.use_classification:
+                batch_y_score = F.softmax(out, dim=-1)[:, 1].cpu().numpy()  # select class1 prediction
+            else:
+                batch_y_score = out.cpu().numpy()  # select class1 prediction
 
-            for i, p in zip(indices, batch_probas_pred):
+            for i, p in zip(indices, batch_y_score):
+                n, c, l = i
+                y_score[n, c, l] = p
+
+    return y_count, y_class, y_score, t_range
+
+
+# training loops
+def train_epoch_for_rnn(model, optimiser, batch_loader, loss_fn, total_losses, conf: BaseConf):
+    """
+    Training the RNN model for a single epoch
+    """
+    epoch_losses = []
+    num_batches = batch_loader.num_batches
+    for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
+        current_batch = batch_loader.current_batch
+
+        # Transfer to PyTorch Tensor and GPU
+        # spc_feats = torch.Tensor(spc_feats[-1]).to(conf.device)  # only taking [-1] for fnn
+        tmp_feats = torch.Tensor(tmp_feats).to(conf.device)  # only taking [-1] for fnn
+        # env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [-1] for fnn
+        out = model(tmp_feats)
+
+        if conf.use_classification:  # using classification labels
+            labels = torch.LongTensor(labels[-1, :, 0]).to(conf.device)  # only taking [-1] for fnn
+            loss = loss_fn(input=out, target=labels)
+        else:  # using regression targets
+            targets = torch.FloatTensor(targets[-1, :]).to(conf.device)  # only taking [-1] for fnn
+            loss = loss_fn(input=out, target=targets)
+
+        epoch_losses.append(loss.item())
+        total_losses.append(epoch_losses[-1])
+
+        if model.training:  # not used in validation loops
+            optimiser.zero_grad()
+            loss.backward()
+            clip_grad_norm_(model.parameters(), 0.5)  # used as regularisation
+            optimiser.step()
+            log.debug(f"Batch: {current_batch:04d}/{num_batches:04d} \t Loss: {epoch_losses[-1]:.4f}")
+
+    mean_epoch_loss = np.mean(epoch_losses)
+    return mean_epoch_loss
+
+
+# evaluation loops
+def evaluate_rnn(model: nn.Module, batch_loader, conf: BaseConf):
+    """
+    Only used to get probas in a time and location based format. The hard predictions should be done outside
+    this function where the threshold is determined using only the training data
+
+    :param model: pytorch model to be trained
+    :param batch_loader: loads batches when looping over data
+    :param conf: config object containing global settings for the training
+    :return: y_count, y_class, y_score, t_range
+    """
+    y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
+    y_count = batch_loader.dataset.targets[-len(y_score):]
+    y_class = batch_loader.dataset.labels[-len(y_score):]
+    t_range = batch_loader.dataset.t_range[-len(y_score):]
+
+    with torch.set_grad_enabled(False):
+        model.eval()
+
+        num_batches = batch_loader.num_batches
+        for indices, spc_feats, tmp_feats, env_feats, targets, labels in batch_loader:
+            current_batch = batch_loader.current_batch
+
+            # Transfer to PyTorch Tensor and GPU
+            spc_feats = torch.Tensor(spc_feats[-1]).to(conf.device)  # only taking [0] for fnn
+            tmp_feats = torch.Tensor(tmp_feats).to(conf.device)  # only taking [0] for fnn
+            env_feats = torch.Tensor(env_feats[-1]).to(conf.device)  # only taking [0] for fnn
+            # targets = torch.LongTensor(targets[0, :, 0]).to(conf.device)  # only taking [0] for fnn
+            out = model(tmp_feats)
+
+            if conf.use_classification:
+                batch_y_score = F.softmax(out, dim=-1)[:, 1].cpu().numpy()  # select class1 prediction
+            else:
+                batch_y_score = out.cpu().numpy()  # select class1 prediction
+
+            for i, p in zip(indices, batch_y_score):
                 n, c, l = i
                 y_score[n, c, l] = p
 

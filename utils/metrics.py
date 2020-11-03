@@ -3,6 +3,8 @@ import logging
 
 import numpy as np
 import torch
+
+from utils import drop_nan
 from utils.data_processing import get_times
 
 """
@@ -34,15 +36,15 @@ from sklearn.metrics import average_precision_score, precision_recall_curve, roc
 import unittest
 
 
-def predictive_accuracy_index_averaged_over_time(y_true, y_pred):
+def predictive_accuracy_index_averaged_over_time(y_count, y_pred):
     """
     Calculate PAI metrics averaged of each observation.
 
-    :param y_true: ndarray (N,L)
+    :param y_count: ndarray (N,L)
     :param y_pred: ndarray (N,L)
     :return: mean and standard deviation of the PAI averaged over time (axis=0)
     """
-    result = predictive_accuracy_index_per_time_slot(y_true, y_pred)
+    result = predictive_accuracy_index_per_time_slot(y_count, y_pred)
     return np.mean(result), np.std(result)
 
 
@@ -68,7 +70,7 @@ def predictive_accuracy_index_per_time_slot(y_count, y_pred):
     return np.array(pai_time_slot)
 
 
-def predictive_accuracy_index(y_true, y_pred):
+def predictive_accuracy_index(y_count, y_pred):
     """
     y_true: true crime counts of the grid (L,) with each cell value [0,max_int]
     y_pred: predicted hotspot areas in the grid -> 1 for hot 0 for not (L,) with each value [0 or 1]
@@ -77,8 +79,8 @@ def predictive_accuracy_index(y_true, y_pred):
     """
     assert y_pred.max() == 1 or y_pred.max() == 0  # make sure if prediction is made at least the value is one
 
-    n = np.sum(y_true[y_pred == 1])  # crimes in predicted area
-    N = np.sum(y_true)  # crimes in total area
+    n = np.sum(y_count[y_pred == 1])  # crimes in predicted area
+    N = np.sum(y_count)  # crimes in total area
 
     a = np.sum(y_pred)  # area of hotspots
     A = np.product(y_pred.shape)
@@ -107,27 +109,26 @@ Y_PRED_PAI = np.array([
 class TestPredictiveAccuracyIndex(unittest.TestCase):
 
     def test_predictive_accuracy_index(self):
-        y_true = Y_TRUE_PAI
-
+        y_count = Y_TRUE_PAI
         y_pred = Y_PRED_PAI
 
-        pai = predictive_accuracy_index(y_true=y_true, y_pred=y_pred)
+        pai = predictive_accuracy_index(y_count=y_count, y_pred=y_pred)
 
         self.assertAlmostEqual(pai, 2.1333333333333333)
 
     def test_predictive_accuracy_index_per_time(self):
-        y_true = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape(10, 1, -1)
-        y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape(10, 1, -1)
+        y_count = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape((10, 1, -1))
+        y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape((10, 1, -1))
 
-        pai_per_t = predictive_accuracy_index_per_time_slot(y_count=y_true, y_pred=y_pred)
+        pai_per_t = predictive_accuracy_index_per_time_slot(y_count=y_count, y_pred=y_pred)
         target = np.array(10 * [2.1333333333333333])
         self.assertTrue(np.equal(pai_per_t, target).all())
 
     def test_predictive_accuracy_index_averaged_over_time(self):
-        y_true = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape(10, -1)
-        y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape(10, -1)
+        y_count = np.stack(10 * [Y_TRUE_PAI], axis=0).reshape((10, 1, -1))
+        y_pred = np.stack(10 * [Y_PRED_PAI], axis=0).reshape((10, 1, -1))
 
-        pai_mu, pai_std = predictive_accuracy_index_averaged_over_time(y_true=y_true, y_pred=y_pred)
+        pai_mu, pai_std = predictive_accuracy_index_averaged_over_time(y_count=y_count, y_pred=y_pred)
         target_mu, target_std = 2.1333333333333333, 0
         self.assertTrue((pai_mu, pai_std) == (target_mu, target_std))
 
@@ -192,8 +193,9 @@ class TestPredictiveThresholds(unittest.TestCase):
         self.assertTrue((y_pred == y_pred_gt_1).all())
 
 
-def best_thresholds(y_class, y_score):
+def best_thresholds(y_class, y_score, verbose=False):
     """
+    :param verbose: if threshold calculations should be printed out
     :param y_class: ndarray (N,C,L) the true values for hot or not spots {0,1}
     :param y_score: ndarray (N,C,L) (probas_pred or y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
     :return list of best thresholds per cell
@@ -202,7 +204,7 @@ def best_thresholds(y_class, y_score):
     thresholds = np.empty(L)
     for l in range(L):
         # IMPORTANT NOTE: THIS SHOULD BE CALCULATED ON THE TRAINING SET
-        thresholds[l] = best_threshold(y_class=y_class[:, :, l], y_score=y_score[:, :, l])
+        thresholds[l] = best_threshold(y_class=y_class[:, :, l], y_score=y_score[:, :, l], verbose=verbose)
 
     return thresholds
 
@@ -222,39 +224,39 @@ def get_y_pred_by_thresholds(thresholds, y_score):
     return y_pred
 
 
-def mean_absolute_scaled_error(y_true, y_pred):
+def mean_absolute_scaled_error(y_count, y_pred):
     """
     Calculated the ratio between MAE of predicted value and the y_true lag by one time step.
-    :param y_true:
+    :param y_count:
     :param y_pred:
     :return:
     """
-    y_true_lag = y_true[:-1].copy()
-    y_true = y_true[1:]
+    y_true_lag = y_count[:-1].copy()
+    y_count = y_count[1:]
     y_pred = y_pred[1:]
 
-    mae_lag = mean_absolute_error(y_true, y_true_lag)
-    mae_pred = mean_absolute_error(y_true, y_pred)
+    mae_lag = mean_absolute_error(y_count, y_true_lag)
+    mae_pred = mean_absolute_error(y_count, y_pred)
 
     mase = mae_pred / mae_lag  # anything less than one is good
 
     return mase
 
 
-def get_metrics(y_true, y_pred):  # for a single time cell (N,1)
+def get_metrics(y_class, y_pred):  # for a single time cell (N,1)
     """
     grids_true: true crime grid (N,d,d)
     grids_pred: predicted crime grid (N,d,d)
     returns accuracy, precision, recall f1score and mase
     """
-    y_true = y_true.ravel()
+    y_class = y_class.ravel()
     y_pred = y_pred.ravel()
 
-    accuracy = accuracy_score(y_true, y_pred)
-    precision = precision_score(y_true, y_pred)
-    recall = recall_score(y_true, y_pred)
-    f1score = f1_score(y_true, y_pred)
-    mase = mean_absolute_scaled_error(y_true, y_pred)
+    accuracy = accuracy_score(y_class, y_pred)
+    precision = precision_score(y_class, y_pred)
+    recall = recall_score(y_class, y_pred)
+    f1score = f1_score(y_class, y_pred)
+    mase = mean_absolute_scaled_error(y_class, y_pred)
 
     r = {'accuracy': accuracy, 'precision': precision, 'recall': recall, 'f1score': f1score, 'mase': mase}
 
@@ -264,22 +266,22 @@ def get_metrics(y_true, y_pred):  # for a single time cell (N,1)
 
 
 # ============= PLOTS =============
-def plot_cell_results(y_true, y_pred):
+def plot_cell_results(y_class, y_pred):
     """
     function usually called in a loop to showcase a group of cells results
     """
-    indices = get_times(y_true)
+    indices = get_times(y_class)
 
     plt.figure(figsize=(20, 3))
     plt.scatter(indices, y_pred[indices], s=20, marker='1')
-    plt.scatter(indices, y_true[indices], s=20, c='r', marker='2')
+    plt.scatter(indices, y_class[indices], s=20, c='r', marker='2')
     plt.plot(y_pred, alpha=0.7)
 
     plt.show()
 
 
-def plot_conf(y_true, y_pred):
-    conf = confusion_matrix(y_true, y_pred)  # can't do confusion because the model never predicts higher
+def plot_conf(y_class, y_pred):
+    conf = confusion_matrix(y_class, y_pred)  # can't do confusion because the model never predicts higher
 
     plt.figure(figsize=(5, 5))
     plt.title("Confusion Matrix")
@@ -293,7 +295,7 @@ def plot_conf(y_true, y_pred):
     plt.show()
 
 
-def plot_roc_and_pr_curve(y_true, probas_pred_dict):
+def plot_roc_and_pr_curve(y_class, y_score_dict):
     # ROC and PR Are binary so the class should be specified, one-vs-many
     # selecting and setting the class
     fig, (ax0, ax1) = plt.subplots(1, 2, )
@@ -313,20 +315,20 @@ def plot_roc_and_pr_curve(y_true, probas_pred_dict):
     ax1.set_xlim(0, 1.)
     ax1.set_ylim(0, 1.)
 
-    for name, probas_pred in probas_pred_dict.items():
+    for name, probas_pred in y_score_dict.items():
         probas_pred = probas_pred.ravel()
 
         # ROC Curve
-        fpr, tpr, thresholds = roc_curve(y_true, probas_pred, drop_intermediate=False)
+        fpr, tpr, thresholds = roc_curve(y_class, probas_pred, drop_intermediate=False)
         thresholds = thresholds / np.max(thresholds)
-        auc = roc_auc_score(y_true, probas_pred)
+        auc = roc_auc_score(y_class, probas_pred)
         ax0.plot(fpr, tpr, label=name + " (AUC: %.3f)" % auc, alpha=0.5)
         ax0.scatter(fpr, tpr, alpha=0.5, s=5 * thresholds, marker='D')
 
         # Precision Recall Curve
-        precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
+        precision, recall, thresholds = precision_recall_curve(y_class, probas_pred)
         thresholds = thresholds / np.max(thresholds)
-        ap = average_precision_score(y_true, probas_pred)
+        ap = average_precision_score(y_class, probas_pred)
         ax1.plot(recall, precision, label=name + " (AP: %.3f)" % ap, alpha=0.5)
         ax1.scatter(recall, precision, alpha=0.5, s=5 * thresholds, marker='D')
 
@@ -458,9 +460,9 @@ class PRCurvePlotter(BaseMetricPlotter):
                 l, = plt.plot(x[y >= 0], y[y >= 0], color='gray', alpha=0.2)
             plt.annotate('F{0}={1:0.1f}'.format(beta, f_score), xy=(0.9, y[45] + 0.02))
 
-    def add_curve(self, y_true, probas_pred, label_name):
-        precision, recall, thresholds = precision_recall_curve(y_true, probas_pred)
-        ap = average_precision_score(y_true, probas_pred)
+    def add_curve(self, y_class, y_score, label_name):
+        precision, recall, thresholds = precision_recall_curve(y_class, y_score)
+        ap = average_precision_score(y_class, y_score)
 
         self.plot_kwargs["label"] = label_name + f" (AP={ap:.3f})"
         plt.plot(recall, precision, **self.plot_kwargs)
@@ -488,11 +490,11 @@ class ROCCurvePlotter(BaseMetricPlotter):
         plt.xlim(-0.01, 1.1)
         plt.ylim(0, 1.1)
 
-    def add_curve(self, y_true, probas_pred, label_name):
+    def add_curve(self, y_class, y_score, label_name):
         """
-        :param y_true: array, shape = [n_samples] or [n_samples, n_classes]
+        :param y_class: array, shape = [n_samples] or [n_samples, n_classes]
         True binary labels or binary label indicators.
-        :param probas_pred: array, shape = [n_samples] or [n_samples, n_classes]
+        :param y_score: array, shape = [n_samples] or [n_samples, n_classes]
         Target scores, can either be probability estimates of the positive
         class, confidence values, or non-thresholded measure of decisions
         (as returned by "decision_function" on some classifiers). For binary
@@ -502,8 +504,8 @@ class ROCCurvePlotter(BaseMetricPlotter):
         :return: none
         """
 
-        fpr, tpr, thresholds = roc_curve(y_true, probas_pred, drop_intermediate=False)
-        auc = roc_auc_score(y_true, probas_pred)
+        fpr, tpr, thresholds = roc_curve(y_class, y_score, drop_intermediate=False)
+        auc = roc_auc_score(y_class, y_score)
 
         self.plot_kwargs["label"] = label_name + f" (AUC={auc:.3f})"
         plt.plot(fpr, tpr, **self.plot_kwargs)
@@ -640,7 +642,7 @@ class CellPlotter(BaseMetricPlotter):
         super(CellPlotter, self).__init__(title)
 
     @staticmethod
-    def plot_predictions(y_true=None, y_pred=None, probas_pred=None):  # todo maybe just send in model result object?
+    def plot_predictions(y_class=None, y_pred=None, y_score=None):  # todo maybe just send in model result object?
         """
         function usually called in a loop to showcase a group of cells results
         """
@@ -652,19 +654,19 @@ class CellPlotter(BaseMetricPlotter):
         # indices = get_times(y_true)
 
         # Major ticks every 20, minor ticks every 5
-        x_minor_ticks = np.arange(0, len(y_true) + 1, 1)
-        x_major_ticks = np.arange(0, len(y_true) + 1, 24)
+        x_minor_ticks = np.arange(0, len(y_class) + 1, 1)
+        x_major_ticks = np.arange(0, len(y_class) + 1, 24)
 
-        y_minor_ticks = np.arange(0, max(y_true) + .1, .1)
-        y_major_ticks = np.arange(0, int(max(y_true)) + 1, 1)
+        y_minor_ticks = np.arange(0, max(y_class) + .1, .1)
+        y_major_ticks = np.arange(0, int(max(y_class)) + 1, 1)
 
         ax.set_xticks(x_major_ticks)
         ax.set_xticks(x_minor_ticks, minor=True)
         ax.set_yticks(y_major_ticks)
         ax.set_yticks(y_minor_ticks, minor=True)
 
-        plt.xlim(-1, len(y_true))
-        plt.ylim(np.min(y_true) - .1, np.max(y_true) + .1)
+        plt.xlim(-1, len(y_class))
+        plt.ylim(np.min(y_class) - .1, np.max(y_class) + .1)
 
         # And a corresponding grid
         ax.grid(which='both')
@@ -673,12 +675,12 @@ class CellPlotter(BaseMetricPlotter):
         ax.grid(which='minor', alpha=0.2)
         ax.grid(which='major', alpha=0.5)
 
-        if y_true:
-            ax.plot(y_true, label="y_true")
-            mean = np.ones(y_true.shape) * np.mean(y_true)
+        if y_class:
+            ax.plot(y_class, label="y_class")
+            mean = np.ones(y_class.shape) * np.mean(y_class)
             ax.plot(mean, label="mean")
-        if probas_pred:
-            ax.plot(probas_pred, label="probas_pred")
+        if y_score:
+            ax.plot(y_score, label="y_score")
         if y_pred:
             ax.plot(y_pred, label="y_pred")
 
@@ -702,19 +704,19 @@ class PerTimeStepPlotter(BaseMetricPlotter):
         plt.plot(data, label=label)
 
 
-def accuracy_score_per_cell(y_true, y_pred):
+def accuracy_score_per_cell(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (1,1,L)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(L)
 
     for i in range(L):
-        result[i] = accuracy_score(y_true=y_true[:, :, i].flatten(),
-                                   y_pred=y_pred[:, :, i].flatten())
+        result[i] = accuracy_score(y_true=y_class[:, :, i].flatten(),
+                                   y_pred=y_score[:, :, i].flatten())
 
     result = np.expand_dims(result, axis=0)
     result = np.expand_dims(result, axis=0)
@@ -722,19 +724,19 @@ def accuracy_score_per_cell(y_true, y_pred):
     return result
 
 
-def precision_score_per_cell(y_true, y_pred):
+def precision_score_per_cell(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (1,1,L)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(L)
 
     for i in range(L):
-        result[i] = precision_score(y_true=y_true[:, :, i].flatten(),
-                                    y_pred=y_pred[:, :, i].flatten())
+        result[i] = precision_score(y_true=y_class[:, :, i].flatten(),
+                                    y_pred=y_score[:, :, i].flatten())
 
     result = np.expand_dims(result, axis=0)
     result = np.expand_dims(result, axis=0)
@@ -742,19 +744,19 @@ def precision_score_per_cell(y_true, y_pred):
     return result
 
 
-def recall_score_per_cell(y_true, y_pred):
+def recall_score_per_cell(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (1,1,L)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(L)
 
     for i in range(L):
-        result[i] = recall_score(y_true=y_true[:, :, i].flatten(),
-                                 y_pred=y_pred[:, :, i].flatten())
+        result[i] = recall_score(y_true=y_class[:, :, i].flatten(),
+                                 y_pred=y_score[:, :, i].flatten())
 
     result = np.expand_dims(result, axis=0)
     result = np.expand_dims(result, axis=0)
@@ -762,19 +764,19 @@ def recall_score_per_cell(y_true, y_pred):
     return result
 
 
-def average_precision_score_per_cell(y_true, probas_pred):
+def average_precision_score_per_cell(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (1,1,L)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(L)
 
     for i in range(L):
-        result[i] = average_precision_score(y_true=y_true[:, :, i].flatten(),
-                                            y_score=probas_pred[:, :, i].flatten())
+        result[i] = average_precision_score(y_true=y_class[:, :, i].flatten(),
+                                            y_score=y_score[:, :, i].flatten())
 
     result = np.expand_dims(result, axis=0)
     result = np.expand_dims(result, axis=0)
@@ -782,19 +784,19 @@ def average_precision_score_per_cell(y_true, probas_pred):
     return result
 
 
-def roc_auc_score_per_cell(y_true, probas_pred):
+def roc_auc_score_per_cell(y_class, y_score):
     """
     y_true: shape (N,1,L)
     probas_pred: (N,1,L)
 
     return: (1,1,L)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_class.shape
     result = np.zeros(L)
 
     for i in range(L):
-        result[i] = average_precision_score(y_true=y_true[:, :, i].flatten(),
-                                            y_score=probas_pred[:, :, i].flatten())
+        result[i] = average_precision_score(y_true=y_class[:, :, i].flatten(),
+                                            y_score=y_score[:, :, i].flatten())
 
     result = np.expand_dims(result, axis=0)
     result = np.expand_dims(result, axis=0)
@@ -847,6 +849,19 @@ def average_precision_score_per_time_slot(y_class, y_score):
     result = np.expand_dims(result, axis=1)
     result = np.expand_dims(result, axis=1)
     return result
+
+
+def mean_average_precision_over_time(y_class, y_score):
+    """
+    Calculate the average precision for each time slot and then mean the values
+
+    :param y_class: binary nd array of class labels
+    :param y_score: float nd array of prediction score
+    :return:
+    """
+    ap = average_precision_score_per_time_slot(y_class, y_score)
+    ap = drop_nan(ap)
+    return np.mean(ap)
 
 
 def roc_auc_score_per_time_slot(y_class, y_score):
@@ -944,20 +959,20 @@ def recall_score_per_time_slot(y_class, y_pred):
     return result
 
 
-def rmse_per_time_slot(y_true, y_pred):
+def rmse_per_time_slot(y_count, y_score):
     """
     y_true: shape (N,1,L)  float values varying between (0,1)
     probas_pred: (N,1,L) float values varying between (0,1)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_count.shape
     result = np.zeros(N)
 
     for i in range(N):
         try:
-            result[i] = np.sqrt(mean_squared_error(y_true=y_true[i, :, :].flatten(),
-                                                   y_pred=y_pred[i, :, :].flatten()))
+            result[i] = np.sqrt(mean_squared_error(y_true=y_count[i, :, :].flatten(),
+                                                   y_pred=y_score[i, :, :].flatten()))
         except ValueError:  # exception occurs when there is a time step where no crime occurs
             logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
             result[i] = np.nan
@@ -968,20 +983,20 @@ def rmse_per_time_slot(y_true, y_pred):
     return result
 
 
-def mae_per_time_slot(y_true, y_pred):
+def mae_per_time_slot(y_count, y_score):
     """
     y_true: shape (N,1,L)  float values varying between (0,1)
     probas_pred: (N,1,L) float values varying between (0,1)
 
     return: (N,1,1)
     """
-    N, _, L = y_true.shape
+    N, _, L = y_count.shape
     result = np.zeros(N)
 
     for i in range(N):
         try:
-            result[i] = mean_absolute_error(y_true=y_true[i, :, :].flatten(),
-                                            y_pred=y_pred[i, :, :].flatten())
+            result[i] = mean_absolute_error(y_true=y_count[i, :, :].flatten(),
+                                            y_pred=y_score[i, :, :].flatten())
         except ValueError:  # exception occurs when there is a time step where no crime occurs
             logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
             result[i] = np.nan
@@ -991,8 +1006,32 @@ def mae_per_time_slot(y_true, y_pred):
 
     return result
 
+def ncdg_per_time_slot(y_count, y_score):
+    """
+    y_true: shape (N,1,L)
+    probas_pred: (N,1,L)
 
-from sklearn.metrics._ranking import _binary_clf_curve
+    return: (N,1,1)
+    """
+    N, _, L = y_count.shape
+    result = np.zeros(N)
+
+    for i in range(N):
+        try:
+            result[i] = ndcg_score(
+                y_true=y_count[i, :, :].flatten(),
+                y_score=y_score[i, :, :].flatten())
+        except ValueError:  # exception occurs when there is a time step where no crime occurs
+            logging.warning(f"time step {i} has no crime and 'per time slot' metric will be set to NaN")
+            result[i] = np.nan
+
+    result = np.expand_dims(result, axis=1)
+    result = np.expand_dims(result, axis=1)
+    return result
+
+
+
+from sklearn.metrics._ranking import _binary_clf_curve, ndcg_score
 
 
 def det_curve(y_true, y_score, pos_label=None, sample_weight=None):
@@ -1068,3 +1107,30 @@ def det_curve(y_true, y_score, pos_label=None, sample_weight=None):
         fns[sl][::-1] / p_count,
         thresholds[sl][::-1]
     )
+
+
+from utils.data_processing import normalize_flat, normalize_grid
+
+
+def normalized_flat_mae(a, b):
+    norm_a = normalize_flat(a)
+    norm_b = normalize_flat(b)
+    return np.mean(np.abs(norm_a - norm_b))
+
+
+def normalized_grid_mae(a, b):
+    norm_a = normalize_grid(a)
+    norm_b = normalize_grid(b)
+    return np.mean(np.abs(norm_a - norm_b))
+
+
+def normalized_flat_rmse(a, b):
+    norm_a = normalize_flat(a)
+    norm_b = normalize_flat(b)
+    return np.sqrt(np.mean(np.square(norm_a - norm_b)))
+
+
+def normalized_grid_rmse(a, b):
+    norm_a = normalize_grid(a)
+    norm_b = normalize_grid(b)
+    return np.sqrt(np.mean(np.square(norm_a - norm_b)))
