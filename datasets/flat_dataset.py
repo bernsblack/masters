@@ -94,8 +94,9 @@ class FlatDataGroup(BaseDataGroup):
         _, _c, _ = dense_data.shape
         assert _c == 1
 
-        dense_descaled = self.target_scaler.inverse_transform(dense_data)[:, 0:1]
-        dense_count = np.round(2 ** dense_descaled - 1)
+        dense_count = self.target_scaler.inverse_transform(dense_data)[:, 0:1]
+        if self.log_norm_scale:
+            dense_count = np.round(2 ** dense_count - 1)
 
         return dense_count  # (N,1,L)
 

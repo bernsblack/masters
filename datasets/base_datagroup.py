@@ -5,11 +5,9 @@ import pandas as pd
 
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
-from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
+from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale
 
-from pandas.tseries.offsets import Hour as OffsetHour
-
-HOUR_NANOS = OffsetHour().nanos
+from utils.preprocessing import get_hours_per_time_step
 
 
 class BaseDataGroup:
@@ -41,7 +39,7 @@ class BaseDataGroup:
             # if freqstr == "H":
             #     freqstr = "1H"
             # hours_per_time_step = int(freqstr[:freqstr.find("H")])  # time step in hours
-            hours_per_time_step = self.t_range.freq.nanos / HOUR_NANOS  # time step in hours
+            hours_per_time_step = get_hours_per_time_step(self.t_range.freq)  # time step in hours
             time_steps_per_day = 24 / hours_per_time_step
 
             self.offset_year = int(365 * time_steps_per_day)
@@ -117,6 +115,7 @@ class BaseDataGroup:
             #                                                                        keepdims=True) * np.max(
             #     tmp_trn_crimes, axis=0, keepdims=True)
 
+            assert np.sum(shaper_crimes) > 0
             # fit crime data to shaper
             self.shaper = Shaper(data=shaper_crimes,
                                  conf=conf)
@@ -145,6 +144,8 @@ class BaseDataGroup:
             self.labels = np.copy(self.crimes[1:, 0:1])  # only check for totals > 0
             self.labels[self.labels > 0] = 1
 
+            self.crimes = self.crimes[:-1]
+
             # if conf.use_classification:  # use this if statement in the training loops to determine if we should use y_class or y_countj
             #     self.targets[self.targets > 0] = 1
 
@@ -169,12 +170,16 @@ class BaseDataGroup:
         self.val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         self.tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
 
+        self.log_norm_scale = conf.log_norm_scale
         # split and normalise the crime data
         # log2 scaling to count data to make less disproportionate
         # self.crimes = np.round(np.log2(1 + self.crimes)) # by round the values we cannot inverse to get the original counts
         # self.targets = np.round(np.log2(1 + self.targets)) # by round the values we cannot inverse to get the original counts
-        self.crimes = np.log2(1 + self.crimes)
-        self.targets = np.log2(1 + self.targets)
+        if self.log_norm_scale:
+            self.crimes = np.log2(1 + self.crimes)
+            self.targets = np.log2(1 + self.targets)
+
+        assert len(self.crimes) == len(self.targets)
 
         # get historic average on the log2+1 normed values
         if conf.use_historic_average:
@@ -192,8 +197,8 @@ class BaseDataGroup:
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         # self.crime_scaler.fit(self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]], axis=1) # scale only on training and validation data
-        self.crime_scaler.fit(self.crimes,
-                              axis=1)  # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
+        # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
+        self.crime_scaler.fit(self.crimes, axis=conf.scale_axis)
         self.crimes = self.crime_scaler.transform(self.crimes)
         self.trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         self.trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
@@ -220,7 +225,8 @@ class BaseDataGroup:
         self.tst_labels = self.labels[self.tst_indices[0]:self.tst_indices[1]]
 
         # total crimes - added separately because all spatial
-        # self.total_crimes = np.log2(1 + self.total_crimes)
+        # if self.log_norm_scale:
+        #     self.total_crimes = np.log2(1 + self.total_crimes)
         self.total_crimes_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data
         self.total_crimes_scaler.fit(self.total_crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1)
@@ -247,8 +253,8 @@ class BaseDataGroup:
         # tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
         # normalise space dependent data - using min_max_scale - no need to save train data norm values
-        self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
-        self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
+        self.demog_grid = min_max_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
+        self.street_grid = min_max_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
         self.training_validation_set = None
         self.training_set = None

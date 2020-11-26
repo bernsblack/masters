@@ -29,16 +29,38 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
-      <change afterPath="$PROJECT_DIR$/config/generate_data_week.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/config/generate_data_1f2.json" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/run_baseline_moving_averages.py" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/utils/mutual_information_plots.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Seasonal Decomposition.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Seasonal Decomposition.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - Ranking Objective.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Ranking Objective.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data.json" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data_7cd.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_7cf.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data_7ce.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_7ce.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data_c97.json" beforeDir="false" afterPath="$PROJECT_DIR$/config/generate_data_c97.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/config/generate_data_week.json" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/base_datagroup.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/base_datagroup.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/cell_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/cell_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/flat_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/flat_dataset.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/datasets/grid_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/grid_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/sequence_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/sequence_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/generate_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/generate_data.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/hawkes_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/hawkes_model.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/rnn_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/rnn_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/forecasting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_resnet_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_resnet_model_local.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_rfnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_rfnn_model_local.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/metrics.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/metrics.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,12 +101,12 @@
   <component name="GitRewordedCommitMessages">
     <option name="commitMessagesMapping">
       <RewordedCommitMessageMapping>
-        <option name="originalMessage" value="Removed high data plots from notebooks to enable git requirements&#10;&#10;Removed high data plots from notebooks to enable git requirements&#10;&#10;Added data folder to gitignore&#10;&#10;Signed-off-by: mielieboom &lt;bernardaswart@gmail.com&gt;&#10;&#10;Renamed and restructured mutual information notebooks&#10;&#10;Quick mutual information reference functions created" />
-        <option name="rewordedMessage" value="Added unit test for functional mutual information&#10;&#10;Removed high data plots from notebooks to enable git requirements&#10;&#10;Removed high data plots from notebooks to enable git requirements&#10;&#10;Added data folder to gitignore&#10;&#10;Signed-off-by: mielieboom &lt;bernardaswart@gmail.com&gt;&#10;&#10;Renamed and restructured mutual information notebooks&#10;&#10;Quick mutual information reference functions created" />
+        <option name="originalMessage" value="Updated unit tests" />
+        <option name="rewordedMessage" value="Added notebook analysis on city wide pred&#10;&#10;&#10;Checkpoint for city wide count notbook&#10;&#10;Checkpoint for city wide count notbook&#10;&#10;&#10;Sequence models updated&#10;&#10;&#10;Total crime count estimated using GRU&#10;&#10;&#10;Updated unit tests" />
       </RewordedCommitMessageMapping>
     </option>
     <option name="currentCommit" value="1" />
-    <option name="onto" value="10e5074b765862154fbc1e6f8f924d0f6b60dddc" />
+    <option name="onto" value="7d674e4d19d1850d743aef7a2270b7ce698cbb85" />
   </component>
   <component name="JupyterTrust" id="0566c3a9-1fd9-4711-ab3c-bccd7ba9a845" />
   <component name="MacroExpansionManager">
@@ -122,6 +144,27 @@
     </key>
   </component>
   <component name="RunManager" selected="Python.generate_data">
+    <configuration name="dev" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dev.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="generate_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -165,60 +208,7 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="run_rfnn_model_local" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/run_rfnn_model_local.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for metrics.TestPredictiveAccuracyIndex" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;metrics.TestPredictiveAccuracyIndex&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for metrics.TestPredictiveAccuracyIndex.test_predictive_accuracy_index_per_time" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="_new_keywords" value="&quot;&quot;" />
-      <option name="_new_parameters" value="&quot;&quot;" />
-      <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;metrics.TestPredictiveAccuracyIndex.test_predictive_accuracy_index_per_time&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
-      <method v="2" />
-    </configuration>
-    <configuration name="pytest for test_all_dataloader.TestAllDataLoaderIndexing" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest in test_all_dataloader.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -230,25 +220,57 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;test_all_dataloader.TestAllDataLoaderIndexing&quot;" />
-      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_all_dataloader.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_cell_dataloader.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_cell_dataloader.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest in test_flat_dataloader.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_flat_dataloader.py&quot;" />
+      <option name="_new_targetType" value="&quot;PATH&quot;" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python.run_rfnn_model_local" />
+      <item itemvalue="Python.dev" />
       <item itemvalue="Python.generate_data" />
-      <item itemvalue="Python tests.pytest for test_all_dataloader.TestAllDataLoaderIndexing" />
-      <item itemvalue="Python tests.pytest for metrics.TestPredictiveAccuracyIndex" />
-      <item itemvalue="Python tests.pytest for metrics.TestPredictiveAccuracyIndex.test_predictive_accuracy_index_per_time" />
+      <item itemvalue="Python tests.pytest in test_flat_dataloader.py" />
+      <item itemvalue="Python tests.pytest in test_cell_dataloader.py" />
+      <item itemvalue="Python tests.pytest in test_all_dataloader.py" />
     </list>
     <recent_temporary>
       <list>
         <item itemvalue="Python.generate_data" />
-        <item itemvalue="Python tests.pytest for metrics.TestPredictiveAccuracyIndex" />
-        <item itemvalue="Python tests.pytest for metrics.TestPredictiveAccuracyIndex.test_predictive_accuracy_index_per_time" />
-        <item itemvalue="Python.run_rfnn_model_local" />
-        <item itemvalue="Python tests.pytest for test_all_dataloader.TestAllDataLoaderIndexing" />
+        <item itemvalue="Python.dev" />
+        <item itemvalue="Python tests.pytest in test_all_dataloader.py" />
+        <item itemvalue="Python tests.pytest in test_cell_dataloader.py" />
+        <item itemvalue="Python tests.pytest in test_flat_dataloader.py" />
       </list>
     </recent_temporary>
   </component>
@@ -453,21 +475,20 @@
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
   </component>
   <component name="WindowStateProjectService">
-    <state x="454" y="211" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605253371535">
+    <state x="454" y="211" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1606417214190">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
-    <state x="454" y="211" key="#com.intellij.execution.impl.EditConfigurationsDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1605253371535" />
-    <state x="790" y="411" width="667" height="410" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1604993918037">
+    <state x="454" y="211" key="#com.intellij.execution.impl.EditConfigurationsDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1606417214190" />
+    <state x="790" y="411" width="668" height="417" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605780544105">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
-    <state x="1250" y="525" width="757" height="403" key="#com.intellij.fileTypes.FileTypeChooser/346.1440.1920.1080/418.0.2142.1440@418.0.2142.1440" timestamp="1596708359556" />
     <state x="790" y="415" width="668" height="300" key="#com.intellij.fileTypes.FileTypeChooser/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600764920110" />
-    <state x="790" y="411" width="667" height="410" key="#com.intellij.fileTypes.FileTypeChooser/72.27.1848.1053@72.27.1848.1053" timestamp="1604993918037" />
+    <state x="790" y="411" width="668" height="417" key="#com.intellij.fileTypes.FileTypeChooser/72.27.1848.1053@72.27.1848.1053" timestamp="1605780544105" />
     <state x="790" y="412" key="#com.intellij.fileTypes.FileTypeChooser/72.29.1848.1051@72.29.1848.1051" timestamp="1601130700943" />
-    <state x="723" y="269" width="1145" height="811" key="#xdebugger.evaluate" timestamp="1605253568822">
+    <state x="723" y="269" width="1145" height="811" key="#xdebugger.evaluate" timestamp="1605696904859">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
-    <state x="723" y="269" width="1145" height="811" key="#xdebugger.evaluate/72.27.1848.1053@72.27.1848.1053" timestamp="1605253568822" />
+    <state x="723" y="269" width="1145" height="811" key="#xdebugger.evaluate/72.27.1848.1053@72.27.1848.1053" timestamp="1605696904859" />
     <state x="586" y="131" width="809" height="853" key="CommitChangelistDialog2" timestamp="1600068113364">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
@@ -480,82 +501,78 @@
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="479" y="1574" width="1655" height="813" key="DiffContextDialog/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599455547527" />
-    <state x="200" y="158" width="1592" height="792" key="DiffContextDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1597219241299" />
     <state x="200" y="159" width="1593" height="792" key="DiffContextDialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600251947945" />
-    <state x="774" y="314" width="374" height="205" key="FileChooserDialogImpl" timestamp="1601319948066">
+    <state x="774" y="314" width="374" height="205" key="FileChooserDialogImpl" timestamp="1605699971652">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="1232" y="264" width="424" height="491" key="FileChooserDialogImpl/418.0.2142.2520@418.0.2142.2520" timestamp="1599033056077" />
-    <state x="774" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1601319948066" />
+    <state x="774" y="314" width="424" height="491" key="FileChooserDialogImpl/72.27.1848.1053@72.27.1848.1053" timestamp="1605699971652" />
     <state x="774" y="139" width="374" height="205" key="FileChooserDialogImpl/72.29.1848.1051@72.29.1848.1051" timestamp="1601122671760" />
-    <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog" timestamp="1600068151226">
-      <screen x="72" y="29" width="1848" height="1051" />
+    <state x="697" y="342" width="396" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog" timestamp="1605335120717">
+      <screen x="72" y="27" width="1848" height="1053" />
     </state>
+    <state x="697" y="342" width="396" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog/72.27.1848.1053@72.27.1848.1053" timestamp="1605335120717" />
     <state x="697" y="343" width="588" height="430" key="Git.Rebase.Log.Action.NewCommitMessage.Dialog/72.29.1848.1051@72.29.1848.1051" timestamp="1600068151226" />
-    <state width="1825" height="359" key="GridCell.Tab.0.bottom" timestamp="1605274966648">
+    <state width="1825" height="359" key="GridCell.Tab.0.bottom" timestamp="1606417545359">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392723" />
     <state width="1825" height="275" key="GridCell.Tab.0.bottom/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="363" key="GridCell.Tab.0.bottom/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600759127809" />
     <state width="1825" height="339" key="GridCell.Tab.0.bottom/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228452" />
-    <state width="1825" height="359" key="GridCell.Tab.0.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966648" />
+    <state width="1825" height="359" key="GridCell.Tab.0.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545359" />
     <state width="1825" height="289" key="GridCell.Tab.0.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1602055816761" />
-    <state width="1825" height="359" key="GridCell.Tab.0.center" timestamp="1605274966646">
+    <state width="1825" height="359" key="GridCell.Tab.0.center" timestamp="1606417545358">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.center/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="363" key="GridCell.Tab.0.center/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600759127809" />
     <state width="1825" height="339" key="GridCell.Tab.0.center/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228450" />
-    <state width="1825" height="359" key="GridCell.Tab.0.center/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966646" />
+    <state width="1825" height="359" key="GridCell.Tab.0.center/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545358" />
     <state width="1825" height="289" key="GridCell.Tab.0.center/72.29.1848.1051@72.29.1848.1051" timestamp="1602055816759" />
-    <state width="1825" height="359" key="GridCell.Tab.0.left" timestamp="1605274966645">
+    <state width="1825" height="359" key="GridCell.Tab.0.left" timestamp="1606417545350">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.left/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="363" key="GridCell.Tab.0.left/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600759127808" />
     <state width="1825" height="339" key="GridCell.Tab.0.left/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228449" />
-    <state width="1825" height="359" key="GridCell.Tab.0.left/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966645" />
+    <state width="1825" height="359" key="GridCell.Tab.0.left/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545350" />
     <state width="1825" height="289" key="GridCell.Tab.0.left/72.29.1848.1051@72.29.1848.1051" timestamp="1602055816758" />
-    <state width="1825" height="359" key="GridCell.Tab.0.right" timestamp="1605274966647">
+    <state width="1825" height="359" key="GridCell.Tab.0.right" timestamp="1606417545358">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599462392722" />
     <state width="1825" height="275" key="GridCell.Tab.0.right/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599475019658" />
     <state width="1825" height="363" key="GridCell.Tab.0.right/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600759127809" />
     <state width="1825" height="339" key="GridCell.Tab.0.right/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228451" />
-    <state width="1825" height="359" key="GridCell.Tab.0.right/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966647" />
+    <state width="1825" height="359" key="GridCell.Tab.0.right/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545358" />
     <state width="1825" height="289" key="GridCell.Tab.0.right/72.29.1848.1051@72.29.1848.1051" timestamp="1602055816760" />
-    <state width="1825" height="359" key="GridCell.Tab.1.bottom" timestamp="1605274966651">
+    <state width="1825" height="359" key="GridCell.Tab.1.bottom" timestamp="1606417545359">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="339" key="GridCell.Tab.1.bottom/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228456" />
-    <state width="1825" height="359" key="GridCell.Tab.1.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966651" />
+    <state width="1825" height="359" key="GridCell.Tab.1.bottom/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545359" />
     <state width="1825" height="359" key="GridCell.Tab.1.bottom/72.29.1848.1051@72.29.1848.1051" timestamp="1602050337832" />
-    <state width="1825" height="359" key="GridCell.Tab.1.center" timestamp="1605274966650">
+    <state width="1825" height="359" key="GridCell.Tab.1.center" timestamp="1606417545359">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="339" key="GridCell.Tab.1.center/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228454" />
-    <state width="1825" height="359" key="GridCell.Tab.1.center/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966650" />
+    <state width="1825" height="359" key="GridCell.Tab.1.center/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545359" />
     <state width="1825" height="359" key="GridCell.Tab.1.center/72.29.1848.1051@72.29.1848.1051" timestamp="1602050337832" />
-    <state width="1825" height="359" key="GridCell.Tab.1.left" timestamp="1605274966649">
+    <state width="1825" height="359" key="GridCell.Tab.1.left" timestamp="1606417545359">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="339" key="GridCell.Tab.1.left/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228453" />
-    <state width="1825" height="359" key="GridCell.Tab.1.left/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966649" />
+    <state width="1825" height="359" key="GridCell.Tab.1.left/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545359" />
     <state width="1825" height="359" key="GridCell.Tab.1.left/72.29.1848.1051@72.29.1848.1051" timestamp="1602050337831" />
-    <state width="1825" height="359" key="GridCell.Tab.1.right" timestamp="1605274966650">
+    <state width="1825" height="359" key="GridCell.Tab.1.right" timestamp="1606417545359">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state width="1825" height="339" key="GridCell.Tab.1.right/418.0.2142.2520@418.0.2142.2520" timestamp="1600504228455" />
-    <state width="1825" height="359" key="GridCell.Tab.1.right/72.27.1848.1053@72.27.1848.1053" timestamp="1605274966650" />
+    <state width="1825" height="359" key="GridCell.Tab.1.right/72.27.1848.1053@72.27.1848.1053" timestamp="1606417545359" />
     <state width="1825" height="359" key="GridCell.Tab.1.right/72.29.1848.1051@72.29.1848.1051" timestamp="1602050337832" />
-    <state x="417" y="403" width="436" height="640" key="RollbackChangesDialog" timestamp="1596701568790">
-      <screen x="418" y="0" width="2142" height="1440" />
-    </state>
-    <state x="417" y="403" width="436" height="640" key="RollbackChangesDialog/346.1440.1920.1080/418.0.2142.1440@418.0.2142.1440" timestamp="1596701568790" />
     <state x="133" y="27" width="1185" height="1440" key="SettingsEditor" timestamp="1601320003530">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
@@ -571,19 +588,18 @@
     </state>
     <state x="1094" y="1650" key="VCS.ChangeListViewerDialog/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1599224994311" />
     <state x="792" y="232" width="398" height="650" key="VCS.ChangeListViewerDialog/72.27.1848.1053@72.27.1848.1053" timestamp="1601386006136" />
-    <state x="741" y="245" width="381" height="289" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1605175135980">
+    <state x="741" y="245" width="381" height="310" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1606213200472">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="1193" y="298" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/346.1440.1920.1080/418.0.2142.1440@418.0.2142.1440" timestamp="1600673464054" />
     <state x="741" y="250" width="928" height="754" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804705490" />
-    <state x="1194" y="521" width="381" height="623" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/418.0.2142.2520@418.0.2142.2520" timestamp="1596624209346" />
-    <state x="741" y="245" width="381" height="289" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/72.27.1848.1053@72.27.1848.1053" timestamp="1605175135980" />
+    <state x="741" y="245" width="381" height="310" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/72.27.1848.1053@72.27.1848.1053" timestamp="1606213200472" />
     <state x="741" y="246" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/72.29.1848.1051@72.29.1848.1051" timestamp="1601061066034" />
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1598863391885">
       <screen x="418" y="0" width="2142" height="2520" />
     </state>
     <state x="1324" y="1119" width="428" height="177" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/418.0.2142.2520@418.0.2142.2520" timestamp="1598863391885" />
-    <state x="527" y="368" width="874" height="712" key="find.popup" timestamp="1605333744338">
+    <state x="527" y="368" width="874" height="712" key="find.popup" timestamp="1606418410068">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="779" y="1592" width="909" height="783" key="find.popup/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1600514169888" />
@@ -591,29 +607,34 @@
     <state x="489" y="175" width="874" height="522" key="find.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599578024344" />
     <state x="489" y="181" width="875" height="759" key="find.popup/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804707334" />
     <state x="882" y="335" width="1012" height="773" key="find.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1601277194688" />
-    <state x="527" y="368" width="874" height="712" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1605333744338" />
+    <state x="527" y="368" width="874" height="712" key="find.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1606418410068" />
     <state x="489" y="177" width="874" height="622" key="find.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1602492122318" />
     <state x="645" y="270" width="700" height="530" key="recent.locations.popup" timestamp="1601108013005">
       <screen x="72" y="29" width="1848" height="1051" />
     </state>
     <state x="645" y="270" width="700" height="530" key="recent.locations.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1601108013005" />
-    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup" timestamp="1604470527003">
+    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup" timestamp="1606416295071">
       <screen x="72" y="27" width="1848" height="1053" />
     </state>
     <state x="859" y="1612" width="896" height="912" key="search.everywhere.popup/346.1440.1920.1080/418.0.2142.1440@346.1440.1920.1080" timestamp="1600670052150" />
     <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/346.1440.1920.1080/72.27.1848.1053@72.27.1848.1053" timestamp="1599474953845" />
     <state x="566" y="201" width="862" height="883" key="search.everywhere.popup/346.1440.1920.1080/72.34.1848.1046@72.34.1848.1046" timestamp="1600804419065" />
     <state x="991" y="403" width="998" height="2125" key="search.everywhere.popup/418.0.2142.2520@418.0.2142.2520" timestamp="1601267042857" />
-    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1604470527003" />
+    <state x="566" y="195" width="861" height="887" key="search.everywhere.popup/72.27.1848.1053@72.27.1848.1053" timestamp="1606416295071" />
     <state x="566" y="197" width="861" height="886" key="search.everywhere.popup/72.29.1848.1051@72.29.1848.1051" timestamp="1602055355590" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/generate_data.py</url>
-          <line>421</line>
+          <url>file://$PROJECT_DIR$/run_baseline_moving_averages.py</url>
+          <line>149</line>
           <option name="timeStamp" value="1" />
+        </line-breakpoint>
+        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
+          <url>file://$PROJECT_DIR$/run_baseline_moving_averages.py</url>
+          <line>97</line>
+          <option name="timeStamp" value="2" />
         </line-breakpoint>
       </breakpoints>
     </breakpoint-manager>

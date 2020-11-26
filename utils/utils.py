@@ -9,6 +9,17 @@ from pprint import pformat
 import pandas as pd
 
 
+def cmi_name(temporal_variables):
+    cond_var_map = {
+        'Hour': 'H_t',
+        'Day of Week': 'DoW_t',
+        'Time of Month': 'ToM_t',
+        'Time of Year': 'ToY_t',
+    }
+
+    return ",".join([cond_var_map[k] for k in temporal_variables])
+
+
 def drop_nan(x):
     return x[~np.isnan(x)]
 

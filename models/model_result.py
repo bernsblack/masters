@@ -1,4 +1,8 @@
 import pickle
+from typing import List
+
+from IPython.core.display import display
+
 from utils.utils import is_all_integer
 from numpy import ndarray
 from pandas.core.indexes.datetimes import DatetimeIndex
@@ -10,247 +14,12 @@ from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, r
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
     recall_score_per_time_slot, safe_f1_score, mae_per_time_slot, rmse_per_time_slot, \
     predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot, predictive_accuracy_index, det_curve, \
-    DETCurvePlotter
-from utils.preprocessing import Shaper
+    DETCurvePlotter, ndcg_per_time_slot
+from utils.preprocessing import Shaper, scale_per_time_slot
 import os
 import numpy as np
 import logging as log
 import pandas as pd
-
-
-# remember pandas df.to_latex for the columns
-def parse_data_path(s):
-    dt, s = s.split("T")[-1].split('H')
-    dx, dy, s = s.split("X")[-1].split('M')
-    _, dy = dy.split("Y")
-    _, start_date, end_date = s.split("_")
-    r = {"dt": int(dt),
-         "dx": int(dx),
-         "dy": int(dy),
-         "start_date": start_date,
-         "stop_date": end_date}
-    return r
-
-
-def get_all_metrics():
-    """
-    """
-    data = []
-    paths = get_data_sub_paths()
-    for data_sub_path in paths:
-        data_path = f"./data/processed/{data_sub_path}/"
-        models_metrics = get_models_metrics(data_path)
-        for m in models_metrics:
-            row = {
-                **parse_data_path(data_sub_path),
-                "Model": m.model_name,
-                "RMSE": m.root_mean_squared_error,
-                "MAE": m.mean_absolute_error,
-                "ROC AUC": m.roc_auc_score,
-                "Avg. Precision": m.average_precision_score,
-                "Precision": m.precision_score,
-                "Recall": m.recall_score,
-                "F1 Score": safe_f1_score((m.precision_score, m.recall_score)),
-                "Accuracy": m.accuracy_score,
-                "MCC": m.matthews_corrcoef,
-                "PAI": m.predictive_accuracy_index,
-            }
-            data.append(row)
-
-    df = pd.DataFrame(data)
-    #     df.index.name = "Model Name"
-    # df.sort_values("F1 Score", inplace=True, ascending=False)
-    df.sort_values(["dt", "dx", "dy", "start_date", "stop_date", "Avg. Precision"], inplace=True, ascending=False)
-    col = ["Model", "dt", "dx", "dy", "start_date", "stop_date", "MAE", "RMSE",
-           "ROC AUC", "Avg. Precision", "Precision", "Recall", "F1 Score", "Accuracy", "Matthews Corrcoef"]
-    return df[col]
-
-
-def get_models_results(data_path):
-    """
-    Reads all model results give the path to a certain data-source/discretisation
-    :param data_path: path to a certain data-source/discretisation
-    :return: list of model metrics for the data discretisation
-    """
-    model_results = []
-    model_names = os.listdir(f"{data_path}models")
-
-    if '.DS_Store' in model_names:
-        model_names.remove('.DS_Store')
-
-    for model_name in model_names:
-        if not os.path.exists(data_path):
-            raise Exception(f"Directory ({data_path}) needs to exist.")
-
-        model_path = f"{data_path}models/{model_name}/"
-
-        file_name = f"{model_path}model_result.pkl"
-
-        if not os.path.exists(file_name):
-            continue
-
-        with open(file_name, 'rb') as file_pointer:
-            model_results.append(pickle.load(file_pointer))
-
-    if len(model_results) == 0:
-        raise EnvironmentError("No model results in this directory")
-
-    return model_results
-
-
-def get_model_result(model_path):
-    """
-    Reads all model results give the path to a certain data-source/discretisation
-    :param model_path: path to a certain data-source/discretisation
-    :return: model metric for the data discretisation
-    """
-    file_path = f"{model_path}/model_result.pkl"
-
-    if not os.path.exists(file_path):
-        raise Exception(f"File '{file_path}' does not exist.")
-
-    model_result = None
-    with open(file_path, 'rb') as file_pointer:
-        model_result = pickle.load(file_pointer)
-
-    return model_result
-
-
-def get_models_metrics(data_path):
-    """
-    Reads all model metrics give the path to a certain data-source/discretisation
-    :param data_path: path to a certain data-source/discretisation
-    :return: list of model metrics for the data discretisation
-    """
-    model_metrics = []
-    model_names = os.listdir(f"{data_path}models")
-
-    if '.DS_Store' in model_names:
-        model_names.remove('.DS_Store')
-
-    for model_name in model_names:
-        if not os.path.exists(data_path):
-            raise Exception(f"Directory ({data_path}) needs to exist.")
-
-        model_path = f"{data_path}models/{model_name}/"
-
-        file_name = f"{model_path}model_metric.pkl"
-
-        if not os.path.exists(file_name):
-            continue
-
-        with open(file_name, 'rb') as file_pointer:
-            model_metrics.append(pickle.load(file_pointer))
-
-    # if len(model_metrics) == 0:
-    #     raise EnvironmentError("No model metrics in this directory")
-
-    return model_metrics
-
-
-# remember pandas df.to_latex for the columns
-def get_metrics_table(models_metrics):
-    col = ['ROC AUC', 'Avg. Precision', 'Precision', 'Recall', 'F1 Score', 'Accuracy',
-           'MCC', 'PAI', 'RMSE', 'MAE']
-    data = []
-    names = []
-    for m in models_metrics:
-        names.append(m.model_name)
-        f1 = safe_f1_score((m.precision_score, m.recall_score))
-        row = [m.roc_auc_score, m.average_precision_score, m.precision_score, m.recall_score,
-               f1, m.accuracy_score, m.matthews_corrcoef, m.predictive_accuracy_index,
-               m.root_mean_squared_error, m.mean_absolute_error]
-        data.append(row)
-
-    df = pd.DataFrame(columns=col, data=data, index=names)
-    df.index.name = "Model Name"
-    # df.sort_values('F1 Score', inplace=True, ascending=False)
-    df.sort_values('Avg. Precision', inplace=True, ascending=False)
-
-    return df
-
-
-def compare_models(models_metrics):
-    """
-    Allows us to filter certain model metrics and only compare their values instead of comparing all the metrics
-
-    :param models_metrics: list of model metrics
-    :return: pandas data-frame table with all model metrics for all the models found under data_path
-    """
-
-    metrics_table = get_metrics_table(models_metrics)
-    log.info(f"\n{metrics_table}")
-
-    # pr-curve
-    pr_plot = PRCurvePlotter()
-    for metric in models_metrics:
-        pr_plot.add_curve_(precision=metric.pr_curve.precision,
-                           recall=metric.pr_curve.recall,
-                           ap=metric.pr_curve.ap,
-                           label_name=metric.model_name)
-    pr_plot.show()  # todo - save somewhere?
-
-    # roc-curve
-    roc_plot = ROCCurvePlotter()
-    for metric in models_metrics:
-        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
-                            tpr=metric.roc_curve.tpr,
-                            auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
-                            label_name=metric.model_name)
-    roc_plot.show()  # todo - save somewhere?
-    # todd add per cel and time plots per metric - should be saved on the metric class
-
-    # det-curve
-    det_plot = DETCurvePlotter()
-    for metric in models_metrics:
-        det_plot.add_curve_(fpr=metric.det_curve.fpr,
-                            fnr=metric.det_curve.fnr,
-                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
-                            label_name=metric.model_name)
-    det_plot.show()  # todo - save somewhere?
-
-    return metrics_table  # by returning the table - makes visualisation in notebooks easier
-
-
-def compare_all_models(data_path: str):
-    """
-    :param data_path: string path to the data directory
-    :return: pandas data-frame table with all model metrics for all the models found under data_path
-    """
-    models_metrics = get_models_metrics(data_path)
-
-    metrics_table = get_metrics_table(models_metrics)
-    log.info(f"\n{metrics_table}")
-
-    # pr-curve
-    pr_plot = PRCurvePlotter()
-    for metric in models_metrics:
-        pr_plot.add_curve_(precision=metric.pr_curve.precision,
-                           recall=metric.pr_curve.recall,
-                           ap=metric.pr_curve.ap,
-                           label_name=metric.model_name)
-    pr_plot.show()  # save somewhere?
-
-    # roc-curve
-    roc_plot = ROCCurvePlotter()
-    for metric in models_metrics:
-        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
-                            tpr=metric.roc_curve.tpr,
-                            auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
-                            label_name=metric.model_name)
-    roc_plot.show()  # save somewhere?
-    # todo add per cel and time plots per metric - should be saved on the metric class
-
-    # det-curve
-    det_plot = DETCurvePlotter()
-    for metric in models_metrics:
-        det_plot.add_curve_(fpr=metric.det_curve.fpr,
-                            fnr=metric.det_curve.fnr,
-                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
-                            label_name=metric.model_name)
-    det_plot.show()  # somewhere?
-
-    return metrics_table  # by returning the table - makes visualisation in notebooks easier
 
 
 class PRCurve:
@@ -275,11 +44,88 @@ class DETCurve:
 
 
 def mean_std(a):
+    a = drop_nan(a)
     return np.mean(a), np.std(a)
 
 
 def mean_std_str(m, s):
     return f"{m:.4f} ± {s:.4f}"
+
+
+from utils.utils import drop_nan
+
+
+class RankingMetrics:
+    def __init__(self, model_name, y_count, y_score, t_range):
+        """
+        RankingMetrics scales y_count, y_score to min=0, max=1 for each time slot. Then performs certain metrics on
+        the scaled data.
+
+        :param model_name: name of model used in plots
+        :param y_count: true crime counts (N,1,L) [0,inf) # should be scaled before - use data_group.to_counts()s
+        :param y_score: (y_score) probability of hot or not [0,1] for classification models and estimated count for regression models
+
+        Note
+        ----
+        y_count is converted to y_class by setting all values above zero to 1. y_class is used in calculation of other
+        metrics
+        """
+        self.model_name = model_name
+
+        # y_true must be in format N,1,L to be able to correctly compare all the models
+        if len(y_count.shape) != 3 or y_count.shape[1] != 1:
+            raise Exception(f"y_count must be in (N,1,L) not {y_count.shape}.")
+
+        if len(y_score.shape) != 3 or y_score.shape[1] != 1:
+            raise Exception(f"y_score must be in (N,1,L) not {y_score.shape}.")
+
+        self.t_range = t_range
+
+        # by scaling we can determine the goodness of distribution for each time step
+        y_count = scale_per_time_slot(y_count)  # scaled each time step to have max 1 and min 0
+        y_score = scale_per_time_slot(y_score)  # scaled each time step to have max 1 and min 0
+
+        ndcg_per_time = ndcg_per_time_slot(y_count=y_count, y_score=y_score)
+        self.mean_ndcg_score = np.mean(drop_nan(ndcg_per_time))
+        # self.ndcg_per_time = np.nan_to_num(ndcg_per_time)
+        self.ndcg_per_time = ndcg_per_time
+
+        mae_per_time = mae_per_time_slot(y_count=y_count, y_score=y_score)
+        self.mean_mae = np.mean(drop_nan(mae_per_time))
+        # self.mae_per_time = np.nan_to_num(mae_per_time)
+        self.mae_per_time = mae_per_time
+
+        y_class = np.copy(y_count)
+        y_class[y_class > 0] = 1
+
+        ap_per_time = average_precision_score_per_time_slot(y_class=y_class, y_score=y_score)
+        self.mean_average_precision = np.mean(drop_nan(ap_per_time))
+        # self.ap_per_time = np.nan_to_num(ap_per_time)
+        self.ap_per_time = ap_per_time
+
+        self.class_count_0 = len(y_class[y_class == 0].flatten())
+        self.class_count_1 = len(y_class[y_class == 1].flatten())
+
+    def __repr__(self):
+        r = rf"""
+        MODEL NORMALIZED RANKING METRICS
+            Class Balance (Crime:No-Crime) - 1:{self.class_count_0 / self.class_count_1:.3f}
+            Model Name: {self.model_name}
+                NDCG:      {self.mean_ndcg_score:.6f}
+                MAP:       {self.mean_average_precision:.6f}
+                MAE:       {self.mean_mae:.6f}
+        """
+        return r
+
+
+class RegressionsMetrics:  # short memory light way of comparing models - does not save the actually predictions
+    def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
+        return None
+
+class ClassificationMetrics:  # short memory light way of comparing models - does not save the actually predictions
+    def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
+        return None
+
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
@@ -318,36 +164,48 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
         self.averaged_over_time = averaged_over_time
 
+        # by scaling we can determine the goodness of distribution for each time step
+        y_count_scl = scale_per_time_slot(y_count)  # scaled each time step to have max 1 and min 0
+        y_score_scl = scale_per_time_slot(y_score)  # scaled each time step to have max 1 and min 0
+
+        ndcg_per_time = ndcg_per_time_slot(y_count=y_count_scl, y_score=y_score_scl)
+        self.ndcg_per_time = np.nan_to_num(ndcg_per_time)
+        self.ndcg = np.mean(self.ndcg_per_time)
+
+        mae_per_time_scl = mae_per_time_slot(y_count=y_count_scl, y_score=y_score_scl)
+        self.mae_scl = np.mean(mae_per_time_scl)
+
         mae_per_time = mae_per_time_slot(y_count=y_count, y_score=y_score)
-        self.mae_per_time = np.nan_to_num(mae_per_time)
+        self.mae_per_time = mae_per_time
 
         # rmse is not intuitive and skews the scores when test samples are few
         rmse_per_time = rmse_per_time_slot(y_count=y_count, y_score=y_score)
-        self.rmse_per_time = np.nan_to_num(rmse_per_time)
+        self.rmse_per_time = rmse_per_time
+
+        pai_per_time = predictive_accuracy_index_per_time_slot(y_count=y_count, y_pred=y_pred)
+        self.pai_per_time = pai_per_time
 
         y_class = np.copy(y_count)
         y_class[y_class > 0] = 1
 
         ap_per_time = average_precision_score_per_time_slot(y_class=y_class, y_score=y_score)
-        self.ap_per_time = np.nan_to_num(ap_per_time)
+        self.ap_per_time = ap_per_time
+        self.mean_ap = np.mean(drop_nan(ap_per_time))
 
         roc_per_time = roc_auc_score_per_time_slot(y_class=y_class, y_score=y_score)
-        self.roc_per_time = np.nan_to_num(roc_per_time)
+        self.roc_per_time = roc_per_time
 
         acc_per_time = accuracy_score_per_time_slot(y_class=y_class, y_pred=y_pred)
-        self.acc_per_time = np.nan_to_num(acc_per_time)
+        self.acc_per_time = acc_per_time
 
         p_per_time = precision_score_per_time_slot(y_class=y_class, y_pred=y_pred)
-        self.p_per_time = np.nan_to_num(p_per_time)
+        self.p_per_time = p_per_time
 
         r_per_time = recall_score_per_time_slot(y_class=y_class, y_pred=y_pred)
-        self.r_per_time = np.nan_to_num(r_per_time)
-
-        pai_per_time = predictive_accuracy_index_per_time_slot(y_count=y_count, y_pred=y_pred)
-        self.pai_per_time = np.nan_to_num(pai_per_time)
+        self.r_per_time = r_per_time
 
         mcc_per_time = matthews_corrcoef_per_time_slot(y_class=y_class, y_pred=y_pred)
-        self.mcc_per_time = np.nan_to_num(mcc_per_time)
+        self.mcc_per_time = mcc_per_time
 
         # flatten array for the next functions
         y_class = y_class.flatten()
@@ -398,6 +256,7 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
             MODEL METRICS (Averaged over Time Steps)
                 Class Balance (Crime:No-Crime) - 1:{self.class_count_0 / self.class_count_1:.3f}
                 Model Name: {self.model_name}
+                    NDCG:               {self.ndcg:.5f}                      
                     ROC AUC:            {mean_std_str(*self.roc_auc_score)}                
                     Average Precision:  {mean_std_str(*self.average_precision_score)}
                     Precision:          {mean_std_str(*self.precision_score)}
@@ -413,6 +272,7 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
             MODEL METRICS (Over All Samples)
             Class Balance (Crime:No-Crime) - 1:{self.class_count_0 / self.class_count_1:.3f}
                 Model Name: {self.model_name}
+                    NDCG:               {self.ndcg:.5f}                
                     ROC AUC:            {self.roc_auc_score:.5f}                
                     Average Precision:  {self.average_precision_score:.5f}
                     Precision:          {self.precision_score:.5f}
@@ -510,6 +370,31 @@ class ModelResult:
         return self.__repr__()
 
 
+def save_ranking_metrics(y_count, y_score, t_range, conf):
+    """
+    Only save the data in a metric object which is lighter than results that save all results to disk.
+    Metrics being saved are related to how well the model ranks important cells for a given time slot
+
+    :param y_count: true crime counts scaled to original values
+    :param y_score: floating point value predictions (probas_pred or y_score)
+    :param t_range: date time range of metrics
+    :param conf: configuration object
+    :return:
+    """
+    # save result
+    # only saves the result of the metrics not the predicted values
+    ranking_metrics = RankingMetrics(
+        model_name=conf.model_name,
+        y_count=y_count,
+        y_score=y_score,
+        t_range=t_range,
+    )
+    log.info(ranking_metrics)
+
+    with open(f"{conf.model_path}ranking_metrics.pkl", "wb") as file:
+        pickle.dump(ranking_metrics, file)
+
+
 def save_metrics(y_count, y_pred, y_score, t_range, shaper, conf):
     """
     Only save the data in a metric object which is lighter than results that save all results to disk
@@ -557,3 +442,262 @@ def save_results(y_count, y_pred, y_score, t_range, shaper, conf):
 
     with open(f"{conf.model_path}model_result.pkl", "wb") as file:
         pickle.dump(model_result, file)
+
+
+# remember pandas df.to_latex for the columns
+def parse_data_path(s):
+    dt, s = s.split("T")[-1].split('H')
+    dx, dy, s = s.split("X")[-1].split('M')
+    _, dy = dy.split("Y")
+    _, start_date, end_date = s.split("_")
+    r = {"dt": int(dt),
+         "dx": int(dx),
+         "dy": int(dy),
+         "start_date": start_date,
+         "stop_date": end_date}
+    return r
+
+
+def get_all_metrics():
+    """
+    """
+    data = []
+    paths = get_data_sub_paths()
+    for data_sub_path in paths:
+        data_path = f"./data/processed/{data_sub_path}/"
+        models_metrics = get_models_metrics(data_path)
+        for m in models_metrics:
+            row = {
+                **parse_data_path(data_sub_path),
+                "Model": m.model_name,
+                "RMSE": m.root_mean_squared_error,
+                "MAE": m.mean_absolute_error,
+                "ROC AUC": m.roc_auc_score,
+                "AP": m.average_precision_score,
+                "Precision": m.precision_score,
+                "Recall": m.recall_score,
+                "F1 Score": safe_f1_score((m.precision_score, m.recall_score)),
+                "Accuracy": m.accuracy_score,
+                "MCC": m.matthews_corrcoef,
+                "PAI": m.predictive_accuracy_index,
+            }
+            data.append(row)
+
+    df = pd.DataFrame(data)
+    #     df.index.name = "Model Name"
+    # df.sort_values("F1 Score", inplace=True, ascending=False)
+    df.sort_values(["dt", "dx", "dy", "start_date", "stop_date", "AP"], inplace=True, ascending=False)
+    col = ["Model", "dt", "dx", "dy", "start_date", "stop_date", "MAE", "RMSE",
+           "ROC AUC", "AP", "Precision", "Recall", "F1 Score", "Accuracy", "Matthews Corrcoef"]
+    return df[col]
+
+
+def get_models_results(data_path):
+    """
+    Reads all model results give the path to a certain data-source/discretisation
+    :param data_path: path to a certain data-source/discretisation
+    :return: list of model metrics for the data discretisation
+    """
+    model_results = []
+    model_names = os.listdir(f"{data_path}models")
+
+    if '.DS_Store' in model_names:
+        model_names.remove('.DS_Store')
+
+    for model_name in model_names:
+        if not os.path.exists(data_path):
+            raise Exception(f"Directory ({data_path}) needs to exist.")
+
+        model_path = f"{data_path}models/{model_name}/"
+
+        file_name = f"{model_path}model_result.pkl"
+
+        if not os.path.exists(file_name):
+            continue
+
+        with open(file_name, 'rb') as file_pointer:
+            model_results.append(pickle.load(file_pointer))
+
+    if len(model_results) == 0:
+        raise EnvironmentError("No model results in this directory")
+
+    return model_results
+
+
+def get_model_result(model_path):
+    """
+    Reads all model results give the path to a certain data-source/discretisation
+    :param model_path: path to a certain data-source/discretisation
+    :return: model metric for the data discretisation
+    """
+    file_path = f"{model_path}/model_result.pkl"
+
+    if not os.path.exists(file_path):
+        raise Exception(f"File '{file_path}' does not exist.")
+
+    model_result = None
+    with open(file_path, 'rb') as file_pointer:
+        model_result = pickle.load(file_pointer)
+
+    return model_result
+
+
+def get_models_metrics(data_path):
+    """
+    Reads all model metrics give the path to a certain data-source/discretisation
+    :param data_path: path to a certain data-source/discretisation
+    :return: list of model metrics for the data discretisation
+    """
+    model_metrics = []
+    model_names = os.listdir(f"{data_path}models")
+
+    if '.DS_Store' in model_names:
+        model_names.remove('.DS_Store')
+
+    for model_name in model_names:
+        if not os.path.exists(data_path):
+            raise Exception(f"Directory ({data_path}) needs to exist.")
+
+        model_path = f"{data_path}models/{model_name}/"
+
+        file_name = f"{model_path}model_metric.pkl"
+
+        if not os.path.exists(file_name):
+            continue
+
+        with open(file_name, 'rb') as file_pointer:
+            model_metrics.append(pickle.load(file_pointer))
+
+    # if len(model_metrics) == 0:
+    #     raise EnvironmentError("No model metrics in this directory")
+
+    return model_metrics
+
+
+# remember pandas df.to_latex for the columns
+def get_metrics_table(models_metrics: List[ModelMetrics]):
+    col = [
+        'NDCG',
+        'MAP',
+        'ROC AUC',
+        'AP',
+        'Precision',
+        'Recall',
+        'F1 Score',
+        'Accuracy',
+        'MCC',
+        'PAI',
+        'RMSE',
+        'MAE',
+    ]
+    data = []
+    names = []
+    for m in models_metrics:
+        names.append(m.model_name)
+        f1 = safe_f1_score((m.precision_score, m.recall_score))
+        row = [
+            m.ndcg,
+            m.mean_ap,
+            m.roc_auc_score,
+            m.average_precision_score,
+            m.precision_score,
+            m.recall_score,
+            f1,
+            m.accuracy_score,
+            m.matthews_corrcoef,
+            m.predictive_accuracy_index,
+            m.root_mean_squared_error,
+            m.mean_absolute_error,
+        ]
+        data.append(row)
+
+    df = pd.DataFrame(columns=col, data=data, index=names)
+    df.index.name = "Model Name"
+    # df.sort_values('F1 Score', inplace=True, ascending=False)
+    df.sort_values('NDCG', inplace=True, ascending=False)
+
+    return df
+
+
+def compare_models(models_metrics):
+    """
+    Allows us to filter certain model metrics and only compare their values instead of comparing all the metrics
+
+    :param models_metrics: list of model metrics
+    :return: pandas data-frame table with all model metrics for all the models found under data_path
+    """
+
+    metrics_table = get_metrics_table(models_metrics)
+    log.info(f"\n{metrics_table}")
+
+    # pr-curve
+    pr_plot = PRCurvePlotter()
+    for metric in models_metrics:
+        pr_plot.add_curve_(precision=metric.pr_curve.precision,
+                           recall=metric.pr_curve.recall,
+                           ap=metric.pr_curve.ap,
+                           label_name=metric.model_name)
+    pr_plot.show()  # todo - save somewhere?
+
+    # roc-curve
+    roc_plot = ROCCurvePlotter()
+    for metric in models_metrics:
+        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
+                            tpr=metric.roc_curve.tpr,
+                            auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
+                            label_name=metric.model_name)
+    roc_plot.show()  # todo - save somewhere?
+    # todd add per cel and time plots per metric - should be saved on the metric class
+
+    # det-curve
+    det_plot = DETCurvePlotter()
+    for metric in models_metrics:
+        det_plot.add_curve_(fpr=metric.det_curve.fpr,
+                            fnr=metric.det_curve.fnr,
+                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
+                            label_name=metric.model_name)
+    det_plot.show()  # todo - save somewhere?
+
+    return metrics_table  # by returning the table - makes visualisation in notebooks easier
+
+
+def compare_all_models(data_path: str):
+    """
+    :param data_path: string path to the data directory
+    :return: pandas data-frame table with all model metrics for all the models found under data_path
+    """
+    models_metrics = get_models_metrics(data_path)
+
+    metrics_table = get_metrics_table(models_metrics)
+    # log.info(f"\n{metrics_table}")
+    display(metrics_table)
+
+    # pr-curve
+    pr_plot = PRCurvePlotter()
+    for metric in models_metrics:
+        pr_plot.add_curve_(precision=metric.pr_curve.precision,
+                           recall=metric.pr_curve.recall,
+                           ap=metric.pr_curve.ap,
+                           label_name=metric.model_name)
+    pr_plot.show()  # save somewhere?
+
+    # roc-curve
+    roc_plot = ROCCurvePlotter()
+    for metric in models_metrics:
+        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
+                            tpr=metric.roc_curve.tpr,
+                            auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
+                            label_name=metric.model_name)
+    roc_plot.show()  # save somewhere?
+    # todo add per cel and time plots per metric - should be saved on the metric class
+
+    # det-curve
+    det_plot = DETCurvePlotter()
+    for metric in models_metrics:
+        det_plot.add_curve_(fpr=metric.det_curve.fpr,
+                            fnr=metric.det_curve.fnr,
+                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
+                            label_name=metric.model_name)
+    det_plot.show()  # somewhere?
+
+    return metrics_table  # by returning the table - makes visualisation in notebooks easier

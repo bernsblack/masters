@@ -10,6 +10,13 @@
   "lon_min": -87.644,
   "root": "./",
   "crime_types": [
-    "THEFT"
+    "THEFT",
+    "BATTERY",
+    "CRIMINAL DAMAGE",
+    "NARCOTICS",
+    "ASSAULT",
+    "BURGLARY",
+    "MOTOR VEHICLE THEFT",
+    "ROBBERY"
   ]
 }

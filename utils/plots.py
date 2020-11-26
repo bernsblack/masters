@@ -7,11 +7,6 @@ import numpy as np
 from IPython.display import HTML
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 
-from sparse_discrete_table import mutual_info_over_time, conditional_mutual_info_over_time, \
-    construct_temporal_information
-from utils.configs import BaseConf
-from utils.interactive import cmi_name
-
 """
     THIS MODULE IS ONLY FOR GENERIC PLOT FUNCTIONS - MORE SPECIFIC PLOT FUNCTION RELATED TO METRICS
     CAN BE FOUND IN THE utils.metrics MODULE 
@@ -148,12 +143,32 @@ def visualize_weights(model):
 #         plt.plot(x)
 #     plt.show()
 
-def plot(**kwargs):
-    return go.Figure([go.Scatter(y=arg, name=kw) for kw, arg in kwargs.items()])
+def plot(title=None, xlabel=None, ylabel=None, **kwargs):
+    fig = go.Figure([go.Scatter(y=arg, name=kw) for kw, arg in kwargs.items()])
+    fig.update_layout(
+        font=dict(family="STIXGeneral"),
+        title=title,
+        title_x=0.5,
+        xaxis_title=xlabel,
+        yaxis_title=ylabel
+    )
+    return fig
 
 
-def plot_time_signals(t_range, alpha=0.5, **kwargs):
-    return go.Figure([go.Scatter(y=arg, x=t_range, name=kw, opacity=alpha) for kw, arg in kwargs.items()])
+def plot_time_signals(t_range, alpha=0.5, title=None, yaxis_title=None, rangeslider_visible=True, **kwargs):
+    fig = go.Figure([go.Scatter(y=arg, x=t_range, name=kw, opacity=alpha) for kw, arg in kwargs.items()])
+    fig.update_layout(
+        font=dict(family="STIXGeneral"),
+        title=title,
+        title_x=0.5,
+        yaxis_title=yaxis_title,
+    )
+
+    fig.update_xaxes(
+        rangeslider_visible=rangeslider_visible,
+    )
+
+    return fig
 
 
 # import plotly.figure_factory as ff
@@ -165,7 +180,7 @@ def plot_time_signals(t_range, alpha=0.5, **kwargs):
 #     :return:
 #     """
 #     fig = ff.create_distplot(list(kwargs.values()), list(kwargs.keys()))
-#     fig.show()
+#     fig.show()fig.update_layout(font=dict(family="STIXGeneral"))
 
 from seaborn import distplot
 
@@ -193,6 +208,21 @@ def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridi
     plt.grid(grid_on)
 
     plt.show()
+
+
+from seaborn import heatmap as sns_heatmap
+
+
+def im_sns(data, figsize=(16, 9), title=None, xlabel=None, ylabel=None):
+    plt.figure(figsize=figsize)
+    ax = plt.gca()
+    ax.set_title(title)
+
+    ax = sns_heatmap(data, cmap='viridis')
+    ax.set_xlabel(xlabel)
+    ax.set_ylabel(ylabel)
+
+    return ax
 
 
 def imshow(a, ax, title=""):
@@ -616,58 +646,12 @@ def new_crime_distribution_plot(crimes: np.ndarray) -> go.Figure:
                        )
 
     fig.update_layout(
-        height=900,
-        title="Probability Distribution of Crime Counts per Cell",
+        height=400,
+        title="Crime Count Distribution",
         title_x=0.5,
-        xaxis_title="Crime Count per Cell",
+        xaxis_title="Crime Count per Time Step per Cell",
         yaxis_title="Probability",
+        font=dict(family="STIXGeneral"),
     )
 
     return fig
-
-
-import plotly.graph_objects as go
-
-
-def plot_mi_curves(
-        a,
-        t_range,
-        max_offset=35,
-        norm=True,
-        log_norm=False,
-        month_divisions=10,
-        year_divisions=10,
-        temporal_variables=("Day of Week", "Time of Month", "Time of Year"),
-):
-    conds = construct_temporal_information(
-        date_range=t_range,
-        temporal_variables=temporal_variables,
-        month_divisions=month_divisions,
-        year_divisions=year_divisions,
-    ).values
-
-    mi_score, offset = mutual_info_over_time(a=a, max_offset=max_offset,
-                                             log_norm=log_norm, norm=norm)
-
-    cmi_score, offset = conditional_mutual_info_over_time(a=a, max_offset=max_offset, conds=conds,
-                                                          log_norm=log_norm, norm=norm)
-
-    cmi_plot_label = cmi_name(temporal_variables=temporal_variables)
-
-    return go.Figure(
-        # data=[
-        #     go.Scatter(y=mi_score, x=offset, name="MI"),
-        #     go.Scatter(y=cmi_score, x=offset, name="CMI (DoW)"),
-        # ],
-        data=[
-            go.Scatter(y=mi_score, x=offset, name='$I(C_{t},C_{t-k})$'),
-            go.Scatter(y=cmi_score, x=offset, name=f'$I(C_{{t}},C_{{t-k}}|{cmi_plot_label})$'),
-        ],
-        layout=dict(
-            title_text="Mutual and Conditional Mutual Information",
-            title_x=0.5,
-            xaxis_title="Offset in days (k)",
-            yaxis_title="Normalised Score [0,1]",
-            legend_title="Curves",
-        ),
-    )

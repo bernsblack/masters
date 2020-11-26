@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
-from utils.preprocessing import Shaper, MinMaxScaler, minmax_scale
+from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale, get_hours_per_time_step
 from utils.utils import if_none
 from pandas.tseries.offsets import Hour as OffsetHour
 
@@ -46,13 +46,15 @@ class GridDataGroup:
                 freqstr = "24H"
             if freqstr == "H":
                 freqstr = "1H"
-            # hours_per_time_step = int(freqstr[:freqstr.find("H")])  # time step in hours
-            # hours_per_time_step = int(
-            #     self.t_range.freq.nanos / HOUR_NANOS)  # int(freqstr[:freqstr.find("H")])  # time step in hours
-            hours_per_time_step = self.t_range.freq.nanos / HOUR_NANOS  # time step in hours
+
+            hours_per_time_step = get_hours_per_time_step(self.t_range.freq)  # time step in hours
             time_steps_per_day = 24 / hours_per_time_step
 
-            if freqstr == "24H":
+            if freqstr == "168H":
+                self.step_c = 1
+                self.step_p = 5
+                self.step_q = 10
+            elif freqstr == "24H":
                 self.step_c = 1
                 self.step_p = 7  # jumps in days
                 self.step_q = 14
@@ -170,6 +172,8 @@ class GridDataGroup:
             self.demog_grid = zip_file["demog_grid"]
             self.street_grid = zip_file["street_grid"]
 
+        assert len(self.crimes) == len(self.targets)
+
         #  sanity check if time matches up with our grids
         if len(self.t_range) - 1 != len(self.crimes):
             log.error("time series and time range lengths do not match up -> " +
@@ -186,13 +190,17 @@ class GridDataGroup:
         val_t_range = self.t_range[self.val_indices[0]:self.val_indices[1]]
         tst_t_range = self.t_range[self.tst_indices[0]:self.tst_indices[1]]
 
-        # self.crimes = np.round(np.log2(1 + self.crimes)) # by rounding we cannot retrieve original count
-        self.crimes = np.log2(1 + self.crimes)
+        self.log_norm_scale = conf.log_norm_scale
+        if self.log_norm_scale:
+            # self.crimes = np.round(np.log2(1 + self.crimes)) # by rounding we cannot retrieve original count
+            # self.targets = np.round(np.log2(1 + self.targets)) # by rounding we cannot retrieve original count
+            self.crimes = np.log2(1 + self.crimes)
+            self.targets = np.log2(1 + self.targets)
 
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # self.crime_scaler.fit(self.crimes[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data
-        self.crime_scaler.fit(self.crimes,
-                              axis=1)  # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
+        # scale on all data because training set is not the same for grid and cell data groups because of sequence offsets
+        self.crime_scaler.fit(self.crimes, axis=conf.scale_axis)
         self.crimes = self.crime_scaler.transform(self.crimes)
         trn_val_crimes = self.crimes[self.trn_val_indices[0]:self.trn_val_indices[1]]
         trn_crimes = self.crimes[self.trn_indices[0]:self.trn_indices[1]]
@@ -200,8 +208,6 @@ class GridDataGroup:
         tst_crimes = self.crimes[self.tst_indices[0]:self.tst_indices[1]]
 
         # targets
-        # self.targets = np.round(np.log2(1 + self.targets)) # by rounding we cannot retrieve original count
-        self.targets = np.log2(1 + self.targets)
         self.target_scaler = MinMaxScaler(feature_range=(0, 1))
         # self.target_scaler.fit(self.targets[self.trn_indices[0]:self.trn_indices[1]], axis=1) # scale only on training and validation data
         self.target_scaler.fit(self.targets,
@@ -234,9 +240,9 @@ class GridDataGroup:
         # val_weather_vectors = self.weather_vectors[self.val_indices[0]:self.val_indices[1]]
         # tst_weather_vectors = self.weather_vectors[self.tst_indices[0]:self.tst_indices[1]]
 
-        # normalise space dependent data - using minmax_scale - no need to save train data norm values
-        self.demog_grid = minmax_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
-        self.street_grid = minmax_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
+        # normalise space dependent data - using min_max_scale - no need to save train data norm values
+        self.demog_grid = min_max_scale(data=self.demog_grid, feature_range=(0, 1), axis=1)
+        self.street_grid = min_max_scale(data=self.street_grid, feature_range=(0, 1), axis=1)
 
         # target index - also the index given to the
         # todo dependency injection of the different types of datasets
@@ -333,8 +339,9 @@ class GridDataGroup:
         _, _c, _, _ = sparse_data.shape
         assert _c == 1
 
-        sparse_descaled = self.target_scaler.inverse_transform(sparse_data)[:, 0:1]
-        sparse_count = np.round(2 ** sparse_descaled - 1)
+        sparse_count = self.target_scaler.inverse_transform(sparse_data)[:, 0:1]
+        if self.log_norm_scale:
+            sparse_count = np.round(2 ** sparse_count - 1)
 
         return sparse_count  # (N,1,H,W)
 

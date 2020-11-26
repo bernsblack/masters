@@ -6,6 +6,16 @@ import numpy as np
 from utils import deprecated
 from utils.configs import BaseConf
 
+from pandas.tseries.offsets import Hour as OffsetHour
+
+from utils.data_processing import safe_divide
+
+HOUR_NANOS = OffsetHour().nanos
+
+
+def get_hours_per_time_step(freq):
+    return freq.nanos / HOUR_NANOS
+
 
 def get_index_mask(data: np.ndarray, threshold: float = 0, top_k: int = -1) -> np.ndarray:
     """
@@ -274,10 +284,17 @@ class ShaperDeprecated:  # was to slow has been replaced
         return reshaped_data
 
 
-def minmax_scale(data, feature_range=(0, 1), axis=0):
+def min_max_scale(data, feature_range=(0, 1), axis=0):
     """
-    function can be used if we do not care about re-scaling data back into original values
-    when we want to rescale or save min and max of a certain set then use MinMaxScaler class
+    'min_max_scale' scales values of the ndarray so that each index in given axis is scaled between feature_range.
+    Example: if we have ndarray of stacked_images of  shape (n_images, n_channels, n_height, n_width) and we want to
+    scaled each channel independently from the other use:
+        min_max_scale(stacked_images, feature_range=(0, 1), axis=1)
+
+    This ensures each channel has max and min of 0 and 1 respectively.
+
+    'min_max_scale' can be used if we do not care about re-scaling data back into original values.
+    To rescale or save min and max of a certain set then use MinMaxScaler class.
 
     :param data: numpy array to be scaled 
     :param feature_range: tuple of min and max values
@@ -291,19 +308,26 @@ def minmax_scale(data, feature_range=(0, 1), axis=0):
     min_old = np.min(data, axis=sum_axis, keepdims=True)
     max_old = np.max(data, axis=sum_axis, keepdims=True)
     scale_old = max_old - min_old
-    if np.any(scale_old == 0):
-        raise ValueError(f"scale_old is {scale_old}. Division by zero is not allowed.")
+    # if np.any(scale_old == 0):
+    #     raise ValueError(f"scale_old is {scale_old}. Division by zero is not allowed.")
 
     min_new = np.ones(min_old.shape) * feature_range[0]
     max_new = np.ones(max_old.shape) * feature_range[1]
     scale_new = max_new - min_new
 
-    return scale_new * (data - min_old) / scale_old + min_new
+    # return scale_new * (data - min_old) / scale_old + min_new
+    return safe_divide(scale_new * (data - min_old), scale_old) + min_new
 
 
 class MinMaxScaler:
     """
     Used to scale and inverse scale features of data
+
+    'MinMaxScaler' scales values of the ndarray so that each index in given axis is scaled between feature_range.
+    Example: if we have ndarray of stacked_images of  shape (n_images, n_channels, n_height, n_width) and we want to
+    scaled each channel independently from the other use:
+        min_max_scale(stacked_images, feature_range=(0, 1), axis=1)
+
     """
 
     def __init__(self, feature_range=(0, 1)):
@@ -330,18 +354,25 @@ class MinMaxScaler:
         self.scale_new = self.max_new - self.min_new
 
     def transform(self, data):
-        if np.any(self.scale_old == 0):
-            raise ValueError(f"self.scale_old is {self.scale_old}. Cannot divide by zero. Data shape -> {data.shape}")
-        return self.scale_new * (data - self.min_old) / self.scale_old + self.min_new
+        return safe_divide(self.scale_new * (data - self.min_old), self.scale_old) + self.min_new
+        # if np.any(self.scale_old == 0):
+        #     raise ValueError(f"self.scale_old is {self.scale_old}. Cannot divide by zero. Data shape -> {data.shape}")
+        # return self.scale_new * (data - self.min_old) / self.scale_old + self.min_new
 
     def inverse_transform(self, data):
-        if np.any(self.scale_new == 0):
-            raise ValueError(f"self.scale_new is {self.scale_new}. Cannot divide by zero")
-        return self.scale_old * (data - self.min_new) / self.scale_new + self.min_old
+        return safe_divide(self.scale_old * (data - self.min_new), self.scale_new) + self.min_old
+        # if np.any(self.scale_new == 0):
+        #     raise ValueError(f"self.scale_new is {self.scale_new}. Cannot divide by zero")
+        # return self.scale_old * (data - self.min_new) / self.scale_new + self.min_old
 
     def fit_transform(self, data, axis):
         self.fit(data, axis)
         return self.transform(data)
+
+
+def scale_per_time_slot(data):
+    data_scaled = min_max_scale(data, feature_range=(0, 1), axis=0)
+    return data_scaled
 
 
 import unittest

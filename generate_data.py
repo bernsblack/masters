@@ -1,7 +1,3 @@
-import os
-import pickle
-from pprint import pprint
-
 from matplotlib import rcParams
 import matplotlib.pyplot as plt
 from utils.utils import *
@@ -10,9 +6,10 @@ import logging as log
 from logger.logger import setup_logging
 from utils.preprocessing import Shaper, save_shaper
 from sys import argv
-from utils.data_processing import encode_category
 
 if __name__ == "__main__":
+    os.environ['NUMEXPR_MAX_THREADS'] = str(os.cpu_count())
+
     if len(argv) < 2:
         raise FileNotFoundError("Please specify config hex reference as argument")
     else:
@@ -42,7 +39,7 @@ if __name__ == "__main__":
     #                     LOAD DATA                      #
     ######################################################
     # external information (demographic and weather)
-    # not these are only weather values for 2014
+    # note: these are only weather values for 2014
     weather_df = pd.read_pickle(load_folder_raw + "weather_minmax_normed.pkl")
     weather_df.index = weather_df.date  # set datetime index todo: move to data-processing
     weather_df.drop(columns="date", inplace=True)  # drop the time column
@@ -50,7 +47,7 @@ if __name__ == "__main__":
     extra_day.name = extra_day.name + pd.DateOffset(1)
     weather_df = weather_df.append(extra_day)
     # re-sample weather data
-    is_gte_24hours = 'D' in dT or dT == '24H'
+    is_gte_24hours = 'D' in dT or 'W' in dT or dT == '24H'
     if is_gte_24hours:
         weather_df = weather_df.resample(dT).mean()
     else:
@@ -92,7 +89,8 @@ if __name__ == "__main__":
     log.info("Cell sizes: %.3f m in x direction and %.3f m in y direction" % (85000 * dx, 110000 * dy))
 
     # crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018.pkl")
-    crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018_new.pkl")
+    # crimes = pd.read_pickle(load_folder_raw + "crimes_2012_to_2018_new.pkl")
+    crimes = pd.read_pickle(load_folder_raw + "crimes_2001_to_2018.pkl")
 
     # CHOOSE CRIME TYPES
     valid_crime_types = config["crime_types"]
@@ -433,28 +431,13 @@ if __name__ == "__main__":
     os.makedirs(save_folder, exist_ok=True)
     os.makedirs(save_folder + "plots", exist_ok=True)
 
+    from utils.plots import new_crime_distribution_plot, im_sns
+
     # save figures
-    figsize = (8, 11)
-
-    v, c = np.unique(crime_grids.flatten(), return_counts=True)
-    c = 100 * c / np.sum(c)
-    plt.figure(figsize=figsize)
-    plt.bar(v, c)
-    plt.yticks(np.arange(21) * 5)
-    plt.title("Crime Count Distribution per Time Step per Cell")
-    plt.ylabel("Frequency (%)")
-    plt.xlabel("Crime Count per Time Step per Cell")
-    plt.grid(True)
-    plt.savefig(save_folder + "plots/" + "crime_distribution.png")
-
-    plt.figure(figsize=figsize)
-    plt.scatter(X, Y, marker=".", label="Ranged")
-    plt.scatter(valid_points[:, 0], valid_points[:, 1], marker=".", label="Valid", s=1)
-    plt.scatter(crimes.X, crimes.Y, marker=".", label="Rounded")
-    plt.legend(loc=3, prop={"size": 20})
-    plt.ylabel("Latitude")
-    plt.xlabel("Longitude")
-    plt.savefig(save_folder + "plots/" + "scatter_map.png")
+    figsize_x = 8
+    figsize_y = int((y_size / x_size) * figsize_x)
+    # figsize = (8, 11)
+    figsize = (figsize_x, figsize_y)
 
     plt.figure(figsize=figsize)
     plt.title("Maximum Crimes per Time Step")
@@ -471,6 +454,16 @@ if __name__ == "__main__":
     plt.ylabel("Y Coordinate")
     plt.xlabel("X Coordinate")
     plt.savefig(save_folder + "plots/" + "crimes_mean.png")
+
+    plt.figure(figsize=(8, 11))
+    plt.title("Selected Point Sampled Data")
+    plt.scatter(X, Y, marker=".", label="Ranged")
+    plt.scatter(valid_points[:, 0], valid_points[:, 1], marker=".", label="Valid", s=1)
+    plt.scatter(crimes.X, crimes.Y, marker=".", label="Rounded")
+    plt.legend(loc=3, prop={"size": 20})
+    plt.ylabel("Latitude")
+    plt.xlabel("Longitude")
+    plt.savefig(save_folder + "plots/" + "scatter_map.png")
 
     plt.figure(figsize=figsize)
     plt.title("Demographics Max Value")
@@ -504,12 +497,24 @@ if __name__ == "__main__":
     # with open(f"{save_folder}shaper.pkl", "wb") as shaper_file:
     #     pickle.dump(shaper, shaper_file)
 
+    # MATPLOTLIB DIST PLOT
+    # v, c = np.unique(squeezed_crime_grids.flatten(), return_counts=True)
+    # c = 100 * c / np.sum(c)
+    # plt.figure()  # figsize=figsize)
+    # plt.bar(v, c)
+    # plt.yticks(np.arange(21) * 5)
+    # plt.title("Crime Count Distribution per Time Step per Cell")
+    # plt.ylabel("Probability (%)")
+    # plt.xlabel("Crime Count per Time Step per Cell")
+    # plt.grid(True)
+    # plt.savefig(save_folder + "plots/" + "crime_distribution.png")
+
     # save generated data
     for g in [crime_type_grids, crime_grids, demog_grid, street_grid]:
         assert len(g.shape) == 4
 
     # note - we only normalise later as some models use different normalisation techniques
-    time_vectors = encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='ohe')  # kind='sincos')
+    time_vectors = encode_time_vectors(t_range, month_divisions=10, year_divisions=12, kind='sincos')  # kind='sincos')
 
     np.savez_compressed(save_folder + "generated_data.npz",
                         crime_feature_indices=crime_feature_indices,
@@ -531,14 +536,38 @@ if __name__ == "__main__":
     write_json(meta_info, f"{save_folder}info.json")
     write_json(config, f"{save_folder}generate_data_config.json")
 
-    from utils.plots import new_crime_distribution_plot
+    # fig = new_crime_distribution_plot(squeezed_crime_grids)
+    # fig.write_image(f"{save_folder}plots/crime_distribution_squeezed.png")
+    # fig = new_crime_distribution_plot(np.log2(1 + squeezed_crime_grids))
+    # fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2.png")
+    # fig = new_crime_distribution_plot(np.round(np.log2(1 + squeezed_crime_grids)))
+    # fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2_round.png")
 
-    fig = new_crime_distribution_plot(squeezed_crime_grids)
-    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed.png")
-    fig = new_crime_distribution_plot(np.log2(1 + squeezed_crime_grids))
-    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2.png")
-    fig = new_crime_distribution_plot(np.round(np.log2(1 + squeezed_crime_grids)))
-    fig.write_image(f"{save_folder}plots/crime_distribution_squeezed_log2_round.png")
-    # fig.write_html(f"{config.data_path}plots/crime_distribution_squeezed.html")  # files can become too big
+    import plotly.graph_objects as go
+
+    feature_names = crime_feature_indices[:-1]
+    total_crime_types = crime_type_grids[:, :-1]
+    total_crime_types = total_crime_types.sum(2).sum(2)
+    fig = go.Figure(
+        data=[
+            go.Scatter(
+                y=total_crime_types[:, i],
+                x=t_range,
+                name=name.title(),
+                opacity=0.4,
+            )
+            for i, name in enumerate(feature_names)
+        ]
+    )
+    fig.update_layout(
+        title="Total Crime Counts Over Time",
+        title_x=0.5,
+        xaxis_title="Date",
+        yaxis_title="Total Crime Counts",
+        # template='plotly_white',
+        font=dict(family="STIXGeneral"),
+    )
+
+    fig.write_image(f"{save_folder}plots/total_crimes.png")
 
     log.info("=====================================END=====================================")

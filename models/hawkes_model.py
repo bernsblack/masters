@@ -2,6 +2,8 @@ from tick.plot import plot_hawkes_kernels
 from tick.hawkes import SimuHawkesSumExpKernels, SimuHawkesMulti, \
     HawkesSumExpKern, HawkesEM
 import numpy as np
+import logging
+
 
 class HawkesModelGeneral:
     """
@@ -91,18 +93,25 @@ class IndHawkesModel:
             realizations = []
             data_counts = data[:, i]
             time_stamps = np.argwhere(data_counts).astype(np.float)
-            realizations.append([time_stamps[:, 0]])
 
-            # kernel_discretization if set explicitly it overrides kernel_support and kernel_size
-            # todo: have kernel values be set by conf_dict
-            em = HawkesEM(kernel_discretization=np.arange(self.kernel_size).astype(np.float),
-                          n_threads=8,
-                          verbose=False,
-                          tol=1e-3,
-                          max_iter=1000)
-            em.fit(realizations)
-            baseline = em.baseline.flatten()[0]
-            kernel = em.kernel.flatten()
+            if len(time_stamps) > 0:
+                realizations.append([time_stamps[:, 0]])
+
+                # kernel_discretization if set explicitly it overrides kernel_support and kernel_size
+                # todo: have kernel values be set by conf_dict
+                em = HawkesEM(kernel_discretization=np.arange(self.kernel_size).astype(np.float),
+                              n_threads=8,
+                              verbose=False,
+                              tol=1e-3,
+                              max_iter=1000)
+                em.fit(realizations)
+                baseline = em.baseline.flatten()[0]
+                kernel = em.kernel.flatten()
+            else:
+                logging.warning(f"Found zero time stamp at cell index {i}")
+                baseline = 0
+                kernel = np.zeros(self.kernel_size).astype(np.float)
+
             self.baselines.append(baseline)
             self.kernels.append(kernel)
 

@@ -1,0 +1,22 @@
+{
+  "start_date": "2001-01-04",
+  "end_date": "2019-01-03",
+  "dT": "168H",
+  "x_scale": 10,
+  "y_scale": 8,
+  "lat_max": 42.022,
+  "lat_min": 41.645,
+  "lon_max": -87.525,
+  "lon_min": -87.934,
+  "root": "./",
+  "crime_types": [
+    "THEFT",
+    "BATTERY",
+    "CRIMINAL DAMAGE",
+    "NARCOTICS",
+    "ASSAULT",
+    "BURGLARY",
+    "MOTOR VEHICLE THEFT",
+    "ROBBERY"
+  ]
+}

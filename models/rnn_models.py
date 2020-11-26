@@ -188,9 +188,10 @@ class SimpleRecurrentFeedForwardNetwork(nn.Module, ABC):
                                     nn.Linear(h_size0, h_size1),
                                     nn.ReLU())
 
-        self.tmpNet = GRUFNN1(input_size=tmp_size,
-                              hidden_size=h_size0,
-                              output_size=h_size1)
+        self.tmpNet = GRUFNN(input_size=tmp_size,
+                             hidden_size0=h_size0,
+                             hidden_size1=h_size0,
+                             output_size=h_size1)
 
         self.envNet = nn.Sequential(nn.Linear(env_size, h_size0),
                                     nn.ReLU(),

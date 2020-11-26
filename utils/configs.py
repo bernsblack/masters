@@ -22,6 +22,9 @@ class BaseConf:  # args from arg-parser to over write values
         self.use_classification = False
         self.use_historic_average = False
         self.use_crime_types = False
+        self.log_norm_scale = True
+
+        self.scale_axis = 1  # which axis should be scaled to ensure values lie between min and max
 
         self.seed = 3
         # self.use_cuda = False

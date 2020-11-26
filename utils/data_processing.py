@@ -1,3 +1,4 @@
+import logging
 from math import sin, cos, sqrt, atan2, radians
 
 import numpy as np
@@ -42,39 +43,65 @@ def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='oh
     kind: {'ohe' or 'sincos'} options - if sincos all vectors are represented and sin cos cycles, if ohe all vectors are
     one hot encoded and the hour of the day is sin cos vector representation.
     """
-    time_frame = t_range.freqstr  # used to choose the external factors
-    # External info
-    is_weekend = t_range.dayofweek.to_numpy()
-    is_weekend[is_weekend < 5] = 0
-    is_weekend[is_weekend >= 5] = 1
 
+    time_frame = t_range.freqstr  # used to choose the external factors
     is_gte_24hours = "D" in time_frame or time_frame == "24H"
 
-    df = pd.DataFrame({
-        "hour": t_range.hour,
-        "dayofweek": t_range.dayofweek,
-        "is_weekend": is_weekend,
-        "timeofmonth": cut(t_range.day / t_range.days_in_month, month_divisions),
-        "timeofyear": cut(t_range.dayofyear / (366), year_divisions),
-        #         "month": t_range.month,
-    })
+    if time_frame == '168H' or time_frame == '1W':
+        df = pd.DataFrame({
+            "timeofmonth": cut(t_range.day / t_range.days_in_month, month_divisions),
+            "timeofyear": cut(t_range.dayofyear / (366), year_divisions),
+        })
+        col_names = ['$ToM_{sin}$', '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$']
 
-    if kind == "ohe":
-        # OneHotEncoder for categorical data
-        time_values = df[["dayofweek", "is_weekend", "timeofmonth", "timeofyear"]].values
-        ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
-        time_value_ohe = ohe.fit_transform(time_values)
+        if kind == "ohe":
+            # OneHotEncoder for categorical data
+            time_values = df[["timeofmonth", "timeofyear"]].values
+            ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
+            time_vectors = ohe.fit_transform(time_values)
+        else:  # option to encode all time information in a sin cos vector representation
+            # ensure all vectors are between 0 and 1
+            time_vectors = encode_sincos(df[["timeofmonth", "timeofyear"]].values) / 2 + 0.5
+    else:
+        # External info
+        is_weekend = t_range.dayofweek.to_numpy()
+        is_weekend[is_weekend < 5] = 0
+        is_weekend[is_weekend >= 5] = 1
 
-        if not is_gte_24hours:  # only if we are working on a hourly time scale
-            # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
-            hour_vec = sincos_vector(df.hour.values) / 2 + 0.5  # ensure all vectors are between 0 and 1
-            time_vectors = np.hstack([time_value_ohe, hour_vec])
-        else:
-            time_vectors = time_value_ohe
-    else:  # option to encode all time information in a sin cos vector representation
-        tv_sce = encode_sincos(df[["hour", "dayofweek", "timeofmonth",
-                                   "timeofyear"]].values) / 2 + 0.5  # ensure all vectors are between 0 and 1
-        time_vectors = np.concatenate([tv_sce, is_weekend.reshape(-1, 1)], axis=1)
+        df = pd.DataFrame({
+            "hour": t_range.hour,
+            "dayofweek": t_range.dayofweek,
+            "is_weekend": is_weekend,
+            "timeofmonth": cut(t_range.day / t_range.days_in_month, month_divisions),
+            "timeofyear": cut(t_range.dayofyear / (366), year_divisions),
+            #         "month": t_range.month,
+        })
+
+        if kind == "ohe":
+            # OneHotEncoder for categorical data
+            time_values = df[["dayofweek", "is_weekend", "timeofmonth", "timeofyear"]].values
+            ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
+            time_value_ohe = ohe.fit_transform(time_values)
+            col_names = ['$DoW_{sin}$', '$DoW_{cos}$', '$ToM_{sin}$',
+                         '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$', '$Wkd$']
+
+            if not is_gte_24hours:  # only if we are working on a hourly time scale
+                # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
+                hour_vec = sincos_vector(df.hour.values) / 2 + 0.5  # ensure all vectors are between 0 and 1
+                time_vectors = np.hstack([time_value_ohe, hour_vec])
+            else:
+                time_vectors = time_value_ohe
+        else:  # option to encode all time information in a sin cos vector representation
+            if not is_gte_24hours:
+                # ensure all vectors are between 0 and 1
+                tv_sce = encode_sincos(df[["hour", "dayofweek", "timeofmonth", "timeofyear"]].values) / 2 + 0.5
+                col_names = ['$H_{sin}$', '$H_{cos}$', '$DoW_{sin}$', '$DoW_{cos}$', '$ToM_{sin}$',
+                             '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$', '$Wkd$']
+            else:
+                tv_sce = encode_sincos(df[["dayofweek", "timeofmonth", "timeofyear"]].values) / 2 + 0.5
+                col_names = ['$DoW_{sin}$', '$DoW_{cos}$', '$ToM_{sin}$',
+                             '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$', '$Wkd$']
+            time_vectors = np.concatenate([tv_sce, is_weekend.reshape(-1, 1)], axis=1)
 
     return time_vectors
 
@@ -796,8 +823,10 @@ def concentric_squares(a):
 
         return ret
 
+
 def safe_divide(a, b):
     return np.divide(a, b, out=np.zeros_like(a), where=b != 0)
+
 
 # def safe_divide(a, b):
 #     """

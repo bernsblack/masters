@@ -96,8 +96,10 @@ class CellDataGroup(BaseDataGroup):
 
         dense = self.shaper.squeeze(sparse_data)
         dense_descaled = self.target_scaler.inverse_transform(dense)[:, 0:1]
-        sparse_descaled = self.shaper.unsqueeze(dense_descaled)
-        sparse_count = np.round(2 ** sparse_descaled - 1)
+        sparse_count = self.shaper.unsqueeze(dense_descaled)
+
+        if self.log_norm_scale:
+            sparse_count = np.round(2 ** sparse_count - 1)
 
         return sparse_count  # (N,1,H,W)
 

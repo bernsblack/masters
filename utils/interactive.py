@@ -13,6 +13,7 @@ from ipywidgets import Layout, widgets
 import plotly.graph_objects as go
 from utils.metrics import safe_f1_score
 from pandas.core.indexes.datetimes import DatetimeIndex
+from utils.utils import cmi_name
 
 
 class State:
@@ -228,6 +229,7 @@ def new_interactive_heatmap(z, name=None, height=500):
             #             paper_bgcolor="LightSteelBlue",
             #             colorscale='Viridis', # one of plotly colorscales
             #             showscale=True,
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -367,7 +369,8 @@ class InteractiveHeatmapsWithLines:
             y = state['y']
 
             with fw_lines.batch_update():
-                fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5)
+                fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5,
+                                       font=dict(family="STIXGeneral"))
                 for name, grid in self.grids.items():
                     z = grid[:, y, x]
 
@@ -469,13 +472,15 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
     return go.Figure(
         [
             # go.Scatter(y=trn_val_epoch_losses, name="Train Valid Losses", mode='lines+markers'),
-            go.Scatter(y=trn_epoch_losses, name="Train Losses", mode='lines+markers'),
-            go.Scatter(y=val_epoch_losses, name="Validation Losses", mode='lines+markers'),
+            go.Scatter(x=np.arange(1, len(trn_epoch_losses) + 1), y=trn_epoch_losses,
+                       name="Train Losses", mode='lines+markers'),
+            go.Scatter(x=np.arange(1, len(val_epoch_losses) + 1), y=val_epoch_losses,
+                       name="Validation Losses", mode='lines+markers'),
             go.Scatter(y=[np.min(val_epoch_losses)],
-                       x=[np.argmin(val_epoch_losses)], name="Best Validation Loss", mode='markers',
+                       x=[np.argmin(val_epoch_losses) + 1], name="Best Validation Loss", mode='markers',
                        marker_symbol='x', marker_size=10),
             go.Scatter(y=[np.min(trn_epoch_losses)],
-                       x=[np.argmin(trn_epoch_losses)], name="Best Train Loss", mode='markers',
+                       x=[np.argmin(trn_epoch_losses) + 1], name="Best Train Loss", mode='markers',
                        marker_symbol='x', marker_size=10),
             # go.Scatter(y=[np.min(trn_val_epoch_losses)],
             #            x=[np.argmin(trn_val_epoch_losses)], name="Best Train Valid Loss", mode='markers',
@@ -483,8 +488,11 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
 
         ],
         layout=dict(
-            title="Train and Validation Losses per epoch",
+            title="Train and Validation Losses per Epoch",
             title_x=0.5,
+            font=dict(family="STIXGeneral"),
+            yaxis_title='Loss',
+            xaxis_title='Epoch',
         )
     )
 
@@ -502,6 +510,7 @@ def plot_interactive_roc(data_path):
             xaxis_title='False Positive Rate',
             yaxis=dict(range=[-0.01, 1.01]),
             xaxis=dict(range=[-0.01, 1.01]),
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -530,6 +539,7 @@ def plot_interactive_det(data_path):
             xaxis_title='False Positive Rate',
             yaxis=dict(range=[0, 100], type="log"),
             xaxis=dict(range=[0, 100], type="log"),
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -561,6 +571,7 @@ def plot_interactive_pr(data_path, beta=1):
             xaxis_title='Recall',
             yaxis=dict(range=[-0.01, 1.01]),
             xaxis=dict(range=[-0.01, 1.01]),
+            font=dict(family="STIXGeneral"),
         ),
 
     )
@@ -611,6 +622,7 @@ def plot_interactive_roc_(y_true, y_score, model_name='model'):
             xaxis_title='False Positive Rate',
             yaxis=dict(range=[-0.01, 1.01]),
             xaxis=dict(range=[-0.01, 1.01]),
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -640,6 +652,7 @@ def plot_interactive_pr_(y_true, y_score, model_name='model'):
             xaxis_title='Recall',
             yaxis=dict(range=[-0.01, 1.01]),
             xaxis=dict(range=[-0.01, 1.01]),
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -690,6 +703,7 @@ def interactive_crime_prediction_comparison(y_class: np.ndarray,
             title_x=0.5,
             title='Mean over Time',
             margin=dict(l=20, r=20, t=50, b=20),
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -718,7 +732,8 @@ def interactive_crime_prediction_comparison(y_class: np.ndarray,
         args = np.argwhere(occ > 0)[:, 0]
 
         with fw_lines.batch_update():
-            fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5)
+            fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5,
+                                   font=dict(family="STIXGeneral"))
             y_score_line.y = y_score[:, y, x]
             y_score_line.x = t_range
 
@@ -744,17 +759,6 @@ def interactive_crime_prediction_comparison(y_class: np.ndarray,
         children=[fw_grid, fw_lines],
         layout=box_layout,
     )
-
-
-def cmi_name(temporal_variables):
-    cond_var_map = {
-        'Hour': 'H_t',
-        'Day of Week': 'DoW_t',
-        'Time of Month': 'ToM_t',
-        'Time of Year': 'ToY_t',
-    }
-
-    return ",".join([cond_var_map[k] for k in temporal_variables])
 
 
 def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, height: int = 500, **kwargs):
@@ -784,6 +788,7 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
             title_x=0.5,
             title='Mean over Time',
             margin=dict(l=20, r=20, t=50, b=20),
+            font=dict(family="STIXGeneral"),
         ),
     )
 
@@ -820,6 +825,7 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
                 title='Mutual Information and Conditional Mutual Information with Time Lagged Signal',
                 title_x=0.5,
                 width=900,
+                font=dict(family="STIXGeneral"),
             )
         )
         mi_line, cmi_line = fw_mi.data
@@ -834,7 +840,8 @@ def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, heigh
         with fw_lines.batch_update():
             z = grids[:, y, x]
 
-            fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5)
+            fw_lines.update_layout(title={"text": f"Selected cell: y,x = {y, x}"}, title_x=0.5,
+                                   font=dict(family="STIXGeneral"))
             grid_line.y = z
             grid_line.x = t_range
 
