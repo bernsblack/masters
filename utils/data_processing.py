@@ -667,7 +667,6 @@ def get_interval_times(a):
     """
     t = []
     prev_idx = 0
-    cur_idx = 0
     for cur_idx in range(len(a)):
         if a[cur_idx]:
             t.append(cur_idx - prev_idx)
@@ -861,3 +860,15 @@ def normalize(data):
     sum of data will now sum to one
     """
     return safe_divide(data, np.sum(data))
+
+
+def normalize_df(df, axis=0):
+    df = df - df.min(axis)
+    df = df / df.max(axis)
+    return df
+
+
+def auto_corr(series, max_lag=None):
+    if max_lag is None:
+        max_lag = int(.5 * len(series))
+    return np.array([pd.Series(series).autocorr(i) for i in range(1, max_lag)])

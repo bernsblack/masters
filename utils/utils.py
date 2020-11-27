@@ -9,6 +9,10 @@ from pprint import pformat
 import pandas as pd
 
 
+def load_total_counts(folder_name):
+    return pd.read_pickle(f"./data/processed/{folder_name}/total_counts_by_type.pkl")
+
+
 def cmi_name(temporal_variables):
     cond_var_map = {
         'Hour': 'H_t',
@@ -22,6 +26,7 @@ def cmi_name(temporal_variables):
 
 def drop_nan(x):
     return x[~np.isnan(x)]
+
 
 def cut(x, bins=10):
     """

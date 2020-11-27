@@ -143,25 +143,27 @@ def visualize_weights(model):
 #         plt.plot(x)
 #     plt.show()
 
-def plot(title=None, xlabel=None, ylabel=None, **kwargs):
-    fig = go.Figure([go.Scatter(y=arg, name=kw) for kw, arg in kwargs.items()])
+def plot(title=None, xlabel=None, ylabel=None, alpha=0.5, **kwargs):
+    fig = go.Figure([go.Scatter(y=arg, name=kw, opacity=alpha) for kw, arg in kwargs.items()])
     fig.update_layout(
         font=dict(family="STIXGeneral"),
         title=title,
         title_x=0.5,
         xaxis_title=xlabel,
-        yaxis_title=ylabel
+        yaxis_title=ylabel,
     )
     return fig
 
 
-def plot_time_signals(t_range, alpha=0.5, title=None, yaxis_title=None, rangeslider_visible=True, **kwargs):
+def plot_time_signals(t_range, alpha=0.5, title=None, xlabel=None,
+                      ylabel=None, rangeslider_visible=True, **kwargs):
     fig = go.Figure([go.Scatter(y=arg, x=t_range, name=kw, opacity=alpha) for kw, arg in kwargs.items()])
     fig.update_layout(
         font=dict(family="STIXGeneral"),
         title=title,
         title_x=0.5,
-        yaxis_title=yaxis_title,
+        yaxis_title=ylabel,
+        xaxis_title=xlabel,
     )
 
     fig.update_xaxes(
@@ -210,7 +212,7 @@ def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridi
     plt.show()
 
 
-from seaborn import heatmap as sns_heatmap
+from seaborn import heatmap as sns_heatmap, diverging_palette
 
 
 def im_sns(data, figsize=(16, 9), title=None, xlabel=None, ylabel=None):
@@ -223,6 +225,16 @@ def im_sns(data, figsize=(16, 9), title=None, xlabel=None, ylabel=None):
     ax.set_ylabel(ylabel)
 
     return ax
+
+
+def plot_corr(corr, title="Pearson Correlation Coefficients Matrix"):
+    f, ax = plt.subplots(figsize=(10, 8))
+    ax = sns_heatmap(corr,
+                     annot=True, fmt=".2f",
+                     cmap=diverging_palette(220, 10, as_cmap=True),
+                     square=True, ax=ax, vmin=-1, vmax=1)
+    ax.set_title(title)
+    plt.show()
 
 
 def imshow(a, ax, title=""):

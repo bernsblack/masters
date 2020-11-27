@@ -124,7 +124,6 @@ def get_total_counts(data_frame, state, date_range):
     returns total_counts_y, total_counts_x
     """
     if len(data_frame) > 0:
-        nt = int(np.ceil(data_frame.t.max()))
         tbins = new_int_bins(data_frame.t.min(), data_frame.t.max())
 
         #  total counts line/curve

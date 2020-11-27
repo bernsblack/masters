@@ -9,11 +9,13 @@ def train_epoch_for_sequence_model(model, optimiser, batch_loader, loss_fn, tota
     batch_losses = []
     num_batches = len(batch_loader)
 
-    for current_batch, (indices, inputs, targets) in enumerate(batch_loader):
+    for current_batch, (indices, _inputs, _targets) in enumerate(batch_loader):
+        inputs, targets = _inputs.to(conf.device), _targets.to(conf.device)
+
         out = model(inputs)
         loss = loss_fn(input=out, target=targets)
 
-        batch_losses.append(loss.item())
+        batch_losses.append(loss.cpu().item())
         total_losses.append(batch_losses[-1])
 
         if model.training:  # not used in validation loops
@@ -33,7 +35,8 @@ def evaluate_sequence_model(model: nn.Module, batch_loader, conf: BaseConf):
     with torch.set_grad_enabled(False):
         model.eval()
 
-        for current_batch, (indices, inputs, targets) in enumerate(batch_loader):
+        for current_batch, (indices, _inputs, _targets) in enumerate(batch_loader):
+            inputs, targets = _inputs.to(conf.device), _targets.to(conf.device)
 
             out = model(inputs)  # b,s,f
 
