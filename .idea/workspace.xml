@@ -30,18 +30,8 @@
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Seasonal Decomposition.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Seasonal Decomposition.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interactive_mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interactive_mutual_information_t1t2mod7.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information_t1t2mod7.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_baseline_models.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_baseline_models.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/forecasting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/mutual_information_plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/mutual_information_plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />

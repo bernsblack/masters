@@ -108,6 +108,9 @@ def subplot_mi_curves(
     day of week, time of month and time of year
     :return: a plotly figure with the mi and cmi curves, with y axis the normalized score and x axis the lag
     """
+
+    cmi_plot_label = cmi_name(temporal_variables=temporal_variables)
+
     fig = make_subplots(
         rows=3,
         cols=1,
@@ -137,8 +140,6 @@ def subplot_mi_curves(
                                                           log_norm=log_norm,
                                                           norm=norm,
                                                           bins=bins)
-
-    cmi_plot_label = cmi_name(temporal_variables=temporal_variables)
 
     ylabel = "Normalised Score [0,1]" if norm else "Score"
 
