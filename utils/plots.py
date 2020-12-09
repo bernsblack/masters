@@ -155,8 +155,16 @@ def plot(title=None, xlabel=None, ylabel=None, alpha=0.5, **kwargs):
     return fig
 
 
-def plot_time_signals(t_range, alpha=0.5, title=None, xlabel=None,
-                      ylabel=None, rangeslider_visible=True, **kwargs):
+def plot_time_signals(
+        t_range, alpha=0.5,
+        title=None,
+        xlabel=None,
+        ylabel=None,
+        rangeslider_visible=False,
+        height=400,
+        width=900,
+        **kwargs
+):
     fig = go.Figure([go.Scatter(y=arg, x=t_range, name=kw, opacity=alpha) for kw, arg in kwargs.items()])
     fig.update_layout(
         font=dict(family="STIXGeneral"),
@@ -164,6 +172,8 @@ def plot_time_signals(t_range, alpha=0.5, title=None, xlabel=None,
         title_x=0.5,
         yaxis_title=ylabel,
         xaxis_title=xlabel,
+        height=height,
+        width=width,
     )
 
     fig.update_xaxes(
@@ -234,7 +244,7 @@ def plot_corr(corr, title="Pearson Correlation Coefficients Matrix"):
                      cmap=diverging_palette(220, 10, as_cmap=True),
                      square=True, ax=ax, vmin=-1, vmax=1)
     ax.set_title(title)
-    plt.show()
+    return f, ax
 
 
 def imshow(a, ax, title=""):
@@ -602,7 +612,7 @@ def hist2d_to_geo(counts: np.ndarray, xbins: np.ndarray, ybins: np.ndarray, filt
 
     :param counts: 2D-array (H,W) with counts [0,inf)
     :param xbins: 1D-array (W+1,)
-    :param ybins: 1D-array (H+1,)
+    :param ybins: 1D-aplrray (H+1,)
     :param filter_zero: counts indices with a zero score gets lef out
     :return:
     """
@@ -664,6 +674,76 @@ def new_crime_distribution_plot(crimes: np.ndarray) -> go.Figure:
         xaxis_title="Crime Count per Time Step per Cell",
         yaxis_title="Probability",
         font=dict(family="STIXGeneral"),
+    )
+
+    return fig
+
+
+from plotly.subplots import make_subplots
+
+
+def plot_df(df, title=None, xlabel=None, ylabel=None):
+    """
+    df: data frame
+    title: plot title
+    xlabel: plot x label
+    ylabel: plot ylabel
+
+    Plot each column of a dataframe with the column names as the series name
+    and the data frame index as the x values
+    """
+    return go.Figure(
+        data=[
+            go.Scatter(
+                y=df[name].values,
+                x=df.index,
+                name=name.title(),
+                opacity=0.3,
+            )
+            for i, name in enumerate(df.columns)
+        ],
+        layout=dict(
+            title=title,
+            xaxis_title=xlabel,
+            yaxis_title=ylabel,
+            title_x=0.5,
+            font=dict(family="STIXGeneral"),
+        ),
+    )
+
+
+def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False):
+    fig = make_subplots(
+        rows=len(df.columns) // 2 + 1,
+        cols=2,
+        subplot_titles=df.columns,
+        shared_xaxes=shared_xaxes,
+    )
+
+    for i, name in enumerate(df.columns):
+        fig.add_trace(
+            go.Scatter(
+                x=df.index,
+                y=df[name].values,
+                opacity=0.3,
+                name=name.title(),
+            ),
+            row=i // 2 + 1,
+            col=i % 2 + 1,
+        )
+
+        fig['layout'][f'xaxis{i + 1}']['title'] = xlabel
+        fig['layout'][f'yaxis{i + 1}']['title'] = ylabel
+
+    fig.update_layout(
+        title=title.title(),
+        xaxis_title=xlabel,
+        yaxis_title=ylabel,
+        title_x=0.5,
+        font=dict(family="STIXGeneral"),
+        height=1200,
+        width=900,
+        showlegend=showlegend,
     )
 
     return fig

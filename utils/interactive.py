@@ -108,7 +108,8 @@ def filter_frame(data_frame, state):
     lat_mask = (data_frame.Latitude >= state.lat_min) & (data_frame.Latitude <= state.lat_max)
 
     # time filters
-    date_mask = (data_frame.Date >= state.date_min) & (data_frame.Date <= state.date_max)
+    # flooring values to the bottom date - use data_frame.Date < state.date_max not data_frame.Date <= state.date_max
+    date_mask = (data_frame.Date >= state.date_min) & (data_frame.Date < state.date_max)
 
     # crime type filters
     crime_types_mask = data_frame['Primary Type'].isin(state.crime_types)
@@ -129,12 +130,32 @@ def get_total_counts(data_frame, state, date_range):
         #  total counts line/curve
         total_counts, edges = np.histogram(data_frame.t, bins=tbins)
         total_counts_y = total_counts
-        total_counts_x = date_range[edges[:-2]]
+        # total_counts_x = date_range[edges[0]:edges[-2]]
+        total_counts_x = date_range[edges[0]:edges[-1]]
     else:
         total_counts_y = np.zeros(len(date_range))
         i, j = state.date_indices
         total_counts_x = date_range[i, j]
     return total_counts_y, total_counts_x
+
+
+from pandas import DataFrame
+
+
+def get_total_counts_by_type(data_frame, state, date_range):
+    """
+    data_frame: dataframe of crime incidents
+    returns total_counts_y, total_counts_x
+    """
+    counts_dict = {}
+    for crime_type in state.crime_types:
+        tbins = new_int_bins(data_frame.t.min(), data_frame.t.max())
+
+        #  total counts line/curve
+        total_counts, edges = np.histogram(data_frame[data_frame['Primary Type'] == crime_type].t, bins=tbins)
+        counts_dict[crime_type] = total_counts
+
+    return DataFrame(counts_dict, index=date_range[edges[0]:edges[-1]])
 
 
 def new_bins(data_frame, state):

@@ -5,8 +5,18 @@ from warnings import warn
 import numpy as np
 import os
 import pandas as pd
-from pprint import pformat
-import pandas as pd
+import torch
+import logging
+
+
+def set_system_seed(seed=0):
+    logging.info(f"Set system seed to {seed}")
+    torch.manual_seed(seed)  # sets seed for cpu and gpu
+    np.random.seed(seed)
+
+
+def to_title(str_list):
+    return list(map(lambda x: x.title(), str_list))
 
 
 def load_total_counts(folder_name):

@@ -77,6 +77,10 @@ def compare_time_series_metrics(y_true, y_score, t_range, feature_names, step=24
 
     for k, v in kwargs.items():
         feat_name = k.split("_")[0]
+
+        assert isinstance(kwargs[f"{feat_name}_y_true"], np.ndarray) == True, f"{feat_name}_y_true not ndarray"
+        assert isinstance(kwargs[k], np.ndarray) == True, f"{feat_name} not ndarray"
+
         ll[k] = forecast_metrics(y_true=kwargs[f"{feat_name}_y_true"], y_score=kwargs[k])
 
     plot_time_signals(t_range=t_range[offset:], alpha=alpha, **kwargs).show()

@@ -70,14 +70,14 @@ def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
         ax0.set_title("Conditional Mutual Information (CMI) Mean over Offset")
         ax2.set_title(ax2_title)
         ax2.set_ylabel("CMI - $I(C_{t},C_{t-k}|kmod7)$")  # give I(C)
-        ax2.set_xlabel("Offset in Days (k)")
+        ax2.set_xlabel("Time Step Offset (k)")
     else:
         ax0.set_title("Mutual Information (MI) Mean over Offset")
         ax1.set_title("Crime Rate Grid")
         ax2_title = "MI per Temporal Offset"
         ax2.set_title(ax2_title)
         ax2.set_ylabel("MI - $I(C_{t},C_{t-k})$")  # give I(C)
-        ax2.set_xlabel("Offset in Days (k)")
+        ax2.set_xlabel("Time Step Offset (k)")
 
     def draw(row_ind, col_ind):
         ax2.set_title(f"{ax2_title} - {col_ind, row_ind}")
@@ -151,13 +151,13 @@ def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     ax_mi_img.set_title("Mutual Information (MI)\nMean over Time Offset")
     ax_mi_curve.set_title(ax_mi_curve_title)
     ax_mi_curve.set_ylabel("MI - $I(C_{t},C_{t-k})$")  # give I(C)
-    ax_mi_curve.set_xlabel("Offset in Days (k)")
+    ax_mi_curve.set_xlabel("Time Step Offset (k)")
 
     ax_cmi_curve_title = "CMI per Temporal Offset"
     ax_cmi_img.set_title("Conditional Mutual Information (CMI)\nMean over Time Offset")
     ax_cmi_curve.set_title(ax_cmi_curve_title)
     ax_cmi_curve.set_ylabel("CMI - $I(C_{t},C_{t-k}|kmod7)$")  # give I(C)
-    ax_cmi_curve.set_xlabel("Offset in Days (k)")
+    ax_cmi_curve.set_xlabel("Time Step Offset (k)")
 
     def draw(row_ind, col_ind):
         ax_mi_curve.set_title(f"{ax_mi_curve_title} for {col_ind, row_ind}")
@@ -231,7 +231,7 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
     ax_cmi_img.set_title("Conditional Mutual Information (CMI)\nMean over Time Offset")
     ax_mi_curve.set_title(ax_mi_curve_title)
     ax_mi_curve.set_ylabel("Mutual Information (bits)")  # give I(C)
-    ax_mi_curve.set_xlabel("Offset in Days (k)")
+    ax_mi_curve.set_xlabel("Time Step Offset (k)")
     plt.legend()
 
     def draw(row_ind, col_ind):

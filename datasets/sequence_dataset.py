@@ -17,7 +17,7 @@ class SequenceDataset(Dataset):
 
         self.seq_len = seq_len
 
-        self.target_shape = (len(self.input_data) - self.seq_len, self.target_data.shape[-1])
+        self.target_shape = (len(self.input_data) - self.seq_len - 1, self.target_data.shape[-1])
 
         self.length = len(self.input_data) - self.seq_len - 1
 
