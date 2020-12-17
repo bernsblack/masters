@@ -13,21 +13,21 @@ def get_max_steps(data, step):
         raise ValueError("Data should be in format (N,C,L)")
 
     log.info("finding best max_steps parameter...")
-    inpt = np.copy(data[:, 0])
-    trgs = np.copy(inpt)
-    trgs = trgs[1:]
-    inpt = inpt[:-1]
+    inputs = np.copy(data[:, 0])
+    targets = np.copy(inputs)
+    targets = targets[1:]
+    inputs = inputs[:-1]
 
-    tst_len = int(0.3 * len(inpt))
+    tst_len = int(0.3 * len(inputs))
 
     results = {}
 
     for max_steps in range(1, 10):
-        out = historic_average(data=inpt,
+        out = historic_average(data=inputs,
                                step=step,
                                max_steps=max_steps)
 
-        mae = np.mean(np.abs(trgs[tst_len:] - out[tst_len:]))
+        mae = np.mean(np.abs(targets[tst_len:] - out[tst_len:]))
         # print(f"mae:{mae} max_steps:{max_steps}")
         results[mae] = max_steps
     best = results[min(list(results.keys()))]
@@ -71,7 +71,7 @@ class HistoricAverage:
         """
         determines the optimal
         """
-        self.max_steps = get_max_steps(data, self.step) # -1
+        self.max_steps = get_max_steps(data, self.step)  # -1
         self.fitted = True
         print(f"fitted historic average: step ({self.step}) and max_steps ({self.max_steps})")
 
@@ -198,11 +198,11 @@ if __name__ == "__main__":
 
     grids = np.load(folder + 'crimes_grids.npy')
     f = lambda x: x.mean(0)
-    avg = lambda x, weights: np.average(x, axis=0, weights=weights)  # x and weights should have same length
+    avg = lambda x, w: np.average(x, axis=0, weights=w)  # x and weights should have same length
     # np.average()
 
     window = 4
-    weights = np.exp(-10 / np.arange(window))
+    window_weights = np.exp(-10 / np.arange(window))
 
     lag = 1
     dT = '1D'
@@ -221,7 +221,7 @@ if __name__ == "__main__":
 
     grids_ma = rolling_apply(f, grids_lag, window)  # use lag because we cannot include today's rate in the MA
 
-    grids_avg = rolling_avg(avg, grids, weights)
+    grids_avg = rolling_avg(fun=avg, data=grids, weights=window_weights)
 
     grids_ha = get_historic_average(grids[:len(grids)], historic_jump)  # use grids as we get average for that time
     grids_hama = grids_ha * grids_ma

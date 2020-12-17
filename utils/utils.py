@@ -200,6 +200,29 @@ def write_json(data, file_name):
         json.dump(data, fp)
 
 
+def write_txt(data, file_name):
+    """
+    Saves string data as text file
+    :param data: str
+    :param file_name: file name or path to e saved
+    :return:
+    """
+    with open(file_name, "w") as fp:
+        fp.write(data)
+
+
+def read_txt(data, file_name):
+    """
+    Reads string data as text file
+    :param data: str
+    :param file_name: file name or path to e saved
+    :return:
+    """
+    with open(file_name, "r") as fp:
+        text = fp.read(data)
+    return text
+
+
 def describe_array(a):
     """
 

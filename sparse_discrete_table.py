@@ -102,6 +102,11 @@ def entropy(table: Dict):
     return -1 * np.sum(arr_filtered * np.log2(arr_filtered))
 
 
+def entropy_from_array(arr: np.ndarray):
+    arr_filtered = arr[arr > 0]
+    return -1 * np.sum(arr_filtered * np.log2(arr_filtered))
+
+
 class SparseDiscreteTable:
     """
     rv_names: list of random variable names, e.g.
