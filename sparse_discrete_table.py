@@ -471,7 +471,7 @@ def quick_cond_mutual_info(x, y, z, norm=False):
 from utils.utils import cut
 
 
-def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_self=False, bins=0):
+def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=False, include_self=False, bins=0):
     """
     Calculates the mutual information between 'a' and time lag of 'a' up until 'max_offset' time steps
 
@@ -489,9 +489,11 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
         a = np.round(np.log2(1 + a))
 
     if bins > 0:
-        logging.warning(f"cutting data into {bins} bins: dangerous when data is exponentially distributed")
+        # logging.warning(f"cutting data into {bins} bins: dangerous when data is exponentially distributed")
         # assert 1 == 0, "bins are being used"
         a = cut(a, bins)
+        from pandas import Series
+        logging.warning(f"binned 'a' into {bins} bins => \n{Series(a).describe()}\n")
 
     mis = []
     if include_self:
@@ -512,7 +514,7 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=True, include_se
 
 
 def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
-                                      log_norm=True, include_self=False,
+                                      log_norm=False, include_self=False,
                                       cycles=(7,), conds=None, bins=0):
     """
     Calculate the conditional mutual information over various time lags conditioned either:
@@ -535,11 +537,12 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
         a = np.round(np.log2(1 + a))
 
     if bins > 0:
-        logging.warning(f"cutting data into {bins} bins: dangerous when data is exponentially distributed")
+        # logging.warning(f"cutting data into {bins} bins: dangerous when data is exponentially distributed")
         # assert 1 == 0, "bins are being used"
         a = cut(a, bins)
 
     if conds is None:  # no explicit conditions use the cycles to construct a conditional series
+        logging.warning("'conds' is not set: cycle values are being used")
         conds = []
         for cycle in cycles:
             conds.append(np.arange(len(a)) % cycle)
@@ -612,7 +615,7 @@ def conditional_mutual_information_over_grid(
         t_range,
         max_offset=35,
         norm=True,
-        log_norm=True,
+        log_norm=False,
         include_self=False,
         bins=0,  # mutual info bins
         temporal_variables=["Day of Week", "Time of Month", "Time of Year"],
@@ -668,7 +671,7 @@ def mutual_information_over_grid(
         dense_grid,
         max_offset=35,
         norm=True,
-        log_norm=True,
+        log_norm=False,
         include_self=False,
         bins=0,  # mutual info bins
 ):

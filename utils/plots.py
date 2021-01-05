@@ -747,3 +747,35 @@ def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False)
     )
 
     return fig
+
+
+from statsmodels.tsa.stattools import acf, pacf
+
+
+def plot_autocorr(max_offset=50, title=None, alpha=0.5, partial=False, **kwargs):
+    plot_list = []
+    ylabel = 'Autocorrelation'
+    for name, x in kwargs.items():
+        if partial:
+            autocorr = pacf(x, nlags=max_offset)
+            ylabel = 'Partial Autocorrelation'
+        else:
+            autocorr = acf(x, nlags=max_offset, fft=True)
+
+        autocorr = autocorr[1::]  # skip zero offset because it is always 1
+        offset = np.arange(1, len(autocorr))
+
+        plot_list.append(
+            go.Scatter(y=autocorr, x=offset, opacity=alpha, name=name),
+        )
+
+    return go.Figure(
+        data=plot_list,
+        layout=dict(
+            title_text=title,
+            title_x=0.5,
+            xaxis_title="Lag (k)",
+            yaxis_title=ylabel,
+            font=dict(family="STIXGeneral"),
+        ),
+    )

@@ -1,4 +1,5 @@
 import logging
+import unittest
 from math import sin, cos, sqrt, atan2, radians
 
 import numpy as np
@@ -12,8 +13,11 @@ from utils.utils import cut
 from utils import deprecated
 
 
-def sincos_vector(x):
+@deprecated
+def sincos_vector_old(x):
     """
+    Deprecated version: max value is not end of cycle - would cause rounding issues
+
     Encode array x in sin cos vector representation
     x should be ndarray of integers
     given x is a cyclical series - we return a sin and cos vector of the cyclical series
@@ -23,6 +27,24 @@ def sincos_vector(x):
 
     sin_x = np.sin(2 * np.pi * (x % x_max) / x_max)
     cos_x = np.cos(2 * np.pi * (x % x_max) / x_max)
+    return np.stack([sin_x, cos_x], axis=1)
+
+
+def sincos_vector(x):
+    """
+    Fixed rounding issue: e.g. 23 hour in 24 hour cycle would give zero - is fixed now.
+
+    Encode array x in sin cos vector representation
+    x should be ndarray of integers
+    given x is a cyclical series - we return a sin and cos vector of the cyclical series
+    """
+    x = x - x.min()
+
+    dx = np.min(np.abs(np.diff(x)))
+    x = x / (dx + x.max())
+
+    sin_x = np.sin(2 * np.pi * x)
+    cos_x = np.cos(2 * np.pi * x)
     return np.stack([sin_x, cos_x], axis=1)
 
 
@@ -868,7 +890,51 @@ def normalize_df(df, axis=0):
     return df
 
 
+class DataFrameMinMaxScaler:
+    def __init__(self, minimum=0, maximum=1, axis=0):
+        self.new_min = minimum
+        self.new_max = maximum
+        self.new_scale = maximum - minimum
+        self.axis = axis
+        self.old_min = None
+        self.old_scale = None
+
+    def fit(self, df):
+        self.old_min = df.min(self.axis)
+        self.old_scale = df.max(self.axis) - self.old_min
+
+    def transform(self, df):
+        return (df - self.old_min) * self.new_scale / self.old_scale + self.new_min
+
+    def fit_transform(self, df):
+        self.fit(df)
+        return self.transform(df)
+
+    def inverse_transform(self, df):
+        return (df - self.new_min) * self.old_scale / self.new_scale + self.old_min
+
+
+class TestDataFrameMinMaxScaler(unittest.TestCase):
+    def test_data_frame_min_max_scaler(self):
+        df = pd.DataFrame(np.random.randn(10, 10))
+        scaler01 = DataFrameMinMaxScaler(minimum=0, maximum=1, axis=0)
+        df01 = scaler01.fit_transform(df)
+        dr01 = scaler01.inverse_transform(df01)
+        pd.testing.assert_frame_equal(df, dr01)
+
+        scaler11 = DataFrameMinMaxScaler(minimum=-1, maximum=1, axis=0)
+        df11 = scaler11.fit_transform(df)
+        dr11 = scaler11.inverse_transform(df11)
+        pd.testing.assert_frame_equal(df, dr11)
+
+        self.assertTrue("Passed")
+
+
 def auto_corr(series, max_lag=None):
     if max_lag is None:
         max_lag = int(.5 * len(series))
     return np.array([pd.Series(series).autocorr(i) for i in range(1, max_lag)])
+
+
+def to_percentile(data):
+    return pd.DataFrame(data).rank(pct=True).values.reshape(data.shape)

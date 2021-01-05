@@ -1,97 +1,61 @@
-from utils.plots import plot, displot
-from seaborn import distplot
-import matplotlib.pyplot as plt
-from models.baseline_models import historic_average
+import torch
+import numpy as np
 
-import os
-import logging as log
-from time import strftime
-from copy import deepcopy
-from torch import nn, optim
-import torch.nn.functional as F
-from utils.data_processing import *
-from logger.logger import setup_logging
-from utils.configs import BaseConf
-from utils.utils import write_json, Timer
-from models.kangkang_fnn_models import KangFeedForwardNetwork, SimpleKangFNN, evaluate_fnn
-from dataloaders.flat_loader import FlatDataLoaders, MockLoader, MockLoaders
-from datasets.flat_dataset import FlatDataGroup
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, LossPlotter, PerTimeStepPlotter
-from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score
-from models.model_result import ModelResult, ModelMetrics, save_results, save_metrics, \
-    compare_all_models, get_models_metrics
-from utils.mock_data import mock_fnn_data_classification
-from utils.plots import im
-from utils.utils import pshape, get_data_sub_paths, by_ref
-from trainers.generic_trainer import train_model
-from models.kangkang_fnn_models import train_epoch_for_fnn
+from ax.plot.contour import plot_contour
+from ax.plot.trace import optimization_trace_single_method
+from ax.service.managed_loop import optimize
+from ax.utils.notebook.plotting import render, init_notebook_plotting
+from ax.utils.tutorials.cnn_utils import load_mnist, train, evaluate, CNN
 
-from utils.metrics import best_threshold, get_y_pred, get_y_pred_by_thresholds, best_thresholds
-from time import time
-from torch.optim import lr_scheduler
+# Load MNIST Data
+BATCH_SIZE = 512
+train_loader, valid_loader, test_loader = load_mnist(batch_size=BATCH_SIZE)
 
-from pprint import pprint
-import logging
-from utils.plots import plot_time_signals
+# Define functions to optimize
+t = train_loader.dataset[0][0]
+dtype = t.dtype
 
-from utils.forecasting import compare_time_series_metrics
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+print('Using device:', device)
 
+def train_evaluate(parameterization):
+    net = CNN()
+    net = train(net=net, train_loader=train_loader, parameters=parameterization, dtype=dtype, device=device)
+    return evaluate(
+        net=net,
+        data_loader=valid_loader,
+        dtype=dtype,
+        device=device,
+    )
 
-if __name__ == '__main__':
-    os.environ['NUMEXPR_MAX_THREADS'] = str(os.cpu_count())
+# Run optimization loop
+best_parameters, values, experiment, model = optimize(
+    parameters=[
+        {"name": "lr", "type": "range", "bounds": [1e-6, 0.4], "log_scale": True},
+        {"name": "momentum", "type": "range", "bounds": [0.0, 1.0]},
+    ],
+    evaluation_function=train_evaluate,
+    objective_name='accuracy',
+)
 
-    data_sub_paths = get_data_sub_paths()
-    print(np.sort(data_sub_paths))
-
-    data_sub_paths = by_ref("1f1")
-    print(data_sub_paths)
-
-    data_sub_path = data_sub_paths[0]
-    time_steps_per_day = 24 / int(data_sub_path[data_sub_path.find('T') + 1:data_sub_path.find('H')])
-    print(time_steps_per_day)
-
-    # manually set
-    conf = BaseConf()
-    conf.seed = int(time())  # 3
-    conf.model_name = "CityCount"  # "SimpleKangFNN" # "KangFNN"  # needs to be created
-    conf.data_path = f"./data/processed/{data_sub_path}/"
-
-    if not os.path.exists(conf.data_path):
-        raise Exception(f"Directory ({conf.data_path}) needs to exist.")
-
-    conf.model_path = f"{conf.data_path}models/{conf.model_name}/"
-    os.makedirs(conf.data_path, exist_ok=True)
-    os.makedirs(conf.model_path, exist_ok=True)
-
-    # logging config is set globally thus we only need to call this in this file
-    # imported function logs will follow the configuration
-    setup_logging(save_dir=conf.model_path, log_config='./logger/standard_logger_config.json', default_level=log.INFO)
-    log.info("=====================================BEGIN=====================================")
-
-    info = deepcopy(conf.__dict__)
-    info["start_time"] = strftime("%Y-%m-%dT%H:%M:%S")
-
-    # DATA LOADER SETUP
-    np.random.seed(conf.seed)
-    use_cuda = torch.cuda.is_available()
-    if use_cuda:
-        torch.cuda.manual_seed(conf.seed)
-    else:
-        torch.manual_seed(conf.seed)
-
-    device = torch.device("cuda:0" if use_cuda else "cpu")
-    log.info(f"Device: {device}")
-    info["device"] = device.type
-    conf.device = device
-
-    # SET THE HYPER PARAMETERS
-    conf.shaper_top_k = -1
-    conf.use_classification = False
-    conf.train_set_first = True
-
-    conf.use_crime_types = True
-    data_group = FlatDataGroup(data_path=conf.data_path, conf=conf)
-    data_group.crimes.shape
-    # loaders = FlatDataLoaders(data_group=data_group, conf=conf)
+# Plot response surface
+render(plot_contour(model=model, param_x='lr', param_y='momentum', metric_name='accuracy'))
 
 
+# Plot best objective as function of the iteration
+# `plot_single_method` expects a 2-d array of means, because it expects to average means from multiple
+# optimization runs, so we wrap out best objectives array in another array.
+best_objectives = np.array([[trial.objective_mean*100 for trial in experiment.trials.values()]])
+best_objective_plot = optimization_trace_single_method(
+    y=np.maximum.accumulate(best_objectives, axis=1),
+    title="Model performance vs. # of iterations",
+    ylabel="Classification Accuracy, %",
+)
+render(best_objective_plot)
+
+# Train CNN with best hyper-parameters and evaluate on test set
+data = experiment.fetch_data()
+df = data.df
+best_arm_name = df.arm_name[df['mean'] == df['mean'].max()].values[0]
+best_arm = experiment.arms_by_name[best_arm_name]
+print(best_arm)

@@ -9,7 +9,7 @@ from utils import cmi_name
 def plot_mi_curves(
         a,
         t_range,
-        max_offset=35,
+        max_offset=50,
         norm=True,
         log_norm=False,
         bins=0,
@@ -78,7 +78,7 @@ def plot_mi_curves(
 def subplot_mi_curves(
         a,
         t_range,
-        max_offset=35,
+        max_offset=50,
         norm=True,
         log_norm=False,
         bins=0,
@@ -178,3 +178,49 @@ def subplot_mi_curves(
     )
 
     return fig
+
+
+def plot_mi(
+        max_offset=50,
+        norm=True,
+        log_norm=False,
+        bins=0,
+        title="Auto Mutual Information",
+        alpha=0.5,
+        **kwargs,
+):
+    """
+    :param alpha: the opacity of the two curves
+    :param title: plot title
+    :param max_offset: maximum lag offset used calculating mi and cmi
+    :param norm: if the mi and cmi should be normed between 0 and 1
+    :param log_norm: if the array 'a' should be scaled using log2(1 + x)
+    :param bins: if the array 'a'
+    day of week, time of month and time of year
+    :return: a plotly figure with the mi and cmi curves, with y axis the normalized score and x axis the lag
+    """
+    ylabel = "Normalised Score [0,1]" if norm else "Score"
+
+    plot_list = []
+    for name, data in kwargs.items():
+        mi_score, offset = mutual_info_over_time(a=data,
+                                                 max_offset=max_offset,
+                                                 log_norm=log_norm,
+                                                 norm=norm,
+                                                 bins=bins)
+
+        plot_list.append(
+            go.Scatter(y=mi_score, x=offset, name=name, opacity=alpha),
+        )
+
+    return go.Figure(
+        data=plot_list,
+        layout=dict(
+            title_text=title,
+            title_x=0.5,
+            xaxis_title="Time Step Offset (k)",
+            yaxis_title=ylabel,
+            # legend_title="Curves",
+            font=dict(family="STIXGeneral"),
+        ),
+    )

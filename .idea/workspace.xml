@@ -29,8 +29,19 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
+      <change afterPath="$PROJECT_DIR$/utils/rolling.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Analysis - Count normalisation by clustering.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Count normalisation by clustering.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Hyper Parameter Optimization.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Hyper Parameter Optimization.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/mutual_information_plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/mutual_information_plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -78,6 +89,14 @@
     <option name="currentCommit" value="1" />
     <option name="onto" value="7d674e4d19d1850d743aef7a2270b7ce698cbb85" />
   </component>
+  <component name="GitSEFilterConfiguration">
+    <file-type-list>
+      <filtered-out-file-type name="LOCAL_BRANCH" />
+      <filtered-out-file-type name="REMOTE_BRANCH" />
+      <filtered-out-file-type name="TAG" />
+      <filtered-out-file-type name="COMMIT_BY_MESSAGE" />
+    </file-type-list>
+  </component>
   <component name="JupyterTrust" id="0566c3a9-1fd9-4711-ab3c-bccd7ba9a845" />
   <component name="MacroExpansionManager">
     <option name="directoryName" value="cSlNCDXk" />
@@ -113,49 +132,7 @@
       <recent name="$PROJECT_DIR$/dataloaders" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.generate_data">
-    <configuration name="dev" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/dev.py" />
-      <option name="PARAMETERS" value="" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
-    <configuration name="generate_data" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
-      <module name="masters" />
-      <option name="INTERPRETER_OPTIONS" value="" />
-      <option name="PARENT_ENVS" value="true" />
-      <envs>
-        <env name="PYTHONUNBUFFERED" value="1" />
-      </envs>
-      <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
-      <option name="IS_MODULE_SDK" value="true" />
-      <option name="ADD_CONTENT_ROOTS" value="true" />
-      <option name="ADD_SOURCE_ROOTS" value="true" />
-      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/generate_data.py" />
-      <option name="PARAMETERS" value="7ce" />
-      <option name="SHOW_COMMAND_LINE" value="false" />
-      <option name="EMULATE_TERMINAL" value="false" />
-      <option name="MODULE_MODE" value="false" />
-      <option name="REDIRECT_INPUT" value="false" />
-      <option name="INPUT_FILE" value="" />
-      <method v="2" />
-    </configuration>
+  <component name="RunManager" selected="Python tests.pytest for data_processing.TestDataFrameMinMaxScaler.test_data_frame_min_max_scaler">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -178,39 +155,39 @@
       <option name="INPUT_FILE" value="" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_all_dataloader.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for data_processing.DataFrameMinMaxScaler.test_data_frame_min_max_scaler" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_all_dataloader.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;data_processing.DataFrameMinMaxScaler.test_data_frame_min_max_scaler&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_cell_dataloader.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for data_processing.TestDataFrameMinMaxScaler.test_data_frame_min_max_scaler" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_cell_dataloader.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;data_processing.TestDataFrameMinMaxScaler.test_data_frame_min_max_scaler&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest in test_flat_dataloader.py" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for sparse_discrete_table_test.TestConditionalMutualInformation" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
@@ -222,25 +199,57 @@
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;$PROJECT_DIR$/test_flat_dataloader.py&quot;" />
-      <option name="_new_targetType" value="&quot;PATH&quot;" />
+      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestConditionalMutualInformation&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for sparse_discrete_table_test.TestQuickMutualInformation" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestQuickMutualInformation&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
+      <method v="2" />
+    </configuration>
+    <configuration name="pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+      <module name="masters" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <option name="_new_keywords" value="&quot;&quot;" />
+      <option name="_new_parameters" value="&quot;&quot;" />
+      <option name="_new_additionalArguments" value="&quot;&quot;" />
+      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info&quot;" />
+      <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python.dev" />
-      <item itemvalue="Python.generate_data" />
-      <item itemvalue="Python tests.pytest in test_all_dataloader.py" />
-      <item itemvalue="Python tests.pytest in test_cell_dataloader.py" />
-      <item itemvalue="Python tests.pytest in test_flat_dataloader.py" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
+      <item itemvalue="Python tests.pytest for data_processing.DataFrameMinMaxScaler.test_data_frame_min_max_scaler" />
+      <item itemvalue="Python tests.pytest for data_processing.TestDataFrameMinMaxScaler.test_data_frame_min_max_scaler" />
     </list>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.generate_data" />
-        <item itemvalue="Python.dev" />
-        <item itemvalue="Python tests.pytest in test_all_dataloader.py" />
-        <item itemvalue="Python tests.pytest in test_cell_dataloader.py" />
-        <item itemvalue="Python tests.pytest in test_flat_dataloader.py" />
+        <item itemvalue="Python tests.pytest for data_processing.TestDataFrameMinMaxScaler.test_data_frame_min_max_scaler" />
+        <item itemvalue="Python tests.pytest for data_processing.DataFrameMinMaxScaler.test_data_frame_min_max_scaler" />
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
+        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
       </list>
     </recent_temporary>
   </component>

@@ -169,6 +169,13 @@ def get_historic_average(data, step=24):
 
 
 def rolling_apply(fun, data, w):  # this rolling average includes the current time step
+    """
+
+    :param fun: function to apply to windowed data
+    :param data: nd array
+    :param w: window length
+    :return: rolling functioned data
+    """
     r = np.empty(data.shape)
     r.fill(np.nan)
     for i in range(w - 1, data.shape[0]):
@@ -177,6 +184,13 @@ def rolling_apply(fun, data, w):  # this rolling average includes the current ti
 
 
 def rolling_avg(fun, data, weights):  # this rolling average includes the current time step
+    """
+
+    :param fun: function to apply to windowed data
+    :param data: nd array
+    :param weights: weight averaged values used
+    :return: rolling functioned data
+    """
     w = len(weights)
     r = np.empty(data.shape)
     r.fill(np.nan)

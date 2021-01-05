@@ -9,6 +9,16 @@ import torch
 import logging
 
 
+def shift(xs, n, fill=np.nan):
+    e = np.empty(xs.shape)
+    e.fill(fill)
+    if n >= 0:
+        e[n:] = xs[:-n]
+    else:
+        e[:n] = xs[-n:]
+    return e
+
+
 def set_system_seed(seed=0):
     logging.info(f"Set system seed to {seed}")
     torch.manual_seed(seed)  # sets seed for cpu and gpu
@@ -30,6 +40,9 @@ def cmi_name(temporal_variables):
         'Time of Month': 'ToM_t',
         'Time of Year': 'ToY_t',
     }
+
+    assert isinstance(temporal_variables, list) or isinstance(temporal_variables, tuple) == True, \
+        f"temporal_variables must be list or tuple not {type(temporal_variables)}"
 
     return ",".join([cond_var_map[k] for k in temporal_variables])
 
