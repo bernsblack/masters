@@ -29,19 +29,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
-      <change afterPath="$PROJECT_DIR$/utils/rolling.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Count normalisation by clustering.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Count normalisation by clustering.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Hyper Parameter Optimization.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Hyper Parameter Optimization.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/sparse_discrete_table.py" beforeDir="false" afterPath="$PROJECT_DIR$/sparse_discrete_table.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/mutual_information_plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/mutual_information_plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/trainers/generic_trainer.py" beforeDir="false" afterPath="$PROJECT_DIR$/trainers/generic_trainer.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -237,11 +227,11 @@
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
       <item itemvalue="Python tests.pytest for data_processing.DataFrameMinMaxScaler.test_data_frame_min_max_scaler" />
       <item itemvalue="Python tests.pytest for data_processing.TestDataFrameMinMaxScaler.test_data_frame_min_max_scaler" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
+      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
     </list>
     <recent_temporary>
       <list>

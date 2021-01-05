@@ -24,7 +24,7 @@ def save_checkpoint(tag, model, optimiser, conf,
 
 
 # generic training loop
-def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None, split_train_set=True):
+def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None, verbose=True):
     """
     train_model is a generic function used to train a variety of models
 
@@ -35,7 +35,7 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
     :param loss_fn: loss function used in training process, can be CrossEntropy, MSE or MAE depending on model
     :param conf: configure object containing all preferences for model, optimisations and training loops
     :param scheduler: learning rate scheduler used during training loop
-    :param split_train_set: boolean value specifying if validation and training set should be split during training
+    :param verbose: if the losses should be logged when training
     :return: trn_epoch_losses, val_epoch_losses, stopped_early
 
     Notes
@@ -79,7 +79,12 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
 
     prev_best_val_step = 0
     for epoch in range(conf.max_epochs):
-        log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
+        if verbose:
+            log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
+        else:
+            if epoch % 10 == 0:
+                log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
+
         conf.timer.reset()
         # Training loop
         model.train()
@@ -133,13 +138,12 @@ def train_model(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, schedu
         #     save_checkpoint('best_trn_val', model, optimiser, conf, val_batch_losses, val_epoch_losses,
         #                     trn_epoch_losses, trn_batch_losses, trn_val_epoch_losses)
 
-        log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Best Trn): \t{trn_epoch_losses_best:.8f}")
-        log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
-        log.info(f"\tLoss (Best Val): \t{val_epoch_losses_best:.8f}")
-        # log.info(f"\tLoss (Trn Val): \t{trn_val_epoch_losses[-1]:.8f}")
-        # log.info(f"\tLoss (Best Trn Val): \t{trn_val_epoch_losses_best:.8f}")
-        log.info(f"\tLoss (Trn Val Dif): \t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
+        if verbose:
+            log.info(f"\tLoss (Trn): \t\t{trn_epoch_losses[-1]:.8f}")
+            log.info(f"\tLoss (Best Trn): \t{trn_epoch_losses_best:.8f}")
+            log.info(f"\tLoss (Val): \t\t{val_epoch_losses[-1]:.8f}")
+            log.info(f"\tLoss (Best Val): \t{val_epoch_losses_best:.8f}")
+            log.info(f"\tLoss (Trn Val Dif): \t{np.abs(val_epoch_losses[-1] - trn_epoch_losses[-1]):.8f}\n")
 
         if conf.early_stopping and prev_best_val_step > conf.patience and epoch >= conf.min_epochs:
             log.warning(
@@ -233,8 +237,7 @@ def train_model_final(model, optimiser, loaders, train_epoch_fn, loss_fn, conf):
 
 
 # generic training loop
-def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None,
-                        split_train_set=True):
+def evaluate_model_loss(model, optimiser, loaders, train_epoch_fn, loss_fn, conf, scheduler=None):
     """
     Will
     """
