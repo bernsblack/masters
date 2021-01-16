@@ -134,6 +134,71 @@ def rolling_norm(
     return d_normed
 
 
+class RollingNormScaler:
+    def __init__(
+            self,
+            window,
+            period=1,
+            center=False,
+            fill=np.nan,
+            axis=0,
+            mode=None,
+    ):
+        """
+        Applies a rolling normalisation by subtracting the rolling mean and dividing by the standard deviation
+
+        :param mode:
+        :param window: window used to calculate running mean and std
+        :param period: periodic offset to use when calculating rolling functions, default is 1
+        :param center: if the rolling functions should centered around current value or have value at the right
+        :param fill: values to fill array with where window is too large
+        :param axis: axis to calculate the rolling function on
+        :return:
+        """
+        self.window = window
+        self.period = period
+        self.center = center
+        self.fill = fill
+        self.axis = axis
+        self.mode = mode
+        self.d_mean = None
+        self.d_std = None
+
+    def fit(self, data):
+        self.d_mean = periodic_rolling(
+            func=np.mean,
+            data=data,
+            window=self.window,
+            period=self.period,
+            center=self.center,
+            fill=self.fill,
+            axis=self.axis,
+            mode=self.mode,
+        )
+
+        self.d_std = periodic_rolling(
+            func=np.std,
+            data=data,
+            window=self.window,
+            period=self.period,
+            center=self.center,
+            fill=self.fill,
+            axis=self.axis,
+            mode=self.mode,
+        )
+
+    def transform(self, data):
+        d_normed = (data - self.d_mean) / self.d_std
+        return d_normed
+
+    def fit_transform(self, data):
+        self.fit(data)
+        return self.transform(data)
+
+    def inverse_transform(self, data):
+        return data * self.d_std + self.d_mean
+
+
 def flag_anomalies(
         data,
         thresh,

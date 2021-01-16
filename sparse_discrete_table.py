@@ -493,7 +493,7 @@ def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=False, include_s
         # assert 1 == 0, "bins are being used"
         a = cut(a, bins)
         from pandas import Series
-        logging.warning(f"binned 'a' into {bins} bins => \n{Series(a).describe()}\n")
+        logging.warning(f"binned 'a' into {bins} bins => distribution: \n{Series(a).describe()}\n")
 
     mis = []
     if include_self:
