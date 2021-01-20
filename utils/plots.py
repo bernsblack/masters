@@ -206,7 +206,8 @@ def displot(**kwargs):
     plt.show()
 
 
-def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis', grid_on=False):
+def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridis',
+       grid_on=False, vmin=None, vmax=None):
     """
     quick and easy way to view 2d matrices in notebooks
     """
@@ -214,7 +215,7 @@ def im(data, title=None, figsize=(10, 10), aspect=1, colorbar=True, cmap='viridi
     if title:
         plt.title(title)
 
-    plt.imshow(data, aspect=aspect, cmap=cmap)
+    plt.imshow(data, aspect=aspect, cmap=cmap, vmin=vmin, vmax=vmax)
     if colorbar:
         plt.colorbar()
     plt.grid(grid_on)

@@ -9,6 +9,24 @@ import torch
 import logging
 
 
+def topk_indices(data, k):
+    """
+    :param data: data array
+    :param k: integer value of top values
+    :return: top k indices in array
+    """
+    return np.argsort(-data)[:k]
+
+
+def topk(data, k):
+    """
+    :param data: data array
+    :param k: integer value of top values
+    :return: top k values in array
+    """
+    return data[np.argsort(-data)[:k]]
+
+
 def shift(xs, n, fill=np.nan):
     e = np.empty(xs.shape)
     e.fill(fill)

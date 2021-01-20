@@ -10,9 +10,10 @@ import numpy as np
 from logger import setup_logging
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper
+from pandas import read_pickle
 
 
-def setup(data_sub_path: str, model_name: str = "Mutual Info") -> Tuple[BaseConf, Shaper, Any, List[str]]:
+def setup(data_sub_path: str, model_name: str = "Analysis") -> Tuple[BaseConf, Shaper, Any, List[str]]:
     """
     gets data conf and sets up logging
 
@@ -45,4 +46,6 @@ def setup(data_sub_path: str, model_name: str = "Mutual Info") -> Tuple[BaseConf
     shaper = Shaper(data=sparse_crimes,
                     conf=conf)
 
-    return conf, shaper, sparse_crimes, crime_feature_indices
+    t_range = read_pickle(conf.data_path + "t_range.pkl")
+
+    return conf, shaper, sparse_crimes, t_range, crime_feature_indices

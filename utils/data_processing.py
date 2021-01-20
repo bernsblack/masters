@@ -938,3 +938,79 @@ def auto_corr(series, max_lag=None):
 
 def to_percentile(data):
     return pd.DataFrame(data).rank(pct=True).values.reshape(data.shape)
+
+
+# Variance-stabilizing transformations
+# anscombe_transform
+def anscombe_transform(x):
+    return 2 * np.sqrt(x + 0.375)
+
+
+def inv_anscombe_transform(y):
+    return (y * 0.5) ** 2 - 0.375
+
+
+def freeman_tukey_transform(x):
+    return np.sqrt(x + 1) + np.sqrt(x)
+
+
+def simple_freeman_tukey_transform(x):
+    return 2 * np.sqrt(x)
+
+
+def poisson_variance_stabilize(x):
+    """
+    From https://stats.stackexchange.com/a/141865/129972
+    :param x: Poisson distributed array data
+    :return: variance stabilized data to ensure a variance of 1
+
+    Note: with lambda large enough the transformed data is approximately normal -> N(2sqrt(lambda),1)
+    """
+    assert len(x) > 1  # ensure we're working with array like
+    lam = np.mean(x)
+    sqrt_lam = np.sqrt(lam)
+    sqrt_lam_inv = 1 / sqrt_lam
+    return 2 * sqrt_lam + sqrt_lam_inv * (x - lam)
+
+
+def poisson_z_score(x):
+    """
+    Z score normalization for a Poisson distributed data
+
+    From https://stats.stackexchange.com/a/141865/129972
+    :param x: Poisson distributed array data
+    :return: variance stabilized data to ensure a variance of 1
+    """
+    assert len(x) > 1  # ensure we're working with array like
+    sqrt_lam = np.sqrt(np.mean(x))
+    return 2 * (np.sqrt(sqrt_lam) - sqrt_lam)
+
+
+def quantile_normalization(df):
+    """
+    Ranking each column and translating each rank to the average of all columns for the given rank allows all columns
+    to have the same quantiles.
+    :param df:
+    :return:
+    """
+    rank_mean = df.stack().groupby(df.rank(method='first').stack().astype(int)).mean()
+    return df.rank(method='min').stack().astype(int).map(rank_mean).unstack()
+
+
+class TestQuantileNormalization(unittest.TestCase):
+    def test_quantile_normalization(self):
+        test_input = pd.DataFrame({
+            'C1': {'A': 5, 'B': 2, 'C': 3, 'D': 4},
+            'C2': {'A': 4, 'B': 1, 'C': 4, 'D': 2},
+            'C3': {'A': 3, 'B': 4, 'C': 6, 'D': 8},
+        })
+
+        test_target = pd.DataFrame({
+            'C1': {'A': 5.666667, 'B': 2.000000, 'C': 3.000000, 'D': 4.666667, },
+            'C2': {'A': 4.666667, 'B': 2.000000, 'C': 4.666667, 'D': 3.000000, },
+            'C3': {'A': 2.000000, 'B': 3.000000, 'C': 4.666667, 'D': 5.666667, },
+        })
+
+        pd.testing.assert_frame_equal(test_target, quantile_normalization(test_input))
+
+        self.assertTrue(True)

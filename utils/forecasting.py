@@ -89,3 +89,16 @@ def compare_time_series_metrics(y_true, y_score, t_range, feature_names, step=24
     # metrics.sort_values('MASE')
 
     return metrics
+
+
+from statsmodels.tsa.stattools import acf, pacf
+import pandas as pd
+
+
+def vector_auto_corr(dense_grid, nlags=40, partial=True):
+    if partial:
+        func = lambda x: pacf(x, nlags=nlags)
+    else:
+        func = lambda x: acf(x, nlags=nlags, fft=False)
+
+    return pd.DataFrame(dense_grid).apply(func).iloc[1:]

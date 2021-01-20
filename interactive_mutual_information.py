@@ -271,8 +271,7 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
 def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL', cap=32):
     _info(f"Running interactive plotting -> data_sub_path => {data_sub_path} K => {max_offset}")
 
-    conf, shaper, sparse_crimes, crime_feature_indices = setup(data_sub_path=data_sub_path)
-    # conf, shaper, sparse_crimes = setup(data_sub_path="T24H-X425M-Y440M_2013-01-01_2017-01-01")
+    conf, shaper, sparse_crimes, t_range, crime_feature_indices = setup(data_sub_path=data_sub_path)
 
     crime_types_mapping = {
         'TOTAL': 0,
