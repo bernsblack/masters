@@ -43,6 +43,7 @@ def evaluate_sequence_model(model: nn.Module, batch_loader, conf: BaseConf):
             #             batch_y_score = out[:, -1, 0].cpu().numpy()  # select class1 prediction
             #             batch_y_count = targets[:, -1, 0].cpu().numpy()  # select class1 prediction
 
+            # TODO: ensure we're only evaluating on the final forecast in the sequence to avoid train set leakage
             batch_y_score = out[:, -1, :].cpu().numpy()  # select class1 prediction
             batch_y_count = targets[:, -1, :].cpu().numpy()  # select class1 prediction
 

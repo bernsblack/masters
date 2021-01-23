@@ -41,16 +41,31 @@ class SequenceDataset(Dataset):
 
 
 class SequenceDataLoaders:
-    def __init__(self, input_data, target_data, t_range,
-                 seq_len=30, batch_size=1, shuffle=True, val_ratio=0.2, tst_ratio=0.2, num_workers=0):
+    def __init__(self, input_data, target_data, t_range, seq_len=30, batch_size=1, shuffle=True,
+                 val_ratio=0.2, tst_ratio=0.2, tst_size=None, num_workers=0):
         """
-        data ndarray (N,d)
+        Indices will be chosen so that training, validation and test sets only overlap by sequence length, this way
+        we can feed in data from the train_val set into the evaluation model, preserving more data to evaluate without
+        leaking evaluation target data into our train_val set because we only look at the final forecasted value given
+        the sequence for the evaluation model.
+
+        :param input_data: all input sequence data, train val en test sets included in nd array format
+        :param target_data: all target sequence data, train val en test sets included in nd array format
+        :param t_range: all datetime sequence data, train val en test sets included in nd array format
+        :param seq_len: sequence length used to feed sequenced data into models
+        :param batch_size: size of batches when training models
+        :param shuffle: if the indices should be shuffled between epochs
+        :param val_ratio: validation set ratio of the train_val set
+        :param tst_ratio: test set ration of the total dataset
+        :param tst_size: explicit test set size. tst_ratio is ignored when tst_size is set
+        :param num_workers: number cpu's used to load data when iterating over set
         """
         assert len(input_data) == len(target_data)
 
         total_len = len(input_data)
 
-        tst_size = int(total_len * tst_ratio)
+        if tst_size is None:
+            tst_size = int(total_len * tst_ratio)
 
         trn_val_size = total_len - tst_size
         val_size = int(trn_val_size * val_ratio)
