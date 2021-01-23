@@ -48,7 +48,11 @@ def to_title(str_list):
 
 
 def load_total_counts(folder_name):
-    return pd.read_pickle(f"./data/processed/{folder_name}/total_counts_by_type.pkl")
+    df = pd.read_pickle(f"./data/processed/{folder_name}/total_counts_by_type.pkl")
+    df['TOTAL'] = df.sum(axis=1)
+    df = df.reindex(columns=np.roll(df.columns, 1))
+    df.columns = to_title(df.columns)
+    return df
 
 
 def cmi_name(temporal_variables):

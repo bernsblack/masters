@@ -57,7 +57,7 @@ def encode_sincos(X):
     return np.concatenate(vectors, axis=1)
 
 
-def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='ohe'):
+def encode_time_vectors(t_range, month_divisions=None, year_divisions=None, kind='sincos'):
     """
     given t_range (datetime series)
     return E: H,D,DoW,isWeekend hot-encoded vector and sin(hour/24) cos(hour/24)
@@ -69,10 +69,20 @@ def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='oh
     time_frame = t_range.freqstr  # used to choose the external factors
     is_gte_24hours = "D" in time_frame or time_frame == "24H"
 
-    if time_frame == '168H' or time_frame == '1W':
+    if month_divisions:
+        timeofmonth = cut(t_range.day / t_range.days_in_month, month_divisions)
+    else:
+        timeofmonth = t_range.day / t_range.days_in_month
+
+    if year_divisions:
+        timeofyear = cut(t_range.dayofyear / (365 + t_range.is_leap_year * 1), year_divisions)
+    else:
+        timeofyear = t_range.dayofyear / (365 + t_range.is_leap_year * 1)
+
+    if time_frame == '168H' or time_frame == '1W':  # WEEKLY TIME VECTORS
         df = pd.DataFrame({
-            "timeofmonth": cut(t_range.day / t_range.days_in_month, month_divisions),
-            "timeofyear": cut(t_range.dayofyear / (366), year_divisions),
+            "timeofmonth": timeofmonth,
+            "timeofyear": timeofyear,
         })
         col_names = ['$ToM_{sin}$', '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$']
 
@@ -84,7 +94,7 @@ def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='oh
         else:  # option to encode all time information in a sin cos vector representation
             # ensure all vectors are between 0 and 1
             time_vectors = encode_sincos(df[["timeofmonth", "timeofyear"]].values) / 2 + 0.5
-    else:
+    else:  # LESS THAN A WEEK
         # External info
         is_weekend = t_range.dayofweek.to_numpy()
         is_weekend[is_weekend < 5] = 0
@@ -94,9 +104,8 @@ def encode_time_vectors(t_range, month_divisions=10, year_divisions=10, kind='oh
             "hour": t_range.hour,
             "dayofweek": t_range.dayofweek,
             "is_weekend": is_weekend,
-            "timeofmonth": cut(t_range.day / t_range.days_in_month, month_divisions),
-            "timeofyear": cut(t_range.dayofyear / (366), year_divisions),
-            #         "month": t_range.month,
+            "timeofmonth": timeofmonth,
+            "timeofyear": timeofyear,
         })
 
         if kind == "ohe":
@@ -879,14 +888,35 @@ def normalize_flat(data):
 
 def normalize(data):
     """
-    sum of data will now sum to one
+    sum of data will now sum to one (distribution normalisation)
     """
     return safe_divide(data, np.sum(data))
 
 
-def normalize_df(df, axis=0):
+def normalize_df_min_max(df, axis=0):
+    """
+    Dataframe min max normalization
+    :param df: pandas dataframe
+    :param axis: axis to compute functions on
+    :return: min max scaled dataframe
+    """
     df = df - df.min(axis)
     df = df / df.max(axis)
+    return df
+
+
+def normalize_df_mean_std(df, axis=0):
+    """
+    Dataframe mean std normalization, a.k.a. z-score normalisation
+
+    Help to cater for outliers in the data
+    For periodic mean std normalization use `rolling_norm` from `utils.rolling`
+    :param df: pandas dataframe
+    :param axis: axis to compute functions on
+    :return: mean std scaled dataframe
+    """
+    df = df - df.mean(axis)
+    df = df / df.std(axis)
     return df
 
 
@@ -958,32 +988,35 @@ def simple_freeman_tukey_transform(x):
     return 2 * np.sqrt(x)
 
 
-def poisson_variance_stabilize(x):
+def poisson_variance_stabilize(x, axis=0):
     """
     From https://stats.stackexchange.com/a/141865/129972
     :param x: Poisson distributed array data
     :return: variance stabilized data to ensure a variance of 1
+    :param axis: axis the z score should be computed in
 
     Note: with lambda large enough the transformed data is approximately normal -> N(2sqrt(lambda),1)
     """
     assert len(x) > 1  # ensure we're working with array like
-    lam = np.mean(x)
-    sqrt_lam = np.sqrt(lam)
+    lam = np.mean(x, axis=axis)  # mu == var for poisson
+    sqrt_lam = np.sqrt(lam)  # sqrt lam is std of observer poisson data
     sqrt_lam_inv = 1 / sqrt_lam
+    # we subtract mean and divide by the standard deviation but plus the 2*std to add the mean back in
     return 2 * sqrt_lam + sqrt_lam_inv * (x - lam)
 
 
-def poisson_z_score(x):
+def poisson_z_score(x, axis=0):
     """
     Z score normalization for a Poisson distributed data
 
     From https://stats.stackexchange.com/a/141865/129972
     :param x: Poisson distributed array data
     :return: variance stabilized data to ensure a variance of 1
+    :param axis: axis the z score should be computed in
     """
     assert len(x) > 1  # ensure we're working with array like
-    sqrt_lam = np.sqrt(np.mean(x))
-    return 2 * (np.sqrt(sqrt_lam) - sqrt_lam)
+    sqrt_lam = np.sqrt(np.mean(x, axis=axis))  # sqrt_lam is sample std for Poisson data
+    return 2 * (np.sqrt(x) - sqrt_lam)
 
 
 def quantile_normalization(df):

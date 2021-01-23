@@ -30,20 +30,9 @@
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Count normalisation by clustering.ipynb" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/Analysis - Mutual Information and Correlation over Spatial Domain.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Mutual Information and Correlation over Spatial Domain.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Development - ARIMA Baseline.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - ARIMA Baseline.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interactive_mutual_information.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/interactive_mutual_information_t1t2mod7.py" beforeDir="false" afterPath="$PROJECT_DIR$/interactive_mutual_information_t1t2mod7.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/mutual_information.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/mutual_information_old.ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_all_data_loaders.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/test_all_data_loaders.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/test_all_dataloader.py" beforeDir="false" afterPath="$PROJECT_DIR$/test_all_dataloader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/forecasting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/setup.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/setup.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -240,11 +229,11 @@
     </configuration>
     <list>
       <item itemvalue="Python.generate_mock_data" />
+      <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization" />
+      <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization.test_quantile_normalization" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestConditionalMutualInformation" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
       <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
-      <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization.test_quantile_normalization" />
-      <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization" />
     </list>
     <recent_temporary>
       <list>
