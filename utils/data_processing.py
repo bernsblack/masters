@@ -858,6 +858,26 @@ def safe_divide(a, b):
     return np.divide(a, b, out=np.zeros_like(a), where=b != 0)
 
 
+def safe_divide_df(a, b):
+    """
+    Any value divided by zero will be set to the original value instead of NaN or Inf
+    """
+    non_zeros = b != 0
+    c = a.copy()
+    c[non_zeros] = c[non_zeros] / b[non_zeros]
+    return c
+
+
+def safe_divide_df_zero_on_zero(a, b):
+    """
+    Divides to dataframes with each other but replaces 0/0 by zero.
+    """
+    non_zeros = ~((a == 0) & (b == 0))
+    c = a.copy()
+    c[non_zeros] = c[non_zeros] / b[non_zeros]
+    return c
+
+
 # def safe_divide(a, b):
 #     """
 #     ignore / 0, div0( [-1, 0, 1], 0 ) -> [0, 0, 0]

@@ -29,8 +29,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
+      <change afterPath="$PROJECT_DIR$/utils/testing.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Interactive Mutual Information for Feature Selection.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Mutual Information and Correlation over Spatial Domain.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Mutual Information and Correlation over Spatial Domain.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/rolling.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/rolling.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -121,7 +128,7 @@
       <recent name="$PROJECT_DIR$/dataloaders" />
     </key>
   </component>
-  <component name="RunManager" selected="Python.scratch">
+  <component name="RunManager" selected="Python tests.pytest for rolling.TestPeriodRollingFunction">
     <configuration name="generate_mock_data" type="PythonConfigurationType" factoryName="Python" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -197,35 +204,35 @@
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for sparse_discrete_table_test.TestQuickMutualInformation" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for rolling.TestPeriodRollingFunction" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestQuickMutualInformation&quot;" />
+      <option name="_new_target" value="&quot;rolling.TestPeriodRollingFunction&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
-    <configuration name="pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
+    <configuration name="pytest for rolling.TestPeriodRollingFunction.test_rolling_nan" type="tests" factoryName="py.test" temporary="true" nameIsGenerated="true">
       <module name="masters" />
       <option name="INTERPRETER_OPTIONS" value="" />
       <option name="PARENT_ENVS" value="true" />
       <option name="SDK_HOME" value="" />
-      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/utils" />
       <option name="IS_MODULE_SDK" value="true" />
       <option name="ADD_CONTENT_ROOTS" value="true" />
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <option name="_new_keywords" value="&quot;&quot;" />
       <option name="_new_parameters" value="&quot;&quot;" />
       <option name="_new_additionalArguments" value="&quot;&quot;" />
-      <option name="_new_target" value="&quot;sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info&quot;" />
+      <option name="_new_target" value="&quot;rolling.TestPeriodRollingFunction.test_rolling_nan&quot;" />
       <option name="_new_targetType" value="&quot;PYTHON&quot;" />
       <method v="2" />
     </configuration>
@@ -234,16 +241,16 @@
       <item itemvalue="Python.scratch" />
       <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization" />
       <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization.test_quantile_normalization" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
-      <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
+      <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction" />
+      <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction.test_rolling_nan" />
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction" />
+        <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction.test_rolling_nan" />
         <item itemvalue="Python.scratch" />
         <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization" />
         <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization.test_quantile_normalization" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation.test_quick_cond_mutual_info" />
-        <item itemvalue="Python tests.pytest for sparse_discrete_table_test.TestQuickMutualInformation" />
       </list>
     </recent_temporary>
   </component>

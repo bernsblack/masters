@@ -2,10 +2,12 @@ import unittest
 
 import numpy as np
 
+from utils.data_processing import safe_divide, safe_divide_df, safe_divide_df_zero_on_zero
 
-def periodic_rolling(func, data, window, period=1, center=False, fill=np.nan, axis=0, mode=None):
+
+def periodic_rolling(func, data, window, period=1, center=False, fill=np.nan, axis=0, mode=None, offset=0):
     """
-    Applies a rolling function by subtracting the rolling mean and dividing by the standard deviation
+    Applies a rolling function
 
     :param mode: ('reflect' or None)
     :param func: function to apply across the moving windows
@@ -15,8 +17,11 @@ def periodic_rolling(func, data, window, period=1, center=False, fill=np.nan, ax
     :param center: if the rolling functions should centered around current value or have value at the right
     :param fill: values to fill array with where window is too large
     :param axis: axis to calculate the rolling function on
+    :param offset: if the mean that is calculated is offset to further time so that short term trends are not wiped out
     :return:
     """
+    # todo add offset to not wipe out short term trends from the data - e.g.
+
     if mode is not None:
         pad_width = window // 2 if center else window
         # pad_width = period * (window // 2) if center else period * window
@@ -31,12 +36,15 @@ def periodic_rolling(func, data, window, period=1, center=False, fill=np.nan, ax
         lo = period * hw
         hi = period * hw if window % 2 == 0 else period * hw + 1
         end = len(r) - hi + 1
+        jump = 0
     else:
         lo = period * (window - 1)
         hi = 1
         end = len(r)
-    for i in range(lo, end):
-        r[i] = func(data[i - lo:i + hi:period], axis=axis)
+        jump = offset * period  # in counts of periods - same as window
+
+    for i in range(lo + jump, end):
+        r[i] = func(data[i - lo - jump:i + hi - jump:period], axis=axis)
 
     if mode is not None:
         pad_width = window // 2 if center else window
@@ -45,7 +53,7 @@ def periodic_rolling(func, data, window, period=1, center=False, fill=np.nan, ax
     return r
 
 
-def periodic_rolling_mean(data, window, period=1, center=False, fill=np.nan, axis=0):
+def periodic_rolling_mean(data, window, period=1, center=False, fill=np.nan, axis=0, offset=0):
     """
     Applies a rolling mean
 
@@ -55,6 +63,7 @@ def periodic_rolling_mean(data, window, period=1, center=False, fill=np.nan, axi
     :param center: if the rolling functions should centered around current value or have value at the right
     :param fill: values to fill array with where window is too large
     :param axis: axis to calculate the rolling function on
+    :param offset: how many periods back should the window stop
     :return:
     """
     return periodic_rolling(func=np.mean,
@@ -63,10 +72,11 @@ def periodic_rolling_mean(data, window, period=1, center=False, fill=np.nan, axi
                             period=period,
                             center=center,
                             fill=fill,
-                            axis=axis)
+                            axis=axis,
+                            offset=offset)
 
 
-def periodic_rolling_std(data, window, period=1, center=False, fill=np.nan, axis=0):
+def periodic_rolling_std(data, window, period=1, center=False, fill=np.nan, axis=0, offset=0):
     """
     Applies a rolling std
 
@@ -76,6 +86,7 @@ def periodic_rolling_std(data, window, period=1, center=False, fill=np.nan, axis
     :param center: if the rolling functions should centered around current value or have value at the right
     :param fill: values to fill array with where window is too large
     :param axis: axis to calculate the rolling function on
+    :param offset: how many periods back should the window stop
     :return:
     """
     return periodic_rolling(func=np.std,
@@ -84,7 +95,8 @@ def periodic_rolling_std(data, window, period=1, center=False, fill=np.nan, axis
                             period=period,
                             center=center,
                             fill=fill,
-                            axis=axis)
+                            axis=axis,
+                            offset=offset)
 
 
 def rolling_norm(
@@ -95,6 +107,7 @@ def rolling_norm(
         fill=np.nan,
         axis=0,
         mode=None,
+        offset=0,
 ):
     """
     Applies a rolling normalisation by subtracting the rolling mean and dividing by the standard deviation
@@ -106,6 +119,7 @@ def rolling_norm(
     :param center: if the rolling functions should centered around current value or have value at the right
     :param fill: values to fill array with where window is too large
     :param axis: axis to calculate the rolling function on
+    :param offset: how many periods back should the window stop
     :return:
     """
     d_mean = periodic_rolling(
@@ -117,6 +131,7 @@ def rolling_norm(
         fill=fill,
         axis=axis,
         mode=mode,
+        offset=offset,
     )
 
     d_std = periodic_rolling(
@@ -128,9 +143,19 @@ def rolling_norm(
         fill=fill,
         axis=axis,
         mode=mode,
+        offset=offset,
     )
 
     d_normed = (data - d_mean) / d_std
+
+    # use safe_divide to avoid dividing by zero
+    # d_normed = safe_divide_df(data - d_mean, d_std)
+    # d_normed = safe_divide_df_zero_on_zero(data - d_mean, d_std)
+
+    # d_normed = data - d_mean
+    # non_zeros = d_std > 1e-10  # tolerance check to avoid dividing by zero
+    # d_normed[non_zeros] = d_normed[non_zeros] / d_std[non_zeros]
+
     return d_normed
 
 
@@ -143,6 +168,7 @@ class RollingNormScaler:
             fill=np.nan,
             axis=0,
             mode=None,
+            offset=0,
     ):
         """
         Applies a rolling normalisation by subtracting the rolling mean and dividing by the standard deviation
@@ -153,6 +179,7 @@ class RollingNormScaler:
         :param center: if the rolling functions should centered around current value or have value at the right
         :param fill: values to fill array with where window is too large
         :param axis: axis to calculate the rolling function on
+        :param offset: how many periods back should the window stop
         :return:
         """
         self.window = window
@@ -237,6 +264,15 @@ def flag_anomalies(
 
 
 class TestPeriodRollingFunction(unittest.TestCase):
+    def test_rolling_nan(self):
+        z = np.zeros(50)
+        z[20:25] = 1
+        zn = rolling_norm(data=z, window=5)
+        z_std = periodic_rolling_std(data=z, window=5)
+        zmu = periodic_rolling_mean(data=z, window=5)
+
+        self.assertTrue((z[24] == 1 and np.isnan(zn[24]) and zmu[24] == 1 and z_std[24] == 0))
+
     def test_period_center_and_no_center(self):
         # assertion test for the periodic rolling function
         period = 4

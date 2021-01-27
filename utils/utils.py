@@ -9,6 +9,10 @@ import torch
 import logging
 
 
+def to_snake(text):
+    return text.lower().replace(' ', '_')
+
+
 def topk_indices(data, k):
     """
     :param data: data array
