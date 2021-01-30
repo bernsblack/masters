@@ -1,3 +1,5 @@
+import logging
+
 from torch.utils.data import Dataset, DataLoader
 import torch
 import numpy as np
@@ -42,7 +44,7 @@ class SequenceDataset(Dataset):
 
 class SequenceDataLoaders:
     def __init__(self, input_data, target_data, t_range, seq_len=30, batch_size=1, shuffle=True,
-                 val_ratio=0.2, tst_ratio=0.2, tst_size=None, num_workers=0, overlap_sequences=False):
+                 val_ratio=0.2, tst_ratio=0.2, tst_size=None, num_workers=0, overlap_sequences=True):
         """
         Indices will be chosen so that training, validation and test sets only overlap by sequence length, this way
         we can feed in data from the train_val set into the evaluation model, preserving more data to evaluate without
@@ -77,6 +79,7 @@ class SequenceDataLoaders:
         # which means validation loss will decrease as training starts to over-fit because they share values in their
         # respective loss calculations
         if overlap_sequences:
+            logging.warning("Data sets are overlapping by sequence length")
             trn_idx = np.array([0, trn_size])
             val_idx = np.array([trn_idx[1] - seq_len, trn_idx[1] + val_size])
             trn_val_idx = np.array([0, val_idx[1]])

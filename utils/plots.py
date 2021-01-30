@@ -1,5 +1,7 @@
 import base64
 import io
+import logging
+
 import plotly.graph_objects as go
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
@@ -683,7 +685,7 @@ def new_crime_distribution_plot(crimes: np.ndarray) -> go.Figure:
 from plotly.subplots import make_subplots
 
 
-def plot_df(df, title=None, xlabel=None, ylabel=None):
+def plot_df(df, title=None, xlabel=None, ylabel=None, alpha=0.3):
     """
     df: data frame
     title: plot title
@@ -699,7 +701,7 @@ def plot_df(df, title=None, xlabel=None, ylabel=None):
                 y=df[name].values,
                 x=df.index,
                 name=name.title(),
-                opacity=0.3,
+                opacity=alpha,
             )
             for i, name in enumerate(df.columns)
         ],
@@ -713,10 +715,10 @@ def plot_df(df, title=None, xlabel=None, ylabel=None):
     )
 
 
-def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False):
+def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False, ncols=2, alpha=0.3):
     fig = make_subplots(
-        rows=len(df.columns) // 2 + 1,
-        cols=2,
+        rows=int(np.ceil(len(df.columns) / ncols)),
+        cols=ncols,
         subplot_titles=df.columns,
         shared_xaxes=shared_xaxes,
     )
@@ -726,11 +728,11 @@ def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False)
             go.Scatter(
                 x=df.index,
                 y=df[name].values,
-                opacity=0.3,
+                opacity=alpha,
                 name=name.title(),
             ),
-            row=i // 2 + 1,
-            col=i % 2 + 1,
+            row=i // ncols + 1,
+            col=i % ncols + 1,
         )
 
         fig['layout'][f'xaxis{i + 1}']['title'] = xlabel
@@ -753,9 +755,11 @@ def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False)
 from statsmodels.tsa.stattools import acf, pacf
 
 
-def plot_autocorr(max_offset=50, title=None, alpha=0.5, partial=False, **kwargs):
-    plot_list = []
+def plot_autocorr(max_offset=50, title=None, alpha=0.5, partial=False, subplots=False, **kwargs):
+    corr_dict = dict()
     ylabel = 'Autocorrelation'
+    xlabel = 'Lag (k)'
+    offset = np.arange(1, max_offset + 1)
     for name, x in kwargs.items():
         if partial:
             autocorr = pacf(x, nlags=max_offset)
@@ -764,19 +768,12 @@ def plot_autocorr(max_offset=50, title=None, alpha=0.5, partial=False, **kwargs)
             autocorr = acf(x, nlags=max_offset, fft=True)
 
         autocorr = autocorr[1::]  # skip zero offset because it is always 1
-        offset = np.arange(1, len(autocorr))
 
-        plot_list.append(
-            go.Scatter(y=autocorr, x=offset, opacity=alpha, name=name),
-        )
+        corr_dict[name] = autocorr
 
-    return go.Figure(
-        data=plot_list,
-        layout=dict(
-            title_text=title,
-            title_x=0.5,
-            xaxis_title="Lag (k)",
-            yaxis_title=ylabel,
-            font=dict(family="STIXGeneral"),
-        ),
-    )
+    corr_df = pd.DataFrame(data=corr_dict, index=offset)
+
+    if subplots:
+        return subplots_df(df=corr_df, title=title, xlabel=xlabel, ylabel=ylabel)
+    else:
+        return plot_df(df=corr_df, title=title, xlabel=xlabel, ylabel=ylabel)
