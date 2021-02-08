@@ -29,10 +29,14 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
+      <change afterPath="$PROJECT_DIR$/Analysis - Count normalisation.ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (Daily).ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (Hourly).ipynb" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (Weekly).ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (PyTorch).ipynb" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/constants.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/constants.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/__run_resnet_model_old.ipynb" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/run_kang_fnn_model_local.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />

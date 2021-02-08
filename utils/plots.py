@@ -739,7 +739,7 @@ def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False,
         fig['layout'][f'yaxis{i + 1}']['title'] = ylabel
 
     fig.update_layout(
-        title=title.title(),
+        title=title,
         xaxis_title=xlabel,
         yaxis_title=ylabel,
         title_x=0.5,

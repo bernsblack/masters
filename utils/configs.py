@@ -20,7 +20,7 @@ class BaseConf:  # args from arg-parser to over write values
         # default values
         # if the regression or classification version of the data loader should be used
         self.use_classification = False
-        self.use_historic_average = False
+        self.use_historic_average = False  # only add the historic average to a channel - does not normalise the data at all.
         self.use_crime_types = False
         self.log_norm_scale = True
 
