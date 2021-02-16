@@ -277,8 +277,6 @@ if __name__ == "__main__":
     ######################################################
     #          DEMOGRAPHIC DATA GENERATION               #
     ######################################################
-    # todo implement interpolation for this as well.
-
     num_demog_feats = 37
     demog_grid = np.zeros((num_demog_feats, y_size, x_size))  # grids with demographic info
 
