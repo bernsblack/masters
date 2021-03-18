@@ -61,7 +61,7 @@ class SequenceDataLoaders:
         :param tst_ratio: test set ration of the total dataset
         :param tst_size: explicit test set size. tst_ratio is ignored when tst_size is set
         :param num_workers: number cpu's used to load data when iterating over set
-        :param overlap_sequences: of datasets should overlap by the sequence length - only of concern if the loss functions in the training loop use the whole sequence outputs to calculate the loss - which in turn leads to quicker train times.
+        :param overlap_sequences: if datasets should overlap by the sequence length - only of concern if the loss functions in the training loop use the whole sequence outputs to calculate the loss - which in turn leads to quicker train times.
         """
         assert len(input_data) == len(target_data)
 

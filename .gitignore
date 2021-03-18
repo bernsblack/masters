@@ -23,3 +23,4 @@ utils/__pycache__
 *.log
 /data/
 /thesis-images/
+.mapbox_token
