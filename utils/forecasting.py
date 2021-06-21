@@ -45,7 +45,6 @@ def mean_absolute_scaled_error(y_true, y_score, offset=1):
 
     return model_err / naive_err
 
-
 def forecast_metrics(y_true, y_score, offset=1):
     return {
         'MASE': mean_absolute_scaled_error(y_true, y_score, offset),

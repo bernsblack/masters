@@ -61,6 +61,7 @@ class BaseConf:  # args from arg-parser to over write values
         self.model_name = ""
         self.model_path = ""  # is data_path/models/{model_name}
         self.data_path = ""
+        self.plots_path = ""
         self.checkpoint = "best"  # ['latest'|'best'] checkpoint to resume from
 
         #  used when train GRU - if loss should be calculated over whole sequence or only last output/prediction
@@ -83,6 +84,10 @@ class BaseConf:  # args from arg-parser to over write values
 
         # Will cap the maximum value to be equal to the 99.9 percentile - to limit the outliers and remove unnecessary scaling
         self.cap_crime_percentile = 0  # 99.95 # if zero then no cap takes place
+
+        self.freq = 1  # data time step frequency
+        self.freq_title = ''  # string description of time series frequency
+        self.time_steps_per_day = 1
 
         if conf_dict:
             for k, v in conf_dict.items():

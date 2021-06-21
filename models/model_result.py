@@ -3,6 +3,7 @@ from typing import List
 
 from IPython.core.display import display
 
+from utils.forecasting import mean_absolute_scaled_error, root_mean_squared_error
 from utils.utils import is_all_integer
 from numpy import ndarray
 from pandas.core.indexes.datetimes import DatetimeIndex
@@ -10,7 +11,7 @@ from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_sco
     , precision_recall_curve, roc_curve, recall_score, precision_score, mean_absolute_error, mean_squared_error
 
 from utils import get_data_sub_paths
-from utils.metrics import PRCurvePlotter, ROCCurvePlotter, PerTimeStepPlotter, roc_auc_score_per_time_slot, \
+from utils.metrics import PRCurvePlotter, ROCCurvePlotter, roc_auc_score_per_time_slot, \
     average_precision_score_per_time_slot, accuracy_score_per_time_slot, precision_score_per_time_slot, \
     recall_score_per_time_slot, safe_f1_score, mae_per_time_slot, rmse_per_time_slot, \
     predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot, predictive_accuracy_index, det_curve, \
@@ -122,10 +123,10 @@ class RegressionsMetrics:  # short memory light way of comparing models - does n
     def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
         return None
 
+
 class ClassificationMetrics:  # short memory light way of comparing models - does not save the actually predictions
     def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
         return None
-
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
@@ -701,3 +702,40 @@ def compare_all_models(data_path: str):
     det_plot.show()  # somewhere?
 
     return metrics_table  # by returning the table - makes visualisation in notebooks easier
+
+
+class SequenceResult:
+    def __init__(
+            self,
+            model_name: str,
+            y_count: ndarray,
+            y_pred: ndarray,
+            y_score: ndarray,
+            t_range: DatetimeIndex,
+    ):
+        """
+
+        :param model_name: Model name used in metrics tables and plots
+        :param y_count: actual crime count - used in certain metrics, easily interpretable for humans
+        :param y_pred: predicted class value (integer values)
+        :param y_score: (float values) regression values - can be probabilities of class = 1 too
+        :param t_range: date time range used to line up results between various models
+        """
+        self.model_name = model_name
+        self.y_count = y_count  # (actual crime )
+        self.y_pred = y_pred  # class predictions (integers)
+        self.y_score = y_score  # predicted floating point score
+        self.t_range = t_range  # needed to ensure that models have the same start and stop times
+
+
+
+class SequenceMetrics:
+    def __init__(self, y_true: ndarray, y_score: ndarray, offset=1):
+        self.metrics = {
+            'MASE': mean_absolute_scaled_error(y_true, y_score, offset),
+            #         'MFE': mean_forecast_error(y_true, y_score),
+            'MAE': mean_absolute_error(y_true, y_score),
+            'MSE': mean_squared_error(y_true, y_score),
+            'RMSE': root_mean_squared_error(y_true, y_score),
+            #         'MAPE': mean_average_percentage_error(y_true, y_score),
+        }

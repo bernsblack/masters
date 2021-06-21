@@ -42,6 +42,9 @@ class SequenceDataset(Dataset):
         return idx, inp, trg
 
 
+# todo: [constant test set size] setup to ensure the test set size stays constant stays regardless of the sequence length
+# todo: [constant test set size] sequences can't overlap as the training loop uses them to calculate the weights update
+# todo: [constant test set size] sequences can't overlap as the training loop uses them to calculate the weights
 class SequenceDataLoaders:
     def __init__(self, input_data, target_data, t_range, seq_len=30, batch_size=1, shuffle=True,
                  val_ratio=0.2, tst_ratio=0.2, tst_size=None, num_workers=0, overlap_sequences=True):
@@ -64,9 +67,9 @@ class SequenceDataLoaders:
         :param overlap_sequences: if datasets should overlap by the sequence length - only of concern if the loss functions in the training loop use the whole sequence outputs to calculate the loss - which in turn leads to quicker train times.
         """
         assert len(input_data) == len(target_data)
+        assert tst_size is not None, Exception('tst_size must be specified to ensure similar behaviours for each model')
 
         total_len = len(input_data)
-
         if tst_size is None:
             tst_size = int(total_len * tst_ratio)
 
