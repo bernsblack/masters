@@ -1,6 +1,7 @@
+import numpy as np
+
 from datasets.grid_dataset import GridDataGroup
 from utils.configs import BaseConf
-import numpy as np
 
 
 class BaseDataLoaders:

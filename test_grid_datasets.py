@@ -1,6 +1,5 @@
-import unittest
-
 import numpy as np
+import unittest
 
 from datasets.flat_dataset import FlatDataset
 from datasets.grid_dataset import GridDataGroup

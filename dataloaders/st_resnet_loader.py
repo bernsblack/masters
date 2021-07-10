@@ -1,6 +1,7 @@
 # DEFINE THE DATASET AND THE DATALOADER
-import torch
 import numpy as np
+import torch
+
 from utils.utils import deprecated
 
 """

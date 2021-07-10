@@ -1,12 +1,10 @@
 import logging as log
-
 import numpy as np
 import pandas as pd
 
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale
-
 from utils.preprocessing import get_hours_per_time_step
 
 

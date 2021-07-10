@@ -1,6 +1,6 @@
 import numpy as np
-import torch
 import shutil
+import torch
 
 
 def save_checkpoint(state, is_best, filename='models/checkpoint.pth.tar'):

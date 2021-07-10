@@ -1,13 +1,10 @@
+import numpy as np
 import pickle
 import unittest
-
-import numpy as np
+from pandas.tseries.offsets import Hour as OffsetHour
 
 from utils import deprecated
 from utils.configs import BaseConf
-
-from pandas.tseries.offsets import Hour as OffsetHour
-
 from utils.data_processing import safe_divide
 
 HOUR_NANOS = OffsetHour().nanos

@@ -1,11 +1,10 @@
 import base64
 import io
 import logging
-
-import plotly.graph_objects as go
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
+import plotly.graph_objects as go
 from IPython.display import HTML
 from mpl_toolkits.axes_grid1 import make_axes_locatable
 

@@ -1,7 +1,7 @@
+import numpy as np
 import unittest
 
 from sparse_discrete_table import SparseDiscreteTable, build_discrete_table
-import numpy as np
 
 
 def get_mock_p_xyz():

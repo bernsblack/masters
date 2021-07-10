@@ -1,10 +1,9 @@
-from typing import List
-
 import numpy as np
 import unittest
+from typing import List
+
 from utils import describe_array
 from utils.preprocessing import Shaper
-
 
 #FILE IS DEPRECATED - MAKE USE OF DISCRETE TABLES IN sparse_discrete_table.py TO CALCULATE MUTUAL INFORMATION
 SMALLEST_TOLERANCE = 1e-14

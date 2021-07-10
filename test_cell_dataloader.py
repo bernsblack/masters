@@ -1,6 +1,5 @@
-import unittest
-
 import numpy as np
+import unittest
 
 from dataloaders.cell_loader import CellDataLoaders, reconstruct_from_cell_loader
 from datasets.cell_dataset import CellDataGroup

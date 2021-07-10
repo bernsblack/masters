@@ -1,6 +1,5 @@
 #!python3
 import logging
-
 import numpy as np
 import torch
 

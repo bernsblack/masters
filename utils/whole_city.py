@@ -1,14 +1,13 @@
 import logging
+import numpy as np
 import pandas as pd
+import plotly.graph_objects as go
 
 from utils.configs import BaseConf
 from utils.constants import TOTAL
 from utils.mutual_information_plots import subplot_mi_curves
 from utils.plots import plot_autocorr, plot_df
 from utils.rolling import flag_anomalies, periodic_rolling_mean, rolling_norm
-import plotly.graph_objects as go
-import numpy as np
-
 from utils.testing import assert_no_nan, assert_valid_datetime_index
 
 

@@ -1,6 +1,5 @@
-import unittest
-
 import numpy as np
+import unittest
 
 from utils.data_processing import safe_divide, safe_divide_df, safe_divide_df_zero_on_zero
 

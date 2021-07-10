@@ -1,7 +1,8 @@
-import unittest
-from dataloaders.flat_loader import FlatDataLoaders, reconstruct_from_flat_loader
 import numpy as np
+import unittest
+
 from dataloaders.flat_loader import FlatBatchLoader
+from dataloaders.flat_loader import FlatDataLoaders, reconstruct_from_flat_loader
 from datasets.flat_dataset import FlatDataGroup
 from utils.configs import BaseConf
 

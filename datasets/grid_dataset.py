@@ -1,13 +1,13 @@
 import logging as log
 import numpy as np
 import pandas as pd
+from pandas.tseries.offsets import Hour as OffsetHour
 from torch.utils.data import Dataset
 
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale, get_hours_per_time_step
 from utils.utils import if_none
-from pandas.tseries.offsets import Hour as OffsetHour
 
 HOUR_NANOS = OffsetHour().nanos
 

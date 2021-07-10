@@ -1,6 +1,6 @@
+import numpy as np
 from scipy.ndimage import gaussian_filter1d
 from sklearn.metrics import mean_absolute_error
-import numpy as np
 
 
 class GaussianFilter1D:

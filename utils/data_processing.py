@@ -1,16 +1,16 @@
 import logging
-import unittest
-from math import sin, cos, sqrt, atan2, radians
-
 import numpy as np
 import pandas as pd
 import torch
+import unittest
+from math import sin, cos, sqrt, atan2, radians
 from scipy.interpolate import interp2d  # used for super resolution of grids
 from scipy.ndimage import gaussian_filter
 from sklearn.preprocessing import OneHotEncoder
 from torch.autograd import Variable
-from utils.utils import cut
+
 from utils import deprecated
+from utils.utils import cut
 
 
 @deprecated

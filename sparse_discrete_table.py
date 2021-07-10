@@ -1,9 +1,10 @@
 # operations multiply, divide, sum
 from __future__ import annotations
 
-from typing import Callable, List, Dict, Union, Tuple
-import numpy as np
 import logging
+import numpy as np
+from typing import Callable, List, Dict, Union, Tuple
+
 from utils import deprecated
 
 FLOAT_TOLERANCE_VALUE = 1e-8

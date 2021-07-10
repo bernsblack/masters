@@ -1,9 +1,9 @@
-from dataloaders.grid_loader import BaseDataLoaders
-from datasets.flat_dataset import FlatDataGroup, FlatDataset
-from utils.configs import BaseConf
 import numpy as np
 import pandas as pd
 
+from dataloaders.grid_loader import BaseDataLoaders
+from datasets.flat_dataset import FlatDataGroup, FlatDataset
+from utils.configs import BaseConf
 from utils.mock_data import mock_fnn_data_classification
 
 

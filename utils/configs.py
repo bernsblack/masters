@@ -3,11 +3,11 @@ File contains a series of classes that can be used as the config/base settings f
 hyper parameters for training
 """
 from copy import deepcopy
+from os import cpu_count
 from pprint import pformat
 from typing import Dict
 
 from utils import Timer
-from os import cpu_count
 
 
 class BaseConf:  # args from arg-parser to over write values

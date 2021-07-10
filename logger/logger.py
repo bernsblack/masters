@@ -1,8 +1,9 @@
 import logging
 import logging.config
 from pathlib import Path
-from utils import read_json
 from pprint import pprint
+
+from utils import read_json
 
 
 def setup_logging(save_dir, file_name=None, log_config='./logger/standard_logger_config.json', default_level=None):

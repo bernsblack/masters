@@ -29,17 +29,10 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
-      <change afterPath="$PROJECT_DIR$/utils/time_series.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/utils/whole_city.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/baseline_models.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/baseline_models.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/hawkes_model.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/hawkes_model.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/models/model_result.py" beforeDir="false" afterPath="$PROJECT_DIR$/models/model_result.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/configs.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/configs.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/forecasting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -66,6 +59,17 @@
         <option value="Jupyter Notebook" />
         <option value="Python Script" />
       </list>
+    </option>
+  </component>
+  <component name="FlaskConsoleOptions" custom-start-script="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))">
+    <envs>
+      <env key="FLASK_APP" value="app" />
+    </envs>
+    <option name="myCustomStartScript" value="import sys&#10;sys.path.extend([WORKING_DIR_AND_PYTHON_PATHS])&#10;from flask.cli import ScriptInfo&#10;locals().update(ScriptInfo(create_app=None).load_app().make_shell_context())&#10;print(&quot;Python %s on %s\nApp: %s [%s]\nInstance: %s&quot; % (sys.version, sys.platform, app.import_name, app.env, app.instance_path))" />
+    <option name="myEnvs">
+      <map>
+        <entry key="FLASK_APP" value="app" />
+      </map>
     </option>
   </component>
   <component name="Git.Settings">
@@ -114,7 +118,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="preferences.fileTypes" />
   </component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
@@ -251,8 +255,8 @@
       <method v="2" />
     </configuration>
     <list>
-      <item itemvalue="Python.dev" />
       <item itemvalue="Python.generate_mock_data" />
+      <item itemvalue="Python.dev" />
       <item itemvalue="Python.scratch" />
       <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization" />
       <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction" />
@@ -382,6 +386,7 @@
       <workItem from="1620462700650" duration="609000" />
       <workItem from="1622608176849" duration="614000" />
       <workItem from="1623592337594" duration="2711000" />
+      <workItem from="1624279628993" duration="5591000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>

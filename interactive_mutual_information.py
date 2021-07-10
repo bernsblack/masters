@@ -1,10 +1,9 @@
 import logging as log
+import matplotlib.pyplot as plt
+import numpy as np
 import os
 from pprint import pformat
 from sys import argv
-
-import matplotlib.pyplot as plt
-import numpy as np
 
 from sparse_discrete_table import SparseDiscreteTable
 from utils.mutual_information_old import construct_mi_grid

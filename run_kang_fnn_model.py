@@ -1,9 +1,8 @@
 import logging as log
 import os
+import torch.nn.functional as F
 from copy import deepcopy
 from time import strftime
-
-import torch.nn.functional as F
 from torch import nn, optim
 
 from dataloaders.flat_loader import FlatDataLoaders

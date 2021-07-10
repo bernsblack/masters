@@ -1,11 +1,12 @@
-from matplotlib import rcParams
-import matplotlib.pyplot as plt
-from utils.utils import *
-from utils.data_processing import *
 import logging as log
-from logger.logger import setup_logging
-from utils.preprocessing import Shaper, save_shaper
+import matplotlib.pyplot as plt
+from matplotlib import rcParams
 from sys import argv
+
+from logger.logger import setup_logging
+from utils.data_processing import *
+from utils.preprocessing import Shaper, save_shaper
+from utils.utils import *
 
 if __name__ == "__main__":
     os.environ['NUMEXPR_MAX_THREADS'] = str(os.cpu_count())

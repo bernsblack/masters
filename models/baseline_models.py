@@ -1,6 +1,7 @@
 import numpy as np
 import pandas as pd
 from torch import nn
+
 from utils.time_series import get_max_steps, historic_average
 
 

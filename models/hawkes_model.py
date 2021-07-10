@@ -1,7 +1,7 @@
-from tick.plot import plot_hawkes_kernels
-from tick.hawkes import HawkesEM
-import numpy as np
 import logging
+import numpy as np
+from tick.hawkes import HawkesEM
+from tick.plot import plot_hawkes_kernels
 
 
 class HawkesModelGeneral:

@@ -1,8 +1,7 @@
 import logging
-
-from torch.utils.data import Dataset, DataLoader
-import torch
 import numpy as np
+import torch
+from torch.utils.data import Dataset, DataLoader
 
 
 class SequenceDataset(Dataset):

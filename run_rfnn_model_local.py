@@ -1,21 +1,22 @@
-import os
 import logging as log
-from time import strftime
+import os
 from copy import deepcopy
+from pprint import pprint
+from time import strftime
+from time import time
 from torch import nn, optim
-from utils.data_processing import *
-from logger.logger import setup_logging
-from utils.configs import BaseConf
+
 from dataloaders.flat_loader import FlatDataLoaders
 from datasets.flat_dataset import FlatDataGroup
+from logger.logger import setup_logging
 from models.model_result import ModelResult, ModelMetrics, save_metrics, compare_all_models, get_models_metrics
-from utils.utils import pshape, get_data_sub_paths, by_ref
-from trainers.generic_trainer import train_model
 from models.rnn_models import train_epoch_for_rfnn, evaluate_rfnn, \
     SimpleRecurrentFeedForwardNetwork, RecurrentFeedForwardNetwork
+from trainers.generic_trainer import train_model
+from utils.configs import BaseConf
+from utils.data_processing import *
 from utils.metrics import best_threshold, get_y_pred, get_y_pred_by_thresholds, best_thresholds
-from time import time
-from pprint import pprint
+from utils.utils import pshape, get_data_sub_paths, by_ref
 
 
 def main():

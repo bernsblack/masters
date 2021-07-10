@@ -1,18 +1,18 @@
 import numpy as np
-from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, average_precision_score
-
-from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time, \
-    construct_temporal_information
-from utils.data_processing import encode_category
-from models.model_result import get_models_metrics
-from utils import ffloor, fceil
-from pprint import pformat
-from pandas import Timedelta
+import plotly.graph_objects as go
 from geopy import distance
 from ipywidgets import Layout, widgets
-import plotly.graph_objects as go
-from utils.metrics import safe_f1_score
+from pandas import Timedelta
 from pandas.core.indexes.datetimes import DatetimeIndex
+from pprint import pformat
+from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, average_precision_score
+
+from models.model_result import get_models_metrics
+from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time, \
+    construct_temporal_information
+from utils import ffloor, fceil
+from utils.data_processing import encode_category
+from utils.metrics import safe_f1_score
 from utils.utils import cmi_name
 
 
@@ -452,7 +452,7 @@ class InteractiveHeatmapsWithLines:
             min=self.time_index_slider.min,
             max=self.time_index_slider.max,
             step=1,
-            interval=1000,
+            interval=200,
             description="Press play",
             disabled=False
         )

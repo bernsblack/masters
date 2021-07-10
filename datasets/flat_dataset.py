@@ -1,9 +1,10 @@
+import logging as log
 import numpy as np
 from torch.utils.data import Dataset
+
+from datasets.base_datagroup import BaseDataGroup
 from utils.configs import BaseConf
 from utils.utils import if_none
-from datasets.base_datagroup import BaseDataGroup
-import logging as log
 
 
 class FlatDataGroup(BaseDataGroup):

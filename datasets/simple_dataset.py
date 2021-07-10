@@ -1,7 +1,8 @@
 # sourced form https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
-import pandas as pd
 import numpy as np
+import pandas as pd
 from torch.utils.data import Dataset, DataLoader
+
 """
 DataLoader allows us to:
 - Batch the data

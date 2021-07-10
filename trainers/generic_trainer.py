@@ -1,6 +1,6 @@
-import torch
 import logging as log
 import numpy as np
+import torch
 
 from dataloaders.grid_loader import BaseDataLoaders
 from utils.configs import BaseConf

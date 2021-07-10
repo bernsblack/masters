@@ -1,16 +1,17 @@
+import logging as log
+import numpy as np
 import unittest
-from utils.utils import by_ref
+
 from dataloaders.cell_loader import CellDataLoaders
+from dataloaders.cell_loader import reconstruct_from_cell_loader
 from dataloaders.flat_loader import FlatDataLoaders
+from dataloaders.flat_loader import reconstruct_from_flat_loader
+from dataloaders.grid_loader import GridDataLoaders, reconstruct_from_grid_loader
 from datasets.cell_dataset import CellDataGroup
 from datasets.flat_dataset import FlatDataGroup
 from datasets.grid_dataset import GridDataGroup
-from dataloaders.grid_loader import GridDataLoaders, reconstruct_from_grid_loader
-from dataloaders.flat_loader import reconstruct_from_flat_loader
-from dataloaders.cell_loader import reconstruct_from_cell_loader
 from utils.setup import setup
-import numpy as np
-import logging as log
+from utils.utils import by_ref
 
 
 class TestAllDataLoaderIndexing(unittest.TestCase):

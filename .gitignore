@@ -1,4 +1,5 @@
 .idea
+.idea/*
 .vscode
 .pytest_cache
 .ipynb_checkpoints

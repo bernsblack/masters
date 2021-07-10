@@ -5,45 +5,37 @@
 # THAT THE TEST SET BASELINE MODELS ARE TRAINED ON TEST SET DATA AND NOT
 
 
+import logging
+import logging as log
+import matplotlib.pyplot as plt
 ### IMPORTS --------------------------------------------------------------------------------------------------
 import numpy as np
-import pandas as pd
-import matplotlib.pyplot as plt
-
 import os
-import logging as log
-from time import strftime
-from copy import deepcopy
-
+import pandas as pd
+import plotly.io as pio
 import torch
+from IPython.core.display import display as display_inner
+from copy import deepcopy
+from matplotlib import rcParams
+from time import strftime
+from time import time
 from torch import nn
 
 from logger.logger import setup_logging
+from models.baseline_models import historic_average
+from models.sequence_models import train_epoch_for_sequence_model, evaluate_sequence_model
+from trainers.generic_trainer import train_model
+from trainers.generic_trainer import train_model_final
 # from utils.data_processing import *
 from utils.configs import BaseConf
+from utils.constants import NOT_TOTAL, TOTAL
 from utils.data_processing import encode_time_vectors
+from utils.forecasting import forecast_metrics
+from utils.plots import plot, plot_time_signals, subplots_df
 from utils.utils import (write_json, get_data_sub_paths,
                          load_total_counts, set_system_seed)
-from utils.constants import NOT_TOTAL, TOTAL
-from utils.plots import plot, plot_time_signals, subplots_df
-from utils.forecasting import forecast_metrics
 from utils.whole_city import (plot_time_series_anom_wc, plot_mi_curves_wc,
                               normalize_periodically_wc, plot_time_vectors)
-
-from time import time
-
-import logging
-
-from matplotlib import rcParams
-
-from models.sequence_models import train_epoch_for_sequence_model, evaluate_sequence_model
-from models.baseline_models import historic_average
-from trainers.generic_trainer import train_model
-
-from trainers.generic_trainer import train_model_final
-from IPython.core.display import display as display_inner
-
-import plotly.io as pio
 
 pio.templates.default = "plotly_white"  # "none"
 

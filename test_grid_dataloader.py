@@ -1,15 +1,14 @@
 
 
-from dataloaders.grid_loader import GridDataLoaders, reconstruct_from_grid_loader
-from datasets.grid_dataset import GridDataGroup
-
+import logging as log
+import os
 import unittest
 
+from dataloaders.grid_loader import GridDataLoaders, reconstruct_from_grid_loader
+from datasets.grid_dataset import GridDataGroup
+from logger.logger import setup_logging
 from utils.configs import BaseConf
 
-import os
-from logger.logger import setup_logging
-import logging as log
 
 class TestGridDataLoaderIndexing(unittest.TestCase):
 
