@@ -1,12 +1,13 @@
 import json
 import logging
-import numpy as np
 import os
-import pandas as pd
-import torch
 from datetime import datetime
 from time import time
 from warnings import warn
+
+import numpy as np
+import pandas as pd
+import torch
 
 
 def to_snake(text):
@@ -53,6 +54,10 @@ def to_title(str_list):
 
 def load_total_counts(folder_name):
     df = pd.read_pickle(f"./data/processed/{folder_name}/total_counts_by_type.pkl")
+    # raise Exception("Reload all Total files and saved after changing: df.freq = df.freqstr")
+
+    # todo: fix issue where reindex breaks runtime
+    # newest change - breaks for some reason
     df['TOTAL'] = df.sum(axis=1)
     df = df.reindex(columns=np.roll(df.columns, 1))
     df.columns = to_title(df.columns)

@@ -1,5 +1,6 @@
+#!/home/bernard/anaconda3/envs/masters/bin/python
+
 # re-writing the sequence training and evaluation notebook (Development - Whole city crime count predictor (Daily))
-# TODO: ensure that the code works for hourly, daily and weekly
 # NOTE THAT THIS FILE LEAVES OUT DATA EXPLORATION AND EXPERIMENTATION AND MAINLY FOCUSES ON THE TRAINING AND EVALUATION
 # OF THE DL AND BASE-LINE MODELS - OUR MAIN CONCERN IS THAT THE TEST SET SIZES ARE NOT THE SAME FOR ALL MODELS, AND
 # THAT THE TEST SET BASELINE MODELS ARE TRAINED ON TEST SET DATA AND NOT
@@ -7,18 +8,19 @@
 
 import logging
 import logging as log
+import os
+from copy import deepcopy
+from time import strftime
+from time import time
+
 import matplotlib.pyplot as plt
 ### IMPORTS --------------------------------------------------------------------------------------------------
 import numpy as np
-import os
 import pandas as pd
 import plotly.io as pio
 import torch
 from IPython.core.display import display as display_inner
-from copy import deepcopy
 from matplotlib import rcParams
-from time import strftime
-from time import time
 from torch import nn
 
 from logger.logger import setup_logging
@@ -26,9 +28,8 @@ from models.baseline_models import historic_average
 from models.sequence_models import train_epoch_for_sequence_model, evaluate_sequence_model
 from trainers.generic_trainer import train_model
 from trainers.generic_trainer import train_model_final
-# from utils.data_processing import *
 from utils.configs import BaseConf
-from utils.constants import NOT_TOTAL, TOTAL
+from utils.constants import NOT_TOTAL
 from utils.data_processing import encode_time_vectors
 from utils.forecasting import forecast_metrics
 from utils.plots import plot, plot_time_signals, subplots_df
@@ -211,6 +212,7 @@ if __name__ == '__main__':
     total_crime_types = total_df.values
 
     time_vectors = encode_time_vectors(t_range)
+    # todo: (check notebooks first) calculate autocorrelation of errors signal of regressions between time vectors and crime count to see if we have information in the signal outside of the time factor of it
 
     # plot time vectors
     do_plot_time_vectors = False
@@ -250,7 +252,7 @@ if __name__ == '__main__':
         "168H": 52 * 2,
     }.get(conf.freq)
 
-    tst_ratio = test_size / len(input_data)
+    # tst_ratio = test_size / len(input_data)
 
     loaders = SequenceDataLoaders(  # setup data loader 1
         input_data=input_data,
@@ -260,8 +262,8 @@ if __name__ == '__main__':
         seq_len=conf.seq_len,
         shuffle=conf.shuffle,
         num_workers=0,
-        val_ratio=0.2,  # 0.5,
-        tst_ratio=tst_ratio,
+        val_ratio=0.3,
+        tst_size=test_size,
         overlap_sequences=overlap_sequences,
     )
 
@@ -313,8 +315,8 @@ if __name__ == '__main__':
             seq_len=conf.seq_len,
             shuffle=conf.shuffle,
             num_workers=0,
-            val_ratio=0.5,
-            tst_ratio=tst_ratio,
+            val_ratio=0.3,
+            tst_size=test_size,
             overlap_sequences=overlap_sequences,
         )
 
@@ -416,7 +418,8 @@ if __name__ == '__main__':
 
     def run_trials(num_trials=10):
         """
-        Run a full experiment on GRUFNN model multiple times with different seeds.
+        Run a full experiment on GRUFNN model multiple times with different seeds, to determine if the variability is
+        due to the hyper parameters or the initial seed that sets the parameters of the model.
         Data and hyper parameters must be set before hand.
         This function acts as a closure, i.e. some variables are created outside the scope of the function.
 
@@ -458,8 +461,8 @@ if __name__ == '__main__':
             seq_len=conf.seq_len,
             shuffle=conf.shuffle,
             num_workers=0,
-            val_ratio=0.5,
-            tst_ratio=tst_ratio,
+            val_ratio=0.3,
+            tst_size=test_size,
             overlap_sequences=overlap_sequences,
         )
 

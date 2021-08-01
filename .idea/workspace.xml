@@ -28,11 +28,21 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added data folder to gitignore">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Moved data">
+      <change afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/masters.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/masters.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/interactive.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/interactive.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Count normalisation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Count normalisation.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Crime Types.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Crime Types.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Explore Generated Data.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Explore Generated Data.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/forecasting.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/whole_city.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/whole_city.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -79,6 +89,7 @@
       </list>
     </option>
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="SET_USER_NAME_GLOBALLY" value="false" />
     <option name="SIGN_OFF_COMMIT" value="true" />
   </component>
   <component name="GitRewordedCommitMessages">
@@ -112,28 +123,29 @@
   </component>
   <component name="PropertiesComponent">
     <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$" />
+    <property name="last_opened_file_path" value="$USER_HOME$/eleanor/recommender" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="preferences.fileTypes" />
+    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
   </component>
   <component name="RecentsManager">
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/config" />
+      <recent name="$PROJECT_DIR$/datasets" />
+      <recent name="$PROJECT_DIR$/utils" />
+      <recent name="$PROJECT_DIR$/dataloaders" />
+    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/examples" />
       <recent name="$PROJECT_DIR$/models" />
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/datasets" />
       <recent name="$PROJECT_DIR$/data" />
-    </key>
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/config" />
-      <recent name="$PROJECT_DIR$/datasets" />
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/utils" />
-      <recent name="$PROJECT_DIR$/dataloaders" />
     </key>
   </component>
   <component name="RunManager" selected="Python.dev">
@@ -264,11 +276,11 @@
     </list>
     <recent_temporary>
       <list>
+        <item itemvalue="Python.dev" />
         <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction.test_rolling_nan" />
         <item itemvalue="Python tests.pytest for rolling.TestPeriodRollingFunction" />
         <item itemvalue="Python tests.pytest for data_processing.TestQuantileNormalization" />
         <item itemvalue="Python.scratch" />
-        <item itemvalue="Python.dev" />
       </list>
     </recent_temporary>
   </component>
@@ -387,6 +399,13 @@
       <workItem from="1622608176849" duration="614000" />
       <workItem from="1623592337594" duration="2711000" />
       <workItem from="1624279628993" duration="5591000" />
+      <workItem from="1625949498353" duration="994000" />
+      <workItem from="1625950712680" duration="1049000" />
+      <workItem from="1625953021939" duration="7406000" />
+      <workItem from="1626516395820" duration="25785000" />
+      <workItem from="1627127039738" duration="2427000" />
+      <workItem from="1627548857867" duration="24000" />
+      <workItem from="1627722276456" duration="1561000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -423,7 +442,14 @@
       <option name="project" value="LOCAL" />
       <updated>1600028177113</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="Moved data">
+      <created>1625949572466</created>
+      <option name="number" value="00006" />
+      <option name="presentableId" value="LOCAL-00006" />
+      <option name="project" value="LOCAL" />
+      <updated>1625949572466</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -472,7 +498,8 @@
     <MESSAGE value="Feature: More mock data generators for the RNN and CNN type models." />
     <MESSAGE value="Minor formatting updates and MI calculations are saved to disk to speed up interactive plots." />
     <MESSAGE value="Added data folder to gitignore" />
-    <option name="LAST_COMMIT_MESSAGE" value="Added data folder to gitignore" />
+    <MESSAGE value="Moved data" />
+    <option name="LAST_COMMIT_MESSAGE" value="Moved data" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
@@ -482,25 +509,30 @@
       <breakpoints>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/run_baseline_moving_averages.py</url>
-          <line>149</line>
+          <line>150</line>
           <option name="timeStamp" value="1" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/run_baseline_moving_averages.py</url>
-          <line>97</line>
+          <line>98</line>
           <option name="timeStamp" value="2" />
         </line-breakpoint>
         <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
           <url>file://$PROJECT_DIR$/dev.py</url>
-          <line>232</line>
-          <option name="timeStamp" value="3" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dev.py</url>
-          <line>639</line>
-          <option name="timeStamp" value="4" />
+          <line>209</line>
+          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
+      <default-breakpoints>
+        <breakpoint type="python-exception">
+          <properties notifyOnTerminate="true" exception="BaseException">
+            <option name="notifyOnTerminate" value="true" />
+          </properties>
+        </breakpoint>
+      </default-breakpoints>
     </breakpoint-manager>
+  </component>
+  <component name="com.intellij.coverage.CoverageDataManagerImpl">
+    <SUITE FILE_PATH="coverage/masters$dev.coverage" NAME="dev Coverage Results" MODIFIED="1626550979437" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

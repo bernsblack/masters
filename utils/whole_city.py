@@ -1,7 +1,9 @@
 import logging
+
 import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
+import plotly.io as pio
 
 from utils.configs import BaseConf
 from utils.constants import TOTAL
@@ -97,6 +99,15 @@ def plot_mi_curves_wc(conf: BaseConf, df: pd.DataFrame):
 
 
 def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, corr_subplots=False):
+    """
+    Normalised the time series of dataframe df.
+
+    :param conf:
+    :param df:
+    :param norm_offset:
+    :param corr_subplots:
+    :return:
+    """
     logging.warning("Using rolling norm means values at the " +
                     "start within the window will be set to NaN and dropped")
 
@@ -110,7 +121,8 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
                         title="Autocorrelations by Crime Type before any Rolling Normalisation",
                         partial=False,
                         max_offset=max_offset,
-                        subplots=corr_subplots)
+                        subplots=corr_subplots,
+                        freq=conf.freq)
     fig.write_image(f"{conf.plots_path}{conf.freq}_auto_corr_normed_none.png".replace(' ', '_'))
     fig.show()
 
@@ -133,7 +145,7 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
 
     fig = plot_autocorr(**normed_df,
                         title=f"Autocorrelations by Crime Type after {period_string} Rolling Normalisation",
-                        max_offset=max_offset, subplots=corr_subplots)
+                        max_offset=max_offset, subplots=corr_subplots, freq=conf.freq)
     fig.write_image(f"{conf.plots_path}{conf.freq}_auto_corr_normed_{period_string.lower()}.png".replace(' ', '_'))
     fig.show()
 
@@ -170,7 +182,7 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
             fig = plot_autocorr(**normed_df,
                                 title=f"Autocorrelations by Crime Type after {period_string} and" +
                                       f" {period_string2} Rolling Normalisation",
-                                max_offset=max_offset, subplots=corr_subplots)
+                                max_offset=max_offset, subplots=corr_subplots, freq=conf.freq)
             fig.write_image(f"{conf.plots_path}{conf.freq}_auto_corr_normed_{period_string.lower()}_" +
                             f"{period_string2.lower()}.png".replace(' ', '_'))
             fig.show()
@@ -191,6 +203,8 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
             fig.show()
     assert len(np.unique(np.diff(normed_df.index.astype(int)))), \
         "Normed values are not contiguous, dropna method might have dropped values"
+
+    return normed_df
 
 
 def plot_time_vectors(conf: BaseConf, t_range: pd.Series, time_vectors: pd.DataFrame):

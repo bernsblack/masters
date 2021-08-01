@@ -1,6 +1,6 @@
 import base64
 import io
-import logging
+
 import matplotlib.cm as cm
 import matplotlib.pyplot as plt
 import numpy as np
@@ -754,10 +754,19 @@ def subplots_df(df, title, xlabel, ylabel, shared_xaxes=False, showlegend=False,
 from statsmodels.tsa.stattools import acf, pacf
 
 
-def plot_autocorr(max_offset=50, title=None, alpha=0.5, partial=False, subplots=False, **kwargs):
+def plot_autocorr(max_offset: int = 50, title: Optional[str] = None, partial: bool = False, subplots: bool = False,
+                  freq: Optional[str] = None, **kwargs):
     corr_dict = dict()
     ylabel = 'Autocorrelation'
     xlabel = 'Lag (k)'
+
+    if freq is not None:
+        xlabel = {
+            "1H": "Lag in Hours (k)",
+            "24H": "Lag in Days (k)",
+            "168H": "Lag in Weeks (k)",
+        }.get(freq)
+
     offset = np.arange(1, max_offset + 1)
     for name, x in kwargs.items():
         if partial:

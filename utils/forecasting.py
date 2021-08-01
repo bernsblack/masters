@@ -30,11 +30,18 @@ def mean_average_percentage_error(y_true, y_score):
 
 def mean_absolute_scaled_error(y_true, y_score, offset=1):
     """
-    values above one means prev step performs better,
-    lower than one means y_score is better
-    equal one is same than prev step
+    MASE: Calculates the mean absolute error between y_true[n] and y_score[n] scaled by the mean absolute error between y_true[n] and y_true[n-offset]   
+    
+    MASE > 1, means y_true[n-offset] is a better estimate than y_score[n]
+    MASE < 1 means y_score is better
+    MASE == 1 means y_score and y_true[n-offset] are identical
 
     offset can be set to the season jump, 7 for week or 24 for hours
+    
+    :param y_true: ndarray of ground truth (time as first axis)
+    :param y_score: ndarray of estimated values (time as first axis)
+    :param offset: distance used to calculate the scale, i.e. abs(y_true[n-offset] - y_true[n]) 
+    :return: 
     """
     y_true_prev = y_true[:-offset]
     y_true = y_true[offset:]
@@ -45,7 +52,20 @@ def mean_absolute_scaled_error(y_true, y_score, offset=1):
 
     return model_err / naive_err
 
+
 def forecast_metrics(y_true, y_score, offset=1):
+    """
+    Calculates various forecasting metrics:
+    - MASE: mean absolute scaled error
+    - MAE: mean absolute error (not scaled and can be confusing when comparing experiments on various scales)
+    - RMSE: root mean square error (values squared before calculating mean - penalising larger errors more than in MAE)
+    - MSE: mean square error
+
+    :param y_true: ndarray time series of ground truth (first axis as time)
+    :param y_score: ndarray time series of estimated values (first axis as time)
+    :param offset: offset used in MASE calculation
+    :return: returns a dictionary with MASE, MAE, MSE and RMSE
+    """
     return {
         'MASE': mean_absolute_scaled_error(y_true, y_score, offset),
         #         'MFE': mean_forecast_error(y_true, y_score),
