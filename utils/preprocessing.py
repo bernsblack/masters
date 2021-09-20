@@ -1,6 +1,7 @@
-import numpy as np
 import pickle
 import unittest
+
+import numpy as np
 from pandas.tseries.offsets import Hour as OffsetHour
 
 from utils import deprecated
@@ -8,6 +9,21 @@ from utils.configs import BaseConf
 from utils.data_processing import safe_divide
 
 HOUR_NANOS = OffsetHour().nanos
+
+
+def split_data(data, fraction, axis=0):
+    """
+
+    :param data: ndarray: Array to be divided into sub-arrays.
+    :param fraction: float: Number between 0 and 1 specifying fraction first half should make up out of total
+    :param axis: int, optional: The axis along which to split, default is 0.
+    :return: tuple of ndarray
+    """
+    assert 0 < fraction < 1, Exception("fraction needs to be between 0 and 1")
+
+    indices = [int(len(data) * fraction)]
+
+    return np.split(data, indices, axis)
 
 
 def get_hours_per_time_step(freq):

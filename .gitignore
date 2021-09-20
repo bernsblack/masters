@@ -25,3 +25,7 @@ utils/__pycache__
 /data/
 /thesis-images/
 .mapbox_token
+*.DS_Store*
+.DS_Store
+./utils/__pycache__
+utils/__pycache__/__init__.cpython-37.pyc

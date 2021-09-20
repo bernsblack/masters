@@ -28,21 +28,14 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Moved data">
-      <change afterPath="$PROJECT_DIR$/TODO.md" afterDir="false" />
+    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Minor changes to dev.py to make file run to completion.">
+      <change afterPath="$PROJECT_DIR$/Development - 1D CNN.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/masters.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/masters.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/misc.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/misc.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Count normalisation.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Count normalisation.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Crime Types.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Crime Types.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Analysis - Explore Generated Data.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Explore Generated Data.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/datasets/sequence_dataset.py" beforeDir="false" afterPath="$PROJECT_DIR$/datasets/sequence_dataset.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/notebook.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/notebook.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/forecasting.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/forecasting.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/plots.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/plots.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/utils.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/utils.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/whole_city.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/whole_city.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dataloaders/flat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/flat_loader.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocessing.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -127,10 +120,10 @@
     <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="WebServerToolWindowFactoryState" value="false" />
     <property name="com.intellij.ide.scratch.LRUPopupBuilder$1/New Scratch File" value="Python" />
-    <property name="last_opened_file_path" value="$USER_HOME$/eleanor/recommender" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../thesis2020" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="com.jetbrains.python.configuration.PyActiveSdkModuleConfigurable" />
+    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -405,7 +398,17 @@
       <workItem from="1626516395820" duration="25785000" />
       <workItem from="1627127039738" duration="2427000" />
       <workItem from="1627548857867" duration="24000" />
-      <workItem from="1627722276456" duration="1561000" />
+      <workItem from="1627722276456" duration="6307000" />
+      <workItem from="1628503749562" duration="616000" />
+      <workItem from="1628771587195" duration="1152000" />
+      <workItem from="1628840722626" duration="4196000" />
+      <workItem from="1630230824460" duration="3052000" />
+      <workItem from="1630839334032" duration="613000" />
+      <workItem from="1630905589534" duration="599000" />
+      <workItem from="1630919145054" duration="624000" />
+      <workItem from="1631260304809" duration="12000" />
+      <workItem from="1631349161116" duration="1264000" />
+      <workItem from="1631966754268" duration="5894000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -449,7 +452,14 @@
       <option name="project" value="LOCAL" />
       <updated>1625949572466</updated>
     </task>
-    <option name="localTasksCounter" value="7" />
+    <task id="LOCAL-00007" summary="Minor changes to dev.py to make file run to completion.">
+      <created>1627808704095</created>
+      <option name="number" value="00007" />
+      <option name="presentableId" value="LOCAL-00007" />
+      <option name="project" value="LOCAL" />
+      <updated>1627808704095</updated>
+    </task>
+    <option name="localTasksCounter" value="8" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -499,7 +509,8 @@
     <MESSAGE value="Minor formatting updates and MI calculations are saved to disk to speed up interactive plots." />
     <MESSAGE value="Added data folder to gitignore" />
     <MESSAGE value="Moved data" />
-    <option name="LAST_COMMIT_MESSAGE" value="Moved data" />
+    <MESSAGE value="Minor changes to dev.py to make file run to completion." />
+    <option name="LAST_COMMIT_MESSAGE" value="Minor changes to dev.py to make file run to completion." />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />
@@ -516,11 +527,6 @@
           <url>file://$PROJECT_DIR$/run_baseline_moving_averages.py</url>
           <line>98</line>
           <option name="timeStamp" value="2" />
-        </line-breakpoint>
-        <line-breakpoint enabled="true" suspend="THREAD" type="python-line">
-          <url>file://$PROJECT_DIR$/dev.py</url>
-          <line>209</line>
-          <option name="timeStamp" value="8" />
         </line-breakpoint>
       </breakpoints>
       <default-breakpoints>
