@@ -28,14 +28,16 @@
     </select>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Minor changes to dev.py to make file run to completion.">
-      <change afterPath="$PROJECT_DIR$/Development - 1D CNN.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/masters.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/masters.iml" afterDir="false" />
+    <list default="true" id="2b534b14-bbbb-4fbe-89bf-cbd0504ba5b6" name="Default Changelist" comment="Added notebook for 1D CNN and split_data helper function added to utils.preprocessing">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Analysis - Conditional Mutual Information on Different Spatial Resolutions.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/dataloaders/flat_loader.py" beforeDir="false" afterPath="$PROJECT_DIR$/dataloaders/flat_loader.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/utils/preprocessing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/preprocessing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - 1D CNN.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - 1D CNN.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (Daily).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (Daily).ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Development - Whole city crime count predictor (Weekly).ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/Development - Whole city crime count predictor (Weekly).ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/dev.py" beforeDir="false" afterPath="$PROJECT_DIR$/dev.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/utils/data_processing.py" beforeDir="false" afterPath="$PROJECT_DIR$/utils/data_processing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/z__Development - Whole city crime count predictor (Daily) [DEPRECATED].ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/z__Development - Whole city crime count predictor (Daily) [DEPRECATED].ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/z__Development - Whole city crime count predictor (Hourly) [DEPRECATED].ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/z__Development - Whole city crime count predictor (Hourly) [DEPRECATED].ipynb" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -123,7 +125,7 @@
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../thesis2020" />
     <property name="nodejs_interpreter_path.stuck_in_default_project" value="undefined stuck path" />
     <property name="nodejs_npm_path_reset_for_default_project" value="true" />
-    <property name="settings.editor.selected.configurable" value="preferences.pluginManager" />
+    <property name="settings.editor.selected.configurable" value="editing.templates" />
   </component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
@@ -408,7 +410,13 @@
       <workItem from="1630919145054" duration="624000" />
       <workItem from="1631260304809" duration="12000" />
       <workItem from="1631349161116" duration="1264000" />
-      <workItem from="1631966754268" duration="5894000" />
+      <workItem from="1631966754268" duration="8043000" />
+      <workItem from="1632427157495" duration="5898000" />
+      <workItem from="1633253097781" duration="606000" />
+      <workItem from="1633524854625" duration="37000" />
+      <workItem from="1634182236176" duration="1252000" />
+      <workItem from="1635598718586" duration="1937000" />
+      <workItem from="1635753030866" duration="1763000" />
     </task>
     <task id="LOCAL-00001" summary="Feature: DataGroupBuilder added, config updated to select if crime types are added.">
       <created>1571299169796</created>
@@ -459,7 +467,14 @@
       <option name="project" value="LOCAL" />
       <updated>1627808704095</updated>
     </task>
-    <option name="localTasksCounter" value="8" />
+    <task id="LOCAL-00008" summary="Added notebook for 1D CNN and split_data helper function added to utils.preprocessing">
+      <created>1632122740926</created>
+      <option name="number" value="00008" />
+      <option name="presentableId" value="LOCAL-00008" />
+      <option name="project" value="LOCAL" />
+      <updated>1632122740926</updated>
+    </task>
+    <option name="localTasksCounter" value="9" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -510,7 +525,8 @@
     <MESSAGE value="Added data folder to gitignore" />
     <MESSAGE value="Moved data" />
     <MESSAGE value="Minor changes to dev.py to make file run to completion." />
-    <option name="LAST_COMMIT_MESSAGE" value="Minor changes to dev.py to make file run to completion." />
+    <MESSAGE value="Added notebook for 1D CNN and split_data helper function added to utils.preprocessing" />
+    <option name="LAST_COMMIT_MESSAGE" value="Added notebook for 1D CNN and split_data helper function added to utils.preprocessing" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REFORMAT_BEFORE_PROJECT_COMMIT" value="true" />
     <option name="REARRANGE_BEFORE_PROJECT_COMMIT" value="true" />

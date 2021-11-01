@@ -1,17 +1,23 @@
 import logging
 
 import numpy as np
+import pandas as pd
 import torch
 from torch.utils.data import Dataset, DataLoader
+import unittest
 
 
 class SequenceDataset(Dataset):
     def __init__(self, input_data, target_data, t_range, seq_len=30):
         """
-        data: shape (N,n_features)
-        seq_len: sequence length
+
+        :param input_data: ndarray (L,C) with L being length of sequences and C (channels) the number of features.
+        :param target_data: ndarray (L,C) with L being length of sequences and C (channels) the number of features.
+        :param t_range: date time range of length L of target data occurrences.
+        :param seq_len: sequence length.
         """
-        assert len(input_data) == len(target_data)
+
+        assert len(input_data) == len(target_data) == len(t_range)
 
         self.input_data = input_data
         self.target_data = target_data
@@ -30,6 +36,11 @@ class SequenceDataset(Dataset):
         return self.length
 
     def __getitem__(self, idx):
+        """
+
+        param idx: index or array of indices
+        :return: tuple of indices, input_data (seq_len, n_features), target_data (seq_len, n_features)
+        """
         if torch.is_tensor(idx):
             idx = idx.tolist()
 
@@ -66,7 +77,7 @@ class SequenceDataLoaders:
 
         :param input_data: all input sequence data, train val en test sets included in nd array format
         :param target_data: all target sequence data, train val en test sets included in nd array format
-        :param t_range: all datetime sequence data, train val en test sets included in nd array format
+        :param t_range: all datetime sequence data, train val en test sets included in nd array format. Dates match target_data indices
         :param seq_len: sequence length used to feed sequenced data into models
         :param batch_size: size of batches when training models
         :param shuffle: if the indices should be shuffled between epochs
@@ -121,27 +132,75 @@ class SequenceDataLoaders:
         trn_val_t_range = t_range[trn_val_idx[0]:trn_val_idx[1]]
         tst_t_range = t_range[tst_idx[0]:tst_idx[1]]
 
-        trn_set = SequenceDataset(input_data=trn_input_data, target_data=trn_target_data,
-                                  t_range=trn_t_range, seq_len=seq_len)
+        trn_set = SequenceDataset(
+            input_data=trn_input_data,
+            target_data=trn_target_data,
+            t_range=trn_t_range,
+            seq_len=seq_len,
+        )
 
-        val_set = SequenceDataset(input_data=val_input_data, target_data=val_target_data,
-                                  t_range=val_t_range, seq_len=seq_len)
+        val_set = SequenceDataset(
+            input_data=val_input_data,
+            target_data=val_target_data,
+            t_range=val_t_range,
+            seq_len=seq_len,
+        )
 
-        trn_val_set = SequenceDataset(input_data=trn_val_input_data, target_data=trn_val_target_data,
-                                      t_range=trn_val_t_range, seq_len=seq_len)
+        trn_val_set = SequenceDataset(
+            input_data=trn_val_input_data,
+            target_data=trn_val_target_data,
+            t_range=trn_val_t_range,
+            seq_len=seq_len,
+        )
 
-        tst_set = SequenceDataset(input_data=tst_input_data, target_data=tst_target_data,
-                                  t_range=tst_t_range, seq_len=seq_len)
+        tst_set = SequenceDataset(
+            input_data=tst_input_data,
+            target_data=tst_target_data,
+            t_range=tst_t_range,
+            seq_len=seq_len,
+        )
 
         self.train_validation_loader = DataLoader(
-            dataset=trn_val_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
+            dataset=trn_val_set,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
         )
         self.train_loader = DataLoader(
-            dataset=trn_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
+            dataset=trn_set,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
         )
         self.validation_loader = DataLoader(
-            dataset=val_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
+            dataset=val_set,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
         )
         self.test_loader = DataLoader(
-            dataset=tst_set, batch_size=batch_size, shuffle=shuffle, num_workers=num_workers,
+            dataset=tst_set,
+            batch_size=batch_size,
+            shuffle=shuffle,
+            num_workers=num_workers,
         )
+
+
+class TestSequenceDataset(unittest.TestCase):
+
+    def test_sequence_dataset(self):
+        n_features = 3
+        seq_len = 7
+        total_len = 91
+        raw_data = np.arange(total_len)
+        t_range = pd.date_range(start="2020-01-01", freq="1D", periods=len(raw_data))  # dates of target data
+        data = np.stack([raw_data for _ in range(n_features)]).T
+        input_data = data[:-1]
+        target_data = data[1:]
+
+        dataset = SequenceDataset(input_data=input_data, target_data=target_data, t_range=t_range, seq_len=seq_len)
+
+        idx, inp, out = dataset[0]
+        print(idx, inp, out)
+
+        self.assertEqual('foo'.upper(), 'FOO')

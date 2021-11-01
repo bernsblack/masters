@@ -534,7 +534,7 @@ if __name__ == '__main__':
     display(pd.DataFrame(trial_results))
 
     pd.DataFrame(trial_results)[['MASE']].plot(kind='box',
-                                               title=f"{conf.freq_title} Crime GRUFFN MASE Score for {NUM_TRIALS} Seeds\n")
+                                               title=f"{conf.freq_title} Crime GRUFNN MASE Score for {NUM_TRIALS} Seeds\n")
     plt.savefig(f"{conf.plots_path}{conf.freq}_result_seed_consistency.png")
     plt.show()
 

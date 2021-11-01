@@ -814,8 +814,20 @@ def batchify(a, batch_size):
 
 def sequencify(a, seq_len):  # NB: SEQUENCES ARE OVERLAPPING
     """
-    returns matrix with sequences that differ with one time step
+    sequencify will duplicate the time series into sequences of size seq_len shifted by 1 step
+    Example:
+    sequencify(np.array([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])  => np.array([[0, 1, 2],
+                                                                      [1, 2, 3],
+                                                                      [2, 3, 4],
+                                                                      [3, 4, 5],
+                                                                      [4, 5, 6],
+                                                                      [5, 6, 7],
+                                                                      [6, 7, 8]])
+    :param a: ndarray (N,D) N is the time dimension and D the feature size
+    :param seq_len: length of the output sequence
+    :return: ndarray (N-seq_len,seq_len, D)
     """
+
     r = []
     for i in range(len(a) - seq_len):
         r.append(a[i:i + seq_len])
