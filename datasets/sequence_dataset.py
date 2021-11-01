@@ -14,7 +14,7 @@ class SequenceDataset(Dataset):
         :param input_data: ndarray (L,C) with L being length of sequences and C (channels) the number of features.
         :param target_data: ndarray (L,C) with L being length of sequences and C (channels) the number of features.
         :param t_range: date time range of length L of target data occurrences.
-        :param seq_len: sequence length.
+        :param seq_len: sequence length
         """
 
         assert len(input_data) == len(target_data) == len(t_range)
@@ -57,18 +57,19 @@ class SequenceDataset(Dataset):
 # todo: [constant test set size] sequences can't overlap as the training loop uses them to calculate the weights update
 # todo: [constant test set size] sequences can't overlap as the training loop uses them to calculate the weights
 class SequenceDataLoaders:
-    def __init__(self,
-                 input_data,
-                 target_data,
-                 t_range,
-                 seq_len=30,
-                 batch_size=1,
-                 shuffle=True,
-                 val_ratio=0.2,
-                 tst_size=None,
-                 num_workers=0,
-                 overlap_sequences=True,
-                 ):
+    def __init__(
+            self,
+            input_data,
+            target_data,
+            t_range,
+            seq_len=30,
+            batch_size=1,
+            shuffle=True,
+            val_ratio=0.2,
+            tst_size=None,
+            num_workers=0,
+            overlap_sequences=True,
+    ):
         """
         Indices will be chosen so that training, validation and test sets only overlap by sequence length, this way
         we can feed in data from the train_val set into the evaluation model, preserving more data to evaluate without
@@ -191,16 +192,49 @@ class TestSequenceDataset(unittest.TestCase):
     def test_sequence_dataset(self):
         n_features = 3
         seq_len = 7
-        total_len = 91
+        total_len = 113
+        batch_size = 5
         raw_data = np.arange(total_len)
-        t_range = pd.date_range(start="2020-01-01", freq="1D", periods=len(raw_data))  # dates of target data
+
         data = np.stack([raw_data for _ in range(n_features)]).T
         input_data = data[:-1]
         target_data = data[1:]
+        t_range = pd.date_range(start="2020-01-01", freq="1D", periods=len(target_data))  # dates of target data
 
         dataset = SequenceDataset(input_data=input_data, target_data=target_data, t_range=t_range, seq_len=seq_len)
 
+        # index 0 will get the first sequence from the dataset data[0:seq_len]
         idx, inp, out = dataset[0]
-        print(idx, inp, out)
+        self.assertEqual(idx, 0)
+        self.assertEqual(np.sum(inp[0].numpy() - input_data[0]), 0.)
+        self.assertEqual(np.sum(inp[-1].numpy() - input_data[seq_len - 1]), 0.)
+        self.assertEqual(np.sum(out[0].numpy() - target_data[0]), 0.)
+        self.assertEqual(np.sum(out[-1].numpy() - target_data[seq_len - 1]), 0.)
+        self.assertEqual(len(inp), seq_len)
+        self.assertEqual(len(out), seq_len)
+        # print(f"{idx=}")
+        # print(f"{inp=}")
+        # print(f"{out=}")
 
-        self.assertEqual('foo'.upper(), 'FOO')
+        loaders = SequenceDataLoaders(
+            input_data=input_data,
+            target_data=target_data,
+            t_range=t_range,
+            seq_len=seq_len,
+            batch_size=batch_size,
+            shuffle=False,
+            val_ratio=0.2,
+            tst_size=5 * seq_len,
+            num_workers=0,
+            overlap_sequences=True,
+        )
+
+        for current_batch, (batch_indices, batch_inputs, batch_targets) in enumerate(loaders.train_loader):
+            self.assertEqual(len(batch_indices), batch_size)
+            self.assertEqual(batch_inputs.shape, torch.Size([batch_size, seq_len, n_features]))
+            self.assertEqual(np.sum(batch_inputs[:, -1].numpy() - batch_targets[:, seq_len - 2].numpy()), 0.)
+            # print(f"{current_batch=}")
+            # print(f"{batch_indices=}")
+            # print(f"{batch_inputs=}")
+            # print(f"{batch_targets=}")
+            break
