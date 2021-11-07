@@ -12,6 +12,7 @@ import os
 from copy import deepcopy
 from time import strftime
 from time import time
+from typing import Optional, Union, Dict
 
 import matplotlib.pyplot as plt
 ### IMPORTS --------------------------------------------------------------------------------------------------
@@ -20,11 +21,14 @@ import pandas as pd
 import plotly.io as pio
 import torch
 from IPython.core.display import display as display_inner
+from ax.service.managed_loop import optimize
 from matplotlib import rcParams
 from torch import nn
 
+from datasets.sequence_dataset import SequenceDataLoaders
 from logger.logger import setup_logging
 from models.baseline_models import historic_average
+from models.rnn_models import GRUFNN
 from models.sequence_models import train_epoch_for_sequence_model, evaluate_sequence_model
 from trainers.generic_trainer import train_model
 from trainers.generic_trainer import train_model_final
@@ -38,13 +42,11 @@ from utils.utils import (write_json, get_data_sub_paths,
 from utils.whole_city import (plot_time_series_anom_wc, plot_mi_curves_wc,
                               normalize_periodically_wc, plot_time_vectors)
 
+# from ax.core import TParameterization
+TParamValue = Optional[Union[str, bool, float, int]]
+TParameterization = Dict[str, TParamValue]
+
 pio.templates.default = "plotly_white"  # "none"
-
-from datasets.sequence_dataset import SequenceDataLoaders
-from models.rnn_models import GRUFNN
-
-from ax.service.managed_loop import optimize
-from ax.core import TParameterization
 
 # todo split file into data part and model part...
 if __name__ == '__main__':
@@ -52,11 +54,15 @@ if __name__ == '__main__':
     if do_display:
         display = display_inner
     else:
-        display = lambda x: None
+        def return_none(x):
+            return None
+
+
+        display = return_none
 
     os.environ['NUMEXPR_MAX_THREADS'] = str(os.cpu_count())
     rcParams["font.family"] = "STIXGeneral"
-    ### START CODE --------------------------------------------------------------------------------------------------
+    # START CODE --------------------------------------------------------------------------------------------------
 
     conf = BaseConf()
 
@@ -64,7 +70,8 @@ if __name__ == '__main__':
     logging.info(data_sub_paths)
 
     #  if train/test sets should overlap by the sequence length of i put vector
-    #  only of concern if the loss functions in the training loop use the whole sequence outputs to calculate the loss - which in turn leads to quicker train times.
+    #  only of concern if the loss functions in the training loop use the whole sequence outputs to calculate the loss
+    #  - which in turn leads to quicker train times.
     overlap_sequences = True
 
     data_sub_path = data_sub_paths[0]
@@ -93,7 +100,7 @@ if __name__ == '__main__':
     else:
         raise Exception("CUDA is not available")
 
-    ## CONFIG AND LOGGING SETUP ----------------------------------------------------------------------------------------
+    # CONFIG AND LOGGING SETUP ----------------------------------------------------------------------------------------
     # manually set
     conf.seed = int(time())  # 3
     set_system_seed(conf.seed)
@@ -140,13 +147,13 @@ if __name__ == '__main__':
 
     conf.batch_size = 128
 
-    ## ANOMALY DETECTION PLOTS ----------------------------------------------------------------------------------------
+    # ANOMALY DETECTION PLOTS ----------------------------------------------------------------------------------------
 
     do_plot_anomalies = False
     if do_plot_anomalies:
         plot_time_series_anom_wc(conf=conf, df=df)
 
-    ## MUTUAL INFORMATION PLOTS ------------------------------------------------------------------------------------------
+    # MUTUAL INFORMATION PLOTS -----------------------------------------------------------------------------------------
 
     do_plot_mi_curves = False
     if do_plot_mi_curves:
@@ -212,13 +219,14 @@ if __name__ == '__main__':
     total_crime_types = total_df.values
 
     time_vectors = encode_time_vectors(t_range)
-    # todo: (check notebooks first) calculate autocorrelation of errors signal of regressions between time vectors and crime count to see if we have information in the signal outside of the time factor of it
+    # todo: (check notebooks first) calculate autocorrelation of errors signal of regressions between time vectors and
+    #  crime count to see if we have information in the signal outside of the time factor of it
 
     # plot time vectors
     do_plot_time_vectors = False
     if do_plot_time_vectors:
         plot_time_vectors(conf=conf, t_range=t_range, time_vectors=time_vectors)
-    ## SETUP DATA LOADERS ------------------------
+    # SETUP DATA LOADERS ------------------------
 
     logging.info(f"Using sequence length: {conf.seq_len}")
 
@@ -270,7 +278,7 @@ if __name__ == '__main__':
     logging.info(f"input_data.shape => {input_data.shape}")
     logging.info(f"target_data.shape => {target_data.shape}")
 
-    ## HYPER PARAMETER OPTIMISATION ---------------------------------------------------------------
+    # HYPER PARAMETER OPTIMISATION ---------------------------------------------------------------
 
     from pprint import pformat
 
@@ -413,7 +421,7 @@ if __name__ == '__main__':
     display(pd.DataFrame([best_parameters]).iloc[0])
 
 
-    ## MULTI-RUN EVALUATION -------------------------------------------------------------------------
+    # MULTI-RUN EVALUATION -------------------------------------------------------------------------
     # TODO: EXTRACT INTO A CLASS WRAPPER LIKE DONE WITH TENSORFLOW AND KERAS
 
     def run_trials(num_trials=10):
@@ -453,7 +461,7 @@ if __name__ == '__main__':
         conf.seed = int(time())  # unique seed for each run
         set_system_seed(conf.seed)  # should be reset with each model instantiation
 
-        loaders = SequenceDataLoaders(  # setup data loader 3: run trial
+        loaders_inner = SequenceDataLoaders(  # setup data loader 3: run trial
             input_data=input_data,
             target_data=target_data,
             t_range=t_range,
@@ -466,7 +474,7 @@ if __name__ == '__main__':
             overlap_sequences=overlap_sequences,
         )
 
-        model = GRUFNN(
+        model_inner = GRUFNN(
             input_size=input_size,
             hidden_size0=hidden_size,
             hidden_size1=hidden_size // 2,
@@ -474,24 +482,25 @@ if __name__ == '__main__':
             num_layers=num_layers,
         ).to(conf.device)
 
-        criterion = nn.MSELoss()
+        criterion_inner = nn.MSELoss()
 
-        optimiser = torch.optim.AdamW(params=model.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
+        optimiser_inner = torch.optim.AdamW(params=model_inner.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
 
-        trn_epoch_losses, val_epoch_losses, stopped_early = train_model(
-            model=model,
-            optimiser=optimiser,
-            loaders=loaders,
+        trn_epoch_losses_inner, val_epoch_losses_inner, stopped_early_inner = train_model(
+            model=model_inner,
+            optimiser=optimiser_inner,
+            loaders=loaders_inner,
             train_epoch_fn=train_epoch_for_sequence_model,
-            loss_fn=criterion,
+            loss_fn=criterion_inner,
             conf=conf,
             verbose=False,
         )
 
-        logging.info(f"best validation: {np.min(val_epoch_losses):.6f} @ epoch: {np.argmin(val_epoch_losses) + 1}")
+        logging.info(
+            f"best validation: {np.min(val_epoch_losses_inner):.6f} @ epoch: {np.argmin(val_epoch_losses_inner) + 1}")
 
         # full train-val dataset training
-        conf.max_epochs = np.argmin(val_epoch_losses) + 1  # because of index starting at zero
+        conf.max_epochs = np.argmin(val_epoch_losses_inner) + 1  # because of index starting at zero
         # ====================================== can be put into loop as well
 
         for i in range(num_trials):
@@ -499,7 +508,7 @@ if __name__ == '__main__':
 
             conf.seed = int(time() + 10 * i)  # unique seed for each run
             set_system_seed(conf.seed)  # should be reset with each model instantiation
-            model = GRUFNN(
+            model_inner = GRUFNN(
                 input_size=input_size,
                 hidden_size0=hidden_size,
                 hidden_size1=hidden_size // 2,
@@ -507,18 +516,19 @@ if __name__ == '__main__':
                 num_layers=num_layers,
             ).to(conf.device)
 
-            optimiser = torch.optim.AdamW(params=model.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
+            optimiser_inner = torch.optim.AdamW(params=model_inner.parameters(), lr=conf.lr,
+                                                weight_decay=conf.weight_decay)
 
             trn_val_epoch_losses = train_model_final(
-                model=model,
-                optimiser=optimiser,
-                loaders=loaders,
+                model=model_inner,
+                optimiser=optimiser_inner,
+                loaders=loaders_inner,
                 train_epoch_fn=train_epoch_for_sequence_model,
-                loss_fn=criterion,
+                loss_fn=criterion_inner,
                 conf=conf,
             )
 
-            tst_y_true, tst_y_score = evaluate_sequence_model(model, loaders.test_loader, conf)
+            tst_y_true, tst_y_score = evaluate_sequence_model(model_inner, loaders_inner.test_loader, conf)
             trial_metrics = forecast_metrics(y_true=tst_y_true, y_score=tst_y_score)
             trial_metrics['Seed'] = conf.seed
             trial_metrics_list.append(trial_metrics)
@@ -538,7 +548,7 @@ if __name__ == '__main__':
     plt.savefig(f"{conf.plots_path}{conf.freq}_result_seed_consistency.png")
     plt.show()
 
-    ## SETUP MODELS WITH HYPER-PARAMETERS FROM PREVIOUS STEP -------------------------------------------
+    # SETUP MODELS WITH HYPER-PARAMETERS FROM PREVIOUS STEP -------------------------------------------
 
     # set hyper params-> set seed -> set model -> set optimiser
     conf.seed = int(time())  # 1607355910
@@ -616,7 +626,7 @@ if __name__ == '__main__':
 
     plot(trn_val_epoch_losses=trn_val_epoch_losses)
 
-    ## TRAINING RESULTS ------------------------------------------------------------------------------
+    # TRAINING RESULTS ------------------------------------------------------------------------------
 
     # Load latest or best validation or final model
     # conf.checkpoint = "latest"
@@ -637,36 +647,6 @@ if __name__ == '__main__':
         "24H": (7, 6),
         "168H": (4, 2),
     }.get(conf.freq, (24, 14))
-
-    from sklearn.metrics import mean_absolute_error
-
-
-    class EWM:
-        def __init__(self, series=None):
-            self.alpha = .9
-            self.options = np.arange(0.001, 0.999, 0.001)
-
-            if series is not None:
-                self.fit(series)
-
-        def __call__(self, series):
-            return self.predict(series)
-
-        def fit(self, series):
-            losses = []
-            for alpha in self.options:
-                self.alpha = alpha
-                pred = self.predict(series)
-                loss = mean_absolute_error(series, pred)
-                losses.append(loss)
-
-            self.alpha = self.options[np.argmin(losses)]
-
-        def predict(self, series):
-            series = np.pad(series, (1, 0), 'edge')
-
-            pred = pd.Series(series).ewm(alpha=self.alpha).mean().values[:-1]
-            return pred
 
 
     # TODO: REFACTOR function: compare_time_series_metrics
@@ -713,8 +693,8 @@ if __name__ == '__main__':
             feature_results[feat_name] = {
                 "Ground Truth": y_true[offset:, i],
                 "GRUFNN": y_score[offset:, i],
-                f"HA({step},{max_steps})": historic_average(y_true[:, i],
-                                                            step=step, max_steps=max_steps)[offset - 1:-1],
+                f"HA({step},{max_steps})": historic_average(y_true[:, i], step=step, max_steps=max_steps)[
+                                           offset - 1:-1],
                 f"EWM({ewm.alpha:.3f})": ewm(y_true[:, i])[offset:],
             }
 
