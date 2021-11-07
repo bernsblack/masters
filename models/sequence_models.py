@@ -1,12 +1,23 @@
 import logging as log
+from typing import Callable, List
+
 import numpy as np
 import torch
 import torch.nn as nn
+from torch.optim import Optimizer
+from torch.utils.data import DataLoader
 
 from utils.configs import BaseConf
 
 
-def train_epoch_for_sequence_model(model, optimiser, batch_loader, loss_fn, total_losses, conf: BaseConf):
+def train_epoch_for_sequence_model(
+        model: nn.Module,
+        optimiser: Optimizer,
+        batch_loader: DataLoader,
+        loss_fn: Callable,
+        total_losses: List[float],
+        conf: BaseConf,
+):
     batch_losses = []
     num_batches = len(batch_loader)
 
@@ -29,7 +40,11 @@ def train_epoch_for_sequence_model(model, optimiser, batch_loader, loss_fn, tota
     return epoch_loss
 
 
-def evaluate_sequence_model(model: nn.Module, batch_loader, conf: BaseConf):
+def evaluate_sequence_model(
+        model: nn.Module,
+        batch_loader: DataLoader,
+        conf: BaseConf,
+):
     y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
     y_count = np.zeros_like(y_score)
 

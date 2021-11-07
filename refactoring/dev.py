@@ -5,23 +5,23 @@
 # OF THE DL AND BASE-LINE MODELS - OUR MAIN CONCERN IS THAT THE TEST SET SIZES ARE NOT THE SAME FOR ALL MODELS, AND
 # THAT THE TEST SET BASELINE MODELS ARE TRAINED ON TEST SET DATA AND NOT
 
+# IMPORTS --------------------------------------------------------------------------------------------------
 
 import logging
 import logging as log
 import os
 from copy import deepcopy
+from pprint import pformat
 from time import strftime
 from time import time
-from typing import Optional, Union, Dict
 
 import matplotlib.pyplot as plt
-### IMPORTS --------------------------------------------------------------------------------------------------
 import numpy as np
 import pandas as pd
 import plotly.io as pio
 import torch
 from IPython.core.display import display as display_inner
-from ax.service.managed_loop import optimize
+from ax.service.managed_loop import optimize as optimize_hyper_parameters
 from matplotlib import rcParams
 from torch import nn
 
@@ -36,15 +36,15 @@ from utils.configs import BaseConf
 from utils.constants import NOT_TOTAL
 from utils.data_processing import encode_time_vectors
 from utils.forecasting import forecast_metrics
+from utils.interactive import plot_interactive_epoch_losses
 from utils.plots import plot, plot_time_signals, subplots_df
+from utils.plots import plot_corr
+from utils.types import TParameterization
 from utils.utils import (write_json, get_data_sub_paths,
                          load_total_counts, set_system_seed)
+from utils.utils import write_txt
 from utils.whole_city import (plot_time_series_anom_wc, plot_mi_curves_wc,
                               normalize_periodically_wc, plot_time_vectors)
-
-# from ax.core import TParameterization
-TParamValue = Optional[Union[str, bool, float, int]]
-TParameterization = Dict[str, TParamValue]
 
 pio.templates.default = "plotly_white"  # "none"
 
@@ -160,7 +160,7 @@ if __name__ == '__main__':
         plot_mi_curves_wc(conf=conf, df=df)
 
     """
-    ### Periodic Rolling Normalisation ---------------------------------------------------------------------------
+    ## Periodic Rolling Normalisation ---------------------------------------------------------------------------
     By applying rolling normalisation we can control for the period nature of our signals. We subtract the signal by a 
     periodic rolling mean and divide it by a period rolling standard deviation. We can also perform this on various 
     periods e.g. 7 days and 365 days, which caters for weekly and yearly periodic cycles. By controlling for the signals 
@@ -175,8 +175,8 @@ if __name__ == '__main__':
     else:
         normed_df = normalize_periodically_wc(conf=conf, df=df, norm_offset=0, corr_subplots=False)
 
-    # total_df = normalize_df_min_max(normed_df) # rescale between 0 and 1 again...is this realy needed?
-    # total_df = normalize_df_mean_std(normed_df) # rescale between 0 and 1 again...is this realy needed?
+    # total_df = normalize_df_min_max(normed_df) # rescale between 0 and 1 again...is this really needed?
+    # total_df = normalize_df_mean_std(normed_df) # rescale between 0 and 1 again...is this really needed?
     total_df = normed_df
     # total_df = df
     # total_df = normalize_df_min_max(df)
@@ -192,8 +192,6 @@ if __name__ == '__main__':
         plt.savefig(f"{conf.plots_path}{conf.freq}_crime_counts_distribution_normed.png")
         plt.show()
         display(total_df)
-
-    from utils.plots import plot_corr
 
     # plot normed crime correlations (pearson/spearman/partial)
     do_plot_correlation = False
@@ -219,7 +217,7 @@ if __name__ == '__main__':
     total_crime_types = total_df.values
 
     time_vectors = encode_time_vectors(t_range)
-    # todo: (check notebooks first) calculate autocorrelation of errors signal of regressions between time vectors and
+    # todo: (check notebooks first) calculate auto-correlation of errors signal of regressions between time vectors and
     #  crime count to see if we have information in the signal outside of the time factor of it
 
     # plot time vectors
@@ -278,13 +276,10 @@ if __name__ == '__main__':
     logging.info(f"input_data.shape => {input_data.shape}")
     logging.info(f"target_data.shape => {target_data.shape}")
 
+
     # HYPER PARAMETER OPTIMISATION ---------------------------------------------------------------
 
-    from pprint import pformat
-
-
-    # todo better train loop eval loop
-    def train_evaluate_hyper(hyper_parameters: TParameterization):
+    def train_evaluate_hyper(hyper_parameters: TParameterization):  # todo better train loop eval loop
         """
         train_evaluate_hyper is a closure and uses variables outside of function scope
 
@@ -294,8 +289,8 @@ if __name__ == '__main__':
         logging.info(f"Running HyperOpt Trial with: {pformat(hyper_parameters)}")
 
         # hyper param setup
-        hidden_size = int(hyper_parameters.get('hidden_size', 50))
-        num_layers = int(hyper_parameters.get('num_layers', 5))
+        hidden_size_hyper = int(hyper_parameters.get('hidden_size', 50))
+        num_layers_hyper = int(hyper_parameters.get('num_layers', 5))
         conf.weight_decay = hyper_parameters.get('weight_decay', 1e-4)
         conf.lr = hyper_parameters.get('lr', 1e-3)
 
@@ -311,11 +306,11 @@ if __name__ == '__main__':
         conf.min_epochs = 1
         conf.max_epochs = 10_000
 
-        conf.seed = np.random.randint(10_000) * (int(time()) % hidden_size + num_layers)
+        conf.seed = np.random.randint(10_000) * (int(time()) % hidden_size_hyper + num_layers_hyper)
 
         set_system_seed(conf.seed)  # should be reset with each model instantiation
 
-        loaders = SequenceDataLoaders(  # setup data loader 2: hyper opt
+        loaders_hyper = SequenceDataLoaders(  # setup data loader 2: hyper opt
             input_data=input_data,
             target_data=target_data,
             t_range=t_range,
@@ -329,24 +324,24 @@ if __name__ == '__main__':
         )
 
         # model setup
-        model = GRUFNN(
+        model_hyper = GRUFNN(
             input_size=input_size,
-            hidden_size0=hidden_size,
-            hidden_size1=hidden_size // 2,
+            hidden_size0=hidden_size_hyper,
+            hidden_size1=hidden_size_hyper // 2,
             output_size=output_size,
-            num_layers=num_layers,
+            num_layers=num_layers_hyper,
         ).to(conf.device)
 
-        criterion = nn.MSELoss()
-        optimiser = torch.optim.AdamW(params=model.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
+        criterion_hyper = nn.MSELoss()
+        optimiser_hyper = torch.optim.AdamW(params=model_hyper.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
 
         # training
         trn_epoch_losses, val_epoch_losses, stopped_early = train_model(
-            model=model,
-            optimiser=optimiser,
-            loaders=loaders,
+            model=model_hyper,
+            optimiser=optimiser_hyper,
+            loaders=loaders_hyper,
             train_epoch_fn=train_epoch_for_sequence_model,
-            loss_fn=criterion,
+            loss_fn=criterion_hyper,
             conf=conf,
             verbose=False,
         )
@@ -356,18 +351,18 @@ if __name__ == '__main__':
         conf.checkpoint = "best_val"
         log.info(f"Loading model from checkpoint ({conf.checkpoint}) for evaluation")
         log.info(f"Loading model from {conf.model_path}")
-        model.load_state_dict(state_dict=torch.load(f"{conf.model_path}model_{conf.checkpoint}.pth",
-                                                    map_location=conf.device.type))
+        model_hyper.load_state_dict(state_dict=torch.load(f"{conf.model_path}model_{conf.checkpoint}.pth",
+                                                          map_location=conf.device.type))
 
         # evaluation
-        val_y_true, val_y_score = evaluate_sequence_model(model, loaders.validation_loader, conf)
+        val_y_true, val_y_score = evaluate_sequence_model(model_hyper, loaders_hyper.validation_loader, conf)
 
         return forecast_metrics(y_true=val_y_true, y_score=val_y_score)['MASE']
 
 
     total_hyper_opt_trials = 20  # 20
-    optimize_hyper_params = True
-    if optimize_hyper_params:
+    do_optimize_hyper_params = True
+    if do_optimize_hyper_params:
         # Hyper Opt Training
         # PARAM_CLASSES = ["range", "choice", "fixed"]
         # PARAM_TYPES = {"int": int, "float": float, "bool": bool, "str": str}
@@ -392,7 +387,7 @@ if __name__ == '__main__':
         logging.info(f"""Hyper Parameters and their bounds:
     {pformat(hyper_params)}""")
 
-        best_parameters, values, experiment, hyper_model = optimize(
+        best_parameters, values, experiment, hyper_model = optimize_hyper_parameters(
             parameters=hyper_params,
             evaluation_function=train_evaluate_hyper,
             objective_name='MASE',
@@ -452,8 +447,8 @@ if __name__ == '__main__':
 
         conf.lr = best_parameters['lr']
         conf.weight_decay = best_parameters['weight_decay']
-        hidden_size = best_parameters['hidden_size']
-        num_layers = best_parameters['num_layers']
+        hidden_size_trial = best_parameters['hidden_size']
+        num_layers_trial = best_parameters['num_layers']
         conf.seq_len = best_parameters['seq_len']
 
         # ====================================== can be put into loop as well
@@ -476,10 +471,10 @@ if __name__ == '__main__':
 
         model_inner = GRUFNN(
             input_size=input_size,
-            hidden_size0=hidden_size,
-            hidden_size1=hidden_size // 2,
+            hidden_size0=hidden_size_trial,
+            hidden_size1=hidden_size_trial // 2,
             output_size=output_size,
-            num_layers=num_layers,
+            num_layers=num_layers_trial,
         ).to(conf.device)
 
         criterion_inner = nn.MSELoss()
@@ -510,14 +505,17 @@ if __name__ == '__main__':
             set_system_seed(conf.seed)  # should be reset with each model instantiation
             model_inner = GRUFNN(
                 input_size=input_size,
-                hidden_size0=hidden_size,
-                hidden_size1=hidden_size // 2,
+                hidden_size0=hidden_size_trial,
+                hidden_size1=hidden_size_trial // 2,
                 output_size=output_size,
-                num_layers=num_layers,
+                num_layers=num_layers_trial,
             ).to(conf.device)
 
-            optimiser_inner = torch.optim.AdamW(params=model_inner.parameters(), lr=conf.lr,
-                                                weight_decay=conf.weight_decay)
+            optimiser_inner = torch.optim.AdamW(
+                params=model_inner.parameters(),
+                lr=conf.lr,
+                weight_decay=conf.weight_decay,
+            )
 
             trn_val_epoch_losses = train_model_final(
                 model=model_inner,
@@ -528,8 +526,12 @@ if __name__ == '__main__':
                 conf=conf,
             )
 
-            tst_y_true, tst_y_score = evaluate_sequence_model(model_inner, loaders_inner.test_loader, conf)
-            trial_metrics = forecast_metrics(y_true=tst_y_true, y_score=tst_y_score)
+            tst_y_true_trial, tst_y_score_trial = evaluate_sequence_model(
+                model=model_inner,
+                batch_loader=loaders_inner.test_loader,
+                conf=conf,
+            )
+            trial_metrics = forecast_metrics(y_true=tst_y_true_trial, y_score=tst_y_score_trial)
             trial_metrics['Seed'] = conf.seed
             trial_metrics_list.append(trial_metrics)
 
@@ -543,8 +545,10 @@ if __name__ == '__main__':
 
     display(pd.DataFrame(trial_results))
 
-    pd.DataFrame(trial_results)[['MASE']].plot(kind='box',
-                                               title=f"{conf.freq_title} Crime GRUFNN MASE Score for {NUM_TRIALS} Seeds\n")
+    pd.DataFrame(trial_results)[['MASE']].plot(
+        kind='box',
+        title=f"{conf.freq_title} Crime GRUFNN MASE Score for {NUM_TRIALS} Seeds\n",
+    )
     plt.savefig(f"{conf.plots_path}{conf.freq}_result_seed_consistency.png")
     plt.show()
 
@@ -593,8 +597,6 @@ if __name__ == '__main__':
     logging.info(f"best validation: {np.min(val_epoch_losses):.6f} @ epoch: {np.argmin(val_epoch_losses) + 1}")
 
     # plot train and validation sets
-
-    from utils.interactive import plot_interactive_epoch_losses
 
     fig = plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses)
     fig.write_image(f"{conf.plots_path}{conf.freq}_loss_val_plot.png")
@@ -743,17 +745,15 @@ if __name__ == '__main__':
 
         metrics = pd.DataFrame(ll)
         metrics.sort_values(['Crime Type', 'MASE'], inplace=True)
-        metrics.reset_index(inplace=True, drop='index')
+        metrics.reset_index(inplace=True, drop=True)
 
         return metrics
 
 
-    from utils.utils import write_txt
-
     metrics_folder = f"./data/processed/{data_sub_path}/metrics/"
     os.makedirs(metrics_folder, exist_ok=True)
 
-    ## TRAINING EVALUATION -------------------------------------------------------------------------
+    # TRAINING EVALUATION -------------------------------------------------------------------------
     trn_y_true, trn_y_score = evaluate_sequence_model(model, loaders.train_loader, conf)
 
     # trn_y_score = scaler.inverse_transform(trn_y_score)
@@ -771,7 +771,7 @@ if __name__ == '__main__':
     )
     display((trn_metrics,))
 
-    # save latex table code to txt fiele
+    # save latex table code to txt file
     trn_metrics_latex = trn_metrics.round(decimals=3).to_latex(
         index=False,
         caption=f"{conf.freq_title} Crime Count Forecasting Metrics (Training Data)",
@@ -780,7 +780,7 @@ if __name__ == '__main__':
     pd.to_pickle(trn_metrics, f"{metrics_folder}{conf.freq}_metrics_train.pkl")
     write_txt(trn_metrics_latex, f"{metrics_folder}{conf.freq}_metrics_train_latex.txt")
 
-    ## TEST SET EVALUATION ---------------------------------------------------------------------------------------
+    # TEST SET EVALUATION ---------------------------------------------------------------------------------------
 
     tst_y_true, tst_y_score = evaluate_sequence_model(model, loaders.test_loader, conf)
     # tst_y_true, tst_y_score = tst_y_true[:,0], tst_y_score[:,0]

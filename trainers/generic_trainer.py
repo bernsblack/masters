@@ -1,27 +1,14 @@
 import logging as log
-from typing import Callable, Union, Optional
+from typing import Callable, Optional
 
 import numpy as np
 import torch
 from torch import nn, optim
 
-from dataloaders.grid_loader import BaseDataLoaders
-from datasets.sequence_dataset import SequenceDataLoaders
 from models.model_result import ModelResult
 from utils.configs import BaseConf
 from utils.metrics import LossPlotter, best_threshold, get_y_pred
-
-LrScheduler = Optional[Union[
-    optim.lr_scheduler.StepLR,
-    optim.lr_scheduler.LambdaLR,
-    optim.lr_scheduler.MultiStepLR,
-    optim.lr_scheduler.CyclicLR,
-    optim.lr_scheduler.CosineAnnealingLR,
-    optim.lr_scheduler.ExponentialLR,
-    optim.lr_scheduler.ReduceLROnPlateau,
-]]
-
-TDataLoaders = Union[BaseDataLoaders, SequenceDataLoaders]
+from utils.types import TDataLoaders, LrScheduler
 
 
 def save_checkpoint(tag, model, optimiser, conf,
@@ -65,7 +52,7 @@ def train_model(
         train_epoch_fn: Callable,
         loss_fn: Callable,
         conf: BaseConf,
-        scheduler: LrScheduler = None,
+        scheduler: Optional[LrScheduler] = None,
         verbose: bool = True,
 ):
     """
@@ -271,12 +258,14 @@ def train_model_final(
         log.info(f"Epoch: {(1 + epoch):04d}/{conf.max_epochs:04d}")
         conf.timer.reset()
 
-        epoch_loss = train_epoch_fn(model=model,
-                                    optimiser=optimiser,
-                                    batch_loader=loaders.train_validation_loader,
-                                    loss_fn=loss_fn,
-                                    total_losses=trn_val_batch_losses,
-                                    conf=conf)
+        epoch_loss = train_epoch_fn(
+            model=model,
+            optimiser=optimiser,
+            batch_loader=loaders.train_validation_loader,
+            loss_fn=loss_fn,
+            total_losses=trn_val_batch_losses,
+            conf=conf,
+        )
 
         trn_val_epoch_losses.append(epoch_loss)
         log.debug(f"Epoch {epoch} -> Training Loop Duration: {conf.timer.check()}")
@@ -288,9 +277,11 @@ def train_model_final(
 
     torch.save(model.state_dict(), f"{conf.model_path}model_{tag}.pth")
     torch.save(optimiser.state_dict(), f"{conf.model_path}optimiser_{tag}.pth")
-    np.savez_compressed(file=f"{conf.model_path}losses_{tag}.npz",
-                        trn_val_batch_losses=trn_val_batch_losses,
-                        trn_val_epoch_losses=trn_val_epoch_losses)
+    np.savez_compressed(
+        file=f"{conf.model_path}losses_{tag}.npz",
+        trn_val_batch_losses=trn_val_batch_losses,
+        trn_val_epoch_losses=trn_val_epoch_losses,
+    )
 
     return trn_val_epoch_losses
 
