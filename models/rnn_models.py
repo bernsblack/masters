@@ -1,4 +1,6 @@
 import logging as log
+import unittest
+
 import numpy as np
 import torch
 import torch.nn.functional as F
@@ -6,6 +8,7 @@ from abc import ABC
 from torch import nn
 from torch.nn.utils import clip_grad_norm_
 
+from utils import set_system_seed
 from utils.configs import BaseConf
 
 """
@@ -51,6 +54,16 @@ class GRUFNN(nn.Module):
     """
 
     def __init__(self, input_size, hidden_size0, hidden_size1, output_size, num_layers=1):
+        """
+        :param input_size: The number of expected features in the input `x` for the GRU layer
+        :param hidden_size0: The number of features in the hidden state `h` for the GRU layer
+        :param hidden_size1: The number of features in the hidden state for the FNN layer
+        :param output_size: The number of features in the output of the FNN layer
+        :param num_layers: Number of recurrent layers in the GRU layer. E.g., setting ``num_layers=2``
+            would mean stacking two GRUs together to form a `stacked GRU`,
+            with the second GRU taking in outputs of the first GRU and
+            computing the final results. Default: 1
+        """
         super(GRUFNN, self).__init__()
 
         self.name = "GRUFNN"
@@ -75,6 +88,11 @@ class GRUFNN(nn.Module):
         # Decode hidden states of all time step
 
         return out  # if we never send h its never detached
+
+    def reset_parameters(self):
+        self.gru.reset_parameters()
+        self.lin1.reset_parameters()
+        self.lin2.reset_parameters()
 
 
 class RecurrentFeedForwardNetwork(nn.Module):
@@ -370,3 +388,30 @@ def evaluate_rnn(model: nn.Module, batch_loader, conf: BaseConf):
                 y_score[n, c, l] = p
 
     return y_count, y_class, y_score, t_range
+
+
+class TestGRUFNN(unittest.TestCase):
+    def test_reset_params(self):
+        seed = 10
+        set_system_seed(seed)
+        model = GRUFNN(
+            input_size=10,
+            hidden_size0=10,
+            hidden_size1=5,
+            output_size=1,
+            num_layers=1
+        )
+        p0 = str(list(model.parameters()))
+        model = GRUFNN(
+            input_size=10,
+            hidden_size0=10,
+            hidden_size1=5,
+            output_size=1,
+            num_layers=1
+        )
+        p1 = str(list(model.parameters()))
+        set_system_seed(seed)
+        model.reset_parameters()
+        p2 = str(list(model.parameters()))
+        self.assertEqual(p0, p2, "Reset model and original model do not have the same weights, but should")
+        self.assertNotEqual(p1, p2, "Re-initialised model and original model have the same weights, but should not")

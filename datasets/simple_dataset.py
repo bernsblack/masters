@@ -1,7 +1,11 @@
 # sourced form https://pytorch.org/tutorials/beginner/data_loading_tutorial.html
+import unittest
+
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset, DataLoader
+
+from utils import deprecated
 
 """
 DataLoader allows us to:
@@ -13,6 +17,7 @@ DataLoader allows us to:
 """
 
 
+@deprecated
 class SimpleDataSet(Dataset):
     """Simple example dataset."""
 
@@ -40,7 +45,13 @@ class SimpleDataSet(Dataset):
         return sample
 
 
+class TestSimpleDataset(unittest.TestCase):
 
-dataset = SimpleDataSet("./data/original/Crimes_Chicago_2001_to_2019.csv")
-dataloader = DataLoader(dataset, batch_size=4,
-                        shuffle=True, num_workers=4)
+    def test_simple_dataset(self):
+        dataset = SimpleDataSet("./data/original/Crimes_Chicago_2001_to_2019.csv")
+        dataloader = DataLoader(
+            dataset=dataset,
+            batch_size=4,
+            shuffle=True,
+            num_workers=4,
+        )

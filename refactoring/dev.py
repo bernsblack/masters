@@ -2,9 +2,10 @@
 
 # re-writing the sequence training and evaluation notebook (Development - Whole city crime count predictor (Daily))
 # NOTE THAT THIS FILE LEAVES OUT DATA EXPLORATION AND EXPERIMENTATION AND MAINLY FOCUSES ON THE TRAINING AND EVALUATION
-# OF THE DL AND BASE-LINE MODELS - OUR MAIN CONCERN IS THAT THE TEST SET SIZES ARE NOT THE SAME FOR ALL MODELS, AND
-# THAT THE TEST SET BASELINE MODELS ARE TRAINED ON TEST SET DATA AND NOT
-
+# OF THE DL AND BASE-LINE MODELS - OUR MAIN ISSUE IS THAT THE TEST SET SIZES ARE NOT THE SAME FOR ALL MODELS,
+# DUE TO DIFFERENT INPUT LENGTHS FOR THE VARIOUS MODELS. THE GOALS OF THE REWRITE IS TO GUARANTEE THAT THE TEST SET
+# OUTPUTS ARE THE SAME LENGTHS REGARDLESS OF THE INPUTS LENGTHS. THIS MEANS ALL MODELS WILL BE COMPARED UNDER THE SAME
+# CIRCUMSTANCES
 # IMPORTS --------------------------------------------------------------------------------------------------
 
 import logging
@@ -30,6 +31,9 @@ from logger.logger import setup_logging
 from models.baseline_models import historic_average
 from models.rnn_models import GRUFNN
 from models.sequence_models import train_epoch_for_sequence_model, evaluate_sequence_model
+from refactoring.compare_models import compare_time_series_metrics
+from refactoring.hyper_optimise_sequence import new_evaluate_hyper_parameters_fn
+from refactoring.trials import run_trials_for_grufnn
 from trainers.generic_trainer import train_model
 from trainers.generic_trainer import train_model_final
 from utils.configs import BaseConf
@@ -164,9 +168,8 @@ if __name__ == '__main__':
     By applying rolling normalisation we can control for the period nature of our signals. We subtract the signal by a 
     periodic rolling mean and divide it by a period rolling standard deviation. We can also perform this on various 
     periods e.g. 7 days and 365 days, which caters for weekly and yearly periodic cycles. By controlling for the signals 
-    periodic nature we essentially have a new signal show casing how many standard deviations a current time step is 
-    outside of the expected value for that day of the week and time of the year. Our potential models then just need 
-    to predict the residuals of our crime signals.
+    periodic nature we have a new signal showing how many standard deviations the current time step is from the expected
+    value for that day/week/season. The models are then left to predict residuals of our crime signals.
     """
 
     normalize_periodically = True
@@ -198,17 +201,17 @@ if __name__ == '__main__':
     if do_plot_correlation:
         for temp, _normed, period_string in zip([df, total_df], ['', '_normed'], ['', ' after Normalisation']):
             corr = temp.loc[:, temp.columns != 'Total'].corr()
-            plot_corr(corr,
+            plot_corr(corr=corr,
                       title=f'Pearson Correlation Coefficients Between {conf.freq_title} Crime Types{period_string}\n')
             plt.savefig(f"{conf.plots_path}{conf.freq}_corr_matrix_pearson{_normed}.png")
             # --
             corr = temp.loc[:, temp.columns != 'Total'].pcorr()
-            plot_corr(corr, title=f'Partial Pearson Correlation Coefficients ' +
-                                  f'Between {conf.freq_title} Crime Types{period_string}\n')
+            plot_corr(corr=corr, title=f'Partial Pearson Correlation Coefficients ' +
+                                       f'Between {conf.freq_title} Crime Types{period_string}\n')
             plt.savefig(f"{conf.plots_path}{conf.freq}_corr_matrix_pearson_partial{_normed}.png")
             # --
             corr = temp.loc[:, temp.columns != 'Total'].corr(method='spearman')
-            plot_corr(corr,
+            plot_corr(corr=corr,
                       title=f'Spearman Correlation Coefficients Between {conf.freq_title} Crime Types{period_string}\n')
             plt.savefig(f"{conf.plots_path}{conf.freq}_corr_matrix_spearman{_normed}.png")
 
@@ -276,89 +279,18 @@ if __name__ == '__main__':
     logging.info(f"input_data.shape => {input_data.shape}")
     logging.info(f"target_data.shape => {target_data.shape}")
 
-
     # HYPER PARAMETER OPTIMISATION ---------------------------------------------------------------
 
-    def train_evaluate_hyper(hyper_parameters: TParameterization):  # todo better train loop eval loop
-        """
-        train_evaluate_hyper is a closure and uses variables outside of function scope
-
-        :param hyper_parameters: dictionary
-        :return:
-        """
-        logging.info(f"Running HyperOpt Trial with: {pformat(hyper_parameters)}")
-
-        # hyper param setup
-        hidden_size_hyper = int(hyper_parameters.get('hidden_size', 50))
-        num_layers_hyper = int(hyper_parameters.get('num_layers', 5))
-        conf.weight_decay = hyper_parameters.get('weight_decay', 1e-4)
-        conf.lr = hyper_parameters.get('lr', 1e-3)
-
-        default_seq_len = {
-            "24H": 90,
-            "1H": 168,
-            "168H": 52,
-        }.get(conf.freq, 60)
-        conf.seq_len = int(hyper_parameters.get('seq_len', default_seq_len))
-
-        conf.early_stopping = True
-        conf.patience = 30
-        conf.min_epochs = 1
-        conf.max_epochs = 10_000
-
-        conf.seed = np.random.randint(10_000) * (int(time()) % hidden_size_hyper + num_layers_hyper)
-
-        set_system_seed(conf.seed)  # should be reset with each model instantiation
-
-        loaders_hyper = SequenceDataLoaders(  # setup data loader 2: hyper opt
-            input_data=input_data,
-            target_data=target_data,
-            t_range=t_range,
-            batch_size=conf.batch_size,
-            seq_len=conf.seq_len,
-            shuffle=conf.shuffle,
-            num_workers=0,
-            val_ratio=0.3,
-            tst_size=test_size,
-            overlap_sequences=overlap_sequences,
-        )
-
-        # model setup
-        model_hyper = GRUFNN(
-            input_size=input_size,
-            hidden_size0=hidden_size_hyper,
-            hidden_size1=hidden_size_hyper // 2,
-            output_size=output_size,
-            num_layers=num_layers_hyper,
-        ).to(conf.device)
-
-        criterion_hyper = nn.MSELoss()
-        optimiser_hyper = torch.optim.AdamW(params=model_hyper.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
-
-        # training
-        trn_epoch_losses, val_epoch_losses, stopped_early = train_model(
-            model=model_hyper,
-            optimiser=optimiser_hyper,
-            loaders=loaders_hyper,
-            train_epoch_fn=train_epoch_for_sequence_model,
-            loss_fn=criterion_hyper,
-            conf=conf,
-            verbose=False,
-        )
-
-        # load the saved best validation model
-        # Load latest or best validation model
-        conf.checkpoint = "best_val"
-        log.info(f"Loading model from checkpoint ({conf.checkpoint}) for evaluation")
-        log.info(f"Loading model from {conf.model_path}")
-        model_hyper.load_state_dict(state_dict=torch.load(f"{conf.model_path}model_{conf.checkpoint}.pth",
-                                                          map_location=conf.device.type))
-
-        # evaluation
-        val_y_true, val_y_score = evaluate_sequence_model(model_hyper, loaders_hyper.validation_loader, conf)
-
-        return forecast_metrics(y_true=val_y_true, y_score=val_y_score)['MASE']
-
+    evaluate_hyper_parameters_fn = new_evaluate_hyper_parameters_fn(
+        conf=conf,
+        input_size=input_size,
+        output_size=output_size,
+        input_data=input_data,
+        target_data=target_data,
+        t_range=t_range,
+        test_size=test_size,
+        overlap_sequences=overlap_sequences,
+    )
 
     total_hyper_opt_trials = 20  # 20
     do_optimize_hyper_params = True
@@ -389,7 +321,7 @@ if __name__ == '__main__':
 
         best_parameters, values, experiment, hyper_model = optimize_hyper_parameters(
             parameters=hyper_params,
-            evaluation_function=train_evaluate_hyper,
+            evaluation_function=evaluate_hyper_parameters_fn,
             objective_name='MASE',
             minimize=True,  # change when the objective is a loss
             total_trials=total_hyper_opt_trials,
@@ -415,48 +347,24 @@ if __name__ == '__main__':
 
     display(pd.DataFrame([best_parameters]).iloc[0])
 
-
     # MULTI-RUN EVALUATION -------------------------------------------------------------------------
-    # TODO: EXTRACT INTO A CLASS WRAPPER LIKE DONE WITH TENSORFLOW AND KERAS
 
-    def run_trials(num_trials=10):
-        """
-        Run a full experiment on GRUFNN model multiple times with different seeds, to determine if the variability is
-        due to the hyper parameters or the initial seed that sets the parameters of the model.
-        Data and hyper parameters must be set before hand.
-        This function acts as a closure, i.e. some variables are created outside the scope of the function.
+    NUM_TRIALS = 10
+    VAL_RATIO = 0.3
 
-        Used to:
-            1. Setup data loader with predefined input and target data
-            2. Setup model
-            3. Train model with a validation set once to determine the num_epochs
-            4. Run trials loops:
-                4.a. Reset seed
-                4.b. Re-setup model
-                4.c. Train with train_val set for predetermined num_epochs
-                4.d. Run evaluations on the model
-            5. Return a dataframe with seed and forecast metrics for each trial run
-        """
-
-        trial_metrics_list = []
-
-        conf.early_stopping = True
-        conf.patience = 30
-        conf.min_epochs = 1
-        conf.max_epochs = 10_000
-
-        conf.lr = best_parameters['lr']
-        conf.weight_decay = best_parameters['weight_decay']
-        hidden_size_trial = best_parameters['hidden_size']
-        num_layers_trial = best_parameters['num_layers']
-        conf.seq_len = best_parameters['seq_len']
-
-        # ====================================== can be put into loop as well
-        # model setup
-        conf.seed = int(time())  # unique seed for each run
-        set_system_seed(conf.seed)  # should be reset with each model instantiation
-
-        loaders_inner = SequenceDataLoaders(  # setup data loader 3: run trial
+    # same model and loaders are used for multiple runs with different seeds
+    # to test the influence of the seed on performance
+    trial_results = run_trials_for_grufnn(
+        conf=conf,
+        hyper_parameters=best_parameters,
+        model=GRUFNN(
+            input_size=input_size,
+            hidden_size0=conf.hidden_size,
+            hidden_size1=conf.hidden_size // 2,
+            output_size=output_size,
+            num_layers=conf.num_layers,
+        ).to(conf.device),
+        loaders=SequenceDataLoaders(  # setup data loader 3: run trial
             input_data=input_data,
             target_data=target_data,
             t_range=t_range,
@@ -464,84 +372,13 @@ if __name__ == '__main__':
             seq_len=conf.seq_len,
             shuffle=conf.shuffle,
             num_workers=0,
-            val_ratio=0.3,
+            val_ratio=VAL_RATIO,
             tst_size=test_size,
             overlap_sequences=overlap_sequences,
-        )
+        ),
+        num_trials=NUM_TRIALS,
 
-        model_inner = GRUFNN(
-            input_size=input_size,
-            hidden_size0=hidden_size_trial,
-            hidden_size1=hidden_size_trial // 2,
-            output_size=output_size,
-            num_layers=num_layers_trial,
-        ).to(conf.device)
-
-        criterion_inner = nn.MSELoss()
-
-        optimiser_inner = torch.optim.AdamW(params=model_inner.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
-
-        trn_epoch_losses_inner, val_epoch_losses_inner, stopped_early_inner = train_model(
-            model=model_inner,
-            optimiser=optimiser_inner,
-            loaders=loaders_inner,
-            train_epoch_fn=train_epoch_for_sequence_model,
-            loss_fn=criterion_inner,
-            conf=conf,
-            verbose=False,
-        )
-
-        logging.info(
-            f"best validation: {np.min(val_epoch_losses_inner):.6f} @ epoch: {np.argmin(val_epoch_losses_inner) + 1}")
-
-        # full train-val dataset training
-        conf.max_epochs = np.argmin(val_epoch_losses_inner) + 1  # because of index starting at zero
-        # ====================================== can be put into loop as well
-
-        for i in range(num_trials):
-            logging.info(f"Starting trial {i + 1} of {num_trials}.")
-
-            conf.seed = int(time() + 10 * i)  # unique seed for each run
-            set_system_seed(conf.seed)  # should be reset with each model instantiation
-            model_inner = GRUFNN(
-                input_size=input_size,
-                hidden_size0=hidden_size_trial,
-                hidden_size1=hidden_size_trial // 2,
-                output_size=output_size,
-                num_layers=num_layers_trial,
-            ).to(conf.device)
-
-            optimiser_inner = torch.optim.AdamW(
-                params=model_inner.parameters(),
-                lr=conf.lr,
-                weight_decay=conf.weight_decay,
-            )
-
-            trn_val_epoch_losses = train_model_final(
-                model=model_inner,
-                optimiser=optimiser_inner,
-                loaders=loaders_inner,
-                train_epoch_fn=train_epoch_for_sequence_model,
-                loss_fn=criterion_inner,
-                conf=conf,
-            )
-
-            tst_y_true_trial, tst_y_score_trial = evaluate_sequence_model(
-                model=model_inner,
-                batch_loader=loaders_inner.test_loader,
-                conf=conf,
-            )
-            trial_metrics = forecast_metrics(y_true=tst_y_true_trial, y_score=tst_y_score_trial)
-            trial_metrics['Seed'] = conf.seed
-            trial_metrics_list.append(trial_metrics)
-
-            logging.info(f"Completed trial {i + 1} of {num_trials}.")
-
-        return trial_metrics_list
-
-
-    NUM_TRIALS = 10
-    trial_results = run_trials(num_trials=NUM_TRIALS)
+    )
 
     display(pd.DataFrame(trial_results))
 
@@ -559,17 +396,17 @@ if __name__ == '__main__':
 
     conf.lr = best_parameters['lr']
     conf.weight_decay = best_parameters['weight_decay']
-    hidden_size = best_parameters['hidden_size']
-    num_layers = best_parameters['num_layers']
+    conf.hidden_size = best_parameters['hidden_size']
+    conf.num_layers = best_parameters['num_layers']
     conf.seq_len = best_parameters['seq_len']
 
     set_system_seed(conf.seed)  # should be reset with each model instantiation
     model = GRUFNN(
         input_size=input_size,
-        hidden_size0=hidden_size,
-        hidden_size1=hidden_size // 2,
+        hidden_size0=conf.hidden_size,
+        hidden_size1=conf.hidden_size // 2,
         output_size=output_size,
-        num_layers=num_layers,
+        num_layers=conf.num_layers,
     ).to(conf.device)
 
     criterion = nn.MSELoss()
@@ -609,10 +446,10 @@ if __name__ == '__main__':
     set_system_seed(conf.seed)  # should be reset with each model instantiation
     model = GRUFNN(
         input_size=input_size,
-        hidden_size0=hidden_size,
-        hidden_size1=hidden_size // 2,
+        hidden_size0=conf.hidden_size,
+        hidden_size1=conf.hidden_size // 2,
         output_size=output_size,
-        num_layers=num_layers,
+        num_layers=conf.num_layers,
     ).to(conf.device)
 
     optimiser = torch.optim.AdamW(params=model.parameters(), lr=conf.lr, weight_decay=conf.weight_decay)
@@ -650,106 +487,6 @@ if __name__ == '__main__':
         "168H": (4, 2),
     }.get(conf.freq, (24, 14))
 
-
-    # TODO: REFACTOR function: compare_time_series_metrics
-    # TODO: save trained baseline models and trained metrics to own folder...
-    # TODO: load baseline models...save evaluation metrics to own folder...
-    # TODO: all models have the same length of test set - the sequence needed should be incorporated into the loaders
-    # TODO: compare_time_series_metrics functions should actually just load metrics of each model and compare using latex and plots and save the result in a directory
-    # TODO: look at the grid metrics - we need meta information about the start adn stop times - can even have the results saved - look at grid result as an example
-    def compare_time_series_metrics(
-            y_true,
-            y_score,
-            t_range,
-            feature_names,
-            is_training_set,
-            step=24,
-            max_steps=29,
-            alpha=0.5,
-            rangeslider_visible=True,
-    ):
-        raise Exception("REWRITE THIS CODE!! - ABSTRACT THE BASELINES INTO models.basesline.squence_models")
-        kwargs = dict()
-
-        offset = step * max_steps
-
-        assert len(y_true.shape) == 2
-
-        model_name_dict = {}
-        feature_results = {}
-
-        if is_training_set:
-            training_str = "(Training Data)"
-        else:
-            training_str = "(Test Data)"
-
-        for i, feat_name in enumerate(feature_names):
-            kwargs[f"{feat_name}_y_score"] = y_score[offset:, i]
-            kwargs[f"{feat_name}_y_true"] = y_true[offset:, i]
-            kwargs[f"{feat_name}_y_ha"] = historic_average(y_true[:, i], step=step,
-                                                           max_steps=max_steps)[offset - 1:-1]
-
-            ewm = EWM(y_true[:, i])
-            kwargs[f"{feat_name}_y_ewm"] = ewm(y_true[:, i])[offset:]
-
-            feature_results[feat_name] = {
-                "Ground Truth": y_true[offset:, i],
-                "GRUFNN": y_score[offset:, i],
-                f"HA({step},{max_steps})": historic_average(y_true[:, i], step=step, max_steps=max_steps)[
-                                           offset - 1:-1],
-                f"EWM({ewm.alpha:.3f})": ewm(y_true[:, i])[offset:],
-            }
-
-            model_name_dict[feat_name] = {
-                "y_score": "GRUFNN",
-                "y_true": "Ground Truth",
-                "y_ha": f"HA({step},{max_steps})",
-                "y_ewm": f"EWM({ewm.alpha:.3f})",
-            }
-
-            fig_predicted_normalised_city_counts = plot_time_signals(
-                t_range=t_range[offset:],
-                alpha=alpha,
-                title=f'{conf.freq_title} {feat_name.title()} Predicted Normalised City Counts {training_str}',
-                ylabel='Normalised Counts [0,1]',
-                xlabel='Date',
-                rangeslider_visible=rangeslider_visible,
-                **feature_results[feat_name]
-            )
-            file_name = f"{conf.plots_path}{conf.freq}_predictions_{feat_name}_" + \
-                        f"{training_str.lower().replace(' ', '_').replace(')', '').replace('(', '')}.png"
-            logging.info(f"Saving Predictions Plots in: {file_name}")
-            fig_predicted_normalised_city_counts.write_image(file_name)
-            fig_predicted_normalised_city_counts.show()
-
-        ll = []  # {}
-        for k, v in kwargs.items():
-            i = k.find("_")
-            feat_name = k[:i]
-            model_type = k[i + 1:]
-            if model_type == 'y_true':
-                continue
-            row = {}
-            crime_type_name = feat_name.title()
-            model_name = model_name_dict[feat_name][model_type]
-            row['Crime Type'] = crime_type_name
-            row['Model'] = model_name
-            row_ = forecast_metrics(y_true=kwargs[f"{feat_name}_y_true"], y_score=kwargs[k])
-            row = {**row, **row_}
-
-            ll.append(row)
-
-        #     plot_time_signals(t_range=t_range[offset:], alpha=alpha,
-        #                       title=f'{conf.freq_title} Predicted Normalised City Counts',
-        #                       yaxis_title='Normalised Counts [0,1]',**kwargs).show()
-
-        metrics = pd.DataFrame(ll)
-        metrics.sort_values(['Crime Type', 'MASE'], inplace=True)
-        metrics.reset_index(inplace=True, drop=True)
-
-        return metrics
-
-
     metrics_folder = f"./data/processed/{data_sub_path}/metrics/"
     os.makedirs(metrics_folder, exist_ok=True)
 
@@ -767,7 +504,7 @@ if __name__ == '__main__':
         step=step,
         max_steps=max_steps,
         is_training_set=True,
-        rangeslider_visible=False,
+        range_slider_visible=False,
     )
     display((trn_metrics,))
 

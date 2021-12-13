@@ -88,6 +88,9 @@ class BaseConf:  # args from arg-parser to over write values
         self.freq = 1  # data time step frequency
         self.freq_title = ''  # string description of time series frequency
         self.time_steps_per_day = 1
+        
+        self.hidden_size = 100
+        self.num_layers = 2
 
         if conf_dict:
             for k, v in conf_dict.items():

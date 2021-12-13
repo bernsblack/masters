@@ -21,6 +21,7 @@ class CellDataLoaders(BaseDataLoaders):
         # (maybe not necessary to have test set in memory tpp)
         # DATA LOADER SETUP
 
+        super().__init__()
         self.data_group = data_group
 
         self.train_loader = CellBatchLoader(dataset=self.data_group.training_set,

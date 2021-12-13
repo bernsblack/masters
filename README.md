@@ -4,7 +4,7 @@
 ## Data flow process
 ### Original (as downloaded from the internet)
 - `Crimes_Chicago_2001_to_2019.csv` Original crime data source from Chicago open data website
-    - Only being used in simple_dataset.py
+    - Only being used in `simple_dataset`.py
 -  `openweatherdata.json` Unprocessed weather data
     - Not incorporated with any of the models
 ### Raw (preprocessed data)

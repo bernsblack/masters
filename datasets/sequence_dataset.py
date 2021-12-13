@@ -53,9 +53,8 @@ class SequenceDataset(Dataset):
         return idx, inp, trg
 
 
-# todo: [constant test set size] setup to ensure the test set size stays constant stays regardless of the sequence length
-# todo: [constant test set size] sequences can't overlap as the training loop uses them to calculate the weights update
-# todo: [constant test set size] sequences can't overlap as the training loop uses them to calculate the weights
+# todo: [constant test set size] setup to ensure the test set size stays constant stays regardless of sequence length
+# todo: [constant test set size] sequences can overlap as long as the targets do not overlap of the evaluation metrics
 class SequenceDataLoaders:
     def __init__(
             self,
@@ -185,6 +184,21 @@ class SequenceDataLoaders:
             shuffle=shuffle,
             num_workers=num_workers,
         )
+
+    def reset(self):
+        """
+        Each call to enumerate(loader) starts from the beginning.
+        Might not be needed if the loader was run to completion previously
+        """
+
+        for _ in enumerate(self.train_validation_loader):
+            continue
+        for _ in enumerate(self.train_loader):
+            continue
+        for _ in enumerate(self.validation_loader):
+            continue
+        for _ in enumerate(self.test_loader):
+            continue
 
 
 class TestSequenceDataset(unittest.TestCase):

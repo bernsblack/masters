@@ -2,6 +2,7 @@ import numpy as np
 
 # possible forecasting metrics
 from models.baseline_models import historic_average
+from utils import deprecated
 
 
 def mean_forecast_error(y_true, y_score):
@@ -80,7 +81,9 @@ from pandas import DataFrame
 from utils.plots import plot_time_signals
 
 
+@deprecated
 def compare_time_series_metrics(y_true, y_score, t_range, feature_names, step=24, max_steps=29, alpha=0.5):
+    raise 'compare_time_series_metrics is deprecated us the one in refactoring folder'
     kwargs = dict()
 
     offset = step * max_steps

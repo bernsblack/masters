@@ -301,13 +301,17 @@ def evaluate_model(
     :param conf:
     :return:
     """
-    trn_y_count, trn_y_class, trn_y_score, trn_t_range = evaluate_fn(model=model,
-                                                                     batch_loader=loaders.train_loader,
-                                                                     conf=conf)
+    trn_y_count, trn_y_class, trn_y_score, trn_t_range = evaluate_fn(
+        model=model,
+        batch_loader=loaders.train_loader,
+        conf=conf,
+    )
 
-    tst_y_count, tst_y_class, tst_y_score, tst_t_range = evaluate_fn(model=model,
-                                                                     batch_loader=loaders.test_loader,
-                                                                     conf=conf)
+    tst_y_count, tst_y_class, tst_y_score, tst_t_range = evaluate_fn(
+        model=model,
+        batch_loader=loaders.test_loader,
+        conf=conf,
+    )
 
     thresh = best_threshold(trn_y_class, trn_y_score)
     # trn_y_pred = get_y_pred(thresh, trn_y_score)

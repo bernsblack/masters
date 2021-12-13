@@ -8,6 +8,12 @@ from warnings import warn
 import numpy as np
 import pandas as pd
 import torch
+from torch import nn
+
+
+def weight_reset(m):
+    if isinstance(m, nn.Conv2d) or isinstance(m, nn.Linear):
+        m.reset_parameters()
 
 
 def to_snake(text):
