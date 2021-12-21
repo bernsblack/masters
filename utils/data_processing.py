@@ -1,4 +1,3 @@
-import logging
 import numpy as np
 import pandas as pd
 import torch
@@ -10,11 +9,12 @@ from sklearn.preprocessing import OneHotEncoder
 from torch.autograd import Variable
 
 from utils import deprecated
+from utils.types import ArrayNHW, ArrayNL
 from utils.utils import cut
 
 
 @deprecated
-def sincos_vector_old(x):
+def sin_cos_vector_old(x):
     """
     Deprecated version: max value is not end of cycle - would cause rounding issues
 
@@ -30,7 +30,7 @@ def sincos_vector_old(x):
     return np.stack([sin_x, cos_x], axis=1)
 
 
-def sincos_vector(x):
+def sin_cos_vector(x):
     """
     Fixed rounding issue: e.g. 23 hour in 24 hour cycle would give zero - is fixed now.
 
@@ -48,16 +48,21 @@ def sincos_vector(x):
     return np.stack([sin_x, cos_x], axis=1)
 
 
-def encode_sincos(X):
+def encode_sin_cos(X):
     n, d = X.shape
     vectors = []
     for i in range(d):
-        vectors.append(sincos_vector(X[:, i]))
+        vectors.append(sin_cos_vector(X[:, i]))
 
     return np.concatenate(vectors, axis=1)
 
 
-def encode_time_vectors(t_range, month_divisions=None, year_divisions=None, kind='sincos'):
+class TimeVectorEncoding:
+    SinCos = 'sincos'
+    OneHot = 'ohe'
+
+
+def encode_time_vectors(t_range, month_divisions=None, year_divisions=None, kind: str = TimeVectorEncoding.SinCos):
     """
     given t_range (datetime series)
     return E: H,D,DoW,isWeekend hot-encoded vector and sin(hour/24) cos(hour/24)
@@ -86,14 +91,14 @@ def encode_time_vectors(t_range, month_divisions=None, year_divisions=None, kind
         })
         col_names = ['$ToM_{sin}$', '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$']
 
-        if kind == "ohe":
+        if kind == TimeVectorEncoding.OneHot:
             # OneHotEncoder for categorical data
             time_values = df[["timeofmonth", "timeofyear"]].values
             ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
             time_vectors = ohe.fit_transform(time_values)
         else:  # option to encode all time information in a sin cos vector representation
             # ensure all vectors are between 0 and 1
-            time_vectors = encode_sincos(df[["timeofmonth", "timeofyear"]].values) / 2 + 0.5
+            time_vectors = encode_sin_cos(df[["timeofmonth", "timeofyear"]].values) / 2 + 0.5
     else:  # LESS THAN A WEEK
         # External info
         is_weekend = t_range.dayofweek.to_numpy()
@@ -108,7 +113,7 @@ def encode_time_vectors(t_range, month_divisions=None, year_divisions=None, kind
             "timeofyear": timeofyear,
         })
 
-        if kind == "ohe":
+        if kind == TimeVectorEncoding.OneHot:
             # OneHotEncoder for categorical data
             time_values = df[["dayofweek", "is_weekend", "timeofmonth", "timeofyear"]].values
             ohe = OneHotEncoder(categories="auto", sparse=False)  # It is assumed that input features take on values
@@ -118,18 +123,18 @@ def encode_time_vectors(t_range, month_divisions=None, year_divisions=None, kind
 
             if not is_gte_24hours:  # only if we are working on a hourly time scale
                 # Cyclical float values for hour of the day (so that 23:55 and 00:05 are more related to each other)
-                hour_vec = sincos_vector(df.hour.values) / 2 + 0.5  # ensure all vectors are between 0 and 1
+                hour_vec = sin_cos_vector(df.hour.values) / 2 + 0.5  # ensure all vectors are between 0 and 1
                 time_vectors = np.hstack([time_value_ohe, hour_vec])
             else:
                 time_vectors = time_value_ohe
         else:  # option to encode all time information in a sin cos vector representation
             if not is_gte_24hours:
                 # ensure all vectors are between 0 and 1
-                tv_sce = encode_sincos(df[["hour", "dayofweek", "timeofmonth", "timeofyear"]].values) / 2 + 0.5
+                tv_sce = encode_sin_cos(df[["hour", "dayofweek", "timeofmonth", "timeofyear"]].values) / 2 + 0.5
                 col_names = ['$H_{sin}$', '$H_{cos}$', '$DoW_{sin}$', '$DoW_{cos}$', '$ToM_{sin}$',
                              '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$', '$Wkd$']
             else:
-                tv_sce = encode_sincos(df[["dayofweek", "timeofmonth", "timeofyear"]].values) / 2 + 0.5
+                tv_sce = encode_sin_cos(df[["dayofweek", "timeofmonth", "timeofyear"]].values) / 2 + 0.5
                 col_names = ['$DoW_{sin}$', '$DoW_{cos}$', '$ToM_{sin}$',
                              '$ToM_{cos}$', '$ToY_{sin}$', '$ToY_{cos}$', '$Wkd$']
             time_vectors = np.concatenate([tv_sce, is_weekend.reshape(-1, 1)], axis=1)
@@ -348,7 +353,7 @@ def get_rev_S(S, do_superres, do_cumsum):
 def get_trans_mat_d2s(a, threshold=0):
     """
     Warning: has been deprecated
-    a array shapped (N, W, H)
+    a array shaped (N, W, H)
     sum over all time should be above this threshold
     """
 
@@ -902,7 +907,7 @@ def safe_divide_df_zero_on_zero(a, b):
 
 
 # n,h,w
-def normalize_grid(data):
+def normalize_grid(data: ArrayNHW):
     assert len(data.shape) == 3
 
     summed_data = np.sum(data, axis=1, keepdims=True)
@@ -911,21 +916,21 @@ def normalize_grid(data):
 
 
 # n,l
-def normalize_flat(data):
+def normalize_flat(data: ArrayNL):
     assert len(data.shape) == 2
 
     summed_data = np.sum(data, axis=1, keepdims=True)
     return safe_divide(data, summed_data)
 
 
-def normalize(data):
+def normalize(data: np.ndarray):
     """
     sum of data will now sum to one (distribution normalisation)
     """
     return safe_divide(data, np.sum(data))
 
 
-def normalize_df_min_max(df, axis=0):
+def normalize_df_min_max(df: pd.DataFrame, axis: int = 0):
     """
     Dataframe min max normalization
     :param df: pandas dataframe
@@ -937,7 +942,7 @@ def normalize_df_min_max(df, axis=0):
     return df
 
 
-def normalize_df_mean_std(df, axis=0):
+def normalize_df_mean_std(df: pd.DataFrame, axis: int = 0):
     """
     Dataframe mean std normalization, a.k.a. z-score normalisation
 
@@ -953,7 +958,7 @@ def normalize_df_mean_std(df, axis=0):
 
 
 class DataFrameMinMaxScaler:
-    def __init__(self, minimum=0, maximum=1, axis=0):
+    def __init__(self, minimum: float = 0, maximum: float = 1, axis: int = 0):
         self.new_min = minimum
         self.new_max = maximum
         self.new_scale = maximum - minimum

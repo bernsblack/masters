@@ -5,25 +5,39 @@ Models compared are:
 - Historic Average
 """
 
-
 # TODO: REFACTOR function: compare_time_series_metrics
 # TODO: save trained baseline models and trained metrics to own folder...
 # TODO: load baseline models...save evaluation metrics to own folder...
 # TODO: all models have the same length of test set - the sequence needed should be incorporated into the loaders
 # TODO: compare_time_series_metrics functions should actually just load metrics of each model and compare using latex and plots and save the result in a directory
 # TODO: look at the grid metrics - we need meta information about the start adn stop times - can even have the results saved - look at grid result as an example
+import logging
+from typing import List
+
+import pandas as pd
+from numpy import ndarray
+from pandas import DatetimeIndex
+
+from refactoring.exponential_weighted_mean import EWM
+from utils.configs import BaseConf
+from utils.forecasting import forecast_metrics
+from utils.plots import plot_time_signals
+from utils.time_series import historic_average
+
+
 def compare_time_series_metrics(
-        y_true,
-        y_score,
-        t_range,
-        feature_names,
-        is_training_set,
-        step=24,
-        max_steps=29,
-        alpha=0.5,
-        range_slider_visible=True,
+        conf: BaseConf,
+        y_true: ndarray,
+        y_score: ndarray,
+        t_range: DatetimeIndex,
+        feature_names: List[str],
+        is_training_set: bool,
+        step: int = 24,
+        max_steps: int = 29,
+        alpha: float = 0.5,
+        range_slider_visible: bool = True,
 ):
-    raise Exception("REWRITE THIS CODE!! - ABSTRACT THE BASELINES INTO models.bases_line.sequence_models")
+    # raise Exception("REWRITE THIS CODE!! - ABSTRACT THE BASELINES INTO models.bases_line.sequence_models")
     kwargs = dict()
 
     offset = step * max_steps
@@ -41,8 +55,11 @@ def compare_time_series_metrics(
     for i, feat_name in enumerate(feature_names):
         kwargs[f"{feat_name}_y_score"] = y_score[offset:, i]
         kwargs[f"{feat_name}_y_true"] = y_true[offset:, i]
-        kwargs[f"{feat_name}_y_ha"] = historic_average(y_true[:, i], step=step,
-                                                       max_steps=max_steps)[offset - 1:-1]
+        kwargs[f"{feat_name}_y_ha"] = historic_average(
+            data=y_true[:, i],
+            step=step,
+            max_steps=max_steps,
+        )[offset - 1:-1]
 
         ewm = EWM(y_true[:, i])
         kwargs[f"{feat_name}_y_ewm"] = ewm(y_true[:, i])[offset:]
@@ -50,8 +67,11 @@ def compare_time_series_metrics(
         feature_results[feat_name] = {
             "Ground Truth": y_true[offset:, i],
             "GRUFNN": y_score[offset:, i],
-            f"HA({step},{max_steps})": historic_average(y_true[:, i], step=step, max_steps=max_steps)[
-                                       offset - 1:-1],
+            f"HA({step},{max_steps})": historic_average(
+                data=y_true[:, i],
+                step=step,
+                max_steps=max_steps
+            )[offset - 1:-1],
             f"EWM({ewm.alpha:.3f})": ewm(y_true[:, i])[offset:],
         }
 

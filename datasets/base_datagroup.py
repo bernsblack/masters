@@ -28,7 +28,7 @@ class BaseDataGroup:
 
             self.crime_feature_indices = list(zip_file["crime_feature_indices"])
 
-            self.t_range = pd.read_pickle(data_path + "t_range.pkl")
+            self.t_range: pd.DatetimeIndex = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
             # freqstr = self.t_range.freqstr

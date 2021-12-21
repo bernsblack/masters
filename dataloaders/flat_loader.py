@@ -44,7 +44,7 @@ class FlatBatchLoader:
 
         :param dataset: PyTorch dataset
         :param batch_size: number of records the models see in a training step
-        :param sub_sample: used to decide if we limit class imbalance by sub-sampling the classes to be equal
+        :param sub_sample: limits class imbalance by sub-sampling the classes to be equal. Any whole number.
         """
         # SET DATA
         self.dataset = dataset

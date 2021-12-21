@@ -3,9 +3,12 @@ from __future__ import annotations
 
 import logging
 import numpy as np
-from typing import Callable, List, Dict, Union, Tuple
+from typing import Callable, List, Dict, Union, Tuple, Iterable
+
+import pandas as pd
 
 from utils import deprecated
+from utils.types import ArrayNL
 
 FLOAT_TOLERANCE_VALUE = 1e-8
 
@@ -583,14 +586,11 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
     return cmis, offsets
 
 
-from pandas import DataFrame
-
-
 def construct_temporal_information(
-        date_range,
-        temporal_variables=("Hour", "Day of Week", "Time of Month", "Time of Year"),
-        month_divisions=4,
-        year_divisions=4,
+        date_range: pd.DatetimeIndex,
+        temporal_variables: Iterable[str] = ("Hour", "Day of Week", "Time of Month", "Time of Year"),
+        month_divisions: int = 4,
+        year_divisions: int = 4,
 ):
     df_dict = dict(Date=date_range)
 
@@ -606,22 +606,22 @@ def construct_temporal_information(
     if "Time of Year" in temporal_variables:
         df_dict["Time of Year"] = cut(date_range.dayofyear / 366, year_divisions)
 
-    temp_info = DataFrame(df_dict).set_index('Date')
+    temp_info = pd.DataFrame(df_dict).set_index('Date')
 
     return temp_info
 
 
 def conditional_mutual_information_over_grid(
-        dense_grid,
-        t_range,
-        max_offset=35,
-        norm=True,
-        log_norm=False,
-        include_self=False,
-        bins=0,  # mutual info bins
-        temporal_variables=["Day of Week", "Time of Month", "Time of Year"],
-        month_divisions=10,
-        year_divisions=10,
+        dense_grid: ArrayNL,
+        t_range: pd.DatetimeIndex,
+        max_offset: int = 35,
+        norm: bool = True,
+        log_norm: bool = False,
+        include_self: bool = False,
+        bins: int = 0,  # mutual info bins
+        temporal_variables: Iterable[str] = ("Day of Week", "Time of Month", "Time of Year"),
+        month_divisions: int = 10,
+        year_divisions: int = 10,
 ):
     """
 
@@ -669,12 +669,12 @@ def conditional_mutual_information_over_grid(
 
 
 def mutual_information_over_grid(
-        dense_grid,
-        max_offset=35,
-        norm=True,
-        log_norm=False,
-        include_self=False,
-        bins=0,  # mutual info bins
+        dense_grid: ArrayNL,
+        max_offset: int = 35,
+        norm: bool = True,
+        log_norm: bool = False,
+        include_self: bool = False,
+        bins: int = 0,  # mutual info bins
 ):
     """
 

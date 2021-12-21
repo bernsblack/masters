@@ -47,7 +47,7 @@ from utils.types import TParameterization
 from utils.utils import (write_json, get_data_sub_paths,
                          load_total_counts, set_system_seed)
 from utils.utils import write_txt
-from utils.whole_city import (plot_time_series_anom_wc, plot_mi_curves_wc,
+from utils.whole_city import (plot_time_series_anomalies_wc, plot_mi_curves_wc,
                               normalize_periodically_wc, plot_time_vectors)
 
 pio.templates.default = "plotly_white"  # "none"
@@ -155,7 +155,7 @@ if __name__ == '__main__':
 
     do_plot_anomalies = False
     if do_plot_anomalies:
-        plot_time_series_anom_wc(conf=conf, df=df)
+        plot_time_series_anomalies_wc(conf=conf, df=df)
 
     # MUTUAL INFORMATION PLOTS -----------------------------------------------------------------------------------------
 
@@ -497,6 +497,7 @@ if __name__ == '__main__':
     # trn_y_true = scaler.inverse_transform(trn_y_true)
 
     trn_metrics = compare_time_series_metrics(
+        conf=conf,
         y_true=trn_y_true,
         y_score=trn_y_score,
         t_range=loaders.train_loader.dataset.t_range[-len(trn_y_true):],
@@ -523,6 +524,7 @@ if __name__ == '__main__':
     # tst_y_true, tst_y_score = tst_y_true[:,0], tst_y_score[:,0]
 
     tst_metrics = compare_time_series_metrics(
+        conf=conf,
         y_true=tst_y_true,
         y_score=tst_y_score,
         t_range=loaders.test_loader.dataset.t_range[-len(tst_y_true):],
@@ -530,7 +532,7 @@ if __name__ == '__main__':
         is_training_set=False,
         step=step,
         max_steps=max_steps,
-        rangeslider_visible=False,
+        range_slider_visible=False,
     )
 
     display((tst_metrics,))

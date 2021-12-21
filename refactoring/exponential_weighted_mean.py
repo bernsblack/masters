@@ -17,7 +17,7 @@ class EWM:
         if series is not None:
             self.fit(series)
 
-    def __call__(self, series: np.ndarray):
+    def __call__(self, series: np.ndarray) -> np.ndarray:
         return self.predict(series)
 
     def fit(self, series):
@@ -35,7 +35,7 @@ class EWM:
 
         self.alpha = self.options[np.argmin(losses)]
 
-    def predict(self, series: np.ndarray):
+    def predict(self, series: np.ndarray) -> np.ndarray:
         series = np.pad(series, (1, 0), 'edge')
 
         estimate = pd.Series(series).ewm(alpha=self.alpha).mean().values[:-1]

@@ -1,3 +1,5 @@
+from typing import Optional
+
 import numpy as np
 import plotly.graph_objects as go
 from geopy import distance
@@ -13,7 +15,9 @@ from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info
 from utils import ffloor, fceil
 from utils.data_processing import encode_category
 from utils.metrics import safe_f1_score
+from utils.types import ArrayNHW
 from utils.utils import cmi_name
+from pandas import DataFrame
 
 
 class State:
@@ -66,7 +70,7 @@ class State:
         self.__recursion_guard = 0
 
 
-def state_to_conf(state):
+def state_to_conf(state: State):
     conf = dict(
         start_date=state.date_min.strftime("%Y-%m-%d"),
         end_date=(state.date_max + Timedelta(state.freq)).strftime("%Y-%m-%d"),
@@ -85,7 +89,7 @@ def state_to_conf(state):
 
 
 # rename and move to utils
-def new_int_bins(int_min, int_max):
+def new_int_bins(int_min: int, int_max: int):
     """
     Will create a array of bin values so that the integers from int_min, int_max fall exactly between the bins.
     Example:
@@ -99,7 +103,7 @@ def new_int_bins(int_min, int_max):
     return np.arange(int_min, int_max + 2)
 
 
-def filter_frame(data_frame, state):
+def filter_frame(data_frame: DataFrame, state: State):
     """
     filter df given the values in state to get a subset of data
     """
@@ -119,16 +123,16 @@ def filter_frame(data_frame, state):
     return data_frame[filter_mask]
 
 
-def get_total_counts(data_frame, state, date_range):
+def get_total_counts(data_frame: DataFrame, state: State, date_range: DatetimeIndex):
     """
     data_frame: dataframe of crime incidents
     returns total_counts_y, total_counts_x
     """
     if len(data_frame) > 0:
-        tbins = new_int_bins(data_frame.t.min(), data_frame.t.max())
+        t_bins = new_int_bins(data_frame.t.min(), data_frame.t.max())
 
         #  total counts line/curve
-        total_counts, edges = np.histogram(data_frame.t, bins=tbins)
+        total_counts, edges = np.histogram(data_frame.t, bins=t_bins)
         total_counts_y = total_counts
         # total_counts_x = date_range[edges[0]:edges[-2]]
         total_counts_x = date_range[edges[0]:edges[-1]]
@@ -139,50 +143,47 @@ def get_total_counts(data_frame, state, date_range):
     return total_counts_y, total_counts_x
 
 
-from pandas import DataFrame
-
-
-def get_total_counts_by_type(data_frame, state, date_range):
+def get_total_counts_by_type(data_frame: DataFrame, state: State, date_range: DatetimeIndex):
     """
     data_frame: dataframe of crime incidents
     returns total_counts_y, total_counts_x
     """
     counts_dict = {}
     for crime_type in state.crime_types:
-        tbins = new_int_bins(data_frame.t.min(), data_frame.t.max())
+        t_bins = new_int_bins(data_frame.t.min(), data_frame.t.max())
 
         #  total counts line/curve
-        total_counts, edges = np.histogram(data_frame[data_frame['Primary Type'] == crime_type].t, bins=tbins)
+        total_counts, edges = np.histogram(data_frame[data_frame['Primary Type'] == crime_type].t, bins=t_bins)
         counts_dict[crime_type] = total_counts
 
     return DataFrame(counts_dict, index=date_range[edges[0]:edges[-1]])
 
 
-def new_bins(data_frame, state):
-    xbins = np.arange(
+def new_bins(data_frame: DataFrame, state: State):
+    x_bins = np.arange(
         start=ffloor(state.lon_min, state.dlon),
         stop=fceil(state.lon_max, state.dlon),
         step=state.dlon,
     )
-    nx = len(xbins)
+    nx = len(x_bins)
 
-    ybins = np.arange(
+    y_bins = np.arange(
         start=ffloor(state.lat_min, state.dlat),
         stop=fceil(state.lat_max, state.dlat),
         step=state.dlat,
     )
-    ny = len(ybins)
+    ny = len(y_bins)
 
     nt = int(np.ceil(data_frame.t.max()))
-    tbins = new_int_bins(data_frame.t.min(), data_frame.t.max())
+    t_bins = new_int_bins(data_frame.t.min(), data_frame.t.max())
 
     nc = len(state.crime_types)
-    cbins = np.arange(0, nc + 1, 1)
+    c_bins = np.arange(0, nc + 1, 1)
 
-    return tbins, cbins, ybins, xbins
+    return t_bins, c_bins, y_bins, x_bins
 
 
-def bin_data_frame(data_frame, state):
+def bin_data_frame(data_frame: DataFrame, state: State):
     """
     will bin the data from into a N,C,H,W grid depending on the state
     """
@@ -209,7 +210,7 @@ def get_mean_map(data_frame, state):
     return mean_map, xbins, ybins
 
 
-def get_ratio_xy(data_frame):
+def get_ratio_xy(data_frame: DataFrame):
     """
     Given data_frame with fields Latitude and Longitude return the ratio between the min and max points distances
     returns d(lon_max-lon_min)/d(lat_max-lat_min)
@@ -233,7 +234,7 @@ def get_ratio_xy(data_frame):
     return ratio_xy
 
 
-def new_interactive_heatmap(z, name=None, height=500):
+def new_interactive_heatmap(z: np.ndarray, name: Optional[str] = None, height: int = 500):
     h, w = z.shape
     # height = 600  # int(30*h)
     width = height * w / h  # 300
@@ -256,7 +257,7 @@ def new_interactive_heatmap(z, name=None, height=500):
 
 class InteractiveHeatmaps:
 
-    def __init__(self, date_range, col_wrap=3, height=500, **kwargs):
+    def __init__(self, date_range: DatetimeIndex, col_wrap: int = 3, height: int = 500, **kwargs):
         """
         InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
 
@@ -343,7 +344,7 @@ class InteractiveHeatmaps:
 
 class InteractiveHeatmapsWithLines:
 
-    def __init__(self, date_range, col_wrap=3, height=500, thresh=0, **kwargs):
+    def __init__(self, date_range: DatetimeIndex, col_wrap: int = 3, height: int = 500, thresh: float = 0, **kwargs):
         """
         InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
 
@@ -486,7 +487,7 @@ class InteractiveHeatmapsWithLines:
         ])
 
 
-def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
+def plot_interactive_epoch_losses(trn_epoch_losses: np.ndarray, val_epoch_losses: np.ndarray):
     # trn_val_epoch_losses = np.array(trn_epoch_losses) + np.array(val_epoch_losses)
 
     return go.Figure(
@@ -498,13 +499,13 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
                        name="Validation Losses", mode='lines+markers'),
             go.Scatter(y=[np.min(val_epoch_losses)],
                        x=[np.argmin(val_epoch_losses) + 1], name="Best Validation Loss", mode='markers',
-                       marker_symbol='x', marker_size=10),
+                       marker=dict(symbol='x', size=10)),
             go.Scatter(y=[np.min(trn_epoch_losses)],
                        x=[np.argmin(trn_epoch_losses) + 1], name="Best Train Loss", mode='markers',
-                       marker_symbol='x', marker_size=10),
+                       marker=dict(symbol='x', size=10)),
             # go.Scatter(y=[np.min(trn_val_epoch_losses)],
             #            x=[np.argmin(trn_val_epoch_losses)], name="Best Train Valid Loss", mode='markers',
-            #            marker_symbol='x', marker_size=10),
+            #            marker=dict(symbol='x', size=10)),
 
         ],
         layout=dict(
@@ -517,7 +518,7 @@ def plot_interactive_epoch_losses(trn_epoch_losses, val_epoch_losses):
     )
 
 
-def plot_interactive_roc(data_path):
+def plot_interactive_roc(data_path: str):
     metrics = get_models_metrics(data_path)
     fig = go.Figure(
         layout=dict(
@@ -546,7 +547,7 @@ def plot_interactive_roc(data_path):
     return fig
 
 
-def plot_interactive_det(data_path):
+def plot_interactive_det(data_path: str):
     metrics = get_models_metrics(data_path)
     fig = go.Figure(
         layout=dict(
@@ -578,7 +579,7 @@ def plot_interactive_det(data_path):
     return fig
 
 
-def plot_interactive_pr(data_path, beta=1):
+def plot_interactive_pr(data_path: str, beta: float = 1.0):
     metrics = get_models_metrics(data_path)
     fig = go.Figure(
         layout=dict(
@@ -630,7 +631,7 @@ def plot_interactive_pr(data_path, beta=1):
     return fig
 
 
-def plot_interactive_roc_(y_true, y_score, model_name='model'):
+def plot_interactive_roc_(y_true: np.ndarray, y_score: np.ndarray, model_name='model'):
     fig = go.Figure(
         layout=dict(
             title_text="Receiver Operating Characteristic Curve",
@@ -660,7 +661,7 @@ def plot_interactive_roc_(y_true, y_score, model_name='model'):
     return fig
 
 
-def plot_interactive_pr_(y_true, y_score, model_name='model'):
+def plot_interactive_pr_(y_true: np.ndarray, y_score: np.ndarray, model_name: str = 'model'):
     fig = go.Figure(
         layout=dict(
             title_text="Precision Recall Curve",
@@ -690,11 +691,11 @@ def plot_interactive_pr_(y_true, y_score, model_name='model'):
     return fig
 
 
-def interactive_crime_prediction_comparison(y_class: np.ndarray,
-                                            y_score: np.ndarray,
+def interactive_crime_prediction_comparison(y_class: ArrayNHW,
+                                            y_score: ArrayNHW,
                                             t_range: DatetimeIndex,
                                             height: int = 500,
-                                            y_count=None):
+                                            y_count: Optional[ArrayNHW] = None):
     """
     Plots interactive widget with a grid of the mean over time that can be used to select cells and view their scores
     over time. The crime occurrences are also overlain on the curve.
@@ -781,7 +782,7 @@ def interactive_crime_prediction_comparison(y_class: np.ndarray,
     )
 
 
-def interactive_grid_visualiser(grids: np.ndarray, t_range: DatetimeIndex, height: int = 500, **kwargs):
+def interactive_grid_visualiser(grids: ArrayNHW, t_range: DatetimeIndex, height: int = 500, **kwargs):
     """
 
     :param grids: (N: time dimension,H: vertical/height,W: horizontal/width dimension) format of ndarray

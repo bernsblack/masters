@@ -3,6 +3,7 @@ import logging
 import os
 from datetime import datetime
 from time import time
+from typing import List
 from warnings import warn
 
 import numpy as np
@@ -58,7 +59,7 @@ def to_title(str_list):
     return list(map(lambda x: x.title(), str_list))
 
 
-def load_total_counts(folder_name):
+def load_total_counts(folder_name: str) -> pd.DataFrame:
     df = pd.read_pickle(f"./data/processed/{folder_name}/total_counts_by_type.pkl")
     # raise Exception("Reload all Total files and saved after changing: df.freq = df.freqstr")
 
@@ -128,7 +129,7 @@ def get_data_resolutions():
     return df
 
 
-def get_data_sub_paths():
+def get_data_sub_paths() -> List[str]:
     data_sub_paths = os.listdir("./data/processed/")
     if '.DS_Store' in data_sub_paths:
         data_sub_paths.remove('.DS_Store')
@@ -136,7 +137,7 @@ def get_data_sub_paths():
     return data_sub_paths
 
 
-def by_ref(ref):
+def by_ref(ref: str) -> List[str]:
     """
     Get the data_sub_paths by the reference code
     :param ref: reference code: 3 letter code
@@ -233,13 +234,13 @@ class Timer:
         self.cache = datetime.now()
 
 
-def read_json(file_name):
+def read_json(file_name: str):
     with open(file_name, "r") as fp:
         r = json.load(fp)
     return r
 
 
-def write_json(data, file_name):
+def write_json(data, file_name: str):
     """
     Saves dictionary data as json file
     :param data: dictionary
@@ -250,7 +251,7 @@ def write_json(data, file_name):
         json.dump(data, fp)
 
 
-def write_txt(data, file_name):
+def write_txt(data: str, file_name: str):
     """
     Saves string data as text file
     :param data: str

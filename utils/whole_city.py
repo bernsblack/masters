@@ -13,7 +13,8 @@ from utils.rolling import flag_anomalies, periodic_rolling_mean, rolling_norm
 from utils.testing import assert_no_nan, assert_valid_datetime_index
 
 
-def plot_time_series_anom_wc(conf: BaseConf, df: pd.DataFrame, periodic_offset: int = 1, anomaly_threshold: float = 3):
+def plot_time_series_anomalies_wc(conf: BaseConf, df: pd.DataFrame, periodic_offset: int = 1,
+                                  anomaly_threshold: float = 3):
     """
     Save a plot for each column in time series dataframe
     
@@ -60,7 +61,7 @@ def plot_time_series_anom_wc(conf: BaseConf, df: pd.DataFrame, periodic_offset: 
 
 def plot_mi_curves_wc(conf: BaseConf, df: pd.DataFrame):
     temporal_variables = {
-        "1H": ["Hour", "Day of Week", "Time of Month", "Time of Year"],
+        # "1H": ["Hour", "Day of Week", "Time of Month", "Time of Year"],
         "1H": ["Hour", "Day of Week"],
         "24H": ["Day of Week", "Time of Month", "Time of Year"],
         "168H": ["Time of Month", "Time of Year"],
@@ -78,8 +79,8 @@ def plot_mi_curves_wc(conf: BaseConf, df: pd.DataFrame):
         mutual_info_bins = 16  # 16
         #         print(f"optimal bins: {get_optimal_bins(a)}")
         #         a = to_percentile(a)
-        #         a = np.round(np.log(1+a)) # whatch out for values between 1024 2048
-        #         a = cut(np.log(1+a)) # whatch out for values between 1024 2048
+        #         a = np.round(np.log(1+a)) # watch out for values between 1024 2048
+        #         a = cut(np.log(1+a)) # watch out for values between 1024 2048
 
         fig = subplot_mi_curves(
             a=a,
@@ -118,7 +119,7 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
     }.get(conf.freq)
 
     fig = plot_autocorr(**df,
-                        title="Autocorrelations by Crime Type before any Rolling Normalisation",
+                        title="Autocorrelation by Crime Type before any Rolling Normalisation",
                         partial=False,
                         max_offset=max_offset,
                         subplots=corr_subplots,
@@ -144,7 +145,7 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
     assert_valid_datetime_index(normed_df)
 
     fig = plot_autocorr(**normed_df,
-                        title=f"Autocorrelations by Crime Type after {period_string} Rolling Normalisation",
+                        title=f"Autocorrelation by Crime Type after {period_string} Rolling Normalisation",
                         max_offset=max_offset, subplots=corr_subplots, freq=conf.freq)
     fig.write_image(f"{conf.plots_path}{conf.freq}_auto_corr_normed_{period_string.lower()}.png".replace(' ', '_'))
     fig.show()
@@ -180,7 +181,7 @@ def normalize_periodically_wc(conf: BaseConf, df: pd.DataFrame, norm_offset=0, c
             assert_valid_datetime_index(normed_df)
 
             fig = plot_autocorr(**normed_df,
-                                title=f"Autocorrelations by Crime Type after {period_string} and" +
+                                title=f"Autocorrelation by Crime Type after {period_string} and" +
                                       f" {period_string2} Rolling Normalisation",
                                 max_offset=max_offset, subplots=corr_subplots, freq=conf.freq)
             fig.write_image(f"{conf.plots_path}{conf.freq}_auto_corr_normed_{period_string.lower()}_" +

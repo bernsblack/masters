@@ -7,6 +7,7 @@ from torch.utils.data import Dataset
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale, get_hours_per_time_step
+from utils.types import ArrayNCHW, ArrayNC, ArrayHWC
 from utils.utils import if_none
 
 HOUR_NANOS = OffsetHour().nanos
@@ -36,9 +37,9 @@ class GridDataGroup:
                 self.crimes = zip_file["crime_grids"]
             self.crime_feature_indices = list(zip_file["crime_feature_indices"])
 
-            self.total_len = len(self.crimes)  # length of the whole time series
+            self.total_len: int = len(self.crimes)  # length of the whole time series
 
-            self.t_range = pd.read_pickle(data_path + "t_range.pkl")
+            self.t_range: pd.DatetimeIndex = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
             freqstr = self.t_range.freqstr
@@ -51,24 +52,24 @@ class GridDataGroup:
             time_steps_per_day = 24 / hours_per_time_step
 
             if freqstr == "168H":
-                self.step_c = 1
-                self.step_p = 5
-                self.step_q = 10
+                self.step_c: int = 1
+                self.step_p: int = 5
+                self.step_q: int = 10
             elif freqstr == "24H":
-                self.step_c = 1
-                self.step_p = 7  # jumps in days
-                self.step_q = 14
+                self.step_c: int = 1
+                self.step_p: int = 7  # jumps in days
+                self.step_q: int = 14
             else:
-                self.step_c = 1
-                self.step_p = int(24 / hours_per_time_step)  # jumps in days
-                self.step_q = int(168 / hours_per_time_step)  # jumps in weeks -  maximum offset
+                self.step_c: int = 1
+                self.step_p: int = int(24 / hours_per_time_step)  # jumps in days
+                self.step_q: int = int(168 / hours_per_time_step)  # jumps in weeks -  maximum offset
 
-            self.n_steps_c = conf.n_steps_c  # 3
-            self.n_steps_p = conf.n_steps_p  # 3
-            self.n_steps_q = conf.n_steps_q  # 3
+            self.n_steps_c: int = conf.n_steps_c  # 3
+            self.n_steps_p: int = conf.n_steps_p  # 3
+            self.n_steps_q: int = conf.n_steps_q  # 3
 
             #  split the data into ratios - size represent the targets sizes not the number of time steps
-            self.total_offset = self.step_q * self.n_steps_q
+            self.total_offset: int = self.step_q * self.n_steps_q
             # self.total_offset = np.max([self.step_q * self.n_steps_q, 365 * time_steps_per_day])
 
             target_len = self.total_len - self.total_offset
@@ -353,24 +354,24 @@ class GridDataset(Dataset):
 
     def __init__(
             self,
-            crimes,  # time and space dependent
-            targets,  # time and space dependent
-            labels,  # time and space dependent
-            t_range,  # time dependent
-            time_vectors,  # time dependent (optional)
+            crimes: ArrayNCHW,  # time and space dependent
+            targets: ArrayNCHW,  # time and space dependent
+            labels: ArrayNCHW,  # time and space dependent
+            t_range: pd.DatetimeIndex,  # time dependent
+            time_vectors: ArrayNC,  # time dependent (optional)
             # weather_vectors,  # time dependent (optional)
-            demog_grid,  # space dependent (optional)
-            street_grid,  # space dependent (optional)
+            demog_grid: ArrayHWC,  # space dependent (optional)
+            street_grid: ArrayHWC,  # space dependent (optional)
 
-            step_c,
-            step_p,
-            step_q,
+            step_c: int,
+            step_p: int,
+            step_q: int,
 
-            n_steps_c,
-            n_steps_p,
-            n_steps_q,
+            n_steps_c: int,
+            n_steps_p: int,
+            n_steps_q: int,
 
-            shaper,
+            shaper: Shaper,
     ):
 
         self.n_steps_c = n_steps_c

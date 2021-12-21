@@ -4,10 +4,12 @@ from typing import Callable, List
 import numpy as np
 import torch
 import torch.nn as nn
+from numpy import ndarray
 from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
 from utils.configs import BaseConf
+from utils.types import Array
 
 
 def train_epoch_for_sequence_model(
@@ -44,7 +46,7 @@ def evaluate_sequence_model(
         model: nn.Module,
         batch_loader: DataLoader,
         conf: BaseConf,
-):
+) -> (ndarray, ndarray):
     y_score = np.zeros(batch_loader.dataset.target_shape, dtype=np.float)
     y_count = np.zeros_like(y_score)
 

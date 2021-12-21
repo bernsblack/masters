@@ -541,7 +541,7 @@ def get_model_result(model_path):
     return model_result
 
 
-def get_models_metrics(data_path):
+def get_models_metrics(data_path: str):
     """
     Reads all model metrics give the path to a certain data-source/discretisation
     :param data_path: path to a certain data-source/discretisation

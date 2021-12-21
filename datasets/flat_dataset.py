@@ -1,9 +1,12 @@
 import logging as log
 import numpy as np
+import pandas as pd
 from torch.utils.data import Dataset
 
 from datasets.base_datagroup import BaseDataGroup
 from utils.configs import BaseConf
+from utils.preprocessing import Shaper
+from utils.types import ArrayNCL, ArrayN, ArrayHWC
 from utils.utils import if_none
 
 
@@ -111,23 +114,23 @@ class FlatDataset(Dataset):
 
     def __init__(
             self,
-            crimes,  # time and space dependent
-            targets,  # time and space dependent - scales transformed crime count - floats between 0 and 1
-            labels,  # time and space dependent - class labels - crime/no-crime [0,1]
-            total_crimes,  # time dependent
-            t_range,  # time dependent
-            time_vectors,  # time dependent
-            # weather_vectors,  # time dependent
-            demog_grid,  # space dependent
-            street_grid,  # space dependent
-            seq_len,
-            offset_year,
-            shaper,
+            crimes: ArrayNCL,  # time and space dependent
+            targets: ArrayNCL,  # time and space dependent - scales transformed crime count - floats between 0 and 1
+            labels: ArrayNCL,  # time and space dependent - class labels - crime/no-crime [0,1]
+            total_crimes: ArrayN,  # time dependent
+            t_range: pd.DatetimeIndex,  # time dependent
+            time_vectors: np.ndarray,  # time dependent
+            # weather_vectors: ,  # time dependent
+            demog_grid: ArrayHWC,  # space dependent
+            street_grid: ArrayHWC,  # space dependent
+            seq_len: int,
+            offset_year: int,
+            shaper: Shaper,
     ):
-        self.seq_len = seq_len
-        self.offset_year = offset_year
+        self.seq_len: int = seq_len
+        self.offset_year: int = offset_year
 
-        self.crimes = crimes
+        self.crimes: ArrayNCL = crimes
         self.targets = targets
         self.labels = labels
         self.t_size, _, self.l_size = np.shape(self.crimes)

@@ -5,6 +5,7 @@ from torch.utils.data import Dataset
 from datasets.base_datagroup import BaseDataGroup
 from utils.configs import BaseConf
 from utils.data_processing import pad4d
+from utils.types import ArrayN1HW
 from utils.utils import if_none
 
 
@@ -85,10 +86,10 @@ class CellDataGroup(BaseDataGroup):
             shaper=self.shaper,
         )
 
-    def to_counts(self, sparse_data: np.ndarray):
+    def to_counts(self, sparse_data: ArrayN1HW):
         """
         convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
-        :param sparse_data: ndarray (N,1,H,W)
+        :param sparse_data: ndarray (N,1,H,W) a.k.a. ArrayN1HW
         :return: count_data
         """
         assert len(sparse_data.shape) == 4

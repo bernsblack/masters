@@ -1,17 +1,21 @@
 import pickle
 import unittest
+from typing import List
 
 import numpy as np
+import pandas as pd
+from pandas._libs.tslibs.offsets import BaseOffset
 from pandas.tseries.offsets import Hour as OffsetHour
 
 from utils import deprecated
 from utils.configs import BaseConf
 from utils.data_processing import safe_divide
+from utils.types import ArrayNCL, ArrayNCHW
 
 HOUR_NANOS = OffsetHour().nanos
 
 
-def split_data(data, fraction, axis=0):
+def split_data(data: np.ndarray, fraction: float, axis=0) -> List[np.ndarray]:
     """
 
     :param data: ndarray: Array to be divided into sub-arrays.
@@ -26,7 +30,7 @@ def split_data(data, fraction, axis=0):
     return np.split(data, indices, axis)
 
 
-def get_hours_per_time_step(freq):
+def get_hours_per_time_step(freq: BaseOffset):
     return freq.nanos / HOUR_NANOS
 
 
@@ -53,7 +57,7 @@ def get_index_mask(data: np.ndarray, threshold: float = 0, top_k: int = -1) -> n
 
 
 @deprecated
-def get_trans_mat(data, threshold=0, top_k=-1):
+def get_trans_mat(data: ArrayNCHW, threshold: float = 0, top_k: int = -1):
     """
     :param data: array shaped (N, C, H, W)
     :param threshold: sum over all time should be above this threshold
@@ -81,7 +85,7 @@ def get_trans_mat(data, threshold=0, top_k=-1):
 
 # utils functions because we're having issues importing utils
 @deprecated
-def get_trans_mat_old(data, threshold=0, top_k=-1):
+def get_trans_mat_old(data: ArrayNCHW, threshold: float = 0, top_k: int = -1):
     """
     :param data: array shaped (N, C, H, W)
     :param threshold: sum over all time should be above this threshold
@@ -93,7 +97,7 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
     if num_axis != 4:
         raise ValueError(f"data has {num_axis} axis and shape {shape_old} should be 4: (N,C,H,W)")
 
-    data = data[:, 0]  # select only the TOTAL chanel
+    data = data[:, 0]  # select only the TOTAL channel
     n, h, w = np.shape(data)
     shape_new = (n, h * w)
 
@@ -119,7 +123,7 @@ def get_trans_mat_old(data, threshold=0, top_k=-1):
 
 
 class Shaper:
-    def __init__(self, data: np.ndarray, conf: BaseConf = BaseConf()):
+    def __init__(self, data: ArrayNCHW, conf: BaseConf = BaseConf()):
         """
 
         :param data: array shaped (N, C, H, W)
@@ -144,7 +148,7 @@ class Shaper:
         self._yx2i_map = {tuple(yx): i for i, yx in enumerate(coords)}
         self._i2yx_map = {i: yx for yx, i in self._yx2i_map.items()}
 
-    def __eq__(self, other):
+    def __eq__(self, other: 'Shaper') -> bool:
         size_match = (self.h, self.w, self.l) == (other.h, other.w, other.l)
         if not size_match:
             return False
@@ -161,18 +165,18 @@ class Shaper:
         """
         return self._i2yx_map.get(i)
 
-    def yx_to_i(self, y, x):
+    def yx_to_i(self, y: int, x: int) -> int:
         """
         maps unsqueezed coordinates to squeezed indices
-        :param y: y index in unsqueezed format - (N, C, H, W) with y ∈ H
-        :param x: x index in unsqueezed format - (N, C, H, W) with x ∈ W
-        :return: index of the cell in the squeezed format - (N,C, L) with index ∈ L
+        :param y: H index in unsqueezed format - (N, C, H, W)
+        :param x: W index in unsqueezed format - (N, C, H, W)
+        :return: index of the cell in the squeezed format - (N, C, L) with index ∈ L
 
         will return None if (y,x) not in mapping
         """
         return self._yx2i_map.get((y, x))
 
-    def squeeze(self, sparse_data):
+    def squeeze(self, sparse_data: ArrayNCHW) -> ArrayNCL:
         """
 
         :param sparse_data: np.array with shape (N, C, H, W)
@@ -187,7 +191,7 @@ class Shaper:
         dense_data = reshaped_data[:, :, self.index_mask]
         return dense_data
 
-    def unsqueeze(self, dense_data):
+    def unsqueeze(self, dense_data: ArrayNCL) -> ArrayNCHW:
         """
         :param dense_data: np.array with shape (N, C, L)
         :return sparse_data: np.array with shape (N, C, H, W):
@@ -224,18 +228,18 @@ def load_shaper(load_folder: str):
 class TestShaperEquals(unittest.TestCase):
     def test_shaper_equals(self):
         conf = BaseConf()
-        data0 = np.random.binomial(1, 0.1, (10, 1, 100, 100))
-        shaper0 = Shaper(data0, conf)
-        shaper2 = Shaper(data0, conf)
-        data1 = np.random.binomial(1, 0.1, (10, 1, 100, 100))
-        shaper1 = Shaper(data1, conf)
+        data0 = np.random.binomial(1, 0.1, (10, 1, 100, 100)).reshape((10, 1, 100, 100))
+        shaper0 = Shaper(data=data0, conf=conf)
+        shaper2 = Shaper(data=data0, conf=conf)
+        data1 = np.random.binomial(1, 0.1, (10, 1, 100, 100)).reshape((10, 1, 100, 100))
+        shaper1 = Shaper(data=data1, conf=conf)
         self.assertEqual(shaper0, shaper2)
         self.assertNotEqual(shaper0, shaper1)
 
 
 class TestShaperIndexConversion(unittest.TestCase):
     def test_shaper_index_conversion(self):
-        test_sparse = np.arange(40 * 50).reshape(1, 1, 40, 50)
+        test_sparse = np.arange(40 * 50).reshape((1, 1, 40, 50))
         conf = BaseConf({"shaper_threshold": 0, "shaper_top_k": -1})
         shaper = Shaper(test_sparse, conf)
 

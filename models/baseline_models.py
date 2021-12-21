@@ -83,7 +83,7 @@ class UniformMovingAverage(BaseMovingAverage):
 class LinearRegressor(nn.Module):
 
     def __init__(self, in_features=10, out_features=2):
-        # super(LinearRegressor, self).__init__()
+        super(LinearRegressor, self).__init__()
 
         self.linear = nn.Linear(in_features, out_features)
         # self.activation = nn.ReLU()
