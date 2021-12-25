@@ -68,7 +68,7 @@ def main():
 
     log.getLogger().setLevel("INFO")
 
-    # SET THE HYPER PARAMETERS
+    # SET THE hyperparameterS
     conf.resume = False
     conf.early_stopping = False
     conf.max_epochs = 2
@@ -77,7 +77,7 @@ def main():
     conf.checkpoint = "best"  # ["best"|"latest"]
     conf.lr = 1e-3
     conf.batch_size = 64
-    conf.seq_len = 30  # connect as hyper parameter to
+    conf.seq_len = 30  # connect as hyperparameter to
 
     # CRIME DATA
     conf.sub_sample_test_set = 0

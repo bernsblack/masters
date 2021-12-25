@@ -1,7 +1,7 @@
 import numpy as np
 import torch
 
-from utils.constants import *
+from constants.crime_types import *
 
 """
 IMPORTANT NOTE: RATHER USE GRID DATASET

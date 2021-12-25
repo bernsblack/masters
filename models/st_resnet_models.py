@@ -22,8 +22,10 @@ class ResUnit(nn.Module):
     def __init__(self, n_channels=1):
         super(ResUnit, self).__init__()
         self.relu = nn.ReLU()
-        self.conv1 = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=(3,), stride=(1,),
+                               padding=1)
+        self.conv2 = nn.Conv2d(in_channels=n_channels, out_channels=n_channels, kernel_size=(3,), stride=(1,),
+                               padding=1)
         self.bn1 = nn.BatchNorm2d(n_channels)
         self.bn2 = nn.BatchNorm2d(n_channels)
 
@@ -59,8 +61,9 @@ class ResNet(nn.Module):
         conv2 take n_channels and outputs 1 channel
         """
         super(ResNet, self).__init__()
-        self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=n_channels, kernel_size=3, stride=1, padding=1)
-        self.conv2 = nn.Conv2d(in_channels=n_channels, out_channels=1, kernel_size=3, stride=1, padding=1)
+        self.conv1 = nn.Conv2d(in_channels=in_channels, out_channels=n_channels, kernel_size=(3,), stride=(1,),
+                               padding=1)
+        self.conv2 = nn.Conv2d(in_channels=n_channels, out_channels=1, kernel_size=(3,), stride=(1,), padding=1)
         self.resUnits = nn.Sequential()
         for i in range(n_layers):
             self.resUnits.add_module(name='ResUnit' + str(i), module=ResUnit(n_channels))
@@ -414,7 +417,7 @@ def train_epoch_for_st_res_net(model, optimiser, batch_loader, loss_fn, total_lo
 
 
 # evaluation loops
-def evaluate_st_res_net_extra(model, batch_loader, conf):
+def evaluate_st_res_net_extra(model: nn.Module, batch_loader, conf):
     """
     st_res_net model looks at historic crime data, time vector data as well as demographic and street view data
 

@@ -8,7 +8,7 @@ from typing import Callable, List, Dict, Union, Tuple, Iterable
 import pandas as pd
 
 from utils import deprecated
-from utils.types import ArrayNL
+from utils.types.arrays import ArrayNL
 
 FLOAT_TOLERANCE_VALUE = 1e-8
 

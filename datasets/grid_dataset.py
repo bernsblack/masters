@@ -4,10 +4,11 @@ import pandas as pd
 from pandas.tseries.offsets import Hour as OffsetHour
 from torch.utils.data import Dataset
 
+from constants.date_time import DatetimeFreq
 from models.baseline_models import HistoricAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale, get_hours_per_time_step
-from utils.types import ArrayNCHW, ArrayNC, ArrayHWC
+from utils.types.arrays import ArrayNCHW, ArrayNC, ArrayHWC, ArrayNHW
 from utils.utils import if_none
 
 HOUR_NANOS = OffsetHour().nanos
@@ -25,16 +26,18 @@ class GridDataGroup:
     def __init__(self, data_path: str, conf: BaseConf):
         """
         Crime should be in format (N,H,W)
-        :param data_path:
+        :param data_path: path toe file
         :param conf:
         """
         log.info('Initialising Grid Data Group')
 
         with np.load(data_path + "generated_data.npz") as zip_file:  # context helper ensures zip_file is closed
             if conf.use_crime_types:
-                self.crimes = zip_file["crime_types_grids"]
+                self.crimes: ArrayNCHW = zip_file["crime_types_grids"]
+                assert len(self.crimes.shape) == 4, f"self.crimes.shape is {self.crimes.shape} not ArrayNCHW"
             else:
-                self.crimes = zip_file["crime_grids"]
+                self.crimes: ArrayNCHW = zip_file["crime_grids"]
+                assert len(self.crimes.shape) == 4, f"self.crimes.shape is {self.crimes.shape} not ArrayNCHW"
             self.crime_feature_indices = list(zip_file["crime_feature_indices"])
 
             self.total_len: int = len(self.crimes)  # length of the whole time series
@@ -42,20 +45,17 @@ class GridDataGroup:
             self.t_range: pd.DatetimeIndex = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
-            freqstr = self.t_range.freqstr
-            if freqstr == "D":
-                freqstr = "24H"
-            if freqstr == "H":
-                freqstr = "1H"
+            # todo change to use DatetimeFreq.convert
+            freqstr = DatetimeFreq.convert(self.t_range)
 
             hours_per_time_step = get_hours_per_time_step(self.t_range.freq)  # time step in hours
             time_steps_per_day = 24 / hours_per_time_step
 
-            if freqstr == "168H":
+            if freqstr == DatetimeFreq.Week:
                 self.step_c: int = 1
                 self.step_p: int = 5
                 self.step_q: int = 10
-            elif freqstr == "24H":
+            elif freqstr == DatetimeFreq.Day:
                 self.step_c: int = 1
                 self.step_p: int = 7  # jumps in days
                 self.step_q: int = 14
@@ -129,13 +129,15 @@ class GridDataGroup:
             #     tmp_trn_crimes, axis=0, keepdims=True)
 
             # fit crime data to shaper - only used to squeeze results when calculating the results
-            self.shaper = Shaper(data=shaper_crimes,
-                                 conf=conf)
+            self.shaper = Shaper(
+                data=shaper_crimes,
+                conf=conf,
+            )
 
             squeezed_crimes = self.shaper.squeeze(self.crimes)
 
             # cap any values above conf.cap_crime_percentile percentile as outliers
-            if conf.cap_crime_percentile:
+            if conf.cap_crime_percentile > 0:
                 cap = np.percentile(squeezed_crimes.flatten(), conf.cap_crime_percentile)
                 squeezed_crimes[squeezed_crimes > cap] = cap
 
@@ -154,7 +156,8 @@ class GridDataGroup:
                 squeezed_crimes = np.concatenate((squeezed_crimes, historic_average), axis=1)
 
             self.crimes = self.shaper.unsqueeze(
-                squeezed_crimes)  # ensures we ignore areas that do not have crime through out and ensures crime data in different data loaders are exactly the same
+                dense_data=squeezed_crimes,
+            )  # ensures we ignore areas that do not have crime through out and ensures crime data in different data loaders are exactly the same
             # add tract count to crime grids - done separately in case we do not want crime types or arrests
             # tract_count_grids = zip_file["tract_count_grids"]
             # self.crimes = np.concatenate((self.crimes, tract_count_grids), axis=1)
@@ -332,7 +335,7 @@ class GridDataGroup:
 
     def to_counts(self, sparse_data: np.ndarray):
         """
-        convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
+        Convert data ndarray values to original count scale so that mae and mse metric calculations can be done.
         :param sparse_data: ndarray (N,1,H,W)
         :return: count_data (N,1,H,W)
         """

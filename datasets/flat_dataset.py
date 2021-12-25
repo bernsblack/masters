@@ -1,4 +1,6 @@
 import logging as log
+from typing import Tuple
+
 import numpy as np
 import pandas as pd
 from torch.utils.data import Dataset
@@ -6,7 +8,7 @@ from torch.utils.data import Dataset
 from datasets.base_datagroup import BaseDataGroup
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper
-from utils.types import ArrayNCL, ArrayN, ArrayHWC
+from utils.types.arrays import ArrayNCL, ArrayN, ArrayHWC
 from utils.utils import if_none
 
 
@@ -105,6 +107,13 @@ class FlatDataGroup(BaseDataGroup):
         return dense_count  # (N,1,L)
 
 
+class FlatBatchTuple(Tuple):
+    """
+    Tuple returns from FlatDataset during iteration
+    (result_indices, spc_feats, tmp_feats, env_feats, targets, labels)
+    """
+
+
 class FlatDataset(Dataset):
     """
     Flat datasets operate on flattened data where the map/grid of data has been reshaped
@@ -131,8 +140,8 @@ class FlatDataset(Dataset):
         self.offset_year: int = offset_year
 
         self.crimes: ArrayNCL = crimes
-        self.targets = targets
-        self.labels = labels
+        self.targets: ArrayNCL = targets
+        self.labels: ArrayNCL = labels
         self.t_size, _, self.l_size = np.shape(self.crimes)
         self.total_crimes = total_crimes
 
@@ -160,7 +169,7 @@ class FlatDataset(Dataset):
         """Denotes the total number of samples"""
         return self.len  # todo WARNING WON'T LINE UP WITH BATCH LOADERS IF SUB-SAMPLING
 
-    def __getitem__(self, index):
+    def __getitem__(self, index) -> FlatBatchTuple:
         # when using no teacher forcing
         # target = self.targets[t+self.seq_len, :, l]
         # todo add all other data - should be done in data-generation?
@@ -218,8 +227,9 @@ class FlatDataset(Dataset):
             stack_targets.append(target_vec)
             stack_labels.append(label_vec)
 
-            result_indices.append((t_index - self.offset_year - self.seq_len, 0,
-                                   l_index))  # extra dimension C, makes it easier for the shaper
+            result_indices.append(
+                (t_index - self.offset_year - self.seq_len, 0, l_index)
+            )  # extra dimension C, makes it easier for the shaper
 
         # spc_feats: [demog_vec]
         # env_feats: [street_vec]
@@ -237,5 +247,5 @@ class FlatDataset(Dataset):
         targets = np.swapaxes(targets, 0, 1)
         labels = np.swapaxes(labels, 0, 1)
 
-        # output shapes should be - (seq_len, batch_size,, n_feats)
+        # output shapes should be - (seq_len, batch_size, n_feats)
         return result_indices, spc_feats, tmp_feats, env_feats, targets, labels

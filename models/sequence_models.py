@@ -9,7 +9,6 @@ from torch.optim import Optimizer
 from torch.utils.data import DataLoader
 
 from utils.configs import BaseConf
-from utils.types import Array
 
 
 def train_epoch_for_sequence_model(

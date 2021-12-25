@@ -14,30 +14,36 @@ class FlatDataLoaders(BaseDataLoaders):
     The data group class also handles reshaping of data.
     """
 
-    def __init__(self, data_group: FlatDataGroup, conf: BaseConf):
+    def __init__(self: 'FlatDataLoaders', data_group: FlatDataGroup, conf: BaseConf):
         # have the train, validation and testing data available im memory
         # (maybe not necessary to have test set in memory tpp)
         # DATA LOADER SETUP
 
         super().__init__()
-        self.data_group = data_group
+        self.data_group: FlatDataGroup = data_group
 
-        self.train_loader = FlatBatchLoader(dataset=self.data_group.training_set,
-                                            batch_size=conf.batch_size,
-                                            sub_sample=conf.sub_sample_train_set)
+        self.train_loader: FlatBatchLoader = FlatBatchLoader(
+            dataset=self.data_group.training_set,
+            batch_size=conf.batch_size,
+            sub_sample=conf.sub_sample_train_set,
+        )
 
-        self.validation_loader = FlatBatchLoader(dataset=self.data_group.validation_set,
-                                                 batch_size=conf.batch_size,
-                                                 sub_sample=conf.sub_sample_validation_set)
+        self.validation_loader: FlatBatchLoader = FlatBatchLoader(
+            dataset=self.data_group.validation_set,
+            batch_size=conf.batch_size,
+            sub_sample=conf.sub_sample_validation_set,
+        )
 
-        self.test_loader = FlatBatchLoader(dataset=self.data_group.testing_set,
-                                           batch_size=conf.batch_size,
-                                           sub_sample=conf.sub_sample_test_set)
+        self.test_loader: FlatBatchLoader = FlatBatchLoader(
+            dataset=self.data_group.testing_set,
+            batch_size=conf.batch_size,
+            sub_sample=conf.sub_sample_test_set,
+        )
 
 
 # todo add sequence loader - runs through the entire sets sequence first then
 class FlatBatchLoader:
-    def __init__(self, dataset: FlatDataset, batch_size: int, sub_sample: int = 0):
+    def __init__(self: 'FlatBatchLoader', dataset: FlatDataset, batch_size: int, sub_sample: int = 0):
         """
         BatchLoader is a iterator that produces batches of data that can be fed into a model during a training
         loop. BatchLoader is used to iterate through and sample the indices for a whole epoch.
@@ -47,20 +53,20 @@ class FlatBatchLoader:
         :param sub_sample: limits class imbalance by sub-sampling the classes to be equal. Any whole number.
         """
         # SET DATA
-        self.dataset = dataset
+        self.dataset: FlatDataset = dataset
 
         # SET LIMITS
         # values use for checking boundaries for the dataset
-        self.min_index = dataset.min_index
-        self.max_index = dataset.max_index
+        self.min_index: int = dataset.min_index
+        self.max_index: int = dataset.max_index
 
         # SET SAMPLE INDICES
-        flat_targets = self.dataset.targets.flatten()
-        class0_args = np.argwhere(flat_targets == 0)
-        class0_args = class0_args[class0_args >= self.min_index]
+        flat_targets: np.ndarray = self.dataset.targets.flatten()
+        class0_args: np.ndarray = np.argwhere(flat_targets == 0)
+        class0_args: np.ndarray = class0_args[class0_args >= self.min_index]
 
-        class1_args = np.argwhere(flat_targets > 0)
-        class1_args = class1_args[class1_args >= self.min_index]
+        class1_args: np.ndarray = np.argwhere(flat_targets > 0)
+        class1_args: np.ndarray = class1_args[class1_args >= self.min_index]
 
         # todo - set subsample ratio_cls0_cls1 = 2 - and let np.choose(class0_args, take_len_class1)
         sub_sample = int(sub_sample)
@@ -69,28 +75,28 @@ class FlatBatchLoader:
             np.random.shuffle(class1_args)
             # class0_args = class0_args[:int(ratio_cls0_cls1*len(class1_args))]
             class0_args = class0_args[:sub_sample * len(class1_args)]
-            self.indices = np.array(list(zip(class0_args, class1_args))).flatten()
+            self.indices: np.ndarray = np.array(list(zip(class0_args, class1_args))).flatten()
         else:
-            self.indices = np.concatenate((class0_args, class1_args), axis=0).flatten()  # [0,0,1,1] format
+            self.indices: np.ndarray = np.concatenate((class0_args, class1_args), axis=0).flatten()  # [0,0,1,1] format
             np.random.shuffle(self.indices)
 
-        self.batch_size = batch_size
+        self.batch_size: int = batch_size
 
-        self.num_batches = int(np.ceil(len(self.indices) / self.batch_size))
-        self.current_batch = 0
+        self.num_batches: int = int(np.ceil(len(self.indices) / self.batch_size))
+        self.current_batch: int = 0
 
-    def __len__(self):
+    def __len__(self: 'FlatBatchLoader') -> int:
         """
         number of batches in the batch loader
         :return:
         """
         return self.num_batches
 
-    def __iter__(self):
+    def __iter__(self: 'FlatBatchLoader') -> 'FlatBatchLoader':
         self.current_batch = 0
         return self
 
-    def __next__(self):
+    def __next__(self: 'FlatBatchLoader'):
         if self.current_batch >= self.num_batches:
             np.random.shuffle(self.indices)  # reshuffle indices after each epoch
             raise StopIteration
@@ -104,7 +110,7 @@ class FlatBatchLoader:
 
             return self.dataset[batch_indices]
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         """
         :param index: the current batch
         :return: batch of data where batch == index

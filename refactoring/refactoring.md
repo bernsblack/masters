@@ -13,8 +13,8 @@ Create a function for each model that will train_eval_fn_for_<MODEL_NAME>(data_l
       same amount of data.
     - The train, validation and test sets can overlap with sequence length, because the models are only evaluated on the
       final target of the sequence, and those values do not overlap in the various datasets.
-- Run hyper parameter optimisation on the training and validation sets to determine valid hyper parameters.
-- Run training and validation loops with optimal hyper parameters to determine the number of epochs before over-fitting.
+- Run hyperparameter optimisation on the training and validation sets to determine valid hyperparameters.
+- Run training and validation loops with optimal hyperparameters to determine the number of epochs before over-fitting.
 - Train model on training and validation set for the number of epochs determined in the previous step.
     - Training with the validation set included will hopefully ensure better generalisation of the model.
 - Evaluation of model using the test set. This includes:

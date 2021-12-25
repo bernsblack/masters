@@ -40,8 +40,8 @@ def run_trials_for_grufnn(
 ):
     """
     Run a full experiment on GRUFNN model multiple times with different seeds, to determine if the variability is
-    due to the hyper parameters or the initial seed that sets the parameters of the model.
-    Data and hyper parameters must be set before hand.
+    due to the hyperparameters or the initial seed that sets the parameters of the model.
+    Data and hyperparameters must be set before hand.
 
     Used to:
         1. Train model with a validation set once to determine the num_epochs

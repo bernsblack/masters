@@ -1,6 +1,7 @@
 import logging as log
 import os
 
+from constants.date_time import DatetimeFreq
 from dataloaders.flat_loader import FlatDataLoaders
 from datasets.flat_dataset import FlatDataGroup
 from logger.logger import setup_logging
@@ -67,11 +68,8 @@ if __name__ == '__main__':
         log.info("=====================================BEGIN=====================================")
 
         # time step in this context is used for
-        freqstr = t_range.freqstr
-        if freqstr == "D":
-            freqstr = "24H"
-        if freqstr == "H":
-            freqstr = "1H"
+
+        freqstr = DatetimeFreq.convert(t_range)
         time_step = int(24 / int(freqstr[:freqstr.find("H")]))
 
         log.info(f"using time step: {time_step}")
@@ -232,11 +230,7 @@ if __name__ == '__main__':
         log.info("=====================================BEGIN=====================================")
 
         # time step in this context is used for
-        freqstr = t_range.freqstr
-        if freqstr == "D":
-            freqstr = "24H"
-        if freqstr == "H":
-            freqstr = "1H"
+        freqstr = DatetimeFreq.convert(t_range)
         time_step = int(24 / int(freqstr[:freqstr.find("H")]))
         time_step = 30 * time_step
 
@@ -298,11 +292,7 @@ if __name__ == '__main__':
         log.info("=====================================BEGIN=====================================")
 
         # time step in this context is used for
-        freqstr = t_range.freqstr
-        if freqstr == "D":
-            freqstr = "24H"
-        if freqstr == "H":
-            freqstr = "1H"
+        freqstr = DatetimeFreq.convert(t_range)
         time_step = int(24 / int(freqstr[:freqstr.find("H")]))
         time_step = 30 * time_step
 
@@ -363,11 +353,7 @@ if __name__ == '__main__':
         log.info("=====================================BEGIN=====================================")
 
         # time step in this context is used for
-        freqstr = t_range.freqstr
-        if freqstr == "D":
-            freqstr = "24H"
-        if freqstr == "H":
-            freqstr = "1H"
+        freqstr = DatetimeFreq.convert(t_range)
         time_step = int(24 / int(freqstr[:freqstr.find("H")]))
         time_step = 30 * time_step
 

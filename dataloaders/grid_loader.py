@@ -1,6 +1,6 @@
 import numpy as np
 
-from datasets.grid_dataset import GridDataGroup
+from datasets.grid_dataset import GridDataGroup, GridDataset
 from utils.configs import BaseConf
 
 
@@ -18,6 +18,7 @@ class BaseDataLoaders:
 
 class GridDataLoaders(BaseDataLoaders):
     def __init__(self, data_group: GridDataGroup, conf: BaseConf):
+        super().__init__()
         self.data_group = data_group
 
         self.train_loader = GridBatchLoader(dataset=self.data_group.training_set,
@@ -34,35 +35,35 @@ class GridDataLoaders(BaseDataLoaders):
 
 
 class GridBatchLoader:
-    def __init__(self, dataset, batch_size, shuffle=True):
-        self.dataset = dataset
+    def __init__(self: 'GridBatchLoader', dataset: GridDataset, batch_size: int, shuffle: bool = True):
+        self.dataset: GridDataset = dataset
 
-        self.min_index = dataset.min_index
-        self.max_index = dataset.max_index
+        self.min_index: int = dataset.min_index
+        self.max_index: int = dataset.max_index
 
-        self.indices = np.arange(self.min_index, self.max_index, dtype=int)
+        self.indices: np.ndarray = np.arange(self.min_index, self.max_index, dtype=int)
 
-        self.shuffle = shuffle
+        self.shuffle: bool = shuffle
         if self.shuffle:
             np.random.shuffle(self.indices)
 
-        self.batch_size = batch_size
+        self.batch_size: int = batch_size
 
         self.num_batches = int(np.ceil(len(self.indices) / self.batch_size))
-        self.current_batch = 0
+        self.current_batch: int = 0
 
-    def __len__(self):
+    def __len__(self) -> int:
         """
         number of batches in the batch loader
         :return:
         """
         return self.num_batches
 
-    def __iter__(self):
+    def __iter__(self: 'GridBatchLoader') -> 'GridBatchLoader':
         self.current_batch = 0
         return self
 
-    def __next__(self):
+    def __next__(self: 'GridBatchLoader'):
         if self.current_batch >= self.num_batches:
             if self.shuffle:  # ensure reshuffling after each epoch
                 np.random.shuffle(self.indices)
@@ -77,7 +78,7 @@ class GridBatchLoader:
 
             return self.dataset[batch_indices]
 
-    def __getitem__(self, index):
+    def __getitem__(self: 'GridBatchLoader', index: int):
         """
         :param index: the current batch
         :return: batch of data where batch == index

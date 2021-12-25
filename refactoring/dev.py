@@ -28,7 +28,6 @@ from torch import nn
 
 from datasets.sequence_dataset import SequenceDataLoaders
 from logger.logger import setup_logging
-from models.baseline_models import historic_average
 from models.rnn_models import GRUFNN
 from models.sequence_models import train_epoch_for_sequence_model, evaluate_sequence_model
 from refactoring.compare_models import compare_time_series_metrics
@@ -37,13 +36,11 @@ from refactoring.trials import run_trials_for_grufnn
 from trainers.generic_trainer import train_model
 from trainers.generic_trainer import train_model_final
 from utils.configs import BaseConf
-from utils.constants import NOT_TOTAL
+from constants.crime_types import NOT_TOTAL
 from utils.data_processing import encode_time_vectors
-from utils.forecasting import forecast_metrics
 from utils.interactive import plot_interactive_epoch_losses
-from utils.plots import plot, plot_time_signals, subplots_df
+from utils.plots import plot, subplots_df
 from utils.plots import plot_corr
-from utils.types import TParameterization
 from utils.utils import (write_json, get_data_sub_paths,
                          load_total_counts, set_system_seed)
 from utils.utils import write_txt
@@ -136,7 +133,7 @@ if __name__ == '__main__':
     info["device"] = device.type
     conf.device = device
 
-    # SET THE HYPER PARAMETERS
+    # SET THE hyperparameterS
     conf.shaper_top_k = -1
     conf.use_classification = False
     conf.train_set_first = True
@@ -279,7 +276,7 @@ if __name__ == '__main__':
     logging.info(f"input_data.shape => {input_data.shape}")
     logging.info(f"target_data.shape => {target_data.shape}")
 
-    # HYPER PARAMETER OPTIMISATION ---------------------------------------------------------------
+    # hyperparameter OPTIMISATION ---------------------------------------------------------------
 
     evaluate_hyper_parameters_fn = new_evaluate_hyper_parameters_fn(
         conf=conf,
@@ -316,7 +313,7 @@ if __name__ == '__main__':
             {"name": "seq_len", "type": "range", "bounds": [8, max_seq_len]},
         ]
 
-        logging.info(f"""Hyper Parameters and their bounds:
+        logging.info(f"""hyperparameters and their bounds:
     {pformat(hyper_params)}""")
 
         best_parameters, values, experiment, hyper_model = optimize_hyper_parameters(

@@ -9,7 +9,7 @@ from sklearn.preprocessing import OneHotEncoder
 from torch.autograd import Variable
 
 from utils import deprecated
-from utils.types import ArrayNHW, ArrayNL
+from utils.types.arrays import ArrayNHW, ArrayNL
 from utils.utils import cut
 
 

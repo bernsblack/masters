@@ -39,7 +39,7 @@ print(best_parameters)
 means, covariances = values
 print(means, covariances)
 
-# render hyper parameter contours
+# render hyperparameter contours
 render(plot_contour(model=model, param_x='lr', param_y='momentum', metric_name='accuracy'))
 
 

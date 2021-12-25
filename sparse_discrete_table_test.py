@@ -192,12 +192,12 @@ class TestSparseDiscreteTable(unittest.TestCase):
         nmi_1 = dt_1.mutual_information(['x'], ['y'], normalize=True)
         nmi_2 = dt_2.mutual_information(['x'], ['y'], normalize=True)
 
-        self.assertAlmostEqual(0.0,mi_0,decimal_place)
-        self.assertAlmostEqual(0.31127812445913294,mi_1,decimal_place)
-        self.assertAlmostEqual(1.5219280948873621,mi_2,decimal_place)
-        self.assertAlmostEqual(0.0,nmi_0,decimal_place)
-        self.assertAlmostEqual(0.31127812445913294,nmi_1,decimal_place)
-        self.assertAlmostEqual(1.0,nmi_2,decimal_place)
+        self.assertAlmostEqual(0.0, mi_0, decimal_place)
+        self.assertAlmostEqual(0.31127812445913294, mi_1, decimal_place)
+        self.assertAlmostEqual(1.5219280948873621, mi_2, decimal_place)
+        self.assertAlmostEqual(0.0, nmi_0, decimal_place)
+        self.assertAlmostEqual(0.31127812445913294, nmi_1, decimal_place)
+        self.assertAlmostEqual(1.0, nmi_2, decimal_place)
 
     def test_normalized_mutual_information(self):
         decimal_place = 5
@@ -218,13 +218,12 @@ class TestSparseDiscreteTable(unittest.TestCase):
         nmi_1 = dt_1.normalized_mutual_information(['x'], ['y'])
         nmi_2 = dt_2.normalized_mutual_information(['x'], ['y'])
 
-        self.assertAlmostEqual(0.0,mi_0,decimal_place)
-        self.assertAlmostEqual(0.31127812445913294,mi_1,decimal_place)
-        self.assertAlmostEqual(1.5219280948873621,mi_2,decimal_place)
-        self.assertAlmostEqual(0.0,nmi_0,decimal_place)
-        self.assertAlmostEqual(0.31127812445913294,nmi_1,decimal_place)
-        self.assertAlmostEqual(1.0,nmi_2,decimal_place)
-
+        self.assertAlmostEqual(0.0, mi_0, decimal_place)
+        self.assertAlmostEqual(0.31127812445913294, mi_1, decimal_place)
+        self.assertAlmostEqual(1.5219280948873621, mi_2, decimal_place)
+        self.assertAlmostEqual(0.0, nmi_0, decimal_place)
+        self.assertAlmostEqual(0.31127812445913294, nmi_1, decimal_place)
+        self.assertAlmostEqual(1.0, nmi_2, decimal_place)
 
 
 class TestConditionalMutualInformation(unittest.TestCase):
@@ -266,6 +265,7 @@ class TestConditionalMutualInformation(unittest.TestCase):
         self.assertAlmostEqual(0.000852316, mi_xyz0, places=decimal_place)
         self.assertAlmostEqual(1.48242, hy, places=decimal_place)
         self.assertAlmostEqual(1.15378, hy_xyz0, places=decimal_place)
+
 
 class TestQuickMutualInformation(unittest.TestCase):
     def test_quick_mutual_info(self):
@@ -311,5 +311,3 @@ class TestQuickMutualInformation(unittest.TestCase):
         self.assertAlmostEqual(0.00074935913348, cmi, places=decimal_place)
         self.assertAlmostEqual(0.00065854846636, cmi_normed, places=decimal_place)
         self.assertAlmostEqual(1.0, cmi_normed_self, places=decimal_place)
-
-

@@ -8,7 +8,7 @@ from numpy import ndarray
 from pandas.core.indexes.datetimes import DatetimeIndex
 from sklearn.metrics import accuracy_score, average_precision_score, roc_auc_score, matthews_corrcoef \
     , precision_recall_curve, roc_curve, recall_score, precision_score, mean_absolute_error, mean_squared_error
-from typing import List
+from typing import List, Optional
 
 from utils import get_data_sub_paths
 from utils.forecasting import mean_absolute_scaled_error, root_mean_squared_error
@@ -119,12 +119,12 @@ class RankingMetrics:
 
 class RegressionsMetrics:  # short memory light way of comparing models - does not save the actually predictions
     def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
-        return None
+        pass
 
 
 class ClassificationMetrics:  # short memory light way of comparing models - does not save the actually predictions
     def __init__(self, model_name, y_count, y_pred, y_score, t_range=None, averaged_over_time=False):
-        return None
+        pass
 
 
 class ModelMetrics:  # short memory light way of comparing models - does not save the actually predictions
@@ -290,8 +290,8 @@ class ModelMetrics:  # short memory light way of comparing models - does not sav
 
 
 class ModelResult:
-    def __init__(self, model_name: str, y_count: ndarray, y_pred: ndarray,
-                 y_score: ndarray, t_range: DatetimeIndex, shaper: Shaper, averaged_over_time: bool = False):
+    def __init__(self, model_name: str, y_count: ndarray, y_pred: ndarray, y_score: ndarray, t_range: DatetimeIndex,
+                 shaper: Optional[Shaper], averaged_over_time: bool = False):
         """
         ModelResult: save the data the model predicted in format (N,C,L)
         Data is saved in a sparse representation - no extra zero values data saved.
@@ -724,7 +724,6 @@ class SequenceResult:
         self.y_pred = y_pred  # class predictions (integers)
         self.y_score = y_score  # predicted floating point score
         self.t_range = t_range  # needed to ensure that models have the same start and stop times
-
 
 
 class SequenceMetrics:

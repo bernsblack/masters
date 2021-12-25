@@ -141,7 +141,7 @@ def by_ref(ref: str) -> List[str]:
     """
     Get the data_sub_paths by the reference code
     :param ref: reference code: 3 letter code
-    :return: list of subpaths ending in ref
+    :return: list of sub-paths ending in ref
     """
     return [c for c in get_data_sub_paths() if c.endswith(ref)]
 

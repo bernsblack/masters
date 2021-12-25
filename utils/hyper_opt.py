@@ -8,8 +8,8 @@ import itertools
 Important note: for GP to function properly the y values should have a mean close to zero and a std close to 1, this
 is taken care of by keep a normalised copy of the parameters domain.
 
-To use GP hyper parameter function define a train_network function that returns a loss value and takes a dictionary of
-hyper parameters and their possible values. For example:
+To use GP hyperparameter function define a train_network function that returns a loss value and takes a dictionary of
+hyperparameters and their possible values. For example:
 
 hyper_param = {
     "lr": [1e-1, 1e-2, 1e-3, 1e-4, 1e-5]
@@ -59,8 +59,8 @@ def next_parameter_by_ei(y_best, y_mean, y_std, x_choices, goal="minimize"):
 def hyper_param_selection(func, hyper_parameters_domain, n_iter=5, goal="minimize", gp_alpha=1e-8):
     """
     func: function used to sample network, training and validation data should be global in the notebook
-          func should only take hyper parameters in as arguments in same order as hyper_parameters_domain values
-    hyper_parameters_domain: dictionary containing all hyper parameters and all their possible values
+          func should only take hyperparameters in as arguments in same order as hyper_parameters_domain values
+    hyper_parameters_domain: dictionary containing all hyperparameters and all their possible values
     n_iter: maximum number of iterations
     goal: [minimize|maximize] states if function needs to be maximized/minimized
     gp_alpha: alpha of gaussian process (GP). Alpha is the number added to the covariance matrix diagonal when fitting

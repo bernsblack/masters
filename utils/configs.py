@@ -1,6 +1,6 @@
 """
 File contains a series of classes that can be used as the config/base settings for the models and their
-hyper parameters for training
+hyperparameters for training
 """
 from copy import deepcopy
 from os import cpu_count
@@ -51,9 +51,9 @@ class BaseConf:  # args from arg-parser to over write values
         self.tolerance: float = 1e-8  # Convergence tolerance: difference between the past two validation losses
         self.lr: float = 1e-3
         self.weight_decay: float = 1e-8
-        self.max_epochs: float = 1
-        self.min_epochs: float = 1
-        self.batch_size: float = 64
+        self.max_epochs: int = 1
+        self.min_epochs: int = 1
+        self.batch_size: int = 64
         self.dropout: float = 0.0  # dropout probability
         self.shuffle: bool = True
         self.num_workers: int = cpu_count()
@@ -90,7 +90,7 @@ class BaseConf:  # args from arg-parser to over write values
         # unnecessary scaling
         self.cap_crime_percentile: float = 0  # 99.95 # if zero then no cap takes place
 
-        self.freq: str = "1D"  # data time step frequency
+        self._freq: Optional[str] = None  # data time step frequency
         self.freq_title: str = ""  # string description of time series frequency
         self.time_steps_per_day: int = 1
 
@@ -101,6 +101,13 @@ class BaseConf:  # args from arg-parser to over write values
             for k, v in conf_dict.items():
                 if self.__dict__.get(k, None) is not None:
                     self.__dict__[k] = v
+
+    @property
+    def freq(self):
+        if self._freq is None:
+            raise Exception(f"conf.freq has not been set")
+        else:
+            return self._freq
 
     def __str__(self):
         return pformat(self.__dict__)

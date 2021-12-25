@@ -1,10 +1,10 @@
 """
-Used for shorthand setup functions to get shaper, doata, and config files
+Used for shorthand setup functions to get shaper, data, and config files
 """
 import logging as log
 import numpy as np
 import os
-from pandas import read_pickle
+from pandas import read_pickle, DatetimeIndex
 from typing import Tuple, Any, List
 
 from logger import setup_logging
@@ -12,7 +12,7 @@ from utils.configs import BaseConf
 from utils.preprocessing import Shaper
 
 
-def setup(data_sub_path: str, model_name: str = "Analysis") -> Tuple[BaseConf, Shaper, Any, List[str]]:
+def setup(data_sub_path: str, model_name: str = "Analysis") -> Tuple[BaseConf, Shaper, Any, DatetimeIndex, List[str]]:
     """
     gets data conf and sets up logging
 

@@ -1,16 +1,15 @@
 import pickle
-import unittest
 from typing import List
 
 import numpy as np
-import pandas as pd
 from pandas._libs.tslibs.offsets import BaseOffset
 from pandas.tseries.offsets import Hour as OffsetHour
 
 from utils import deprecated
 from utils.configs import BaseConf
 from utils.data_processing import safe_divide
-from utils.types import ArrayNCL, ArrayNCHW
+from utils.types.arrays import ArrayNCL, ArrayNCHW
+import unittest
 
 HOUR_NANOS = OffsetHour().nanos
 
@@ -305,7 +304,7 @@ def min_max_scale(data, feature_range=(0, 1), axis=0):
     """
     'min_max_scale' scales values of the ndarray so that each index in given axis is scaled between feature_range.
     Example: if we have ndarray of stacked_images of  shape (n_images, n_channels, n_height, n_width) and we want to
-    scaled each channel independently from the other use:
+    scale each channel independently of the other use:
         min_max_scale(stacked_images, feature_range=(0, 1), axis=1)
 
     This ensures each channel has max and min of 0 and 1 respectively.
@@ -342,7 +341,7 @@ class MinMaxScaler:
 
     'MinMaxScaler' scales values of the ndarray so that each index in given axis is scaled between feature_range.
     Example: if we have ndarray of stacked_images of  shape (n_images, n_channels, n_height, n_width) and we want to
-    scaled each channel independently from the other use:
+    scale each channel independently of the other use:
         min_max_scale(stacked_images, feature_range=(0, 1), axis=1)
 
     """
@@ -392,9 +391,6 @@ def scale_per_time_slot(data):
     return data_scaled
 
 
-import unittest
-
-
 class TestMinMaxScaler(unittest.TestCase):
 
     def test_min_max_inverse(self):
@@ -411,7 +407,10 @@ class TestMinMaxScaler(unittest.TestCase):
 @deprecated
 class MeanStdScaler:
     """
-    Used to scale and inverse scale features of data
+    Used to scale and inverse scale features of data.
+    Does make use of saved floating point values to scale so the unscaled and orignal values might differ due to
+    minor floating point errors.
+
     """
 
     def __init__(self):
@@ -441,7 +440,13 @@ class TestMeanStdScaler(unittest.TestCase):
 
     def test_mean_std_inverse(self):
         scaler = MeanStdScaler()
-        mock = np.arange(7 * 5 * 3).reshape(7, 5, 3) % 13
+        mock = np.arange(7 * 5 * 3).reshape((7, 5, 3)) % 13
         mock_scaled = scaler.fit_transform(mock, axis=1)
         mock_unscaled = scaler.inverse_transform(mock_scaled)
-        self.assertTrue((mock_unscaled == mock).all())
+        tolerance = 1E-15
+        delta = np.abs(np.sum(mock_unscaled - mock))
+        self.assertTrue(delta < tolerance)
+
+        mock_unscaled = np.round(mock_unscaled)
+        delta = np.abs(np.sum(mock_unscaled - mock))
+        self.assertEqual(delta, 0.0)

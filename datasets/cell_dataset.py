@@ -5,7 +5,7 @@ from torch.utils.data import Dataset
 from datasets.base_datagroup import BaseDataGroup
 from utils.configs import BaseConf
 from utils.data_processing import pad4d
-from utils.types import ArrayN1HW
+from utils.types.arrays import ArrayN1HW
 from utils.utils import if_none
 
 

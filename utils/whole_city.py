@@ -6,15 +6,19 @@ import plotly.graph_objects as go
 import plotly.io as pio
 
 from utils.configs import BaseConf
-from utils.constants import TOTAL
+from constants.crime_types import TOTAL
 from utils.mutual_information_plots import subplot_mi_curves
 from utils.plots import plot_autocorr, plot_df
 from utils.rolling import flag_anomalies, periodic_rolling_mean, rolling_norm
 from utils.testing import assert_no_nan, assert_valid_datetime_index
 
 
-def plot_time_series_anomalies_wc(conf: BaseConf, df: pd.DataFrame, periodic_offset: int = 1,
-                                  anomaly_threshold: float = 3):
+def plot_time_series_anomalies_wc(
+        conf: BaseConf,
+        df: pd.DataFrame,
+        periodic_offset: int = 1,
+        anomaly_threshold: float = 3,
+):
     """
     Save a plot for each column in time series dataframe
     

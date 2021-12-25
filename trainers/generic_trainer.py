@@ -8,7 +8,7 @@ from torch import nn, optim
 from models.model_result import ModelResult
 from utils.configs import BaseConf
 from utils.metrics import LossPlotter, best_threshold, get_y_pred
-from utils.types import TDataLoaders, LrScheduler
+from utils.types.training import TDataLoaders, LrScheduler
 
 
 def save_checkpoint(tag, model, optimiser, conf,

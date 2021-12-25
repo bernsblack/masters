@@ -39,7 +39,7 @@ Thus we save each prediction for the model under the data folder - with that mod
 
 
 ## Data Shapes
-
+Grid Dataset Information:
 	crime_feature_indices shape (C,)
     crime_types_grids shape (N, C, H, W)
 	crime_grids shape (N, 1, H, W)

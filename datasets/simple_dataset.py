@@ -45,10 +45,11 @@ class SimpleDataSet(Dataset):
         return sample
 
 
+@deprecated
 class TestSimpleDataset(unittest.TestCase):
 
     def test_simple_dataset(self):
-        dataset = SimpleDataSet("./data/original/Crimes_Chicago_2001_to_2019.csv")
+        dataset = SimpleDataSet(csv_file="./data/original/Crimes_Chicago_2001_to_2019.csv")
         dataloader = DataLoader(
             dataset=dataset,
             batch_size=4,

@@ -17,10 +17,13 @@ from utils.utils import by_ref
 class TestAllDataLoaderIndexing(unittest.TestCase):
 
     def test_all_loaders_reconstruction_without_crime_types(self):
-        data_sub_path = by_ref("7cd")[0]
+        data_sub_path = by_ref("7ce")[0]
         print(f"using: {data_sub_path}")
 
-        conf, shaper, sparse_crimes, t_range, crime_feature_indices = setup(data_sub_path, 'test')
+        conf, shaper, sparse_crimes, t_range, crime_feature_indices = setup(
+            data_sub_path=data_sub_path,
+            model_name='unit_tests',
+        )
         conf.seq_len = 100
 
         conf.use_classification = False
@@ -110,7 +113,10 @@ class TestAllDataLoaderIndexing(unittest.TestCase):
         data_sub_path = by_ref("c97")[0]
         print(f"using: {data_sub_path}")
 
-        conf, shaper, sparse_crimes, t_range, crime_feature_indices = setup(data_sub_path, 'test')
+        conf, shaper, sparse_crimes, t_range, crime_feature_indices = setup(
+            data_sub_path=data_sub_path,
+            model_name='test',
+        )
 
         conf.use_classification = False
         conf.use_crime_types = True

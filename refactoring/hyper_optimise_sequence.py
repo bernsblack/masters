@@ -13,7 +13,7 @@ from trainers.generic_trainer import train_model
 from utils import set_system_seed
 from utils.configs import BaseConf
 from utils.forecasting import forecast_metrics
-from utils.types import TParameterization
+from utils.types.training import TParameterization
 
 
 def new_evaluate_hyper_parameters_fn(
@@ -28,7 +28,7 @@ def new_evaluate_hyper_parameters_fn(
 ):
     def evaluate_hyper_parameters_fn(hyper_parameters: TParameterization):  # todo better train loop eval loop
         """
-        Trains GRUFNN model on training set and evaluate the hyper parameters on the validation set
+        Trains GRUFNN model on training set and evaluate the hyperparameters on the validation set
 
         :param hyper_parameters:
         :return: Mean Absolute Scaled Error (MASE) on Validation Set given hyper_parameters

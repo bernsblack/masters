@@ -31,12 +31,6 @@ class BaseDataGroup:
             self.t_range: pd.DatetimeIndex = pd.read_pickle(data_path + "t_range.pkl")
             log.info(f"\tt_range: {np.shape(self.t_range)} {self.t_range[0]} -> {self.t_range[-1]}")
 
-            # freqstr = self.t_range.freqstr
-            # if freqstr == "D":
-            #     freqstr = "24H"
-            # if freqstr == "H":
-            #     freqstr = "1H"
-            # hours_per_time_step = int(freqstr[:freqstr.find("H")])  # time step in hours
             hours_per_time_step = get_hours_per_time_step(self.t_range.freq)  # time step in hours
             time_steps_per_day = 24 / hours_per_time_step
 

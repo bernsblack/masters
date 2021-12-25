@@ -9,13 +9,14 @@ from pandas.core.indexes.datetimes import DatetimeIndex
 from pprint import pformat
 from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, average_precision_score
 
+from constants.date_time import DatetimeFreq
 from models.model_result import get_models_metrics
 from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time, \
     construct_temporal_information
 from utils import ffloor, fceil
 from utils.data_processing import encode_category
 from utils.metrics import safe_f1_score
-from utils.types import ArrayNHW
+from utils.types.arrays import ArrayNHW
 from utils.utils import cmi_name
 from pandas import DataFrame
 
@@ -348,7 +349,7 @@ class InteractiveHeatmapsWithLines:
         """
         InteractiveHeatmaps creates in interactive widget to scroll through and investigate grids that vary over time
 
-        :param date_range: pandas date range array
+        :param date_range: pandas DatetimeIndex
         :param col_wrap: plots per row before wrapping
         :param height: height in pixels of a single images
         :param kwargs: key word arguments for name of plot as key and data (N,H,W format) as value
@@ -825,7 +826,8 @@ def interactive_grid_visualiser(grids: ArrayNHW, t_range: DatetimeIndex, height:
     if kwargs.get("mutual_info"):
         temporal_variables = kwargs.get('temporal_variables')
         if temporal_variables is None:
-            if t_range.freqstr == 'H':
+            freqstr = DatetimeFreq.convert(t_range)
+            if freqstr == DatetimeFreq.Hour:
                 temporal_variables = ["Hour", "Day of Week"]
             else:
                 temporal_variables = ["Day of Week", "Time of Month", "Time of Year"]
