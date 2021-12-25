@@ -6,6 +6,7 @@ from time import strftime
 from time import time
 from torch import nn, optim
 
+from constants.date_time import DatetimeFreq
 from dataloaders.flat_loader import FlatDataLoaders
 from datasets.flat_dataset import FlatDataGroup
 from logger.logger import setup_logging
@@ -87,7 +88,7 @@ def main():
     data_group = FlatDataGroup(data_path=conf.data_path, conf=conf)
     loaders = FlatDataLoaders(data_group=data_group, conf=conf)
 
-    conf.freqstr = data_group.t_range.freqstr
+    conf.freqstr = DatetimeFreq.convert(data_group.t_range)
 
     # SET LOSS FUNCTION
     # size averaged - so more epochs or larger lr for smaller batches
