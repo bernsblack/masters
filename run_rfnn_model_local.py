@@ -11,8 +11,8 @@ from dataloaders.flat_loader import FlatDataLoaders
 from datasets.flat_dataset import FlatDataGroup
 from logger.logger import setup_logging
 from models.model_result import ModelResult, ModelMetrics, save_metrics, compare_all_models, get_models_metrics
-from models.rnn_models import train_epoch_for_rfnn, evaluate_rfnn, \
-    SimpleRecurrentFeedForwardNetwork, RecurrentFeedForwardNetwork
+from models.rnn_models import (train_epoch_for_rfnn, evaluate_rfnn,
+                               SimpleRecurrentFeedForwardNetwork, RecurrentFeedForwardNetwork)
 from trainers.generic_trainer import train_model
 from utils.configs import BaseConf
 from utils.data_processing import *
@@ -147,7 +147,7 @@ def main():
     ##### RESUME LOGIC
     if conf.resume:  # todo check if the files actually exist
         try:
-            # resume from previous check point or resume from best validaton score checkpoint
+            # resume from previous check point or resume from best validation score checkpoint
             # load model state
             model_state_dict = torch.load(f"{conf.model_path}model_{conf.checkpoint}.pth",
                                           map_location=conf.device.type)
@@ -158,11 +158,11 @@ def main():
                                               map_location=conf.device.type)
             optimiser.load_state_dict(optimiser_state_dict)
 
-            # new optimiser hyper-parameters
+            # new optimiser hyperparameters
             optimiser.param_groups[0]['lr'] = conf.lr
             optimiser.param_groups[0]['weight_decay'] = conf.weight_decay
 
-            # new model hyper-parameters
+            # new model hyperparameters
             model.dropout.p = conf.dropout  # note that drop out is not part of the saved state dict
 
         except Exception as e:
@@ -175,8 +175,8 @@ def main():
                                                                     loss_fn=loss_function,
                                                                     conf=conf)
 
-    print(f"stopped_early: {stopped_early}")  # use the current epoch instead
-    # if stopped_early -> continue with best_model - new hyper-parameters -> no n
+    log.info(f"stopped_early: {stopped_early}")  # use the current epoch instead
+    # if stopped_early -> continue with best_model - new hyperparameters -> no n
 
     # Load latest or best validation model
     # conf.checkpoint = "latest_val"

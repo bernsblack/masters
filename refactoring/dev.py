@@ -331,7 +331,7 @@ if __name__ == '__main__':
 
     #     render(plot_contour(model=hyper_model, param_x='lr', param_y='weight_decay', metric_name='MASE'))
     else:
-        # default values to set when not using hyper-parameter optimization
+        # default values to set when not using hyperparameter optimization
         best_parameters = {
             'lr': 1e-3,
             'weight_decay': 1e-6,
@@ -386,7 +386,7 @@ if __name__ == '__main__':
     plt.savefig(f"{conf.plots_path}{conf.freq}_result_seed_consistency.png")
     plt.show()
 
-    # SETUP MODELS WITH HYPER-PARAMETERS FROM PREVIOUS STEP -------------------------------------------
+    # SETUP MODELS WITH hyperparameterS FROM PREVIOUS STEP -------------------------------------------
 
     # set hyper params-> set seed -> set model -> set optimiser
     conf.seed = int(time())  # 1607355910
@@ -472,7 +472,7 @@ if __name__ == '__main__':
 
     log.info(f"Loading model from checkpoint ({conf.checkpoint}) for evaluation")
 
-    # resume from previous check point or resume from best validaton score checkpoint
+    # resume from previous check point or resume from best validation score checkpoint
     # load model state
     log.info(f"loading model from {conf.model_path}")
     model_state_dict = torch.load(f"{conf.model_path}model_{conf.checkpoint}.pth", map_location=conf.device.type)

@@ -67,7 +67,7 @@ def hyper_param_selection(func, hyper_parameters_domain, n_iter=5, goal="minimiz
     the GP
 
     ::return::
-    X_samples: combination of hyper-parameters
+    X_samples: combination of hyperparameters
     y_sample: matching func out for those samples
     """
     # set up hyper-param limits

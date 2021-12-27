@@ -21,7 +21,7 @@ It allows us to estimate the expected value and gauge the variance of the result
 """
 
 
-# # default values to set when not using hyper-parameter optimization
+# # default values to set when not using hyperparameter optimization
 # hyper_parameters = {
 #     'lr': 1e-3,
 #     'weight_decay': 1e-6,

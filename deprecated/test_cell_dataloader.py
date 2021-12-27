@@ -11,7 +11,7 @@ class TestCellDataLoaderIndexing(unittest.TestCase):
 
     def test_cell_loader_reconstruction(self):
         conf = BaseConf()
-        data_path = './data/processed/T24H-X850M-Y880M_2012-01-01_2019-01-01_#826/'
+        data_path = '../data/processed/T24H-X850M-Y880M_2012-01-01_2019-01-01_#826/'
         conf.sub_sample_test_set = 0
         conf.sub_sample_train_set = 0
         conf.sub_sample_validation_set = 0
@@ -26,7 +26,7 @@ class TestCellDataLoaderIndexing(unittest.TestCase):
     def test_test_loader_indices(self):
         # CRIME DATA
         conf = BaseConf()
-        data_path = './data/processed/T24H-X850M-Y880M_2012-01-01_2019-01-01_#826/'
+        data_path = '../data/processed/T24H-X850M-Y880M_2012-01-01_2019-01-01_#826/'
         conf.sub_sample_test_set = 0
         conf.sub_sample_train_set = 0
         conf.sub_sample_validation_set = 0
