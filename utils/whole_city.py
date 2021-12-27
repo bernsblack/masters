@@ -99,6 +99,7 @@ def plot_mi_curves_wc(conf: BaseConf, df: pd.DataFrame):
             title=f'{conf.freq_title} {name} Mutual and Conditional Mutual Information',
             a_title=f'{conf.freq_title} {name} City Wide Counts',
         )
+        # todo: test out difference with svg and scape = 2
         fig.write_image(f"{conf.plots_path}{conf.freq}_mi_plots_{name}.png".replace(' ', '_'))
         fig.show()
 

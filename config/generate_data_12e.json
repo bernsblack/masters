@@ -1,1 +1,22 @@
-{"start_date": "2014-01-01", "end_date": "2019-01-01", "dT": "24H", "x_scale": 15, "y_scale": 12, "lat_max": 42.022, "lat_min": 41.645, "lon_max": -87.525, "lon_min": -87.934, "root": "./", "crime_types": ["THEFT", "BATTERY", "CRIMINAL DAMAGE", "NARCOTICS", "ASSAULT", "BURGLARY", "MOTOR VEHICLE THEFT", "ROBBERY"]}
+{
+  "start_date": "2014-01-01",
+  "end_date": "2019-01-01",
+  "dT": "24H",
+  "x_scale": 15,
+  "y_scale": 12,
+  "lat_max": 42.022,
+  "lat_min": 41.645,
+  "lon_max": -87.525,
+  "lon_min": -87.934,
+  "root": "./",
+  "crime_types": [
+    "THEFT",
+    "BATTERY",
+    "CRIMINAL DAMAGE",
+    "NARCOTICS",
+    "ASSAULT",
+    "BURGLARY",
+    "MOTOR VEHICLE THEFT",
+    "ROBBERY"
+  ]
+}
