@@ -1,4 +1,6 @@
 import logging as log
+from time import strftime
+
 import numpy as np
 import os
 import pandas as pd
@@ -18,7 +20,7 @@ from utils.metrics import PRCurvePlotter, ROCCurvePlotter, roc_auc_score_per_tim
     predictive_accuracy_index_per_time_slot, matthews_corrcoef_per_time_slot, predictive_accuracy_index, det_curve, \
     DETCurvePlotter, ndcg_per_time_slot
 from utils.preprocessing import Shaper, scale_per_time_slot
-from utils.utils import is_all_integer
+from utils.utils import is_all_integer, write_json, write_latex_table
 
 
 class PRCurve:
@@ -541,21 +543,36 @@ def get_model_result(model_path):
     return model_result
 
 
-def get_models_metrics(data_path: str):
+def get_model_names(data_path: str, model_names_filter: Optional[List[str]] = None) -> List[str]:
+    """
+    Reads all names from directory or takes the names in the model_names_filter
+    :param data_path: path to a certain data-source/discretisation
+    :param model_names_filter: Optional list of valid models - if we only want to compare a subset from disk
+    :return: list of model names
+    """
+    if model_names_filter is not None and len(model_names_filter) > 0:
+        model_names = model_names_filter
+    else:
+        model_names = os.listdir(f"{data_path}models")
+        if '.DS_Store' in model_names:
+            model_names.remove('.DS_Store')
+
+    return model_names
+
+
+def get_models_metrics(data_path: str, model_names_filter: Optional[List[str]] = None) -> List[ModelMetrics]:
     """
     Reads all model metrics give the path to a certain data-source/discretisation
     :param data_path: path to a certain data-source/discretisation
+    :param model_names_filter: Optional list of valid models - if we only want to compare a subset from disk
     :return: list of model metrics for the data discretisation
     """
     model_metrics = []
-    model_names = os.listdir(f"{data_path}models")
-
-    if '.DS_Store' in model_names:
-        model_names.remove('.DS_Store')
+    model_names = get_model_names(data_path=data_path, model_names_filter=model_names_filter)
 
     for model_name in model_names:
         if not os.path.exists(data_path):
-            raise Exception(f"Directory ({data_path}) needs to exist.")
+            raise Exception(f"Directory '{data_path}' needs to exist.")
 
         model_path = f"{data_path}models/{model_name}/"
 
@@ -574,7 +591,7 @@ def get_models_metrics(data_path: str):
 
 
 # remember pandas df.to_latex for the columns
-def get_metrics_table(models_metrics: List[ModelMetrics]):
+def get_metrics_table(models_metrics: List[ModelMetrics]) -> pd.DataFrame:
     col = [
         'NDCG',
         'MAP',
@@ -618,16 +635,23 @@ def get_metrics_table(models_metrics: List[ModelMetrics]):
     return df
 
 
-def compare_models(models_metrics):
-    """
-    Allows us to filter certain model metrics and only compare their values instead of comparing all the metrics
+def get_models_hash(model_names: List[str]) -> str:
+    models_hash = str(hex(hash(";".join(model_names))))
+    return models_hash
 
-    :param models_metrics: list of model metrics
-    :return: pandas data-frame table with all model metrics for all the models found under data_path
-    """
 
-    metrics_table = get_metrics_table(models_metrics)
-    log.info(f"\n{metrics_table}")
+def plot_model_metrics(data_path: str, models_metrics: List[ModelMetrics]):
+    if data_path is None or data_path == "":
+        raise Exception(f"data_path argument must be set and cannot be None or empty")
+
+    model_names = [metric.model_name for metric in models_metrics]
+    models_hash = get_models_hash(model_names=model_names)
+    save_folder = f"{data_path}comparison_{models_hash}/"
+    info = {
+        "created_at": strftime("%Y-%m-%dT%H:%M:%S"),
+        "model_names": model_names,
+    }
+    write_json(info, f"{save_folder}info.json")
 
     # pr-curve
     pr_plot = PRCurvePlotter()
@@ -636,7 +660,8 @@ def compare_models(models_metrics):
                            recall=metric.pr_curve.recall,
                            ap=metric.pr_curve.ap,
                            label_name=metric.model_name)
-    pr_plot.show()  # todo - save somewhere?
+    pr_plot.savefig(f"{save_folder}plot_pr_curve.png")
+    pr_plot.show()
 
     # roc-curve
     roc_plot = ROCCurvePlotter()
@@ -645,7 +670,8 @@ def compare_models(models_metrics):
                             tpr=metric.roc_curve.tpr,
                             auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
                             label_name=metric.model_name)
-    roc_plot.show()  # todo - save somewhere?
+    pr_plot.savefig(f"{save_folder}plot_roc_curve.png")
+    roc_plot.show()
     # todd add per cel and time plots per metric - should be saved on the metric class
 
     # det-curve
@@ -655,51 +681,52 @@ def compare_models(models_metrics):
                             fnr=metric.det_curve.fnr,
                             eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
                             label_name=metric.model_name)
-    det_plot.show()  # todo - save somewhere?
+    pr_plot.savefig(f"{save_folder}plot_det_curve.png")
+    det_plot.show()
+
+    return save_folder
+
+
+def compare_models(data_path: str, models_metrics: List[ModelMetrics]) -> pd.DataFrame:
+    """
+    Allows us to filter certain model metrics and only compare their values instead of comparing all the metrics
+
+    :param data_path: string indicating where to save the table and plots of the comparison with an info.json file
+    for meta information
+    :param models_metrics: list of model metrics
+    :return: pandas data-frame table with all model
+    metrics for all the models found under data_path
+    """
+    saved_plot_folder = plot_model_metrics(data_path=data_path,
+                                           models_metrics=models_metrics)
+    log.info(f"Saved comparison plots in {saved_plot_folder}.")
+
+    metrics_table = get_metrics_table(models_metrics=models_metrics)
+    log.info(f"\n{metrics_table}")
+    # display(metrics_table)
+    write_latex_table(
+        df=metrics_table,
+        file_name=f"{saved_plot_folder}metrics_table.tex",
+        caption=f"%TODO: ADD TABLE CAPTION",
+        label=f"%TODO: ADD TABLE LABEL",
+    )
 
     return metrics_table  # by returning the table - makes visualisation in notebooks easier
 
 
-def compare_all_models(data_path: str):
+def compare_all_models(data_path: str, model_names_filter: Optional[List[str]] = None) -> pd.DataFrame:
     """
+    Compare_all_models fetches saved ModelMetrics for various models and plots curves for them and loads the metrics
+    table.
     :param data_path: string path to the data directory
+    :param model_names_filter: Optional list of valid models - if we only want to compare a subset from disk
     :return: pandas data-frame table with all model metrics for all the models found under data_path
     """
-    models_metrics = get_models_metrics(data_path)
+    models_metrics = get_models_metrics(data_path=data_path,
+                                        model_names_filter=model_names_filter)
 
-    metrics_table = get_metrics_table(models_metrics)
-    # log.info(f"\n{metrics_table}")
-    display(metrics_table)
-
-    # pr-curve
-    pr_plot = PRCurvePlotter()
-    for metric in models_metrics:
-        pr_plot.add_curve_(precision=metric.pr_curve.precision,
-                           recall=metric.pr_curve.recall,
-                           ap=metric.pr_curve.ap,
-                           label_name=metric.model_name)
-    pr_plot.show()  # save somewhere?
-
-    # roc-curve
-    roc_plot = ROCCurvePlotter()
-    for metric in models_metrics:
-        roc_plot.add_curve_(fpr=metric.roc_curve.fpr,
-                            tpr=metric.roc_curve.tpr,
-                            auc=metric.roc_curve.auc,  # note this is the mean roc_score not this curves score
-                            label_name=metric.model_name)
-    roc_plot.show()  # save somewhere?
-    # todo add per cel and time plots per metric - should be saved on the metric class
-
-    # det-curve
-    det_plot = DETCurvePlotter()
-    for metric in models_metrics:
-        det_plot.add_curve_(fpr=metric.det_curve.fpr,
-                            fnr=metric.det_curve.fnr,
-                            eer=metric.det_curve.eer,  # note this is the mean roc_score not this curves score
-                            label_name=metric.model_name)
-    det_plot.show()  # somewhere?
-
-    return metrics_table  # by returning the table - makes visualisation in notebooks easier
+    return compare_models(data_path=data_path,
+                          models_metrics=models_metrics)
 
 
 class SequenceResult:

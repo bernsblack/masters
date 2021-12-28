@@ -240,6 +240,34 @@ def read_json(file_name: str):
     return r
 
 
+def write_latex_table(
+        df: pd.DataFrame,
+        file_name: str,
+        caption: str,
+        label: str,
+) -> None:
+    """
+    Saves the dataframe into a tex file aas a table
+    :rtype: None
+    :param df: Dataframe table
+    :param file_name: full path and tex file name
+    :param caption: Table name/caption
+    :param label: label used to reference to the table in the tex document
+    :return: None
+
+    Note:
+     - if filtering or subset of the table is needed just filter the columns beforehand
+     - float values get rounded to 3 decimal places
+    """
+
+    latex_text = df.round(decimals=3).to_latex(
+        index=False,
+        caption=caption,
+        label=label,
+    )
+    write_txt(data=latex_text, file_name=file_name)
+
+
 def write_json(data, file_name: str):
     """
     Saves dictionary data as json file

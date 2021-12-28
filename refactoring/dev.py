@@ -42,7 +42,7 @@ from utils.interactive import plot_interactive_epoch_losses
 from utils.plots import plot, subplots_df
 from utils.plots import plot_corr
 from utils.utils import (write_json, get_data_sub_paths,
-                         load_total_counts, set_system_seed)
+                         load_total_counts, set_system_seed, write_latex_table)
 from utils.utils import write_txt
 from utils.whole_city import (plot_time_series_anomalies_wc, plot_mi_curves_wc,
                               normalize_periodically_wc, plot_time_vectors)
@@ -512,8 +512,14 @@ if __name__ == '__main__':
         caption=f"{conf.freq_title} Crime Count Forecasting Metrics (Training Data)",
         label=f"tab:{conf.freq_title.lower()}-crime-count-metrics",
     )
+
     pd.to_pickle(trn_metrics, f"{metrics_folder}{conf.freq}_metrics_train.pkl")
-    write_txt(trn_metrics_latex, f"{metrics_folder}{conf.freq}_metrics_train_latex.txt")
+    write_latex_table(
+        df=trn_metrics,
+        file_name=f"{metrics_folder}{conf.freq}_metrics_train_latex.tex",
+        caption=f"{conf.freq_title} Crime Count Forecasting Metrics (Training Data)",
+        label=f"tab:{conf.freq_title.lower()}-crime-count-metrics",
+    )
 
     # TEST SET EVALUATION ---------------------------------------------------------------------------------------
 
@@ -534,11 +540,10 @@ if __name__ == '__main__':
 
     display((tst_metrics,))
 
-    tst_metrics_latex = tst_metrics.round(decimals=3).to_latex(
-        index=False,
+    pd.to_pickle(tst_metrics, f"{metrics_folder}{conf.freq}_metrics_test.pkl")
+    write_latex_table(
+        df=tst_metrics,
+        file_name=f"{metrics_folder}{conf.freq}_metrics_test.tex",
         caption=f"{conf.freq_title} Crime Count Forecasting Metrics (Test Data)",
         label=f"tab:{conf.freq_title.lower()}-crime-count-metrics",
     )
-
-    pd.to_pickle(tst_metrics, f"{metrics_folder}{conf.freq}_metrics_test.pkl")
-    write_txt(tst_metrics_latex, f"{metrics_folder}{conf.freq}_metrics_test.txt")
