@@ -408,7 +408,7 @@ class TestMinMaxScaler(unittest.TestCase):
 class MeanStdScaler:
     """
     Used to scale and inverse scale features of data.
-    Does make use of saved floating point values to scale so the unscaled and orignal values might differ due to
+    Does make use of saved floating point values to scale so the unscaled and original values might differ due to
     minor floating point errors.
 
     """

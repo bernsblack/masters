@@ -2,13 +2,14 @@
 from __future__ import annotations
 
 import logging
-import numpy as np
 from typing import Callable, List, Dict, Union, Tuple, Iterable
 
+import numpy as np
 import pandas as pd
 
 from utils import deprecated
 from utils.types.arrays import ArrayNL
+from utils.utils import cut
 
 FLOAT_TOLERANCE_VALUE = 1e-8
 
@@ -472,9 +473,6 @@ def quick_cond_mutual_info(x, y, z, norm=False):
         return h_xz + h_yz - h_xyz - h_z
 
 
-from utils.utils import cut
-
-
 def mutual_info_over_time(a, max_offset=35, norm=True, log_norm=False, include_self=False, bins=0):
     """
     Calculates the mutual information between 'a' and time lag of 'a' up until 'max_offset' time steps
@@ -677,6 +675,9 @@ def mutual_information_over_grid(
         bins: int = 0,  # mutual info bins
 ):
     """
+    Calculates the mutual information between a cell and a time lag of the same cell up until 'max_offset' time steps,
+    for each cell l in L. ndarray (L,max_offset). For example index (5,6) will have the mutual information between cell
+    5 with time lag 0 and cell 5 and time lag 6.
 
     :param dense_grid: ndarray (N,L)
     :param max_offset: maximum time lag
