@@ -5,6 +5,13 @@ HOURS_IN_WEEK = 168
 HOURS_IN_YEAR = 8760
 
 
+class TemporalVariables:
+    Hour = "Hour"
+    DayOfWeek = "Day of Week"
+    TimeOfMonth = "Time of Month"
+    TimeOfYear = "Time of Year"
+
+
 class DatetimeFreq:
     Hour = '1H'
     Day = '24H'

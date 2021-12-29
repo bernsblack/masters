@@ -1,8 +1,9 @@
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from sparse_discrete_table import conditional_mutual_info_over_time, mutual_info_over_time, \
-    construct_temporal_information
+from constants.date_time import TemporalVariables as tv
+from sparse_discrete_table import (conditional_mutual_info_over_time, mutual_info_over_time,
+                                   construct_temporal_information)
 from utils import cmi_name
 
 
@@ -15,7 +16,7 @@ def plot_mi_curves(
         bins=0,
         month_divisions=10,
         year_divisions=12,
-        temporal_variables=("Day of Week", "Time of Month", "Time of Year"),
+        temporal_variables=(tv.DayOfWeek, tv.TimeOfMonth, tv.TimeOfYear),
         title="Mutual and Conditional Mutual Information",
         alpha=0.5,
 ):
@@ -84,7 +85,7 @@ def subplot_mi_curves(
         bins=0,
         month_divisions=10,
         year_divisions=12,
-        temporal_variables=("Day of Week", "Time of Month", "Time of Year"),
+        temporal_variables=(tv.DayOfWeek, tv.TimeOfMonth, tv.TimeOfYear),
         title="Mutual and Conditional Mutual Information",
         a_title="Counts",
         alpha=0.5,

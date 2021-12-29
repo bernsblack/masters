@@ -7,6 +7,7 @@ from typing import Callable, List, Dict, Union, Tuple, Iterable
 import numpy as np
 import pandas as pd
 
+from constants.date_time import TemporalVariables as tv
 from utils import deprecated
 from utils.types.arrays import ArrayNL
 from utils.utils import cut
@@ -586,23 +587,23 @@ def conditional_mutual_info_over_time(a, max_offset=35, norm=False,
 
 def construct_temporal_information(
         date_range: pd.DatetimeIndex,
-        temporal_variables: Iterable[str] = ("Hour", "Day of Week", "Time of Month", "Time of Year"),
+        temporal_variables: Iterable[str] = (tv.Hour, tv.DayOfWeek, tv.TimeOfMonth, tv.TimeOfYear),
         month_divisions: int = 4,
         year_divisions: int = 4,
 ):
     df_dict = dict(Date=date_range)
 
-    if "Hour" in temporal_variables:
-        df_dict["Hour"] = date_range.hour
+    if tv.Hour in temporal_variables:
+        df_dict[tv.Hour] = date_range.hour
 
-    if "Day of Week" in temporal_variables:
-        df_dict["Day of Week"] = date_range.dayofweek
+    if tv.DayOfWeek in temporal_variables:
+        df_dict[tv.DayOfWeek] = date_range.dayofweek
 
-    if "Time of Month" in temporal_variables:
-        df_dict["Time of Month"] = cut(date_range.day / date_range.days_in_month, month_divisions)
+    if tv.TimeOfMonth in temporal_variables:
+        df_dict[tv.TimeOfMonth] = cut(date_range.day / date_range.days_in_month, month_divisions)
 
-    if "Time of Year" in temporal_variables:
-        df_dict["Time of Year"] = cut(date_range.dayofyear / 366, year_divisions)
+    if tv.TimeOfYear in temporal_variables:
+        df_dict[tv.TimeOfYear] = cut(date_range.dayofyear / 366, year_divisions)
 
     temp_info = pd.DataFrame(df_dict).set_index('Date')
 
@@ -617,7 +618,7 @@ def conditional_mutual_information_over_grid(
         log_norm: bool = False,
         include_self: bool = False,
         bins: int = 0,  # mutual info bins
-        temporal_variables: Iterable[str] = ("Day of Week", "Time of Month", "Time of Year"),
+        temporal_variables: Iterable[str] = (tv.DayOfWeek, tv.TimeOfMonth, tv.TimeOfYear),
         month_divisions: int = 10,
         year_divisions: int = 10,
 ):
@@ -636,6 +637,7 @@ def conditional_mutual_information_over_grid(
     :return: ndarray (L,max_offset) of the conditional variables
     """
     assert len(dense_grid.shape) == 2, "dense_grid should be shape (N,L)"
+    logging.warning("conditional_mutual_information_over_grid might take very long")
 
     n, l = dense_grid.shape
 
