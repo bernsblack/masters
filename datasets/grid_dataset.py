@@ -5,7 +5,7 @@ from pandas.tseries.offsets import Hour as OffsetHour
 from torch.utils.data import Dataset
 
 from constants.date_time import DatetimeFreq
-from models.baseline_models import HistoricAverage
+from models.baseline_models import PeriodicAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale, get_hours_per_time_step
 from utils.types.arrays import ArrayNCHW, ArrayNC, ArrayHWC, ArrayNHW
@@ -143,17 +143,17 @@ class GridDataGroup:
 
                 log.info(f"capping max crime values to {cap} which is percentile {conf.cap_crime_percentile}")
 
-            # get historic average on the log2+1 normed values
-            if conf.use_historic_average:
+            # get periodic average on the log2+1 normed values
+            if conf.use_periodic_average:
                 if time_steps_per_day == 1:
-                    ha = HistoricAverage(step=7)
+                    ha = PeriodicAverage(step=7)
                 elif time_steps_per_day == 24:
-                    ha = HistoricAverage(step=24)
+                    ha = PeriodicAverage(step=24)
                 else:
-                    ha = HistoricAverage(step=1)
+                    ha = PeriodicAverage(step=1)
 
-                historic_average = ha.fit_transform(squeezed_crimes[:, 0:1])
-                squeezed_crimes = np.concatenate((squeezed_crimes, historic_average), axis=1)
+                periodic_average = ha.fit_transform(squeezed_crimes[:, 0:1])
+                squeezed_crimes = np.concatenate((squeezed_crimes, periodic_average), axis=1)
 
             self.crimes = self.shaper.unsqueeze(
                 dense_data=squeezed_crimes,

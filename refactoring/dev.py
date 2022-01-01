@@ -26,6 +26,7 @@ from ax.service.managed_loop import optimize as optimize_hyper_parameters
 from matplotlib import rcParams
 from torch import nn
 
+from constants.date_time import DatetimeFreq
 from datasets.sequence_dataset import SequenceDataLoaders
 from logger.logger import setup_logging
 from models.rnn_models import GRUFNN
@@ -76,13 +77,13 @@ if __name__ == '__main__':
     overlap_sequences = True
 
     data_sub_path = data_sub_paths[0]
-    conf.freq = data_sub_path.lstrip('Totals_T').split('_')[0]
+    conf.set_freq(data_sub_path.lstrip('Totals_T').split('_')[0])
     conf.time_steps_per_day = 24 / int(conf.freq[:-1])
 
     conf.freq_title = {
-        "24H": "Daily",
-        "1H": "Hourly",
-        "168H": "Weekly",
+        DatetimeFreq.Day: "Daily",
+        DatetimeFreq.Hour: "Hourly",
+        DatetimeFreq.Week: "Weekly",
     }.get(conf.freq, "Hourly")
     logging.info(f"Using: {conf.freq_title} ({conf.freq})")
 

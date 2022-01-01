@@ -2,7 +2,7 @@
 Models compared are:
 - GRUFNN
 - EWM
-- Historic Average
+- Periodic average
 """
 
 # TODO: REFACTOR function: compare_time_series_metrics
@@ -22,7 +22,7 @@ from refactoring.exponential_weighted_mean import EWM
 from utils.configs import BaseConf
 from utils.forecasting import forecast_metrics
 from utils.plots import plot_time_signals
-from utils.time_series import historic_average
+from utils.time_series import periodic_average
 
 
 def compare_time_series_metrics(
@@ -55,7 +55,7 @@ def compare_time_series_metrics(
     for i, feat_name in enumerate(feature_names):
         kwargs[f"{feat_name}_y_score"] = y_score[offset:, i]
         kwargs[f"{feat_name}_y_true"] = y_true[offset:, i]
-        kwargs[f"{feat_name}_y_ha"] = historic_average(
+        kwargs[f"{feat_name}_y_ha"] = periodic_average(
             data=y_true[:, i],
             step=step,
             max_steps=max_steps,
@@ -67,7 +67,7 @@ def compare_time_series_metrics(
         feature_results[feat_name] = {
             "Ground Truth": y_true[offset:, i],
             "GRUFNN": y_score[offset:, i],
-            f"HA({step},{max_steps})": historic_average(
+            f"HA({step},{max_steps})": periodic_average(
                 data=y_true[:, i],
                 step=step,
                 max_steps=max_steps

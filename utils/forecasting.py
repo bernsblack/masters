@@ -1,7 +1,7 @@
 import numpy as np
 
 # possible forecasting metrics
-from models.baseline_models import historic_average
+from models.baseline_models import periodic_average
 from utils import deprecated
 
 
@@ -95,7 +95,7 @@ def compare_time_series_metrics(y_true, y_score, t_range, feature_names, step=24
         kwargs[f"{feat_name}_y_score"] = y_score[offset:, i]
         kwargs[f"{feat_name}_y_true"] = y_true[offset:, i]
         # kwargs[f"{feat_name}_y_true_lag1"] = ([y_true[0, i],*y_true[:-1, i]])[offset:]
-        kwargs[f"{feat_name}_y_ha"] = historic_average(y_true[:, i], step=step, max_steps=max_steps)[offset - 1:-1]
+        kwargs[f"{feat_name}_y_ha"] = periodic_average(y_true[:, i], step=step, max_steps=max_steps)[offset - 1:-1]
 
     for k, v in kwargs.items():
         feat_name = k.split("_")[0]

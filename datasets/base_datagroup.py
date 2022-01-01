@@ -2,7 +2,7 @@ import logging as log
 import numpy as np
 import pandas as pd
 
-from models.baseline_models import HistoricAverage
+from models.baseline_models import PeriodicAverage
 from utils.configs import BaseConf
 from utils.preprocessing import Shaper, MinMaxScaler, min_max_scale
 from utils.preprocessing import get_hours_per_time_step
@@ -173,18 +173,18 @@ class BaseDataGroup:
 
         assert len(self.crimes) == len(self.targets)
 
-        # get historic average on the log2+1 normed values
-        if conf.use_historic_average:
+        # get periodic average on the log2+1 normed values
+        if conf.use_periodic_average:
             if time_steps_per_day == 1:
-                ha = HistoricAverage(step=7)
+                ha = PeriodicAverage(step=7)
             elif time_steps_per_day == 24:
-                ha = HistoricAverage(step=24)
+                ha = PeriodicAverage(step=24)
             else:
-                ha = HistoricAverage(step=1)
+                ha = PeriodicAverage(step=1)
 
-            historic_average = ha.fit_transform(self.crimes[:, 0:1])
-            self.crimes = np.concatenate((self.crimes, historic_average), axis=1)
-            self.crime_feature_indices.append("historic_average")
+            periodic_average = ha.fit_transform(self.crimes[:, 0:1])
+            self.crimes = np.concatenate((self.crimes, periodic_average), axis=1)
+            self.crime_feature_indices.append("periodic_average")
 
         self.crime_scaler = MinMaxScaler(feature_range=(0, 1))
         # should be axis of the channels - only fit scaler on training data

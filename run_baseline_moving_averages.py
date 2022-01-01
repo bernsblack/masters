@@ -6,7 +6,7 @@ from dataloaders.flat_loader import FlatDataLoaders
 from datasets.flat_dataset import FlatDataGroup
 from logger.logger import setup_logging
 from models.baseline_models import ExponentialMovingAverage, UniformMovingAverage, \
-    TriangularMovingAverage, HistoricAverage
+    TriangularMovingAverage, PeriodicAverage
 from models.model_result import save_metrics
 from utils.configs import BaseConf
 from utils.data_processing import *
@@ -57,9 +57,9 @@ if __name__ == '__main__':
         crimes = data_group.crimes
         t_range = data_group.t_range
 
-        # -----------HISTORIC AVERAGE
+        # -----------PERIODIC AVERAGE
         # Create model folder and setup logging for model
-        conf.model_name = "Historic Average"  # needs to be created
+        conf.model_name = "Periodic average"  # needs to be created
         conf.model_path = f"{conf.data_path}models/{conf.model_name}/"
         os.makedirs(conf.model_path, exist_ok=True)
         setup_logging(save_dir=conf.model_path,
@@ -76,7 +76,7 @@ if __name__ == '__main__':
 
         test_set_size = data_group.testing_set.target_shape[0]
 
-        ha = HistoricAverage(step=time_step)
+        ha = PeriodicAverage(step=time_step)
         all_crimes = data_group.crimes[:, 0]
         all_targets = data_group.targets
         all_labels = data_group.labels
@@ -116,7 +116,7 @@ if __name__ == '__main__':
                      conf=conf)
 
         log.info("=====================================END=====================================\n")
-        # -----------HISTORIC AVERAGE
+        # -----------PERIODIC AVERAGE
 
         # -----------GLOBAL AVERAGE
         # Create model folder and setup logging for model

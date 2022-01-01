@@ -1,14 +1,16 @@
 import logging as log
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 from pprint import pformat
 from sys import argv
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 from sparse_discrete_table import SparseDiscreteTable
 from utils.mutual_information_old import construct_mi_grid
 from utils.preprocessing import Shaper
 from utils.setup import setup
+from utils.types.arrays import Array1KHW, ArrayNCHW
 
 _info = log.info
 global MAX_Y_LIM
@@ -46,10 +48,14 @@ def set_line(f, t, ax, line):
     line.set_data(t, f)
 
 
-def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
+def interactive_mi_grid(
+        mi_grid: Array1KHW,
+        crime_grid: ArrayNCHW,
+        is_conditional_mi=False,
+):
     """
-    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
+    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     """
     _, _, n_rows, n_cols = mi_grid.shape
 
@@ -78,7 +84,7 @@ def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
         ax2.set_ylabel("MI - $I(C_{t},C_{t-k})$")  # give I(C)
         ax2.set_xlabel("Time Step Offset (k)")
 
-    def draw(row_ind, col_ind):
+    def draw(row_ind: int, col_ind: int):
         ax2.set_title(f"{ax2_title} - {col_ind, row_ind}")
 
         f = mi_grid[0, :, row_ind, col_ind]
@@ -119,11 +125,16 @@ def interactive_mi_grid(mi_grid, crime_grid, is_conditional_mi=False):
     plt.show()
 
 
-def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
+def interactive_mi_two_plots(
+        mi_grid: Array1KHW,
+        cmi_grid: Array1KHW,
+        crime_grid: ArrayNCHW,
+):
     """
-    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
+
     mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
     cmi_grid: grid with shape 1,K,H,W where K is the max number of time offset
+    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     """
     _, _, n_rows, n_cols = mi_grid.shape
 
@@ -140,8 +151,8 @@ def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     _img_mi = ax_mi_img.imshow(mi_grid.mean(axis=(0, 1)))
     _img_cmi = ax_cmi_img.imshow(cmi_grid.mean(axis=(0, 1)))
     _img_crime = ax_crime_img.imshow(crime_grid.mean(axis=(0, 1)))
-    line_mi, = ax_mi_curve.plot([0], [0])
-    line_cmi, = ax_cmi_curve.plot([0], [0])
+    line_mi, = ax_mi_curve.plot([0], [0], marker='+')
+    line_cmi, = ax_cmi_curve.plot([0], [0], marker='x')
 
     ax_crime_img.set_title("Mean Crime Count")
     ax_crime_img.set_title("Crime Rate Grid")
@@ -193,11 +204,16 @@ def interactive_mi_two_plots(mi_grid, cmi_grid, crime_grid):
     plt.show()
 
 
-def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
+def interactive_mi_one_plot(
+        mi_grid: Array1KHW,
+        cmi_grid: Array1KHW,
+        crime_grid: ArrayNCHW,
+        suptitle=None,
+):
     """
-    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     mi_grid: grid with shape 1,K,H,W where K is the max number of time offset
     cmi_grid: grid with shape 1,K,H,W where K is the max number of time offset
+    crime_grid: crime counts N,C,H,W where N time steps, C crime counts
     """
     _, _, n_rows, n_cols = mi_grid.shape
 
@@ -214,8 +230,8 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
     _img_mi = ax_mi_img.imshow(mi_grid.mean(axis=(0, 1)))
     _img_cmi = ax_cmi_img.imshow(cmi_grid.mean(axis=(0, 1)))
     _img_crime = ax_crime_img.imshow(crime_grid.mean(axis=(0, 1)))
-    line_mi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k})$")
-    line_cmi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k}|DoW_{t},DoW_{t-k})$")
+    line_mi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k})$", alpha=0.6, marker='x')
+    line_cmi, = ax_mi_curve.plot([0], [0], label="$I(C_{t};C_{t-k}|DoW_{t},DoW_{t-k})$", alpha=0.6, marker='+')
 
     ax_crime_img.set_title("Mean Crime Count")
     ax_crime_img.set_title("Crime Rate Grid")
@@ -267,7 +283,11 @@ def interactive_mi_one_plot(mi_grid, cmi_grid, crime_grid, suptitle=None):
     plt.show()
 
 
-def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL', cap=32):
+def generate_mi_maps(
+        data_sub_path: str = "T24H-X850M-Y880M_2012-01-01_2019-01-01",
+        max_offset: int = 90,
+        crime_type: str = 'TOTAL',
+):
     _info(f"Running interactive plotting -> data_sub_path => {data_sub_path} K => {max_offset}")
 
     conf, shaper, sparse_crimes, t_range, crime_feature_indices = setup(data_sub_path=data_sub_path)
@@ -325,7 +345,7 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
         cmi_list = []
         for i in range(l):
             if i % (l // 10) == 0:
-                print(f"{i + 1}/{l} => {(i + 1) / l * 100}%")
+                print(f"{i + 1}/{l} => {(i + 1) / l * 100:.3f}%")
             mi_list.append([])
             cmi_list.append([])
             for k in range(0, max_offset + 1):  # K is the maximum
@@ -365,7 +385,7 @@ def generate_mi_maps(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max
         return sparse_crimes, mi_arr, cmi_arr, shaper
 
 
-def generate_grids_for_all(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90):
+def generate_grids_for_all(data_sub_path: str = "T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset: int = 90):
     crime_types = [
         'TOTAL',
         'THEFT',
@@ -392,9 +412,12 @@ def generate_grids_for_all(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01
         _info(f"END => Generating MI grids for crime type: {crime_type}")
 
 
-def main(data_sub_path="T24H-X850M-Y880M_2012-01-01_2019-01-01", max_offset=90, crime_type='TOTAL'):
+def main(
+        data_sub_path: str = "T24H-X850M-Y880M_2012-01-01_2019-01-01",
+        max_offset: int = 90,
+        crime_type: str = 'TOTAL',
+):
     """
-
     :param data_sub_path: location of the data
     :param max_offset: maximum days offset to compare mutual info to
     :param crime_type: string of crime type
@@ -426,7 +449,7 @@ if __name__ == '__main__':
     if len(argv) < 4:
         data_sub_path_ = argv[1]
         K_ = int(argv[2])
-        generate_grids_for_all(data_sub_path_, K_)
+        generate_grids_for_all(data_sub_path=data_sub_path_, max_offset=K_)
         # raise Exception("Please specify data_sub_path, max_offset and crime type")
     else:
         data_sub_path_ = argv[1]

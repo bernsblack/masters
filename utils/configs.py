@@ -24,7 +24,7 @@ class BaseConf:  # args from arg-parser to over write values
         self.use_classification: bool = False
         self.use_crime_types: bool = False
         self.log_norm_scale: bool = True
-        self.use_historic_average: bool = False  # only add the historic average to a channel - does not normalise
+        self.use_periodic_average: bool = False  # only add the periodic average to a channel - does not normalise
         # the data at all.
 
         self.scale_axis: int = 1  # which axis should be scaled to ensure values lie between min and max
@@ -101,6 +101,9 @@ class BaseConf:  # args from arg-parser to over write values
             for k, v in conf_dict.items():
                 if self.__dict__.get(k, None) is not None:
                     self.__dict__[k] = v
+
+    def set_freq(self, freq: str):
+        self._freq = freq
 
     @property
     def freq(self):

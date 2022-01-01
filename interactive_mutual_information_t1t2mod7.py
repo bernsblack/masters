@@ -1,9 +1,10 @@
 import logging as log
-import matplotlib.pyplot as plt
-import numpy as np
 import os
 from pprint import pformat
 from sys import argv
+
+import matplotlib.pyplot as plt
+import numpy as np
 
 from sparse_discrete_table import SparseDiscreteTable
 from utils.mutual_information_old import construct_mi_grid
@@ -330,7 +331,7 @@ def generate_mi_maps(
         cmi_list = []
         for i in range(l):
             if i % (l // 10) == 0:
-                print(f"{i + 1}/{l} => {(i + 1) / l * 100}%")
+                print(f"{i + 1}/{l} => {(i + 1) / l * 100:.3f}%")
             mi_list.append([])
             cmi_list.append([])
             for k in range(0, max_offset + 1):  # K is the maximum

@@ -20,7 +20,7 @@ def get_max_steps(data, step):
     results = {}
 
     for max_steps in range(1, 10):
-        out = historic_average(data=inputs,
+        out = periodic_average(data=inputs,
                                step=step,
                                max_steps=max_steps)
 
@@ -33,22 +33,22 @@ def get_max_steps(data, step):
     return best
 
 
-def historic_average(data, step, max_steps):
+def periodic_average(data, step, max_steps):
     """
-    historic_average gets the historic average of the following time step without including that time step.
-    it gets the the historic average of each cell and then moves it one time step forward.
-    We do not want to use the input cell's historic average because it's less related to the target cell
+    periodic_average gets the periodic average of the following time step without including that time step.
+    it gets the periodic average of each cell and then moves it one time step forward.
+    We do not want to use the input cell's periodic average because it's less related to the target cell
 
     :param data: (N, ...) shape
     :param step: interval used to calculate the average
     :param max_steps: number of intervals to sample
-    :return: historic average of the next time steps
+    :return: periodic average of the next time steps
     """
     r = np.zeros(data.shape)  # so that calculation can still be done on the first few cells
     # r = np.empty(data.shape)
     # r.fill(np.nan)
     for i in range(step + 1, len(r)):
-        a_subset = data[i - step + 1:0:-step]  # +1 to take the historic average of the next time step
+        a_subset = data[i - step + 1:0:-step]  # +1 to take the periodic average of the next time step
         if max_steps > 0:
             a_subset = a_subset[:max_steps]
 

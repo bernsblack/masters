@@ -489,7 +489,7 @@ def get_all_metrics():
     # df.sort_values("F1 Score", inplace=True, ascending=False)
     df.sort_values(["dt", "dx", "dy", "start_date", "stop_date", "AP"], inplace=True, ascending=False)
     col = ["Model", "dt", "dx", "dy", "start_date", "stop_date", "MAE", "RMSE",
-           "ROC AUC", "AP", "Precision", "Recall", "F1 Score", "Accuracy", "Matthews Corrcoef"]
+           "ROC AUC", "AP", "Precision", "Recall", "F1 Score", "Accuracy", "MCC", "PAI"]
     return df[col]
 
 

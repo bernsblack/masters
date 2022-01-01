@@ -54,7 +54,7 @@ Large blocks of code used as closures:
 
 - Ground truth
 - GRUFNN: (GRU and FNN)
-- HA: historic average (need to rename this to periodic average)
+- HA: periodic average (need to rename this to periodic average)
 - EWM: Exponential weighted mean.
 
 ## Metrics
